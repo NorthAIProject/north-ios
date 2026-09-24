@@ -54,7 +54,7 @@ public struct SocialAuthButton: View {
                 Image(systemName: provider.iconName)
                     .font(.system(size: 16, weight: .semibold))
                 Text(provider.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
             }
             .foregroundColor(.primary)
             .frame(maxWidth: .infinity)
