@@ -123,6 +123,19 @@ enum Server {
         return token
     }
 
+    static func get(_ path: String, token: String) throws -> [String: Any] {
+        var request = URLRequest(url: base.appending(path: path))
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let done = DispatchSemaphore(value: 0)
+        var body = Data()
+        URLSession.shared.dataTask(with: request) { data, _, _ in
+            body = data ?? Data()
+            done.signal()
+        }.resume()
+        _ = done.wait(timeout: .now() + 20)
+        return (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+    }
+
     @discardableResult
     static func post(_ path: String, token: String?, body: [String: Any]) throws -> [String: Any] {
         var request = URLRequest(url: base.appending(path: path))

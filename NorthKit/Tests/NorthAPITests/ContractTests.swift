@@ -69,10 +69,24 @@ struct ContractTests {
         #expect(exercise.art?.credit.contains("CC BY-SA") == true)
     }
 
+    @Test func settings() throws {
+        #expect(try decode(Schemas.Profile.self, "profile").coachingTone == .direct)
+        #expect(try decode(Schemas.NotificationSettings.self, "notifications").statsDigestCadence == .weekly)
+        let ai = try decode(Schemas.AISettings.self, "ai-settings")
+        #expect(ai.current?.keyHint == "…9f2c")
+        #expect(try decode(Schemas.ConnectionList.self, "connections").connections.first?.kind == .claudeCode)
+        #expect(try decode(Schemas.CreatedConnection.self, "connection-created").token.hasPrefix("nk_"))
+        #expect(try decode(Schemas.ActivityList.self, "activity").executions.first?.outcome == .executed)
+        #expect(try decode(Schemas.TelegramSettings.self, "telegram").linked)
+        #expect(try decode(Schemas.CalendarSettings.self, "calendar").connected?.status == "ok")
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
-                            "conversation", "conversations", "exercise"]
+                            "conversation", "conversations", "exercise",
+                            "profile", "notifications", "ai-settings", "connections", "connection-created",
+                            "activity", "telegram", "calendar"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
