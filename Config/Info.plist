@@ -14,6 +14,16 @@
 				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>khepri</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>khepri</string>
+			</array>
+		</dict>
 	</array>
 	<key>GIDClientID</key>
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
