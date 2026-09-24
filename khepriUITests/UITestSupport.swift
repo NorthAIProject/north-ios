@@ -59,9 +59,13 @@ extension XCTestCase {
     /// and the first match can be an off-screen copy. Tap the one on screen.
     @MainActor
     func openTab(_ app: XCUIApplication, _ name: String, file: StaticString = #filePath, line: UInt = #line) {
-        let deadline = Date.now.addingTimeInterval(15)
+        let deadline = Date.now.addingTimeInterval(30)
+        // One query, cheap even on a busy machine; walking every tab-bar
+        // element to ask each whether it is hittable is not.
+        let selected = app.tabBars.buttons.matching(NSPredicate(format: "label == %@ AND selected == true", name)).firstMatch
         while Date.now < deadline {
             answerSavePassword(app)
+            if selected.exists { return }
             let candidates = app.tabBars.buttons.allElementsBoundByIndex.filter { $0.label == name && $0.isHittable }
             // A tap on a copy, or during a transition, can leave the tab
             // unchanged; only a selected tab counts.

@@ -46,14 +46,17 @@ final class WorkoutSession {
 
     private let service: ActivityServicing
     private let live: WorkoutLiveActivityControlling
+    /// Saves the finished workout to Apple Health, when allowed.
+    private let health: HealthWorkoutWriting?
     private let now: () -> Date
 
     init(title: String, day: TrainingDay, service: ActivityServicing, live: WorkoutLiveActivityControlling,
-         now: @escaping () -> Date = Date.init) {
+         health: HealthWorkoutWriting? = nil, now: @escaping () -> Date = Date.init) {
         self.title = title
         self.exercises = day.exercises.filter { $0.sets > 0 }
         self.service = service
         self.live = live
+        self.health = health
         self.now = now
     }
 
@@ -155,6 +158,9 @@ final class WorkoutSession {
         }
         phase = .finished
         live.end(liveState, dismissImmediately: false)
+        if let health, let startedAt {
+            await health.saveStrengthWorkout(start: startedAt, end: now())
+        }
         await connecting?.value
         guard let recorded else { return }
         do {

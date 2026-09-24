@@ -93,13 +93,29 @@ struct ContractTests {
         #expect(activity.recent.first?.caloriesBurned == 212.5)
     }
 
+    @Test func healthStravaAndInsights() throws {
+        let sync = try decode(Schemas.HealthSyncResult.self, "health-sync")
+        #expect(sync.readings == 1240 && sync.workouts == 3)
+        let strava = try decode(Schemas.StravaStatus.self, "strava-status")
+        #expect(strava.connected && !strava.syncPending && strava.lastSyncedAt != nil)
+        #expect(try decode(Schemas.StravaConnect.self, "strava-connect").authorizeUrl.hasPrefix("https://www.strava.com/"))
+        let summary = try decode(Schemas.InsightsSummary.self, "insights-summary")
+        #expect(summary.scores.first?.components.first?.earned == 30)
+        #expect(summary.pinned.first?.metricKey == "sleep")
+        #expect(summary.pinned.first?.chart?.series.first?.values == [7.2, 6.8, 7.9])
+        let metric = try decode(Schemas.InsightMetric.self, "insights-metric")
+        #expect(metric.trend.word == "up" && metric.comparison.priorPct == 96)
+        #expect(metric.range.options.map(\.key) == ["week", "month"])
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
-                            "plan", "plans", "exercises", "activity-overview"]
+                            "plan", "plans", "exercises", "activity-overview",
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

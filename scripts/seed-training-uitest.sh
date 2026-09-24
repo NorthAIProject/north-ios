@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Seeds a local account with a training plan and recorded biometrics, for
-# TrainingUITests and WorkoutUITests.
+# Seeds a local account with a training plan, recorded biometrics and a few
+# days of synced steps, for TrainingUITests, WorkoutUITests and ProgressUITests.
 #
 # The fake model cannot generate a plan (it answers in prose, not the plan
 # schema), so the intake and plan rows are inserted as the repository would
@@ -53,5 +53,16 @@ values ('{uuid.uuid4()}', '{user}', 72, 175, '1990-05-01', 'female', true, now()
 """
 subprocess.run(["docker-compose", "exec", "-T", "postgres", "psql", "-U", "north", "-d", "north", "-v", "ON_ERROR_STOP=1", "-c", sql],
                cwd=web, check=True, capture_output=True)
+# Five days of steps, sent the way the phone sends them: one reading per day
+# starting at midnight UTC, through the health sync API.
+import datetime
+today = datetime.datetime.now(datetime.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+readings = []
+for back in range(1, 6):
+    start = today - datetime.timedelta(days=back)
+    readings.append({"metric": "steps", "value": 6000 + back * 700, "unit": "count",
+                     "startedAt": start.isoformat().replace("+00:00", "Z"),
+                     "endedAt": (start + datetime.timedelta(days=1)).isoformat().replace("+00:00", "Z")})
+call("POST", "/health/samples", token, {"readings": readings})
 print(f"export TEST_RUNNER_TRAINING_EMAIL='{email}' TEST_RUNNER_TRAINING_PASSWORD='{password}'")
 PY
