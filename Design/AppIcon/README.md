@@ -1,6 +1,6 @@
 # App icon
 
-**Status: draft, awaiting a verdict.** Not yet approved for App Store submission.
+**Status: approved 2026-09-24** for TestFlight and the App Store.
 
 Traced from `north-web-app/web/assets/brand/source/khepri-emblem-original.jpg`,
 the scarab emblem the brand README names as the mark. No square source at or
