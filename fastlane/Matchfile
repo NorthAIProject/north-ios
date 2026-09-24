@@ -1,11 +1,22 @@
-# Signing certificates/profiles live in a private repo, encrypted with
-# MATCH_PASSWORD. Create the repo once, then run `bundle exec fastlane match appstore`
-# locally to seed it. CI only ever reads (readonly).
+# Signing lives in Norviq's match repo, shared on purpose.
 #
-# HTTPS URL: locally you authenticate via your normal git credentials; in CI
-# match uses MATCH_GIT_BASIC_AUTHORIZATION (base64 "x-access-token:<PAT>")
-# because deploy keys are disabled org-wide.
-git_url("https://github.com/NorthAIProject/north-certificates.git")
+# Both apps belong to team 84X9WYBF36, and Apple caps a team's distribution
+# certificates, so Khepri reuses Norviq's (certs/distribution/4AQ4Q8XM7Z)
+# instead of minting its own. Its profiles sit beside Norviq's under
+# profiles/appstore/, one per bundle ID.
+#
+# Consequences:
+#   - MATCH_PASSWORD is Norviq's: the repo is encrypted with one password.
+#   - MATCH_GIT_BASIC_AUTHORIZATION (base64 "x-access-token:<PAT>") needs a
+#     PAT that can read FinancePlanner/norviq-certificates, although this
+#     repo lives under NorthAIProject.
+#   - Revoking the certificate breaks both apps' signing at once.
+#
+# Seed Khepri's profiles once with `bundle exec fastlane seed_signing`; match
+# finds the existing certificate and only creates the missing profiles. CI
+# only ever reads (readonly).
+git_url("https://github.com/FinancePlanner/norviq-certificates.git")
+git_branch("master")
 storage_mode("git")
 type("appstore")
 app_identifier([
