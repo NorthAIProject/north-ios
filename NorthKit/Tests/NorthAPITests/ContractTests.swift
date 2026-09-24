@@ -108,6 +108,43 @@ struct ContractTests {
         #expect(metric.range.options.map(\.key) == ["week", "month"])
     }
 
+    @Test func goalsAndCheckIns() throws {
+        let list = try decode(Schemas.GoalList.self, "goals")
+        #expect(list.goals.first?.status == .active)
+        #expect(list.goals.first?.latestUpdate?.progress == 40)
+        #expect(list.categories.contains("fitness"))
+        let goal = try decode(Schemas.GoalDetail.self, "goal")
+        #expect(goal.value1.targetDate == "2026-12-06")
+        #expect(goal.value2.milestones.map(\.status) == [.completed, .open])
+        let checkIns = try decode(Schemas.CheckInList.self, "check-ins")
+        #expect(checkIns.today?.relatedGoalTitle == "Run a half marathon")
+        #expect(checkIns.streak == 6)
+    }
+
+    @Test func reportsAndMemories() throws {
+        let reports = try decode(Schemas.ReportList.self, "reports")
+        #expect(reports.reports.first?.kind == .weekly && reports.reports.first?.helpful == true)
+        let report = try decode(Schemas.ReportDetail.self, "report")
+        #expect(report.value2.body.hasPrefix("## The week"))
+        let memories = try decode(Schemas.MemoryList.self, "memories")
+        #expect(memories.pending.first?.status == .pending)
+        #expect(memories.approved.first?.pinned == true)
+        #expect(memories.categories.contains("injury"))
+    }
+
+    @Test func knowledgeAndFormChecks() throws {
+        let library = try decode(Schemas.KnowledgeList.self, "knowledge")
+        #expect(library.documents.first?.status == .ready && library.counts.ready == 1)
+        let document = try decode(Schemas.KnowledgeDocumentDetail.self, "knowledge-document")
+        #expect(document.value2.text.hasPrefix("# Marathon plan"))
+        let search = try decode(Schemas.KnowledgeSearchResults.self, "knowledge-search")
+        #expect(search.hits.first?.headingPath == ["Marathon plan"])
+        #expect(search.hits.first?.segments.filter(\.matched).map(\.text) == ["easy runs"])
+        let checks = try decode(Schemas.FormCheckList.self, "form-checks")
+        #expect(checks.checks.first?.result?.issues.first?.at == 4.5)
+        #expect(try decode(Schemas.FormCheck.self, "form-check").status == .running)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -115,7 +152,9 @@ struct ContractTests {
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric"]
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
+                            "goals", "goal", "check-ins", "reports", "report", "memories",
+                            "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

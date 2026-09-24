@@ -52,11 +52,24 @@ struct MoreScreen: View {
         }
     }
 
+    @ViewBuilder
+    private func destination(for section: Section) -> some View {
+        switch section.id {
+        case "goals": GoalsScreen()
+        case "check-ins": CheckInsScreen()
+        case "reports": ReportsScreen()
+        case "memories": MemoriesScreen()
+        case "knowledge": KnowledgeScreen()
+        default:
+            PlaceholderScreen(title: section.title, systemImage: section.systemImage, phase: section.phase, summary: section.summary).content
+        }
+    }
+
     private func sectionRows(_ header: String, _ sections: [Section]) -> some View {
         SwiftUI.Section(header) {
             ForEach(sections) { section in
                 NavigationLink {
-                    PlaceholderScreen(title: section.title, systemImage: section.systemImage, phase: section.phase, summary: section.summary).content
+                    destination(for: section)
                 } label: {
                     Label(section.title, systemImage: section.systemImage)
                 }
