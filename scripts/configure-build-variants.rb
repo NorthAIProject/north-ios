@@ -50,6 +50,11 @@ APP_SETTINGS = {
   "INFOPLIST_KEY_ITSAppUsesNonExemptEncryption" => "NO",
   "INFOPLIST_KEY_NSHealthUpdateUsageDescription" =>
     "Khepri saves workouts you finish in the app to Apple Health.",
+  # Dictation: the microphone, and Apple's on-device speech recognition.
+  "INFOPLIST_KEY_NSMicrophoneUsageDescription" =>
+    "Khepri listens only while the microphone button is on, to turn what you say into text.",
+  "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription" =>
+    "Your words are turned into text on this iPhone so you can speak to your coach instead of typing.",
 }.freeze
 
 project = Xcodeproj::Project.open(PROJECT_PATH)

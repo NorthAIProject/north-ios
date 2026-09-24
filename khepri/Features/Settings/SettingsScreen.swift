@@ -234,11 +234,11 @@ private struct CoachingSettings: View {
                 }
 
                 Section {
-                    TextField("Or describe it in your own words", text: Binding(
-                        get: { profile.value?.coachingStyle ?? "" },
-                        set: { profile.value?.coachingStyle = $0 }
-                    ), axis: .vertical)
-                    .lineLimit(2...6)
+                    HStack(alignment: .top) {
+                        TextField("Or describe it in your own words", text: coachingStyle, axis: .vertical)
+                            .lineLimit(2...6)
+                        DictationButton(text: coachingStyle, font: .body)
+                    }
                 } footer: {
                     Text("Your coach follows this on the web, in Telegram and here.")
                 }
@@ -262,6 +262,10 @@ private struct CoachingSettings: View {
         .navigationTitle("Coaching Style")
         .saveToolbar(profile) { try await service.save($0) }
         .task { await profile.load(service.profile) }
+    }
+
+    private var coachingStyle: Binding<String> {
+        Binding(get: { profile.value?.coachingStyle ?? "" }, set: { profile.value?.coachingStyle = $0 })
     }
 }
 

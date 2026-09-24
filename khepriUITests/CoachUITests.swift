@@ -60,6 +60,38 @@ final class CoachUITests: XCTestCase {
         attach(app, "03-sheet")
     }
 
+    /// Dictated words land in the composer, not in a message: nothing is sent
+    /// until Send. Under test the microphone hears a fixed sentence.
+    @MainActor
+    func testDictationFillsTheComposer() throws {
+        let email = "dictate+\(Int(Date().timeIntervalSince1970))@example.com"
+        let password = "Correct-horse-9"
+        let token = try Server.signUp(email: email, password: password)
+        try Server.post("/api/v1/onboarding", token: token, body: [
+            "focusAreas": ["fitness"], "coachingStyle": "direct", "nearTermGoal": "Get stronger",
+        ])
+
+        let app = launchSignedIn(email: email, password: password)
+        openTab(app, "Coach")
+        tap(app.buttons["new-conversation"])
+
+        let composer = app.textFields["Message your coach"]
+        let microphone = app.buttons["dictate"]
+        tap(microphone)
+        expectation(for: NSPredicate(format: "label == 'Stop dictating'"), evaluatedWith: microphone)
+        waitForExpectations(timeout: 10)
+        tap(microphone)
+
+        let heard = NSPredicate(format: "value == %@", "How many rest days should I take")
+        expectation(for: heard, evaluatedWith: composer)
+        waitForExpectations(timeout: 10)
+        XCTAssertFalse(app.buttons["Helpful"].exists, "dictation sent the message by itself")
+        attach(app, "04-dictated")
+
+        tap(app.buttons["Send"])
+        XCTAssertTrue(app.buttons["Helpful"].waitForExistence(timeout: 60), "no finished reply")
+    }
+
 
 
 

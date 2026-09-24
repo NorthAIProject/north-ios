@@ -32,8 +32,11 @@ struct IntakeSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("What are you training for?", text: $goal, axis: .vertical)
-                        .lineLimit(2...4)
+                    HStack(alignment: .top) {
+                        TextField("What are you training for?", text: $goal, axis: .vertical)
+                            .lineLimit(2...4)
+                        DictationButton(text: $goal, font: .body)
+                    }
                 } footer: {
                     Text("A race, getting stronger, feeling better. Your own words.")
                 }
@@ -60,8 +63,11 @@ struct IntakeSheet: View {
                 }
 
                 Section("Anything to work around?") {
-                    TextField("Injuries, limits, preferences", text: $limitations, axis: .vertical)
-                        .lineLimit(2...4)
+                    HStack(alignment: .top) {
+                        TextField("Injuries, limits, preferences", text: $limitations, axis: .vertical)
+                            .lineLimit(2...4)
+                        DictationButton(text: $limitations, font: .body)
+                    }
                 }
 
                 if let error { ErrorRow(error) }
