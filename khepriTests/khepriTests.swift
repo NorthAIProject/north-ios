@@ -25,17 +25,23 @@ struct AuthTests {
         #expect(AuthValidation.passwordStrengthScore("Password123!") >= 3)
     }
 
-    @Test func testJWTTokenInspector() {
-        // Sample base64 URL encoded JWT with { "userId": "test-uuid-1234", "exp": 1893456000 }
-        let header = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-        let payload = "eyJ1c2VySWQiOiJ0ZXN0LXV1aWQtMTIzNCIsImV4cCI6MTg5MzQ1NjAwMH0"
-        let signature = "dummy_signature"
-        let token = "\(header).\(payload).\(signature)"
+    @Test func expiredSessionIsDiscarded() async throws {
+        final class MemoryStore: SecureStringStoring, @unchecked Sendable {
+            var storage: [String: String] = [:]
+            func string(for key: String) throws -> String? { storage[key] }
+            func setString(_ value: String, for key: String) throws { storage[key] = value }
+            func removeValue(for key: String) throws { storage.removeValue(forKey: key) }
+        }
 
-        let parsed = JWTTokenInspector.payload(from: token)
-        #expect(parsed != nil)
-        #expect(parsed?.userID == "test-uuid-1234")
-        #expect(parsed?.expiresAt != nil)
+        let store = MemoryStore()
+        let sessions = AuthSessionManager(secureStore: store)
+
+        try await sessions.storeSession(token: "live", user: nil, expiresAt: Date().addingTimeInterval(3600))
+        #expect(try await sessions.validAccessToken() == "live")
+
+        try await sessions.storeSession(token: "stale", user: nil, expiresAt: Date().addingTimeInterval(-60))
+        #expect(try await sessions.validAccessToken() == nil)
+        #expect(store.storage.isEmpty)
     }
 
     @Test func testMockSecureStore() throws {

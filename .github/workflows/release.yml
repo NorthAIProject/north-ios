@@ -9,6 +9,7 @@
 #   MATCH_GIT_BASIC_AUTHORIZATION                        — base64 "x-access-token:<PAT>",
 #                                                          PAT with Contents:Read on certificates repo
 #   SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN        — dSYM upload (optional)
+#   SECRETS_XCCONFIG                                     — contents of Config/Secrets.xcconfig (optional)
 name: Release
 
 on:
@@ -55,6 +56,16 @@ jobs:
           ruby-version: "3.3"
           bundler-cache: true
 
+      - name: Materialize Secrets.xcconfig
+        env:
+          SECRETS_XCCONFIG: ${{ secrets.SECRETS_XCCONFIG }}
+        run: |
+          # Optional: Config/Base.xcconfig includes it with #include?, so an
+          # unset secret still builds, just without the values it carries.
+          if [ -n "$SECRETS_XCCONFIG" ]; then
+            printf '%s\n' "$SECRETS_XCCONFIG" > Config/Secrets.xcconfig
+          fi
+
       - name: Fastlane beta
         run: bundle exec fastlane beta
         env:
@@ -84,6 +95,16 @@ jobs:
         with:
           ruby-version: "3.3"
           bundler-cache: true
+
+      - name: Materialize Secrets.xcconfig
+        env:
+          SECRETS_XCCONFIG: ${{ secrets.SECRETS_XCCONFIG }}
+        run: |
+          # Optional: Config/Base.xcconfig includes it with #include?, so an
+          # unset secret still builds, just without the values it carries.
+          if [ -n "$SECRETS_XCCONFIG" ]; then
+            printf '%s\n' "$SECRETS_XCCONFIG" > Config/Secrets.xcconfig
+          fi
 
       - name: Fastlane ${{ inputs.lane }}
         run: bundle exec fastlane ${{ inputs.lane }} ${{ inputs.version != '' && format('version:{0}', inputs.version) || '' }}

@@ -20,6 +20,7 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
     private let secureStore: SecureStringStoring
     private let tokenKey = "auth_session_token"
     private let userKey = "auth_session_user"
+    private let expiresAtKey = "auth_session_expires_at"
 
     public init(secureStore: SecureStringStoring = KeychainStringStore()) {
         self.secureStore = secureStore
@@ -39,11 +40,12 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
             return nil
         }
 
-        if let expiry = JWTTokenInspector.expirationDate(in: token) {
-            if expiry <= Date() {
-                await invalidateSession()
-                return nil
-            }
+        // Session tokens are opaque; the server sends their expiry alongside.
+        if let raw = try? secureStore.string(for: expiresAtKey),
+           let expiry = try? Date(raw, strategy: .iso8601),
+           expiry <= Date() {
+            await invalidateSession()
+            return nil
         }
 
         return token
@@ -51,6 +53,11 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
 
     public func storeSession(token: String, user: UserDTO?, expiresAt: Date?) async throws {
         try secureStore.setString(token, for: tokenKey)
+        if let expiresAt {
+            try? secureStore.setString(expiresAt.formatted(.iso8601), for: expiresAtKey)
+        } else {
+            try? secureStore.removeValue(for: expiresAtKey)
+        }
         if let user, let userData = try? JSONEncoder().encode(user), let userJson = String(data: userData, encoding: .utf8) {
             try? secureStore.setString(userJson, for: userKey)
         }
@@ -71,6 +78,7 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
 
         try? secureStore.removeValue(for: tokenKey)
         try? secureStore.removeValue(for: userKey)
+        try? secureStore.removeValue(for: expiresAtKey)
 
         await MainActor.run {
             NotificationCenter.default.post(name: .authSessionDidInvalidate, object: nil)

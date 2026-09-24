@@ -1,0 +1,8 @@
+// Base configuration for the khepri app target, shared by Debug, Beta and
+// Release. Per-variant values (bundle ID, display name, API base URL) live in
+// the target's build settings; see scripts/configure-build-variants.rb.
+//
+// Secrets.xcconfig is gitignored. CI writes it from the SECRETS_XCCONFIG
+// Actions secret; locally, copy Secrets.example.xcconfig. The optional include
+// keeps a fresh clone building without it.
+#include? "Secrets.xcconfig"

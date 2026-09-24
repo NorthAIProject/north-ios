@@ -31,7 +31,7 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
     private let baseURL: URL
 
     public init(
-        baseURL: URL = URL(string: "http://localhost:8090")!,
+        baseURL: URL = AppEnvironment.apiBaseURL,
         httpClient: AuthHTTPClient? = nil,
         sessionManager: AuthSessionManaging = AuthSessionManager.shared,
         webAuthenticator: OAuthWebAuthenticating = OAuthWebAuthenticator(),
