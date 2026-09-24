@@ -11,6 +11,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         center.setNotificationCategories([WorkoutReminders.category])
+        // Before launch finishes, or HealthKit drops background deliveries.
+        HealthBackgroundDelivery.register()
         return true
     }
 

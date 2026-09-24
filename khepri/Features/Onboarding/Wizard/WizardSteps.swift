@@ -207,6 +207,11 @@ struct HealthStep: View {
                 Task {
                     asking = true
                     await Permissions.requestHealth()
+                    // Answering the sheet is consent to sync; refused types
+                    // simply return nothing.
+                    HealthSync.shared.setEnabled(true)
+                    HealthBackgroundDelivery.register()
+                    Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
                     asking = false
                     next()
                 }

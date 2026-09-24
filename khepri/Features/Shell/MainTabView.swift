@@ -6,6 +6,7 @@ struct MainTabView: View {
     let user: APIUser
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         @Bindable var router = router
@@ -20,8 +21,7 @@ struct MainTabView: View {
                 TrainingScreen()
             }
             Tab("Progress", systemImage: "chart.line.uptrend.xyaxis", value: AppTab.progress) {
-                PlaceholderScreen(title: "Progress", systemImage: "chart.line.uptrend.xyaxis", phase: 4,
-                                  summary: "Insights across body, mind and training, with Apple Health and Strava.")
+                InsightsScreen()
             }
             Tab("More", systemImage: "square.grid.2x2", value: AppTab.more) {
                 MoreScreen(user: user)
@@ -29,6 +29,11 @@ struct MainTabView: View {
         }
         .guidedTourOverlay(tour, router: router)
         .onAppear { tour.startIfNeeded() }
+        // Apple Health catches up whenever the app comes forward; the sync
+        // itself decides whether it is on.
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() } }
+        }
     }
 }
 

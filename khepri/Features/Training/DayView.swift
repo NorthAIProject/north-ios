@@ -145,7 +145,8 @@ extension DayView {
             title: "\(day.weekday) · \(day.focus)",
             day: day,
             service: ActivityService(),
-            live: WorkoutLiveActivityController()
+            live: WorkoutLiveActivityController(),
+            health: HealthWorkoutWriter()
         )
     }
 }

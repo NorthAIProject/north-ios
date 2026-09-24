@@ -36,6 +36,12 @@ struct SettingsScreen: View {
                 }
 
                 Section("Connections") {
+                    NavigationLink { HealthSettings() } label: {
+                        Label("Apple Health", systemImage: "heart.text.square")
+                    }
+                    NavigationLink { StravaSettings() } label: {
+                        Label("Strava", systemImage: "figure.run")
+                    }
                     NavigationLink { AgentConnections(service: service) } label: {
                         Label("Agents", systemImage: "point.3.connected.trianglepath.dotted")
                     }
