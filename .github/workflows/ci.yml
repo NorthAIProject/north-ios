@@ -60,17 +60,18 @@ jobs:
         id: sim
         run: |
           set -euo pipefail
-          udid="$(xcrun simctl list devices available \
-            | grep -E '^\s+iPhone' \
-            | head -1 \
-            | grep -oE '[0-9A-Fa-f-]{36}' || true)"
-          if [ -z "$udid" ]; then
-            echo "::error::No iOS simulator available on this runner. Available destinations:"
-            xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations 2>&1 | sed -n '1,40p'
+          # Ask xcodebuild, not simctl: it lists only simulators whose runtime
+          # meets the deployment target. simctl's first iPhone can be on an
+          # older iOS, which the test step then rejects.
+          destinations="$(xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations -skipPackagePluginValidation 2>/dev/null)"
+          line="$(grep -E 'platform:iOS Simulator, arch:arm64, id:[0-9A-F-]{36}, OS:[0-9.]+, name:iPhone' <<<"$destinations" | tail -1 || true)"
+          if [ -z "$line" ]; then
+            echo "::error::No iPhone simulator meets the deployment target. Available destinations:"
+            echo "$destinations" | sed -n '1,60p'
             exit 1
           fi
-          name="$(xcrun simctl list devices available | grep "$udid" | sed -E 's/^ *([^(]+) \(.*/\1/')"
-          echo "Using simulator: $name ($udid)"
+          udid="$(grep -oE 'id:[0-9A-F-]{36}' <<<"$line" | cut -d: -f2)"
+          echo "Using simulator: $(grep -oE 'name:[^}]+' <<<"$line" | cut -d: -f2) iOS $(grep -oE 'OS:[0-9.]+' <<<"$line" | cut -d: -f2) ($udid)"
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
       - name: Run Unit Tests
