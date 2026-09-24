@@ -11,6 +11,7 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    var onSignOut: () -> Void = {}
 
     var body: some View {
         NavigationSplitView {
@@ -29,6 +30,11 @@ struct ContentView: View {
 #endif
             .toolbar {
 #if os(iOS)
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(role: .destructive, action: onSignOut) {
+                        Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }

@@ -1,0 +1,181 @@
+require "fileutils"
+
+default_platform(:ios)
+
+PROJECT = "khepri.xcodeproj"
+RELEASE_SCHEME = "khepri"
+BUNDLE_ID = "com.fernandocorreia.khepri"
+
+platform :ios do
+  desc "Run the full unit test suite"
+  lane :test do
+    run_tests(
+      project: PROJECT,
+      scheme: RELEASE_SCHEME,
+      only_testing: ["khepriTests"],
+      device: "iPhone 17",
+      result_bundle: true,
+      output_directory: "fastlane/test_output"
+    )
+  end
+
+  desc "UI smoke tests (not part of gating PR checks)"
+  lane :ui_test do
+    run_tests(
+      project: PROJECT,
+      scheme: RELEASE_SCHEME,
+      only_testing: ["khepriUITests"],
+      device: "iPhone 17",
+      result_bundle: true,
+      output_directory: "fastlane/ui_test_output"
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    api_key = asc_api_key
+    setup_ci if is_ci
+    # CI runs match in readonly mode; certificates are seeded via seed_signing lane
+    match(type: "appstore", readonly: is_ci, api_key: api_key)
+    prepare_signing(bundle_id: BUNDLE_ID, config: "Release")
+    bump_build_number(api_key: api_key, bundle_id: BUNDLE_ID)
+
+    build_app(
+      project: PROJECT,
+      scheme: RELEASE_SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "fastlane/build"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      skip_waiting_for_build_processing: false,
+      distribute_external: false
+    )
+
+    upload_dsyms
+  end
+
+  desc "One-time: create signing certs/profiles and push them to the match repo"
+  lane :seed_signing do
+    api_key = asc_api_key
+    setup_ci if is_ci
+    match(type: "appstore", readonly: false, api_key: api_key)
+  end
+
+  desc "Release to the App Store (phased). Usage: fastlane release [version:1.1]"
+  lane :release do |options|
+    api_key = asc_api_key
+    setup_ci if is_ci
+    match(type: "appstore", readonly: is_ci, api_key: api_key)
+    prepare_signing(bundle_id: BUNDLE_ID, config: "Release")
+
+    if options[:version]
+      increment_version_number(version_number: options[:version], xcodeproj: PROJECT)
+    end
+    bump_build_number(api_key: api_key, bundle_id: BUNDLE_ID)
+
+    build_app(
+      project: PROJECT,
+      scheme: RELEASE_SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "fastlane/build"
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      submit_for_review: true,
+      automatic_release: true,
+      phased_release: true,
+      precheck_include_in_app_purchases: false,
+      force: true, # skip interactive HTML preview
+      skip_screenshots: true,
+      skip_metadata: false
+    )
+
+    upload_dsyms
+  end
+
+  desc "Hotfix release: no phased rollout"
+  lane :hotfix do |options|
+    api_key = asc_api_key
+    setup_ci if is_ci
+    match(type: "appstore", readonly: is_ci, api_key: api_key)
+    prepare_signing(bundle_id: BUNDLE_ID, config: "Release")
+
+    increment_version_number(version_number: options[:version], xcodeproj: PROJECT) if options[:version]
+    bump_build_number(api_key: api_key, bundle_id: BUNDLE_ID)
+
+    build_app(
+      project: PROJECT,
+      scheme: RELEASE_SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "fastlane/build"
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      submit_for_review: true,
+      automatic_release: true,
+      phased_release: false,
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: true
+    )
+
+    upload_dsyms
+  end
+
+  # ---- helpers ----
+
+  private_lane :asc_api_key do
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_P8"),
+      is_key_content_base64: true
+    )
+  end
+
+  # Project uses Xcode-managed signing for local dev; CI archives need the
+  # match profile pinned explicitly.
+  private_lane :prepare_signing do |options|
+    bundle_id = options[:bundle_id] || BUNDLE_ID
+    config = options[:config] || "Release"
+    update_code_signing_settings(
+      path: PROJECT,
+      use_automatic_signing: false,
+      team_id: "84X9WYBF36",
+      code_sign_identity: "Apple Distribution",
+      profile_name: "match AppStore #{bundle_id}",
+      targets: ["khepri"],
+      build_configurations: [config]
+    )
+  end
+
+  private_lane :bump_build_number do |options|
+    api_key = options[:api_key]
+    bundle_id = options[:bundle_id] || BUNDLE_ID
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+    app = Spaceship::ConnectAPI::App.find(bundle_id)
+    UI.user_error!("Could not find #{bundle_id} on App Store Connect") unless app
+
+    build_numbers = app.get_builds.map { |build| Integer(build.version, exception: false) }.compact
+    next_build_number = (build_numbers.max || 0) + 1
+
+    increment_build_number(build_number: next_build_number, xcodeproj: PROJECT)
+  end
+
+  private_lane :upload_dsyms do
+    next unless ENV["SENTRY_AUTH_TOKEN"]
+
+    sh("npx --yes @sentry/cli upload-dif --org #{ENV.fetch('SENTRY_ORG')} " \
+       "--project #{ENV.fetch('SENTRY_PROJECT')} ../fastlane/build")
+  end
+end

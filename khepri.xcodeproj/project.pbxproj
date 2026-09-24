@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0D195ABC305DBA810055016F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = khepri;
 			packageProductDependencies = (
+				0D195AE1305DBA810055016F /* GoogleSignIn */,
 			);
 			productName = khepri;
 			productReference = 0D195AAC305DBA800055016F /* khepri.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 0D195AA3305DBA800055016F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0D195AAD305DBA800055016F /* Products */;
 			projectDirPath = "";
@@ -398,6 +407,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -442,6 +455,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -615,6 +632,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0D195AE1305DBA810055016F /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0D195AA4305DBA800055016F /* Project object */;
 }

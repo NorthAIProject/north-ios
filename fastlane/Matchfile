@@ -1,0 +1,14 @@
+# Signing certificates/profiles live in a private repo, encrypted with
+# MATCH_PASSWORD. Create the repo once, then run `bundle exec fastlane match appstore`
+# locally to seed it. CI only ever reads (readonly).
+#
+# HTTPS URL: locally you authenticate via your normal git credentials; in CI
+# match uses MATCH_GIT_BASIC_AUTHORIZATION (base64 "x-access-token:<PAT>")
+# because deploy keys are disabled org-wide.
+git_url("https://github.com/NorthAIProject/north-certificates.git")
+storage_mode("git")
+type("appstore")
+app_identifier([
+  "com.fernandocorreia.khepri"
+])
+team_id("84X9WYBF36")
