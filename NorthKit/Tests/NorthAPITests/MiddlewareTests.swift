@@ -45,11 +45,33 @@ struct MiddlewareTests {
         }
     }
 
+    @Test func aMissingThingIsNotFoundWithTheServersWords() async throws {
+        let transport = CannedTransport(status: .notFound, json: #"{"error":{"message":"No intake yet."}}"#)
+        await #expect(throws: APIError.notFound("No intake yet.")) {
+            try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+        }
+    }
+
     @Test func anErrorWithoutABodyKeepsItsStatus() async throws {
         let transport = CannedTransport(status: .badGateway, json: nil)
         await #expect(throws: APIError.invalidStatus(502)) {
             try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
         }
+    }
+
+    /// A 409 whose body is a plan, not an error, reaches the generated client
+    /// as the operation's documented conflict case.
+    @Test func aDocumentedNonErrorBodyPassesThrough() async throws {
+        let plan = #"{"id":"abababab-abab-abab-abab-abababababab","name":"Base","rationale":"","weeksTotal":4,"days":[],"problems":[],"source":"edited","createdAt":"2026-09-24T07:15:00Z"}"#
+        let transport = CannedTransport(status: .conflict, json: plan)
+        let output = try await NorthAPI.call {
+            try await client(transport).setDayStartTime(path: .init(planID: "p", day: 0), body: .json(.init(startTime: "07:00")))
+        }
+        guard case .conflict(let conflict) = output else {
+            Issue.record("expected the conflict case, got \(output)")
+            return
+        }
+        #expect(try conflict.body.json.name == "Base")
     }
 
     private func client(_ transport: CannedTransport, onUnauthorized: @escaping @Sendable () -> Void = {}) -> Client {

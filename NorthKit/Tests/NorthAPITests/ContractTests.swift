@@ -81,12 +81,25 @@ struct ContractTests {
         #expect(try decode(Schemas.CalendarSettings.self, "calendar").connected?.status == "ok")
     }
 
+    @Test func training() throws {
+        let plan = try decode(Schemas.PlanDetail.self, "plan")
+        #expect(plan.days.first?.startTime == "07:00")
+        #expect(plan.days.last?.startTime == nil)
+        #expect(plan.days.first?.exercises.first?.hasArt == true)
+        #expect(try decode(Schemas.PlanList.self, "plans").plans.first?.days.count == 2)
+        #expect(try decode(Schemas.ExerciseList.self, "exercises").total == 42)
+        let activity = try decode(Schemas.ActivityOverview.self, "activity-overview")
+        #expect(activity.active?.status == .paused)
+        #expect(activity.recent.first?.caloriesBurned == 212.5)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
-                            "activity", "telegram", "calendar"]
+                            "activity", "telegram", "calendar",
+                            "plan", "plans", "exercises", "activity-overview"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
