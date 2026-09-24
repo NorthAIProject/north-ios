@@ -23,7 +23,7 @@ public struct LoginScreen: View {
                             .accessibilityHidden(true)
 
                         Text(NorthBrand.name)
-                            .font(.largeTitle.weight(.semibold))
+                            .font(.north(.largeTitle).weight(.semibold))
 
                         Text(NorthBrand.tagline)
                             .font(.subheadline)

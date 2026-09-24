@@ -170,10 +170,8 @@ struct FirstGoalStep: View {
             FieldError(model.fieldErrors["goal_title"] ?? model.submitError)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("IDEAS")
-                    .font(.caption.weight(.medium))
-                    .tracking(1.5)
-                    .foregroundStyle(.secondary)
+                Text("Ideas")
+                    .northEyebrow()
                 ForEach(suggestions, id: \.self) { suggestion in
                     Button(suggestion) { model.setGoal(suggestion) }
                         .font(.subheadline)

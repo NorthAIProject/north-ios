@@ -100,9 +100,7 @@ struct WorkoutSessionView: View {
     private var header: some View {
         HStack {
             Text("EXERCISE \(session.exerciseIndex + 1) OF \(session.exercises.count)")
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(.secondary)
+                .northEyebrow()
             Spacer()
             Group {
                 if session.isPaused {
@@ -122,9 +120,7 @@ struct WorkoutSessionView: View {
         if let end = session.restEndsAt {
             VStack(spacing: 12) {
                 Text("REST")
-                    .font(.caption.weight(.medium))
-                    .tracking(1.5)
-                    .foregroundStyle(NorthColor.signal)
+                    .northEyebrow(NorthColor.signal)
                 Group {
                     if session.isPaused {
                         Text("Paused")
@@ -132,13 +128,13 @@ struct WorkoutSessionView: View {
                         Text(timerInterval: Date.now...max(end, .now), countsDown: true)
                     }
                 }
-                .font(.system(size: 42, weight: .light).monospacedDigit())
+                .font(.north(size: 42, relativeTo: .largeTitle).weight(.light).monospacedDigit())
                 .accessibilityIdentifier("rest-countdown")
                 HStack(spacing: 12) {
                     Button("+15s") { session.extendRest(by: 15) }
                         .buttonStyle(.bordered)
                     Button("Skip Rest") { session.endRest() }
-                        .buttonStyle(.borderedProminent)
+                        .northProminentButton()
                 }
                 .disabled(session.isPaused)
             }
@@ -152,7 +148,7 @@ struct WorkoutSessionView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
-            .buttonStyle(.borderedProminent)
+            .northProminentButton()
             .controlSize(.large)
             .disabled(session.isPaused)
         }
@@ -225,7 +221,7 @@ private struct WorkoutSummary: View {
                 .foregroundStyle(NorthColor.signal)
             VStack(spacing: 8) {
                 Text("Workout done")
-                    .font(.title2.weight(.semibold))
+                    .font(.north(.title2).weight(.semibold))
                 Text(session.title)
                     .foregroundStyle(.secondary)
             }
@@ -250,7 +246,7 @@ private struct WorkoutSummary: View {
             Button(action: onDone) {
                 Text("Done").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 8)
             }
-            .buttonStyle(.borderedProminent)
+            .northProminentButton()
             .controlSize(.large)
         }
         .padding(20)
@@ -258,8 +254,8 @@ private struct WorkoutSummary: View {
 
     private func stat(_ value: String, _ label: String) -> some View {
         VStack(spacing: 4) {
-            Text(value).font(.system(size: 24, weight: .light).monospacedDigit())
-            Text(label).font(.caption.weight(.medium)).tracking(1.5).foregroundStyle(.secondary)
+            Text(value).northDisplayNumber(.title)
+            Text(label).northEyebrow()
         }
     }
 }

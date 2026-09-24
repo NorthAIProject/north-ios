@@ -13,8 +13,8 @@ struct TodayView: View {
             VStack(alignment: .leading, spacing: 24) {
                 if let briefing = snapshot.briefing, !briefing.isEmpty {
                     Text(briefing)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                        .font(.north(.title3))
+                        .lineSpacing(2)
                 }
 
                 if let nextStep = snapshot.nextStep {
@@ -42,7 +42,7 @@ struct TodayView: View {
                     }
                 }
 
-                TodaySection("Today") {
+                TodaySection("Water and sleep") {
                     Row {
                         LabeledContent("Water", value: "\(snapshot.hydration.todayML) / \(snapshot.hydration.targetML) ml")
                     }
@@ -82,22 +82,18 @@ private struct NextStepCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(step.eyebrow.uppercased())
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(NorthColor.signal)
+            Text(step.eyebrow)
+                .northEyebrow(NorthColor.signal)
             Text(step.title)
-                .font(.title3.weight(.semibold))
+                .font(.north(.title2).weight(.semibold))
             Text(step.body)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Button(step.cta, action: action)
-                .buttonStyle(.borderedProminent)
+                .northProminentButton()
                 .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+        .northCard()
     }
 }
 
@@ -107,26 +103,22 @@ private struct Metric: View {
 
     init(title: String, value: Int, unit: String) {
         self.title = title
-        self.display = Text(value, format: .number).font(.title2.weight(.light)) + Text(" \(unit)").font(.subheadline).foregroundStyle(.secondary)
+        self.display = Text(value, format: .number).font(.north(.title).weight(.light).monospacedDigit()) + Text(" \(unit)").font(.subheadline).foregroundStyle(.secondary)
     }
 
     init(title: String, text: String) {
         self.title = title
-        self.display = Text(text).font(.title2.weight(.light))
+        self.display = Text(text).font(.north(.title).weight(.light))
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title.uppercased())
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(.secondary)
+            Text(title)
+                .northEyebrow()
             display
                 .contentTransition(.numericText())
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+        .northCard()
     }
 }
 
@@ -177,7 +169,7 @@ private struct TimelineRow: View {
             }
             Spacer()
             Text(entry.at, style: .time)
-                .font(.caption)
+                .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
     }
@@ -195,13 +187,11 @@ private struct TodaySection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(.secondary)
+            Text(title)
+                .northEyebrow()
                 .padding(.leading, 16)
             VStack(spacing: 0) { content }
-                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: NorthRadius.medium))
         }
     }
 }

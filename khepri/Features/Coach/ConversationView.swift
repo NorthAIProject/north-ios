@@ -109,7 +109,7 @@ private struct MessageRow: View {
             Text(message.text)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(NorthColor.signal.opacity(0.18), in: .rect(cornerRadius: 16))
+                .background(NorthColor.signal.opacity(0.18), in: .rect(cornerRadius: 18, style: .continuous))
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.leading, 48)
                 .textSelection(.enabled)
@@ -119,6 +119,7 @@ private struct MessageRow: View {
                     TypingIndicator()
                 } else {
                     Text(Markdown.render(message.text))
+                        .lineSpacing(2)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -194,12 +195,14 @@ private struct ApprovalCard: View {
                 Button("Not Now") { onDecide(false) }
                     .buttonStyle(.bordered)
                 Button("Allow") { onDecide(true) }
-                    .buttonStyle(.borderedProminent)
+                    .northProminentButton()
             }
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+        .northCard()
+        .overlay {
+            RoundedRectangle(cornerRadius: NorthRadius.medium)
+                .strokeBorder(NorthColor.agent.opacity(0.3), lineWidth: 1)
+        }
     }
 }
 

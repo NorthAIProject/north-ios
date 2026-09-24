@@ -39,13 +39,10 @@ struct MetricDetailView: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(metric.range.label.uppercased())
-                        .font(.caption.weight(.medium))
-                        .tracking(1.5)
-                        .foregroundStyle(.secondary)
+                    Text(metric.range.label)
+                        .northEyebrow()
                     Text(metric.headline)
-                        .font(.system(size: 40, weight: .light))
-                        .monospacedDigit()
+                        .northDisplayNumber(.largeTitle)
                     if metric.trend.hasPrior {
                         Text(metric.trend.word)
                             .font(.subheadline)

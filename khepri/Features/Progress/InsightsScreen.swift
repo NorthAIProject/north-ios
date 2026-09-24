@@ -73,8 +73,7 @@ private struct SummaryList: View {
             } else if summary.judged > 0 {
                 Section {
                     Text("\(summary.onTrack) of \(summary.judged) on track")
-                        .font(.system(size: 24, weight: .light))
-                        .contentTransition(.numericText())
+                        .northDisplayNumber(.title)
                         .padding(.vertical, 4)
                 }
             }
@@ -125,7 +124,7 @@ private struct ScoreRow: View {
     var body: some View {
         HStack(spacing: 16) {
             ZStack {
-                Circle().stroke(Color(.separator).opacity(0.3), lineWidth: 3)
+                Circle().stroke(.quaternary, lineWidth: 3)
                 if score.hasData {
                     Circle()
                         .trim(from: 0, to: CGFloat(min(max(score.points, 0), 100)) / 100)
@@ -142,10 +141,8 @@ private struct ScoreRow: View {
                 HStack(spacing: 8) {
                     Text(score.label).font(.headline)
                     if score.hasData {
-                        Text(score.verdict.uppercased())
-                            .font(.caption2.weight(.medium))
-                            .tracking(1.5)
-                            .foregroundStyle(.secondary)
+                        Text(score.verdict)
+                            .northEyebrow()
                     }
                 }
                 Text(score.hasData ? score.reason : "Not enough logged to judge.")
@@ -166,13 +163,10 @@ private struct PinnedRow: View {
     var body: some View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(pinned.label.uppercased())
-                    .font(.caption.weight(.medium))
-                    .tracking(1.5)
-                    .foregroundStyle(.secondary)
+                Text(pinned.label)
+                    .northEyebrow()
                 Text(pinned.value)
-                    .font(.system(size: 24, weight: .light))
-                    .monospacedDigit()
+                    .northDisplayNumber(.title)
                 HStack(spacing: 4) {
                     if pinned.delta.hasPrior {
                         DeltaText(direction: pinned.delta.direction, pct: pinned.delta.pct)

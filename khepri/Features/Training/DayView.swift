@@ -43,7 +43,7 @@ struct DayView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 4)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .northProminentButton()
                     .disabled(day.exercises.isEmpty)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)

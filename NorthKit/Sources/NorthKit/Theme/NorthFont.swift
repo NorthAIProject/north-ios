@@ -30,6 +30,12 @@ public extension Font {
         .custom(NorthFont.sans, size: UIFontMetrics.defaultSize(for: style), relativeTo: style)
     }
 
+    /// Geist at a fixed size that still scales with the given text style, for
+    /// the rare figure larger than any text style.
+    static func north(size: CGFloat, relativeTo style: Font.TextStyle) -> Font {
+        .custom(NorthFont.sans, size: size, relativeTo: style)
+    }
+
     /// Geist Mono at the size of a system text style, for numbers and timers.
     static func northMono(_ style: Font.TextStyle) -> Font {
         .custom(NorthFont.mono, size: UIFontMetrics.defaultSize(for: style), relativeTo: style)

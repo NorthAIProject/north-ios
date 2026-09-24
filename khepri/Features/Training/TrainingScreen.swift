@@ -72,7 +72,7 @@ struct TrainingScreen: View {
                 Text("Tell your coach what you're training for, how often, and with what. You'll get a plan to follow and adjust.")
             } actions: {
                 Button("Create a Plan") { creating = true }
-                    .buttonStyle(.borderedProminent)
+                    .northProminentButton()
             }
             .anchorGuidedTour(.training)
         case .ready:
@@ -102,7 +102,7 @@ private struct PlanOverview: View {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(plan.name)
-                        .font(.title2.weight(.semibold))
+                        .font(.north(.title2).weight(.semibold))
                     Text("\(plan.weeksTotal) weeks · \(plan.days.count) days a week")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -150,10 +150,8 @@ private struct DayRow: View {
                 HStack(spacing: 8) {
                     Text(day.weekday).font(.headline)
                     if isNext {
-                        Text("NEXT")
-                            .font(.caption2.weight(.semibold))
-                            .tracking(1.5)
-                            .foregroundStyle(NorthColor.signal)
+                        Text("Next")
+                            .northEyebrow(NorthColor.signal)
                     }
                 }
                 Text(day.focus)
