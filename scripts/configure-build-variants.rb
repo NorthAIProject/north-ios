@@ -45,6 +45,9 @@ APP_SETTINGS = {
     "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.",
   # The workout on the Lock Screen and in the Dynamic Island.
   "INFOPLIST_KEY_NSSupportsLiveActivities" => "YES",
+  # Only HTTPS and Apple's own crypto, which are exempt: answers App Store
+  # Connect's export-compliance question so builds reach testers unprompted.
+  "INFOPLIST_KEY_ITSAppUsesNonExemptEncryption" => "NO",
   "INFOPLIST_KEY_NSHealthUpdateUsageDescription" =>
     "Khepri saves workouts you finish in the app to Apple Health.",
 }.freeze
