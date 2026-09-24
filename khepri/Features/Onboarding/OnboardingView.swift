@@ -1,8 +1,9 @@
+import NorthAPI
 import SwiftUI
 
 struct OnboardingView: View {
-    let user: UserDTO
-    let onComplete: (UserDTO) -> Void
+    let user: APIUser
+    let onComplete: (APIUser) -> Void
     let onSignOut: () -> Void
 
     @State private var focusAreas: Set<String> = []
@@ -105,7 +106,7 @@ struct OnboardingView: View {
         errorMessage = nil
         defer { isSubmitting = false }
 
-        let request = OnboardingRequestDTO(
+        let answers = OnboardingAnswers(
             focusAreas: availableFocusAreas.filter { focusAreas.contains($0) },
             coachingStyle: coachingStyle,
             coachingStyleCustom: customStyle,
@@ -113,8 +114,8 @@ struct OnboardingView: View {
         )
 
         do {
-            let response = try await AuthService.shared.completeOnboarding(request)
-            onComplete(response.user)
+            let user = try await AuthService.shared.completeOnboarding(answers)
+            onComplete(user)
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -5,16 +5,17 @@
 //  Created by Fernando Correia Chill on 18/09/2026.
 //
 
-import SwiftUI
 import GoogleSignIn
+import NorthAPI
 import NorthKit
+import SwiftUI
 
 @main
 struct khepriApp: App {
     @State private var isAuthenticated: Bool = false
     @State private var isCheckingAuth: Bool = true
-    @State private var bootstrapUser: UserDTO?
-    @State private var todaySnapshot: TodaySnapshotDTO?
+    @State private var bootstrapUser: APIUser?
+    @State private var todaySnapshot: TodaySnapshot?
     @State private var bootstrapError: String?
 
     init() {
@@ -98,12 +99,12 @@ struct khepriApp: App {
         bootstrapError = nil
 
         do {
-            let response = try await AuthService.shared.currentUser()
+            let user = try await AuthService.shared.currentUser()
             withAnimation {
-                bootstrapUser = response.user
+                bootstrapUser = user
                 isAuthenticated = true
             }
-            if !response.user.needsOnboarding {
+            if !user.needsOnboarding {
                 await loadToday()
             } else {
                 isCheckingAuth = false

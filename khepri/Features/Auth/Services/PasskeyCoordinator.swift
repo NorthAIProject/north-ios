@@ -1,5 +1,6 @@
 import AuthenticationServices
 import Foundation
+import NorthAPI
 import UIKit
 
 public struct PasskeyAssertionResult: Sendable {
@@ -26,22 +27,23 @@ public struct PasskeyAssertionResult: Sendable {
         self.userHandle = userHandle
     }
 
-    public func toDictionary() -> [String: AnyCodable] {
-        var responseDict: [String: AnyCodable] = [
-            "clientDataJSON": AnyCodable(clientDataJSON),
-            "authenticatorData": AnyCodable(authenticatorData),
-            "signature": AnyCodable(signature)
+    /// The assertion as WebAuthn PublicKeyCredential JSON, the shape the
+    /// server's ceremony parses. Binary fields are already base64url.
+    public var credentialJSON: [String: Any] {
+        var response: [String: Any] = [
+            "clientDataJSON": clientDataJSON,
+            "authenticatorData": authenticatorData,
+            "signature": signature,
         ]
         if let userHandle {
-            responseDict["userHandle"] = AnyCodable(userHandle)
+            response["userHandle"] = userHandle
         }
-
         return [
-            "id": AnyCodable(credentialID),
-            "rawId": AnyCodable(rawID),
-            "type": AnyCodable("public-key"),
-            "response": AnyCodable(responseDict),
-            "clientExtensionResults": AnyCodable([String: AnyCodable]())
+            "id": credentialID,
+            "rawId": rawID,
+            "type": "public-key",
+            "response": response,
+            "clientExtensionResults": [String: Any](),
         ]
     }
 }
@@ -64,18 +66,17 @@ public struct PasskeyRegistrationResult: Sendable {
         self.attestationObject = attestationObject
     }
 
-    public func toDictionary() -> [String: AnyCodable] {
-        let responseDict: [String: AnyCodable] = [
-            "clientDataJSON": AnyCodable(clientDataJSON),
-            "attestationObject": AnyCodable(attestationObject)
-        ]
-
-        return [
-            "id": AnyCodable(credentialID),
-            "rawId": AnyCodable(rawID),
-            "type": AnyCodable("public-key"),
-            "response": AnyCodable(responseDict),
-            "clientExtensionResults": AnyCodable([String: AnyCodable]())
+    /// The attestation as WebAuthn PublicKeyCredential JSON.
+    public var credentialJSON: [String: Any] {
+        [
+            "id": credentialID,
+            "rawId": rawID,
+            "type": "public-key",
+            "response": [
+                "clientDataJSON": clientDataJSON,
+                "attestationObject": attestationObject,
+            ],
+            "clientExtensionResults": [String: Any](),
         ]
     }
 }

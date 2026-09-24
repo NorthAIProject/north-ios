@@ -1,7 +1,8 @@
+import NorthAPI
 import SwiftUI
 
 struct TodayView: View {
-    let snapshot: TodaySnapshotDTO
+    let snapshot: TodaySnapshot
     let onSignOut: () -> Void
 
     var body: some View {

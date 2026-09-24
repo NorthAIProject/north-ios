@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+		2D28BB50B7EF28246FC190D7 /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = FEF37D107C5252F8E0439108 /* NorthAPI */; };
 		D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 374D2B9F944381566FCEA46B /* NorthKit */; };
 /* End PBXBuildFile section */
 
@@ -66,6 +67,7 @@
 			files = (
 				0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */,
 				D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */,
+				2D28BB50B7EF28246FC190D7 /* NorthAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +131,7 @@
 			packageProductDependencies = (
 				0D195AE1305DBA810055016F /* GoogleSignIn */,
 				374D2B9F944381566FCEA46B /* NorthKit */,
+				FEF37D107C5252F8E0439108 /* NorthAPI */,
 			);
 			productName = khepri;
 			productReference = 0D195AAC305DBA800055016F /* khepri.app */;
@@ -817,6 +820,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
 			productName = NorthKit;
+		};
+		FEF37D107C5252F8E0439108 /* NorthAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
+			productName = NorthAPI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

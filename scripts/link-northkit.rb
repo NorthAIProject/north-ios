@@ -1,5 +1,5 @@
-# Adds the local NorthKit package to the project and links it into the app.
-# Idempotent.
+# Adds the local NorthKit package to the project and links its libraries
+# (NorthKit, NorthAPI) into the app. Idempotent.
 #
 #   bundle exec ruby scripts/link-northkit.rb
 require "xcodeproj"
@@ -18,9 +18,11 @@ unless reference
 end
 
 app = project.targets.find { |t| t.name == "khepri" }
-unless app.package_product_dependencies.any? { |d| d.product_name == "NorthKit" }
+%w[NorthKit NorthAPI].each do |product|
+  next if app.package_product_dependencies.any? { |d| d.product_name == product }
+
   dependency = project.new(Xcodeproj::Project::Object::XCSwiftPackageProductDependency)
-  dependency.product_name = "NorthKit"
+  dependency.product_name = product
   dependency.package = reference
   app.package_product_dependencies << dependency
 
@@ -30,4 +32,4 @@ unless app.package_product_dependencies.any? { |d| d.product_name == "NorthKit" 
 end
 
 project.save
-puts "NorthKit linked into #{app.name}"
+puts "NorthKit and NorthAPI linked into #{app.name}"

@@ -1,4 +1,5 @@
 import Foundation
+import NorthAPI
 
 public extension Notification.Name {
     static let authSessionDidAuthenticate = Notification.Name("khepri.authSessionDidAuthenticate")
@@ -9,7 +10,7 @@ public extension Notification.Name {
 public protocol AuthSessionManaging: Sendable {
     func restoreSessionIfNeeded() async -> Bool
     func validAccessToken() async throws -> String?
-    func storeSession(token: String, user: UserDTO?, expiresAt: Date?) async throws
+    func storeSession(token: String, user: APIUser?, expiresAt: Date?) async throws
     func logout() async
     func invalidateSession() async
 }
@@ -51,7 +52,7 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
         return token
     }
 
-    public func storeSession(token: String, user: UserDTO?, expiresAt: Date?) async throws {
+    public func storeSession(token: String, user: APIUser?, expiresAt: Date?) async throws {
         try secureStore.setString(token, for: tokenKey)
         if let expiresAt {
             try? secureStore.setString(expiresAt.formatted(.iso8601), for: expiresAtKey)

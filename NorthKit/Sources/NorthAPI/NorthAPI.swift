@@ -23,11 +23,31 @@ public enum NorthAPI {
         onUnauthorized: @escaping @Sendable () async -> Void = {},
         session: URLSession = .shared
     ) -> Client {
+        client(
+            baseURL: baseURL,
+            token: token,
+            onUnauthorized: onUnauthorized,
+            transport: URLSessionTransport(configuration: .init(session: session))
+        )
+    }
+
+    /// The same client over any transport; tests pass a canned one.
+    public static func client(
+        baseURL: URL,
+        token: @escaping @Sendable () async -> String?,
+        onUnauthorized: @escaping @Sendable () async -> Void = {},
+        transport: any ClientTransport
+    ) -> Client {
         Client(
             serverURL: baseURL.appending(path: "api/v1"),
             configuration: configuration,
-            transport: URLSessionTransport(configuration: .init(session: session)),
-            middlewares: [BearerAuthMiddleware(token: token, onUnauthorized: onUnauthorized)]
+            transport: transport,
+            // Outermost first. Error mapping wraps the bearer middleware so
+            // the bearer middleware still sees a raw 401 and can sign out.
+            middlewares: [
+                ErrorMappingMiddleware(),
+                BearerAuthMiddleware(token: token, onUnauthorized: onUnauthorized),
+            ]
         )
     }
 

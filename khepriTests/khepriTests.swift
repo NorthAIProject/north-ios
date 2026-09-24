@@ -5,8 +5,12 @@
 //  Created by Fernando Correia Chill on 18/09/2026.
 //
 
-import Testing
 import Foundation
+import HTTPTypes
+import NorthAPI
+import OpenAPIRuntime
+import Synchronization
+import Testing
 @testable import khepri
 
 struct AuthTests {
@@ -26,13 +30,6 @@ struct AuthTests {
     }
 
     @Test func expiredSessionIsDiscarded() async throws {
-        final class MemoryStore: SecureStringStoring, @unchecked Sendable {
-            var storage: [String: String] = [:]
-            func string(for key: String) throws -> String? { storage[key] }
-            func setString(_ value: String, for key: String) throws { storage[key] = value }
-            func removeValue(for key: String) throws { storage.removeValue(forKey: key) }
-        }
-
         let store = MemoryStore()
         let sessions = AuthSessionManager(secureStore: store)
 
@@ -44,61 +41,24 @@ struct AuthTests {
         #expect(store.storage.isEmpty)
     }
 
-    @Test func testMockSecureStore() throws {
-        final class MockSecureStore: SecureStringStoring, @unchecked Sendable {
-            var storage: [String: String] = [:]
-            func string(for key: String) throws -> String? { storage[key] }
-            func setString(_ value: String, for key: String) throws { storage[key] = value }
-            func removeValue(for key: String) throws { storage.removeValue(forKey: key) }
-        }
+    @Test func loginStoresTheSessionTheServerReturns() async throws {
+        let store = MemoryStore()
+        let sessions = AuthSessionManager(secureStore: store)
+        let transport = RecordingTransport(json: """
+        {"token":"server-token","expiresAt":"2026-10-24T09:30:00.123456789Z",
+         "user":{"id":"22222222-2222-2222-2222-222222222222","email":"ana@example.com",
+                 "displayName":"Ana","timezone":"Europe/Lisbon","needsOnboarding":true}}
+        """)
+        let service = AuthService(
+            api: NorthAPI.client(baseURL: URL(string: "https://example.com")!, token: { nil }, transport: transport),
+            sessionManager: sessions
+        )
 
-        let store = MockSecureStore()
-        let sessionManager = AuthSessionManager(secureStore: store)
+        let session = try await service.login(email: "ana@example.com", password: "correct horse")
 
-        // Storing session
-        Task {
-            try await sessionManager.storeSession(
-                token: "mock-session-token",
-                user: UserDTO(id: "123", email: "test@north.ai"),
-                expiresAt: Date().addingTimeInterval(3600)
-            )
-
-            let restoredToken = try await sessionManager.validAccessToken()
-            #expect(restoredToken == "mock-session-token")
-
-            await sessionManager.logout()
-            let clearedToken = try await sessionManager.validAccessToken()
-            #expect(clearedToken == nil)
-        }
-    }
-
-    @Test func testGoogleAuthEndpoint() throws {
-        let endpoint = GoogleAuthEndpoint(request: GoogleAuthRequestDTO(idToken: "mock-google-id-token"))
-        #expect(endpoint.path == "/api/v1/auth/google")
-        #expect(endpoint.method == .post)
-        #expect(endpoint.bodyData != nil)
-        if let bodyData = endpoint.bodyData {
-            let decoded = try JSONDecoder().decode(GoogleAuthRequestDTO.self, from: bodyData)
-            #expect(decoded.idToken == "mock-google-id-token")
-        }
-    }
-
-    @Test func testAppleAuthEndpoint() throws {
-        let endpoint = AppleAuthEndpoint(request: AppleAuthRequestDTO(
-            identityToken: "mock-apple-id-token",
-            authorizationCode: "mock-code",
-            nonce: "raw-nonce",
-            fullName: "Test User",
-            email: "apple@north.ai"
-        ))
-        #expect(endpoint.path == "/api/v1/auth/apple")
-        #expect(endpoint.method == .post)
-        #expect(endpoint.bodyData != nil)
-        if let bodyData = endpoint.bodyData {
-            let decoded = try JSONDecoder().decode(AppleAuthRequestDTO.self, from: bodyData)
-            #expect(decoded.identityToken == "mock-apple-id-token")
-            #expect(decoded.nonce == "raw-nonce")
-        }
+        #expect(session.user.needsOnboarding)
+        #expect(try await sessions.validAccessToken() == "server-token")
+        #expect(transport.lastPath == "/api/v1/auth/login")
     }
 
     @Test func testGoogleClientIDConfiguration() {
@@ -111,3 +71,26 @@ struct AuthTests {
     }
 }
 
+final class MemoryStore: SecureStringStoring, @unchecked Sendable {
+    var storage: [String: String] = [:]
+    func string(for key: String) throws -> String? { storage[key] }
+    func setString(_ value: String, for key: String) throws { storage[key] = value }
+    func removeValue(for key: String) throws { storage.removeValue(forKey: key) }
+}
+
+/// Answers every request with 200 and one JSON body, and records the path.
+final class RecordingTransport: ClientTransport, Sendable {
+    private let json: String
+    private let path = Mutex<String?>(nil)
+
+    init(json: String) { self.json = json }
+
+    var lastPath: String? { path.withLock { $0 } }
+
+    func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
+        path.withLock { $0 = baseURL.path() + (request.path ?? "") }
+        var response = HTTPResponse(status: .ok)
+        response.headerFields[.contentType] = "application/json"
+        return (response, HTTPBody(json))
+    }
+}
