@@ -21,7 +21,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     /// A tap, or the Start Workout button, opens where the notification says.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        guard let link = response.notification.request.content.userInfo["url"] as? String, let url = URL(string: link) else { return }
-        await MainActor.run { onOpenURL?(url) }
+        guard let link = response.notification.request.content.userInfo["url"] as? String, var url = URL(string: link) else { return }
+        if response.actionIdentifier == WorkoutReminders.startActionIdentifier {
+            url.append(component: "start")
+        }
+        await MainActor.run { [url] in onOpenURL?(url) }
     }
 }

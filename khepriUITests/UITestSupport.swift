@@ -46,6 +46,15 @@ extension XCTestCase {
         return false
     }
 
+    /// The first time a simulator shows the keyboard, iOS lays a one-time
+    /// "slide to type" tip over it, with its own Continue button covering the
+    /// app's. Dismiss it wherever it appears.
+    @MainActor
+    func dismissKeyboardTip(_ app: XCUIApplication) {
+        let tip = app.keyboards.buttons["Continue"]
+        if tip.exists, tip.isHittable { tip.tap() }
+    }
+
     /// The iOS 26 tab bar exposes each tab more than once to accessibility,
     /// and the first match can be an off-screen copy. Tap the one on screen.
     @MainActor
@@ -67,7 +76,13 @@ extension XCTestCase {
     @MainActor
     func type(_ element: XCUIElement, _ text: String, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertTrue(element.waitForExistence(timeout: 15), "missing \(element)", file: file, line: line)
-        element.tap()
+        // A tap during a sheet's or alert's entrance lands but focuses
+        // nothing; tap until the field has the keyboard.
+        for _ in 0..<10 {
+            element.tap()
+            if (element.value(forKey: "hasKeyboardFocus") as? Bool) == true { break }
+            usleep(300_000)
+        }
         element.typeText(text)
     }
 
@@ -78,6 +93,7 @@ extension XCTestCase {
         let deadline = Date.now.addingTimeInterval(20)
         while Date.now < deadline {
             answerSavePassword(app)
+            dismissKeyboardTip(app)
             if element.exists, element.isHittable {
                 element.tap()
                 return

@@ -158,19 +158,22 @@ platform :ios do
   end
 
   # Project uses Xcode-managed signing for local dev; CI archives need the
-  # match profile pinned explicitly.
+  # match profile pinned explicitly, for the app and for the widget
+  # extension embedded in it (bundle ID + ".widgets").
   private_lane :prepare_signing do |options|
     bundle_id = options[:bundle_id] || BUNDLE_ID
     config = options[:config] || "Release"
-    update_code_signing_settings(
-      path: PROJECT,
-      use_automatic_signing: false,
-      team_id: "84X9WYBF36",
-      code_sign_identity: "Apple Distribution",
-      profile_name: "match AppStore #{bundle_id}",
-      targets: ["khepri"],
-      build_configurations: [config]
-    )
+    { "khepri" => bundle_id, "KhepriWidgets" => "#{bundle_id}.widgets" }.each do |target, id|
+      update_code_signing_settings(
+        path: PROJECT,
+        use_automatic_signing: false,
+        team_id: "84X9WYBF36",
+        code_sign_identity: "Apple Distribution",
+        profile_name: "match AppStore #{id}",
+        targets: [target],
+        build_configurations: [config]
+      )
+    end
   end
 
   private_lane :bump_build_number do |options|

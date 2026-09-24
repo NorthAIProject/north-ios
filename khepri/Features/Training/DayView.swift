@@ -11,6 +11,8 @@ struct DayView: View {
     @State private var picking: PickerPurpose?
     @State private var adjusting: IndexedExercise?
     @State private var viewing: ExerciseSlugRoute?
+    @State private var workout: WorkoutSession?
+    @Environment(AppRouter.self) private var router
 
     /// A new start time begins at the one the other days use most, so a
     /// plan's sessions line up without adjusting each; 07:00 otherwise.
@@ -30,6 +32,21 @@ struct DayView: View {
             List {
                 if let notice = store.notice {
                     Section { Label(notice, systemImage: "arrow.triangle.2.circlepath").font(.subheadline) }
+                }
+
+                Section {
+                    Button {
+                        startWorkout(day)
+                    } label: {
+                        Label("Start Workout", systemImage: "play.fill")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(day.exercises.isEmpty)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
                 }
 
                 StartTimeSection(startTime: day.startTime, suggested: suggestedStart, isSaving: store.isEditing) { time in
@@ -108,9 +125,28 @@ struct DayView: View {
                 }
             }
             .sheet(item: $viewing) { route in ExerciseSheet(slug: route.slug) }
+            .fullScreenCover(item: $workout) { session in WorkoutSessionView(session: session) }
+            // The reminder's Start Workout button.
+            .onAppear {
+                guard router.startsWorkout else { return }
+                router.startsWorkout = false
+                startWorkout(day)
+            }
         } else {
             ContentUnavailableView("This day is no longer in the plan", systemImage: "calendar.badge.exclamationmark")
         }
+    }
+}
+
+extension DayView {
+    private func startWorkout(_ day: TrainingDay) {
+        guard workout == nil, !day.exercises.isEmpty else { return }
+        workout = WorkoutSession(
+            title: "\(day.weekday) · \(day.focus)",
+            day: day,
+            service: ActivityService(),
+            live: WorkoutLiveActivityController()
+        )
     }
 }
 

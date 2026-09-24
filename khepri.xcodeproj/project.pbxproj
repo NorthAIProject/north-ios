@@ -8,8 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+		243D15825794CC9E0B3F9902 /* KhepriWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2D28BB50B7EF28246FC190D7 /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = FEF37D107C5252F8E0439108 /* NorthAPI */; };
+		6E856D1B873B65B9C70C50BE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9784842CA8BCC9867FB62BCB /* Foundation.framework */; };
+		77D2DEC09A977B76A7C2BBD9 /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = DBF1609B7085042FC274234E /* NorthKit */; };
+		CC9A10B1E3DD154A88F5E0AB /* KhepriWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */; };
 		D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 374D2B9F944381566FCEA46B /* NorthKit */; };
+		FB6BAB19AAE471A5AB44E779 /* WorkoutLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,13 +32,39 @@
 			remoteGlobalIDString = 0D195AAB305DBA800055016F;
 			remoteInfo = khepri;
 		};
+		DF597E7BC4A6B4DCD6A69B5D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D195AA4305DBA800055016F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A47E19CFC48341A676F24187;
+			remoteInfo = KhepriWidgets;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		35DB4F54CA453068720956C6 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				243D15825794CC9E0B3F9902 /* KhepriWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0BF497DE36C073C2C594CD1D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D195AAC305DBA800055016F /* khepri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = khepri.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195ABB305DBA810055016F /* khepriTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195AC5305DBA810055016F /* khepriUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KhepriWidgetsBundle.swift; sourceTree = "<group>"; };
+		3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutLiveActivity.swift; sourceTree = "<group>"; };
+		9784842CA8BCC9867FB62BCB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		C5B1241A3C69C8907F58C460 /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = Config/Base.xcconfig; sourceTree = "<group>"; };
+		D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KhepriWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,6 +116,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8918313C61F68BACF0FD98FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E856D1B873B65B9C70C50BE /* Foundation.framework in Frameworks */,
+				77D2DEC09A977B76A7C2BBD9 /* NorthKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -96,6 +136,8 @@
 				0D195AC8305DBA810055016F /* khepriUITests */,
 				0D195AAD305DBA800055016F /* Products */,
 				C5B1241A3C69C8907F58C460 /* Base.xcconfig */,
+				0D9F93BD36F7B227DB9035A5 /* Frameworks */,
+				F8DE6502E3820C15E829201D /* KhepriWidgets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -105,8 +147,36 @@
 				0D195AAC305DBA800055016F /* khepri.app */,
 				0D195ABB305DBA810055016F /* khepriTests.xctest */,
 				0D195AC5305DBA810055016F /* khepriUITests.xctest */,
+				D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		0D9F93BD36F7B227DB9035A5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				75526703230CED8FE255537A /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		75526703230CED8FE255537A /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9784842CA8BCC9867FB62BCB /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		F8DE6502E3820C15E829201D /* KhepriWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */,
+				3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */,
+				0BF497DE36C073C2C594CD1D /* Info.plist */,
+			);
+			name = KhepriWidgets;
+			path = KhepriWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,10 +189,12 @@
 				0D195AA8305DBA800055016F /* Sources */,
 				0D195AA9305DBA800055016F /* Frameworks */,
 				0D195AAA305DBA800055016F /* Resources */,
+				35DB4F54CA453068720956C6 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				42FEC2887AC6A4FA6D379EF2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0D195AAE305DBA800055016F /* khepri */,
@@ -179,6 +251,26 @@
 			productReference = 0D195AC5305DBA810055016F /* khepriUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		A47E19CFC48341A676F24187 /* KhepriWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B32C05FBEB18B1BC5836144B /* Build configuration list for PBXNativeTarget "KhepriWidgets" */;
+			buildPhases = (
+				CC3D6A49042C6E972AEBDBBB /* Sources */,
+				8918313C61F68BACF0FD98FE /* Frameworks */,
+				9C6E8E0DF656B1513C167364 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KhepriWidgets;
+			packageProductDependencies = (
+				DBF1609B7085042FC274234E /* NorthKit */,
+			);
+			productName = KhepriWidgets;
+			productReference = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -223,6 +315,7 @@
 				0D195AAB305DBA800055016F /* khepri */,
 				0D195ABA305DBA810055016F /* khepriTests */,
 				0D195AC4305DBA810055016F /* khepriUITests */,
+				A47E19CFC48341A676F24187 /* KhepriWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -243,6 +336,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		0D195AC3305DBA810055016F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C6E8E0DF656B1513C167364 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -273,6 +373,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CC3D6A49042C6E972AEBDBBB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC9A10B1E3DD154A88F5E0AB /* KhepriWidgetsBundle.swift in Sources */,
+				FB6BAB19AAE471A5AB44E779 /* WorkoutLiveActivity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -285,6 +394,12 @@
 			isa = PBXTargetDependency;
 			target = 0D195AAB305DBA800055016F /* khepri */;
 			targetProxy = 0D195AC6305DBA810055016F /* PBXContainerItemProxy */;
+		};
+		42FEC2887AC6A4FA6D379EF2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = KhepriWidgets;
+			target = A47E19CFC48341A676F24187 /* KhepriWidgets */;
+			targetProxy = DF597E7BC4A6B4DCD6A69B5D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -427,6 +542,7 @@
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -478,6 +594,7 @@
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -623,6 +740,7 @@
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -729,6 +847,63 @@
 			};
 			name = Beta;
 		};
+		9512759FA16BCDE90D45AC2F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 84X9WYBF36;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KhepriWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B82DA0029BE99B6F04714A00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 84X9WYBF36;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KhepriWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		DEFD264F6C30AB13425171F7 /* Beta */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -750,6 +925,35 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/khepri.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/khepri";
+			};
+			name = Beta;
+		};
+		E78CAEABC1A67F7CDD3470A8 /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 84X9WYBF36;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KhepriWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.beta.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Beta;
 		};
@@ -796,6 +1000,16 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		B32C05FBEB18B1BC5836144B /* Build configuration list for PBXNativeTarget "KhepriWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9512759FA16BCDE90D45AC2F /* Release */,
+				B82DA0029BE99B6F04714A00 /* Debug */,
+				E78CAEABC1A67F7CDD3470A8 /* Beta */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -823,6 +1037,11 @@
 			productName = GoogleSignIn;
 		};
 		374D2B9F944381566FCEA46B /* NorthKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
+			productName = NorthKit;
+		};
+		DBF1609B7085042FC274234E /* NorthKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
 			productName = NorthKit;

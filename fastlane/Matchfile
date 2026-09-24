@@ -19,8 +19,12 @@ git_url("https://github.com/FinancePlanner/norviq-certificates.git")
 git_branch("master")
 storage_mode("git")
 type("appstore")
+# Each app and its widget extension (Live Activities, widgets) is signed
+# with its own profile.
 app_identifier([
   "com.fernandocorreia.khepri",
-  "com.fernandocorreia.khepri.beta"
+  "com.fernandocorreia.khepri.widgets",
+  "com.fernandocorreia.khepri.beta",
+  "com.fernandocorreia.khepri.beta.widgets"
 ])
 team_id("84X9WYBF36")

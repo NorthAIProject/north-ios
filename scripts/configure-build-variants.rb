@@ -43,6 +43,8 @@ APP_SETTINGS = {
   # Health access without them crashes the app.
   "INFOPLIST_KEY_NSHealthShareUsageDescription" =>
     "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.",
+  # The workout on the Lock Screen and in the Dynamic Island.
+  "INFOPLIST_KEY_NSSupportsLiveActivities" => "YES",
   "INFOPLIST_KEY_NSHealthUpdateUsageDescription" =>
     "Khepri saves workouts you finish in the app to Apple Health.",
 }.freeze

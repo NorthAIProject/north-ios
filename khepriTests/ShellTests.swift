@@ -100,6 +100,7 @@ struct RouterTests {
         ("/app/chat/33333333-3333-3333-3333-333333333333", .tab(.coach)),
         ("https://kheprios.com/app/training/abc", .tab(.training)),
         ("khepri://training/plan-1/2", .trainingDay(2)),
+        ("khepri://training/plan-1/2/start", .startWorkout(2)),
     ])
     func mapsLinksToDestinations(_ link: String, _ expected: AppDestination) throws {
         #expect(AppRouter.destination(for: try #require(URL(string: link))) == expected)
