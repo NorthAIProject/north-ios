@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+		D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 374D2B9F944381566FCEA46B /* NorthKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */,
+				D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,6 +128,7 @@
 			name = khepri;
 			packageProductDependencies = (
 				0D195AE1305DBA810055016F /* GoogleSignIn */,
+				374D2B9F944381566FCEA46B /* NorthKit */,
 			);
 			productName = khepri;
 			productReference = 0D195AAC305DBA800055016F /* khepri.app */;
@@ -207,6 +210,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0D195AAD305DBA800055016F /* Products */;
@@ -785,6 +789,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = NorthKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -801,6 +812,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0D195AE2305DBA810055016F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignIn;
+		};
+		374D2B9F944381566FCEA46B /* NorthKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
+			productName = NorthKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

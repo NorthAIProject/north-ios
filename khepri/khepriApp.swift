@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignIn
+import NorthKit
 
 @main
 struct khepriApp: App {
@@ -15,6 +16,10 @@ struct khepriApp: App {
     @State private var bootstrapUser: UserDTO?
     @State private var todaySnapshot: TodaySnapshotDTO?
     @State private var bootstrapError: String?
+
+    init() {
+        NorthFont.register()
+    }
 
     var body: some Scene {
         WindowGroup {

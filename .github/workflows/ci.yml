@@ -82,6 +82,14 @@ jobs:
             -parallel-testing-enabled NO \
             -quiet
 
+      - name: Run NorthKit Tests
+        working-directory: NorthKit
+        run: |
+          xcodebuild test \
+            -scheme NorthKit \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -quiet
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
