@@ -40,13 +40,13 @@ public struct VaultTextField: View {
             if isSecure && !isPasswordVisible {
                 SecureField(title, text: $text)
                     .focused($isFocused)
-                    .textContentType(textContentType)
+                    .textContentType(UITesting.isActive ? nil : textContentType)
                     .textInputAutocapitalization(autoCapitalization)
             } else {
                 TextField(title, text: $text)
                     .focused($isFocused)
                     .keyboardType(keyboardType)
-                    .textContentType(textContentType)
+                    .textContentType(UITesting.isActive ? nil : textContentType)
                     .textInputAutocapitalization(autoCapitalization)
                     .autocorrectionDisabled()
             }

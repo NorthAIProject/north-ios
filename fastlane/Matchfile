@@ -1,26 +1,29 @@
-# Signing lives in Norviq's match repo, shared on purpose.
+# Khepri's own match storage: NorthAIProject/north-ios-certificates.
 #
-# Both apps belong to team 84X9WYBF36, and Apple caps a team's distribution
-# certificates, so Khepri reuses Norviq's (certs/distribution/4AQ4Q8XM7Z)
-# instead of minting its own. Its profiles sit beside Norviq's under
-# profiles/appstore/, one per bundle ID.
+# The team (84X9WYBF36) is at Apple's limit of three distribution
+# certificates, so Khepri does not mint one. Its repo holds an existing
+# certificate, BC73LRR48W, imported with `fastlane match import`, under a
+# password of its own. It used to share Norviq's match repo; Khepri no longer
+# depends on that repo or its password.
 #
 # Consequences:
-#   - MATCH_PASSWORD is Norviq's: the repo is encrypted with one password.
-#   - MATCH_GIT_BASIC_AUTHORIZATION (base64 "x-access-token:<PAT>") needs a
-#     PAT that can read FinancePlanner/norviq-certificates, although this
-#     repo lives under NorthAIProject.
-#   - Revoking the certificate breaks both apps' signing at once.
+#   - MATCH_PASSWORD is Khepri's own.
+#   - MATCH_GIT_BASIC_AUTHORIZATION (base64 "x-access-token:<PAT>") needs a PAT
+#     that can read NorthAIProject/north-ios-certificates.
+#   - Revoking BC73LRR48W breaks Khepri's signing; renew it before 2027-09-23.
 #
-# Seed Khepri's profiles once with `bundle exec fastlane seed_signing`; match
-# finds the existing certificate and only creates the missing profiles. CI
-# only ever reads (readonly).
-git_url("https://github.com/FinancePlanner/norviq-certificates.git")
-git_branch("master")
+# Profiles are created with `bundle exec fastlane seed_signing`. CI only ever
+# reads (readonly).
+git_url("https://github.com/NorthAIProject/north-ios-certificates.git")
+git_branch("main")
 storage_mode("git")
 type("appstore")
+# Each app and its widget extension (Live Activities, widgets) is signed
+# with its own profile.
 app_identifier([
   "com.fernandocorreia.khepri",
-  "com.fernandocorreia.khepri.beta"
+  "com.fernandocorreia.khepri.widgets",
+  "com.fernandocorreia.khepri.beta",
+  "com.fernandocorreia.khepri.beta.widgets"
 ])
 team_id("84X9WYBF36")

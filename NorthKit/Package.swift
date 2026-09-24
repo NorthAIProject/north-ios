@@ -37,7 +37,8 @@ let package = Package(
         ),
         .testTarget(
             name: "NorthKitTests",
-            dependencies: ["NorthKit"]
+            dependencies: ["NorthKit"],
+            resources: [.copy("ArtFixtures")]
         ),
         .testTarget(
             name: "NorthAPITests",

@@ -5,6 +5,7 @@ import SwiftUI
 
 @main
 struct KhepriApp: App {
+    @UIApplicationDelegateAdaptor private var delegate: AppDelegate
     @State private var app = AppModel()
     @State private var router = AppRouter()
     @State private var tour = GuidedTour()
@@ -19,7 +20,10 @@ struct KhepriApp: App {
                 .environment(app)
                 .environment(router)
                 .environment(tour)
-                .task { await app.start() }
+                .task {
+                    delegate.onOpenURL = { router.open(url: $0) }
+                    await app.start()
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .authSessionDidInvalidate)) { _ in
                     app.sessionEnded()
                 }

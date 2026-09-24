@@ -29,10 +29,7 @@ final class FirstRunUITests: XCTestCase {
 
         // Wizard. iOS offers to save the password first, as it would for anyone.
         XCTAssertTrue(app.buttons["Get Started"].waitForExistence(timeout: 15), "wizard did not open after sign-in")
-        let savePassword = app.sheets["Save Password?"]
-        if savePassword.waitForExistence(timeout: 5) {
-            savePassword.buttons["Not Now"].tap()
-        }
+        dismissSavePassword(app)
         snapshot(app, "02-welcome")
         tap(app.buttons["Get Started"])
 
@@ -90,14 +87,6 @@ final class FirstRunUITests: XCTestCase {
         XCTAssertEqual(status, 201, "is north-web-app running on localhost:8090?")
     }
 
-    /// Waits out step transitions before tapping.
-    private func tap(_ element: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(element.waitForExistence(timeout: 10), "missing \(element)", file: file, line: line)
-        let hittable = NSPredicate(format: "isHittable == true")
-        let wait = XCTNSPredicateExpectation(predicate: hittable, object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [wait], timeout: 5), .completed, "not hittable: \(element)", file: file, line: line)
-        element.tap()
-    }
 
     private func fill(_ element: XCUIElement, _ text: String) {
         XCTAssertTrue(element.waitForExistence(timeout: 10), "missing \(element)")

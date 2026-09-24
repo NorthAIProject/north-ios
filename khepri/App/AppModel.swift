@@ -44,6 +44,10 @@ final class AppModel {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
         }
+        // Tests that are not about the tour mark it finished up front.
+        if ProcessInfo.processInfo.arguments.contains("-uitest-skip-tour") {
+            UserDefaults.standard.set(true, forKey: "guidedTour.finished")
+        }
         #endif
         if await sessions.restoreSessionIfNeeded() {
             await loadUser()
@@ -79,6 +83,7 @@ final class AppModel {
     private func loadUser() async {
         do {
             let user = try await auth.currentUser()
+            AppTimeZone.current = TimeZone(identifier: user.timezone) ?? .current
             phase = user.needsOnboarding ? .onboarding(user) : .signedIn(user)
         } catch let error as APIError where error.isUnauthorized {
             await sessions.invalidateSession()

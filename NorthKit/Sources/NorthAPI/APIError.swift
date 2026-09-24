@@ -11,6 +11,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case invalidResponse
     case invalidStatus(Int)
     case unauthorized(String?)
+    /// The thing asked for does not exist, or not for this account.
+    case notFound(String?)
     case fieldValidation(message: String, fields: [String: String])
     case server(String)
     case network(String)
@@ -23,6 +25,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             "Request failed with status code \(code)."
         case .unauthorized(let message):
             message ?? "Your session has expired. Please sign in again."
+        case .notFound(let message):
+            message ?? "That could not be found."
         case .fieldValidation(let message, _), .server(let message), .network(let message):
             message
         }
@@ -31,6 +35,12 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     public var isUnauthorized: Bool {
         if case .unauthorized = self { return true }
         if case .invalidStatus(401) = self { return true }
+        return false
+    }
+
+    public var isNotFound: Bool {
+        if case .notFound = self { return true }
+        if case .invalidStatus(404) = self { return true }
         return false
     }
 
@@ -65,8 +75,10 @@ public extension NorthAPI {
     }
 }
 
-/// Turns every non-2xx response into a thrown `APIError`, reading the
-/// server's `ErrorBody` for the message and any per-field errors.
+/// Turns non-2xx responses carrying the server's `ErrorBody` into a thrown
+/// `APIError`, with its message and any per-field errors. A non-2xx response
+/// with some other JSON body is a documented answer of its own and passes
+/// through to the generated client.
 struct ErrorMappingMiddleware: ClientMiddleware {
     /// Error bodies are a sentence or two; this bounds a misbehaving proxy.
     static let maxErrorBodyBytes = 64 * 1024
@@ -83,17 +95,29 @@ struct ErrorMappingMiddleware: ClientMiddleware {
             return (response, responseBody)
         }
 
-        var detail: ErrorDetail?
-        if let responseBody, let data = try? await Data(collecting: responseBody, upTo: Self.maxErrorBodyBytes) {
-            detail = try? JSONDecoder().decode(ErrorEnvelope.self, from: data).error
+        guard let responseBody else {
+            throw Self.error(status: response.status.code, detail: nil)
         }
-        throw Self.error(status: response.status.code, detail: detail)
+        let data = try await Data(collecting: responseBody, upTo: Self.maxErrorBodyBytes)
+        if let detail = try? JSONDecoder().decode(ErrorEnvelope.self, from: data).error {
+            throw Self.error(status: response.status.code, detail: detail)
+        }
+        // Not an ErrorBody: a documented non-2xx answer with its own shape,
+        // such as a 409 carrying the newest version of an edited plan. Hand it
+        // on, with the bytes already read, for the generated client to decode
+        // as that operation's case. An undocumented one surfaces there too.
+        if !data.isEmpty, response.headerFields[.contentType]?.hasPrefix("application/json") == true {
+            return (response, HTTPBody(data))
+        }
+        throw Self.error(status: response.status.code, detail: nil)
     }
 
     static func error(status: Int, detail: ErrorDetail?) -> APIError {
         switch (status, detail) {
         case (401, _):
             .unauthorized(detail?.message)
+        case (404, _):
+            .notFound(detail?.message)
         case (_, let detail?) where !(detail.fields ?? [:]).isEmpty:
             .fieldValidation(message: detail.message, fields: detail.fields ?? [:])
         case (_, let detail?):
