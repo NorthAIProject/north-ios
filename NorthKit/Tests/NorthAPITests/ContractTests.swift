@@ -121,6 +121,17 @@ struct ContractTests {
         #expect(checkIns.streak == 6)
     }
 
+    @Test func reportsAndMemories() throws {
+        let reports = try decode(Schemas.ReportList.self, "reports")
+        #expect(reports.reports.first?.kind == .weekly && reports.reports.first?.helpful == true)
+        let report = try decode(Schemas.ReportDetail.self, "report")
+        #expect(report.value2.body.hasPrefix("## The week"))
+        let memories = try decode(Schemas.MemoryList.self, "memories")
+        #expect(memories.pending.first?.status == .pending)
+        #expect(memories.approved.first?.pinned == true)
+        #expect(memories.categories.contains("injury"))
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -129,7 +140,7 @@ struct ContractTests {
                             "activity", "telegram", "calendar",
                             "plan", "plans", "exercises", "activity-overview",
                             "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
-                            "goals", "goal", "check-ins"]
+                            "goals", "goal", "check-ins", "reports", "report", "memories"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

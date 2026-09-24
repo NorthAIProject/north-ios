@@ -16,7 +16,7 @@ SPEC_DEST="$ROOT/NorthKit/Sources/NorthAPI/openapi.yaml"
 GOLDEN_DEST="$ROOT/NorthKit/Tests/NorthAPITests/Contract"
 
 # Golden files that describe /api/v1 responses. mcpserver's are not API.
-GOLDEN_SOURCES=(activity auth capture checkins coach dashboard exercises fitness goals health insights onboarding settings workouts)
+GOLDEN_SOURCES=(activity auth capture checkins coach dashboard exercises fitness goals health insights memories onboarding reports settings workouts)
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
