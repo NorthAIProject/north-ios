@@ -340,6 +340,8 @@ private struct NotificationSettings: View {
                     Text("Nothing is sent during quiet hours, in your account's time zone.")
                 }
 
+                WorkoutReminderSection()
+
                 Section {
                     Toggle("Ask for progress photos", isOn: bind(\.photoAskEnabled))
                     if value.photoAskEnabled {
@@ -409,6 +411,37 @@ extension View {
                     Button("Save") { Task { await editable.save(send) } }
                 }
             }
+        }
+    }
+}
+
+/// Workout reminders are scheduled by this iPhone from the plan's start
+/// times, so their switch lives here rather than on the server.
+private struct WorkoutReminderSection: View {
+    @State private var enabled = WorkoutReminderSettings.enabled
+    @State private var lead = WorkoutReminderSettings.leadMinutes
+
+    var body: some View {
+        Section {
+            Toggle("Before each workout", isOn: $enabled)
+            if enabled {
+                Picker("Remind me", selection: $lead) {
+                    Text("At the start time").tag(0)
+                    ForEach([5, 10, 15, 30, 60], id: \.self) { Text("\($0) minutes before").tag($0) }
+                }
+            }
+        } header: {
+            Text("On this iPhone")
+        } footer: {
+            Text("From the start times on your training days. Scheduled on this iPhone, so they arrive even offline.")
+        }
+        .onChange(of: enabled) { _, on in
+            WorkoutReminderSettings.enabled = on
+            Task { await WorkoutReminderSettings.apply() }
+        }
+        .onChange(of: lead) { _, minutes in
+            WorkoutReminderSettings.leadMinutes = minutes
+            Task { await WorkoutReminderSettings.apply() }
         }
     }
 }

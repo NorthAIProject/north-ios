@@ -12,6 +12,8 @@ enum AppTab: String, CaseIterable, Hashable {
 enum AppDestination: Equatable {
     case tab(AppTab)
     case settings
+    /// A day of a plan, e.g. from a workout reminder.
+    case trainingDay(Int)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -25,6 +27,9 @@ final class AppRouter {
     /// Set when a link asks for Settings; the More tab presents it and clears
     /// it.
     var showsSettings = false
+    /// Set when a link asks for a training day; the Training tab opens it and
+    /// clears it.
+    var openTrainingDay: Int?
 
     func open(_ destination: AppDestination) {
         switch destination {
@@ -33,6 +38,9 @@ final class AppRouter {
         case .settings:
             selectedTab = .more
             showsSettings = true
+        case .trainingDay(let day):
+            selectedTab = .training
+            openTrainingDay = day
         }
     }
 
@@ -63,7 +71,12 @@ final class AppRouter {
     }
 
     private static func destination(forPath parts: [String]) -> AppDestination? {
-        switch parts.first {
+        // khepri://training/<plan>/<day>: the plan id is informational; the
+        // Training tab always shows the newest version of the plan.
+        if parts.first == "training", parts.count == 3, let day = Int(parts[2]) {
+            return .trainingDay(day)
+        }
+        return switch parts.first {
         case nil, "today": .tab(.today)
         case "chat", "coach": .tab(.coach)
         case "training", "workouts", "exercises", "activity": .tab(.training)

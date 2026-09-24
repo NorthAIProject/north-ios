@@ -27,7 +27,7 @@ protocol CoachServicing: Sendable {
 
 struct CoachService: CoachServicing {
     var api: Client = API.shared
-    var exercises = ExerciseCache()
+    var exercises = ExerciseCache.shared
 
     func conversations() async throws -> [ConversationSummary] {
         try await NorthAPI.call { try await api.listConversations().ok.body.json.conversations }
@@ -121,6 +121,10 @@ struct CoachService: CoachServicing {
 /// Exercise details don't change during a session, and a reply often shows
 /// the same card twice, so each slug is fetched once.
 actor ExerciseCache {
+    /// One cache for the app: cards, thumbnails and sheets all ask for the
+    /// same few exercises.
+    static let shared = ExerciseCache()
+
     private var details: [String: ExerciseDetail] = [:]
     private var inFlight: [String: Task<ExerciseDetail, Error>] = [:]
 

@@ -83,6 +83,7 @@ final class AppModel {
     private func loadUser() async {
         do {
             let user = try await auth.currentUser()
+            AppTimeZone.current = TimeZone(identifier: user.timezone) ?? .current
             phase = user.needsOnboarding ? .onboarding(user) : .signedIn(user)
         } catch let error as APIError where error.isUnauthorized {
             await sessions.invalidateSession()

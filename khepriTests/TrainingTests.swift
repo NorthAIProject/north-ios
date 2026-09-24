@@ -55,3 +55,78 @@ struct WorkoutReminderTests {
         #expect(WorkoutReminders.clock("07:05")! == (7, 5))
     }
 }
+
+@MainActor
+struct TrainingStoreTests {
+    @Test func anEditShowsTheVersionItMadeAndReschedules() async {
+        let service = FakeTraining()
+        var scheduled: [String?] = []
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _ in scheduled.append(plan?.id) })
+
+        await store.load()
+        #expect(store.plan?.id == "v1")
+
+        await store.setStartTime(day: 0, to: "07:00")
+        #expect(store.plan?.id == "v2")
+        #expect(store.plan?.days.first?.startTime == "07:00")
+        #expect(scheduled == ["v1", "v2"], "reminders follow every version shown")
+        #expect(store.notice == nil)
+    }
+
+    @Test func anEditOnAReplacedVersionShowsTheNewestAndSaysSo() async {
+        let service = FakeTraining()
+        service.superseded = true
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { _, _ in })
+
+        await store.load()
+        await store.setStartTime(day: 0, to: "07:00")
+        #expect(store.plan?.id == "newest")
+        #expect(store.notice?.contains("another device") == true)
+    }
+
+    @Test func noPlansMeansEmptyAndNoReminders() async {
+        let service = FakeTraining()
+        service.hasPlan = false
+        var scheduled: [String?] = ["sentinel"]
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _ in scheduled = [plan?.id] })
+
+        await store.load()
+        #expect(store.phase == .empty)
+        #expect(scheduled == [nil])
+    }
+}
+
+final class FakeTraining: TrainingServicing, @unchecked Sendable {
+    var hasPlan = true
+    var superseded = false
+
+    static func plan(_ id: String, start: String? = nil) -> PlanDetail {
+        WorkoutReminderTests.plan([("Monday", start)]).with(id: id)
+    }
+
+    func plans() async throws -> [PlanSummary] {
+        hasPlan ? [PlanSummary(id: "v1", name: "Base", weeksTotal: 4, days: [], source: .ai, createdAt: .now)] : []
+    }
+    func plan(_ id: String) async throws -> PlanDetail { Self.plan(id) }
+    func latestIntake() async throws -> TrainingIntake? { nil }
+    func createPlan(_ intake: TrainingIntake) async throws -> PlanDetail { Self.plan("new") }
+    func setStartTime(plan: String, day: Int, to time: String?) async throws -> PlanEditResult {
+        superseded ? .superseded(Self.plan("newest")) : .saved(Self.plan("v2", start: time))
+    }
+    func addExercise(plan: String, day: Int, slug: String) async throws -> PlanEditResult { .saved(Self.plan(plan)) }
+    func swapExercise(plan: String, day: Int, index: Int, slug: String) async throws -> PlanEditResult { .saved(Self.plan(plan)) }
+    func removeExercise(plan: String, day: Int, index: Int) async throws -> PlanEditResult { .saved(Self.plan(plan)) }
+    func moveExercise(plan: String, day: Int, index: Int, up: Bool) async throws -> PlanEditResult { .saved(Self.plan(plan)) }
+    func setPrescription(plan: String, day: Int, index: Int, sets: Int, reps: String, restSeconds: Int) async throws -> PlanEditResult { .saved(Self.plan(plan)) }
+    func suggestions(plan: String, day: Int) async throws -> [ExerciseSummary] { [] }
+    func replacements(plan: String, day: Int, index: Int) async throws -> [ExerciseSummary] { [] }
+    func searchExercises(_ query: String, muscle: String?) async throws -> [ExerciseSummary] { [] }
+}
+
+extension PlanDetail {
+    func with(id: String) -> PlanDetail {
+        var copy = self
+        copy.id = id
+        return copy
+    }
+}

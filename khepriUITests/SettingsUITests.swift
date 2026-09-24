@@ -16,14 +16,7 @@ final class SettingsUITests: XCTestCase {
             "focusAreas": ["fitness"], "coachingStyle": "direct", "nearTermGoal": "Get stronger",
         ])
 
-        let app = XCUIApplication()
-        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour"]
-        app.launch()
-        type(app.textFields["Email address"], email)
-        type(app.secureTextFields["Password"], password)
-        app.buttons.matching(NSPredicate(format: "label == 'Sign In'")).element(boundBy: 1).tap()
-        let savePassword = app.sheets["Save Password?"]
-        if savePassword.waitForExistence(timeout: 5) { savePassword.buttons["Not Now"].tap() }
+        let app = launchSignedIn(email: email, password: password)
 
         openTab(app, "More")
         tap(app.buttons["Settings"])
@@ -65,37 +58,7 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(app.textFields["Email address"].waitForExistence(timeout: 20), "not signed out after deletion")
     }
 
-    // MARK: - Helpers
 
-    private func openTab(_ app: XCUIApplication, _ name: String) {
-        let deadline = Date.now.addingTimeInterval(15)
-        while Date.now < deadline {
-            if let tab = app.tabBars.buttons.allElementsBoundByIndex.first(where: { $0.label == name && $0.isHittable }) {
-                tab.tap()
-                return
-            }
-            usleep(250_000)
-        }
-        XCTFail("no tappable \(name) tab")
-    }
 
-    private func type(_ element: XCUIElement, _ text: String) {
-        XCTAssertTrue(element.waitForExistence(timeout: 15), "missing \(element)")
-        element.tap()
-        element.typeText(text)
-    }
 
-    private func tap(_ element: XCUIElement) {
-        XCTAssertTrue(element.waitForExistence(timeout: 15), "missing \(element)")
-        let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [hittable], timeout: 15), .completed, "never became tappable: \(element)")
-        element.tap()
-    }
-
-    private func attach(_ app: XCUIApplication, _ name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
-    }
 }

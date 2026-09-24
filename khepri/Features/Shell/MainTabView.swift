@@ -17,9 +17,7 @@ struct MainTabView: View {
                 CoachScreen()
             }
             Tab("Training", systemImage: "figure.strengthtraining.traditional", value: AppTab.training) {
-                PlaceholderScreen(title: "Training", systemImage: "figure.strengthtraining.traditional", phase: 3,
-                                  summary: "Plans, workouts, the exercise library and reminders before you train.",
-                                  tourStep: .training)
+                TrainingScreen()
             }
             Tab("Progress", systemImage: "chart.line.uptrend.xyaxis", value: AppTab.progress) {
                 PlaceholderScreen(title: "Progress", systemImage: "chart.line.uptrend.xyaxis", phase: 4,
