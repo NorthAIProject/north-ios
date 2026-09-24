@@ -26,6 +26,7 @@ struct SettingsScreen: View {
                             dismiss()
                         }
                     }
+                    ReviewSettingsRows()
                 } footer: {
                     Text("Replays the three-step tour of Today, Coach and Training.")
                 }
