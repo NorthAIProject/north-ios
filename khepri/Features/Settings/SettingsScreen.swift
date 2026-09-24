@@ -62,6 +62,7 @@ struct SettingsScreen: View {
                     } label: {
                         Label("Show Me Around", systemImage: "hand.point.up.left")
                     }
+                    ReviewSettingsRows()
                 }
 
                 Section {
