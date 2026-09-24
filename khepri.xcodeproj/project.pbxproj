@@ -543,6 +543,8 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -596,6 +598,8 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -743,6 +747,8 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

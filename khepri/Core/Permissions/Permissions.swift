@@ -1,4 +1,6 @@
+import AVFAudio
 import HealthKit
+import Speech
 import UserNotifications
 
 /// The system permissions the app asks for, and the one place that asks.
@@ -37,5 +39,28 @@ enum Permissions {
     @discardableResult
     static func requestNotifications() async -> Bool {
         (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound])) ?? false
+    }
+
+    enum Access { case undetermined, granted, denied }
+
+    /// Dictation needs the microphone and speech recognition. Denied if
+    /// either was refused: only the Settings app can change that.
+    static var dictation: Access {
+        let microphone = AVAudioApplication.shared.recordPermission
+        let speech = SFSpeechRecognizer.authorizationStatus()
+        if microphone == .denied || speech == .denied || speech == .restricted { return .denied }
+        if microphone == .granted && speech == .authorized { return .granted }
+        return .undetermined
+    }
+
+    /// Shows the microphone prompt, then the speech recognition prompt.
+    /// Returns whether both were allowed.
+    static func requestDictation() async -> Bool {
+        guard await AVAudioApplication.requestRecordPermission() else { return false }
+        let speech = await withCheckedContinuation { continuation in
+            // Answered on a background queue, so the closure must not be main-actor.
+            SFSpeechRecognizer.requestAuthorization { @Sendable status in continuation.resume(returning: status) }
+        }
+        return speech == .authorized
     }
 }

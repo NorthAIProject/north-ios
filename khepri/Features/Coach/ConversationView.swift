@@ -215,14 +215,19 @@ private struct Composer: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
-            // The keyboard's microphone dictates on device, so voice needs no
-            // code here and no speech service.
             TextField("Message your coach", text: $text, axis: .vertical)
                 .lineLimit(1...6)
                 .focused(focused)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20))
+
+            // The keyboard's microphone only appears once the keyboard is up
+            // and stops on a pause; this one is a tap away and keeps
+            // listening until tapped again.
+            if !isReplying {
+                DictationButton(text: $text)
+            }
 
             if isReplying {
                 Button(action: onStop) {

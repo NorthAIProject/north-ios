@@ -74,6 +74,10 @@ struct CoachingStyleStep: View {
     let next: () -> Void
     @FocusState private var customFocused: Bool
 
+    private var customStyle: Binding<String> {
+        Binding(get: { model.draft.customStyle }, set: { model.setCustomStyle($0) })
+    }
+
     var body: some View {
         WizardChrome(
             headline: "How should your coach talk to you?",
@@ -116,12 +120,12 @@ struct CoachingStyleStep: View {
             .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
 
             if model.draft.coachingStyle == .custom {
-                TextField("For example: blunt, but ask before you push", text: Binding(
-                    get: { model.draft.customStyle },
-                    set: { model.setCustomStyle($0) }
-                ), axis: .vertical)
-                .lineLimit(3...6)
-                .focused($customFocused)
+                HStack(alignment: .top) {
+                    TextField("For example: blunt, but ask before you push", text: customStyle, axis: .vertical)
+                        .lineLimit(3...6)
+                        .focused($customFocused)
+                    DictationButton(text: customStyle, font: .body)
+                }
                 .padding(12)
                 .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
             }
@@ -134,6 +138,10 @@ struct FirstGoalStep: View {
     let model: WizardModel
     let next: () -> Void
     @FocusState private var focused: Bool
+
+    private var goal: Binding<String> {
+        Binding(get: { model.draft.goal }, set: { model.setGoal($0) })
+    }
 
     private var suggestions: [String] {
         (model.draft.focusAreas.isEmpty ? FocusArea.allCases : model.draft.focusAreas).map(\.example)
@@ -148,14 +156,14 @@ struct FirstGoalStep: View {
             isWorking: model.isSubmitting,
             onPrimary: submit
         ) {
-            TextField("A goal you are working toward", text: Binding(
-                get: { model.draft.goal },
-                set: { model.setGoal($0) }
-            ), axis: .vertical)
-            .lineLimit(1...3)
-            .focused($focused)
-            .submitLabel(.continue)
-            .onSubmit(submit)
+            HStack(alignment: .top) {
+                TextField("A goal you are working toward", text: goal, axis: .vertical)
+                    .lineLimit(1...3)
+                    .focused($focused)
+                    .submitLabel(.continue)
+                    .onSubmit(submit)
+                DictationButton(text: goal, font: .body)
+            }
             .padding(12)
             .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
 
