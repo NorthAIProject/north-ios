@@ -108,6 +108,19 @@ struct ContractTests {
         #expect(metric.range.options.map(\.key) == ["week", "month"])
     }
 
+    @Test func goalsAndCheckIns() throws {
+        let list = try decode(Schemas.GoalList.self, "goals")
+        #expect(list.goals.first?.status == .active)
+        #expect(list.goals.first?.latestUpdate?.progress == 40)
+        #expect(list.categories.contains("fitness"))
+        let goal = try decode(Schemas.GoalDetail.self, "goal")
+        #expect(goal.value1.targetDate == "2026-12-06")
+        #expect(goal.value2.milestones.map(\.status) == [.completed, .open])
+        let checkIns = try decode(Schemas.CheckInList.self, "check-ins")
+        #expect(checkIns.today?.relatedGoalTitle == "Run a half marathon")
+        #expect(checkIns.streak == 6)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -115,7 +128,8 @@ struct ContractTests {
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric"]
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
+                            "goals", "goal", "check-ins"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
