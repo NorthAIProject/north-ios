@@ -1,3 +1,4 @@
+import NorthKit
 import SwiftUI
 
 public struct LoginScreen: View {
@@ -14,23 +15,20 @@ public struct LoginScreen: View {
                 VStack(spacing: 28) {
                     // Header Branding
                     VStack(spacing: 8) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.accentColor.opacity(0.12))
-                                .frame(width: 72, height: 72)
+                        NorthBrand.mark
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
+                            .padding(.top, 24)
+                            .accessibilityHidden(true)
 
-                            Image(systemName: "compass.drawing")
-                                .font(.system(size: 36, weight: .semibold))
-                                .foregroundColor(.accentColor)
-                        }
-                        .padding(.top, 24)
+                        Text(NorthBrand.name)
+                            .font(.largeTitle.weight(.semibold))
 
-                        Text("North")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-
-                        Text("AI Operating System for Personal Growth")
+                        Text(NorthBrand.tagline)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
                     }
 
                     // Mode Switcher (Sign In vs Sign Up)

@@ -425,6 +425,8 @@
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -474,6 +476,8 @@
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -617,6 +621,8 @@
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
