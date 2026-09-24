@@ -44,6 +44,10 @@ final class AppModel {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
         }
+        // Tests that are not about the tour mark it finished up front.
+        if ProcessInfo.processInfo.arguments.contains("-uitest-skip-tour") {
+            UserDefaults.standard.set(true, forKey: "guidedTour.finished")
+        }
         #endif
         if await sessions.restoreSessionIfNeeded() {
             await loadUser()

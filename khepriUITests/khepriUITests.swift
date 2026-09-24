@@ -95,7 +95,7 @@ final class FirstRunUITests: XCTestCase {
         XCTAssertTrue(element.waitForExistence(timeout: 10), "missing \(element)", file: file, line: line)
         let hittable = NSPredicate(format: "isHittable == true")
         let wait = XCTNSPredicateExpectation(predicate: hittable, object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [wait], timeout: 5), .completed, "not hittable: \(element)", file: file, line: line)
+        XCTAssertEqual(XCTWaiter().wait(for: [wait], timeout: 15), .completed, "not hittable: \(element)", file: file, line: line)
         element.tap()
     }
 

@@ -34,3 +34,9 @@ public extension OpenAPIObjectContainer {
         return object
     }
 }
+
+public typealias ConversationSummary = Components.Schemas.ConversationSummary
+public typealias ConversationDetail = Components.Schemas.ConversationDetail
+public typealias ChatMessage = Components.Schemas.ChatMessage
+public typealias ToolApproval = Components.Schemas.Approval
+public typealias ExerciseDetail = Components.Schemas.ExerciseDetail

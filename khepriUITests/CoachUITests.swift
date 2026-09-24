@@ -1,0 +1,148 @@
+import XCTest
+
+/// The coach tab against a local server (Debug's base URL, localhost:8090).
+///
+/// Run the server with `AI_PROVIDER_CHAIN=fake` so replies are deterministic
+/// and free. The fake model never calls tools, so the exercise card test uses
+/// an account the host seeds first (scripts/seed-coach-uitest.sh) and passes in
+/// through TEST_RUNNER_COACH_EMAIL / TEST_RUNNER_COACH_PASSWORD.
+final class CoachUITests: XCTestCase {
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    /// A message goes out, the reply streams back as events, and the stored
+    /// reply can be rated.
+    @MainActor
+    func testReplyStreamsAndCanBeRated() throws {
+        let email = "coach+\(Int(Date().timeIntervalSince1970))@example.com"
+        let password = "Correct-horse-9"
+        let token = try Server.signUp(email: email, password: password)
+        try Server.post("/api/v1/onboarding", token: token, body: [
+            "focusAreas": ["fitness"], "coachingStyle": "direct", "nearTermGoal": "Get stronger",
+        ])
+
+        let app = launchSignedIn(email: email, password: password)
+        openTab(app, "Coach")
+        // Onboarding opened a first thread; start a fresh one for the test.
+        tapWhenReady(app.buttons["new-conversation"])
+
+        type(app.textFields["Message your coach"], "How do I do a push-up?")
+        tapWhenReady(app.buttons["Send"])
+
+        XCTAssertTrue(app.buttons["Helpful"].waitForExistence(timeout: 60), "no finished reply")
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'fake coach'")).firstMatch.exists)
+        attach(app, "01-reply")
+
+        tapWhenReady(app.buttons["Helpful"])
+        XCTAssertTrue(app.buttons["Helpful"].isSelected)
+    }
+
+    /// A reply that looked an exercise up carries a native card; the card opens
+    /// the full exercise.
+    @MainActor
+    func testExerciseCardOpensTheExercise() throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let email = env["COACH_EMAIL"], let password = env["COACH_PASSWORD"] else {
+            throw XCTSkip("seed an account with scripts/seed-coach-uitest.sh and pass TEST_RUNNER_COACH_EMAIL/PASSWORD")
+        }
+        let app = launchSignedIn(email: email, password: password)
+        openTab(app, "Coach")
+        tapWhenReady(app.cells.firstMatch)
+
+        let card = app.buttons.containing(NSPredicate(format: "label CONTAINS[c] 'push'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20), "no exercise card on the seeded reply")
+        sleep(2) // let the loop show a pose beyond the first
+        attach(app, "02-card")
+
+        card.tap()
+        XCTAssertTrue(app.staticTexts["WORKS"].waitForExistence(timeout: 15), "exercise sheet did not open")
+        attach(app, "03-sheet")
+    }
+
+    @MainActor
+    private func launchSignedIn(email: String, password: String) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour"]
+        app.launch()
+        type(app.textFields["Email address"], email)
+        type(app.secureTextFields["Password"], password)
+        app.buttons.matching(NSPredicate(format: "label == 'Sign In'")).element(boundBy: 1).tap()
+        let savePassword = app.sheets["Save Password?"]
+        if savePassword.waitForExistence(timeout: 5) { savePassword.buttons["Not Now"].tap() }
+        return app
+    }
+
+    private func type(_ element: XCUIElement, _ text: String) {
+        XCTAssertTrue(element.waitForExistence(timeout: 15), "missing \(element)")
+        element.tap()
+        element.typeText(text)
+    }
+
+    /// The iOS 26 tab bar exposes each tab more than once to accessibility,
+    /// and the first match can be an off-screen copy. Tap the one on screen.
+    private func openTab(_ app: XCUIApplication, _ name: String) {
+        let deadline = Date.now.addingTimeInterval(15)
+        while Date.now < deadline {
+            if let tab = app.tabBars.buttons.matching(identifier: name).allElementsBoundByIndex.first(where: \.isHittable)
+                ?? app.tabBars.buttons.allElementsBoundByIndex.first(where: { $0.label == name && $0.isHittable }) {
+                tab.tap()
+                return
+            }
+            usleep(250_000)
+        }
+        attach(app, "no-\(name)-tab")
+        XCTFail("no tappable \(name) tab")
+    }
+
+    private func tapWhenReady(_ element: XCUIElement) {
+        XCTAssertTrue(element.waitForExistence(timeout: 15), "missing \(element)")
+        let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: element)
+        // Generous: a loaded machine can take seconds to settle a transition.
+        XCTAssertEqual(XCTWaiter().wait(for: [hittable], timeout: 15), .completed, "never became tappable: \(element)")
+        element.tap()
+    }
+
+    private func attach(_ app: XCUIApplication, _ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}
+
+/// Calls the local server directly, for setting up accounts.
+enum Server {
+    static let base = URL(string: "http://localhost:8090")!
+
+    static func signUp(email: String, password: String) throws -> String {
+        let json = try post("/api/v1/auth/signup", token: nil, body: [
+            "email": email, "password": password, "passwordConfirmation": password, "displayName": "Ana",
+        ])
+        guard let token = json["token"] as? String else { throw URLError(.badServerResponse) }
+        return token
+    }
+
+    @discardableResult
+    static func post(_ path: String, token: String?, body: [String: Any]) throws -> [String: Any] {
+        var request = URLRequest(url: base.appending(path: path))
+        request.httpMethod = "POST"
+        request.timeoutInterval = 120
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let done = DispatchSemaphore(value: 0)
+        var result: (Data?, HTTPURLResponse?) = (nil, nil)
+        URLSession.shared.dataTask(with: request) { data, response, _ in
+            result = (data, response as? HTTPURLResponse)
+            done.signal()
+        }.resume()
+        // Onboarding asks the model to open the first thread, which can take a while.
+        _ = done.wait(timeout: .now() + 120)
+        guard let status = result.1?.statusCode, (200..<300).contains(status) else {
+            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "\(path) answered \(result.1?.statusCode ?? 0); is north-web-app running on :8090?"])
+        }
+        return (try? JSONSerialization.jsonObject(with: result.0 ?? Data()) as? [String: Any]) ?? [:]
+    }
+}

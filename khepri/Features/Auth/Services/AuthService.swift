@@ -41,11 +41,7 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
     ) {
         self.baseURL = baseURL
         self.sessionManager = sessionManager
-        self.api = api ?? NorthAPI.client(
-            baseURL: baseURL,
-            token: { try? await sessionManager.validAccessToken() },
-            onUnauthorized: { await sessionManager.invalidateSession() }
-        )
+        self.api = api ?? API.shared
         self.appleCoordinator = appleCoordinator
         self.passkeyCoordinator = passkeyCoordinator
     }

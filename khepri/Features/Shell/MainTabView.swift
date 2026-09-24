@@ -14,9 +14,7 @@ struct MainTabView: View {
                 TodayScreen()
             }
             Tab("Coach", systemImage: "bubble.left.and.text.bubble.right", value: AppTab.coach) {
-                PlaceholderScreen(title: "Coach", systemImage: "bubble.left.and.text.bubble.right", phase: 2,
-                                  summary: "Talk to your coach, with streaming replies, tool approvals and exercise cards.",
-                                  tourStep: .coach)
+                CoachScreen()
             }
             Tab("Training", systemImage: "figure.strengthtraining.traditional", value: AppTab.training) {
                 PlaceholderScreen(title: "Training", systemImage: "figure.strengthtraining.traditional", phase: 3,

@@ -48,9 +48,31 @@ struct ContractTests {
         #expect(response.written == 1)
     }
 
+    @Test func conversation() throws {
+        let detail = try decode(Schemas.ConversationDetail.self, "conversation")
+        // The tool plumbing turn is left out on the server: question, answer.
+        #expect(detail.messages.map(\.role) == [.user, .coach])
+        #expect(detail.messages.last?.exercises == ["push-up"])
+        #expect(detail.pendingApproval?.calls.first?.name == "log_check_in")
+    }
+
+    @Test func conversations() throws {
+        let list = try decode(Schemas.ConversationList.self, "conversations")
+        #expect(list.conversations.map(\.kind) == [.chat, .reflection])
+        #expect(list.conversations.last?.ended == true)
+    }
+
+    @Test func exercise() throws {
+        let exercise = try decode(Schemas.ExerciseDetail.self, "exercise")
+        #expect(exercise.art?.frames.count == 3)
+        #expect(exercise.art?.size == 512)
+        #expect(exercise.art?.credit.contains("CC BY-SA") == true)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit"]
+        let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
+                            "conversation", "conversations", "exercise"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
