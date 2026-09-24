@@ -21,6 +21,9 @@ struct TrainingScreen: View {
                             NavigationLink(value: DayRoute.library) {
                                 Label("Exercise Library", systemImage: "books.vertical")
                             }
+                            NavigationLink(value: DayRoute.formCheck) {
+                                Label("Form Check", systemImage: "video.badge.checkmark")
+                            }
                             Button("New Plan", systemImage: "plus") { creating = true }
                         } label: {
                             Label("Training Options", systemImage: "ellipsis.circle")
@@ -31,6 +34,7 @@ struct TrainingScreen: View {
                     switch route {
                     case .day(let index): DayView(store: store, dayIndex: index)
                     case .library: ExerciseLibrary(service: store.service)
+                    case .formCheck: FormCheckScreen()
                     }
                 }
                 .refreshable { await store.load() }
@@ -86,6 +90,7 @@ struct TrainingScreen: View {
 enum DayRoute: Hashable {
     case day(Int)
     case library
+    case formCheck
 }
 
 /// The plan: why it suits the person, then each day.

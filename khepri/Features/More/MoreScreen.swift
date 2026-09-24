@@ -59,6 +59,7 @@ struct MoreScreen: View {
         case "check-ins": CheckInsScreen()
         case "reports": ReportsScreen()
         case "memories": MemoriesScreen()
+        case "knowledge": KnowledgeScreen()
         default:
             PlaceholderScreen(title: section.title, systemImage: section.systemImage, phase: section.phase, summary: section.summary).content
         }

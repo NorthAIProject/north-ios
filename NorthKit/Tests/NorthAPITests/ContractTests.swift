@@ -132,6 +132,19 @@ struct ContractTests {
         #expect(memories.categories.contains("injury"))
     }
 
+    @Test func knowledgeAndFormChecks() throws {
+        let library = try decode(Schemas.KnowledgeList.self, "knowledge")
+        #expect(library.documents.first?.status == .ready && library.counts.ready == 1)
+        let document = try decode(Schemas.KnowledgeDocumentDetail.self, "knowledge-document")
+        #expect(document.value2.text.hasPrefix("# Marathon plan"))
+        let search = try decode(Schemas.KnowledgeSearchResults.self, "knowledge-search")
+        #expect(search.hits.first?.headingPath == ["Marathon plan"])
+        #expect(search.hits.first?.segments.filter(\.matched).map(\.text) == ["easy runs"])
+        let checks = try decode(Schemas.FormCheckList.self, "form-checks")
+        #expect(checks.checks.first?.result?.issues.first?.at == 4.5)
+        #expect(try decode(Schemas.FormCheck.self, "form-check").status == .running)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -140,7 +153,8 @@ struct ContractTests {
                             "activity", "telegram", "calendar",
                             "plan", "plans", "exercises", "activity-overview",
                             "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
-                            "goals", "goal", "check-ins", "reports", "report", "memories"]
+                            "goals", "goal", "check-ins", "reports", "report", "memories",
+                            "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
