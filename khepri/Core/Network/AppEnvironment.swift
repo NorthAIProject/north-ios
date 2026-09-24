@@ -15,4 +15,11 @@ public enum AppEnvironment {
         }
         return url
     }()
+
+    /// The App Store's numeric ID for this app, or nil until it is listed.
+    /// `Config/Info.plist` holds it under `AppStoreID`, empty for now.
+    public static let appStoreID: String? = {
+        let raw = Bundle.main.object(forInfoDictionaryKey: "AppStoreID") as? String ?? ""
+        return raw.isEmpty ? nil : raw
+    }()
 }
