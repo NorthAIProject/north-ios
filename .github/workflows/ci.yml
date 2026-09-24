@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           for i in 1 2 3; do
-            xcodebuild -project khepri.xcodeproj -scheme khepri -resolvePackageDependencies && break
+            xcodebuild -project khepri.xcodeproj -scheme khepri -resolvePackageDependencies -skipPackagePluginValidation && break
             echo "Resolve attempt $i failed; retrying in 20s..."
             sleep 20
           done
@@ -53,6 +53,7 @@ jobs:
             -project khepri.xcodeproj \
             -scheme khepri \
             -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
             -quiet
 
       - name: Resolve a simulator
@@ -79,6 +80,7 @@ jobs:
             -scheme khepri \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -only-testing:khepriTests \
+            -skipPackagePluginValidation \
             -parallel-testing-enabled NO \
             -quiet
 
@@ -86,7 +88,8 @@ jobs:
         working-directory: NorthKit
         run: |
           xcodebuild test \
-            -scheme NorthKit \
+            -scheme NorthKit-Package \
+            -skipPackagePluginValidation \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -quiet
 

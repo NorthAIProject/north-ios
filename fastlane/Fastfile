@@ -18,6 +18,7 @@ platform :ios do
       only_testing: ["khepriTests"],
       device: "iPhone 17",
       result_bundle: true,
+      xcargs: "-skipPackagePluginValidation",
       output_directory: "fastlane/test_output"
     )
   end
@@ -30,6 +31,7 @@ platform :ios do
       only_testing: ["khepriUITests"],
       device: "iPhone 17",
       result_bundle: true,
+      xcargs: "-skipPackagePluginValidation",
       output_directory: "fastlane/ui_test_output"
     )
   end
@@ -48,7 +50,10 @@ platform :ios do
       scheme: BETA_SCHEME,
       configuration: "Beta",
       export_method: "app-store",
-      output_directory: "fastlane/build"
+      output_directory: "fastlane/build",
+      # NorthAPI runs the OpenAPI generator as a build plugin; CI cannot
+      # click Xcode's "Trust & Enable" prompt.
+      xcargs: "-skipPackagePluginValidation"
     )
 
     upload_to_testflight(
@@ -85,7 +90,10 @@ platform :ios do
       scheme: RELEASE_SCHEME,
       configuration: "Release",
       export_method: "app-store",
-      output_directory: "fastlane/build"
+      output_directory: "fastlane/build",
+      # NorthAPI runs the OpenAPI generator as a build plugin; CI cannot
+      # click Xcode's "Trust & Enable" prompt.
+      xcargs: "-skipPackagePluginValidation"
     )
 
     upload_to_app_store(
@@ -118,7 +126,10 @@ platform :ios do
       scheme: RELEASE_SCHEME,
       configuration: "Release",
       export_method: "app-store",
-      output_directory: "fastlane/build"
+      output_directory: "fastlane/build",
+      # NorthAPI runs the OpenAPI generator as a build plugin; CI cannot
+      # click Xcode's "Trust & Enable" prompt.
+      xcargs: "-skipPackagePluginValidation"
     )
 
     upload_to_app_store(

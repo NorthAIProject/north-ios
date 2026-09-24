@@ -63,7 +63,7 @@ public struct AppleAuthEndpoint: Endpoint {
 public struct PasskeyRegisterBeginEndpoint: Endpoint {
     public typealias Response = PasskeyCeremonyDTO
     public let method: HTTPMethod = .post
-    public let path: String = "/auth/passkey/register/begin"
+    public let path: String = "/api/v1/auth/passkey/register/begin"
     public let bodyData: Data?
 
     public init(request: PasskeyRegisterBeginRequestDTO) {
@@ -75,7 +75,7 @@ public struct PasskeyRegisterBeginEndpoint: Endpoint {
 public struct PasskeyRegisterFinishEndpoint: Endpoint {
     public typealias Response = AuthResponseDTO
     public let method: HTTPMethod = .post
-    public let path: String = "/auth/passkey/register/finish"
+    public let path: String = "/api/v1/auth/passkey/register/finish"
     public let bodyData: Data?
 
     public init(request: PasskeyCeremonyFinishRequestDTO) {
@@ -87,7 +87,7 @@ public struct PasskeyRegisterFinishEndpoint: Endpoint {
 public struct PasskeyLoginBeginEndpoint: Endpoint {
     public typealias Response = PasskeyCeremonyDTO
     public let method: HTTPMethod = .post
-    public let path: String = "/auth/passkey/login/begin"
+    public let path: String = "/api/v1/auth/passkey/login/begin"
     public let bodyData: Data?
 
     public init(request: PasskeyLoginBeginRequestDTO) {
@@ -99,7 +99,7 @@ public struct PasskeyLoginBeginEndpoint: Endpoint {
 public struct PasskeyLoginFinishEndpoint: Endpoint {
     public typealias Response = AuthResponseDTO
     public let method: HTTPMethod = .post
-    public let path: String = "/auth/passkey/login/finish"
+    public let path: String = "/api/v1/auth/passkey/login/finish"
     public let bodyData: Data?
 
     public init(request: PasskeyCeremonyFinishRequestDTO) {

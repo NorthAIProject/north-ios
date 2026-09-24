@@ -148,7 +148,13 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
         }
 
         let rpID = (beginResponse.publicKey["rp"]?.value as? [String: Any])?["id"] as? String ?? baseURL.host ?? "localhost"
-        let userID = UUID().uuidString.data(using: .utf8) ?? Data()
+        // The user handle must be the server's: discoverable sign-in returns
+        // it, and the server maps it back to the account.
+        guard let userIDString = (beginResponse.publicKey["user"]?.value as? [String: Any])?["id"] as? String,
+              let userID = Data(base64URLEncoded: userIDString)
+        else {
+            throw APIError.server("Invalid user handle received for passkey registration.")
+        }
 
         let registrationResult = try await passkeyCoordinator.registerPasskey(
             relyingPartyID: rpID,
