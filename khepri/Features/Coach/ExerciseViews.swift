@@ -140,10 +140,8 @@ struct ExerciseSheet: View {
 
     private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(.secondary)
+            Text(title)
+                .northEyebrow()
             content()
         }
     }

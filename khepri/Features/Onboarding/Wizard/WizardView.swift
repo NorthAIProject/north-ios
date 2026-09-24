@@ -123,7 +123,7 @@ struct WizardChrome<Content: View>: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .northProminentButton()
                 .controlSize(.large)
                 .disabled(!primaryEnabled || isWorking)
 

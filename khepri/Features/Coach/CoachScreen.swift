@@ -1,4 +1,5 @@
 import NorthAPI
+import NorthKit
 import SwiftUI
 
 /// The Coach tab: conversations, newest first, and a way to start one.
@@ -67,6 +68,7 @@ struct CoachScreen: View {
                                 .lineLimit(1)
                         } icon: {
                             Image(systemName: conversation.kind == .reflection ? "sparkles" : "bubble.left")
+                                .foregroundStyle(NorthColor.agent)
                         }
                         Text(conversation.updatedAt, format: .relative(presentation: .named))
                             .font(.caption)
@@ -93,7 +95,7 @@ struct CoachScreen: View {
             Text("Ask about training, a goal, or how your week went. The same coach answers on the web and in Telegram.")
         } actions: {
             Button("Start a Conversation") { Task { await start(reflection: false) } }
-                .buttonStyle(.borderedProminent)
+                .northProminentButton()
         }
     }
 

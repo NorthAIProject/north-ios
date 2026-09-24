@@ -79,12 +79,10 @@ private struct TourCallout: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(progress.uppercased())
-                .font(.caption.weight(.medium))
-                .tracking(1.5)
-                .foregroundStyle(NorthColor.signal)
+            Text(progress)
+                .northEyebrow(NorthColor.signal)
             Text(step.title)
-                .font(.headline)
+                .font(.north(.headline))
             Text(step.message)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -93,7 +91,7 @@ private struct TourCallout: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 Button(step == TourStep.allCases.last ? "Done" : "Next", action: onNext)
-                    .buttonStyle(.borderedProminent)
+                    .northProminentButton()
             }
             .padding(.top, 8)
         }
