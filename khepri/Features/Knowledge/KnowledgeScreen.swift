@@ -35,6 +35,12 @@ struct KnowledgeScreen: View {
                 Menu {
                     Button("Write a Note", systemImage: "square.and.pencil") { writing = true }
                     Button("Add a File", systemImage: "doc.badge.plus") { importing = true }
+                    Divider()
+                    Button("Re-read Everything", systemImage: "arrow.clockwise") {
+                        Task {
+                            do { try await service.reindexAll(); await load() } catch { self.error = error.localizedDescription }
+                        }
+                    }
                 } label: {
                     Label("Add", systemImage: "plus")
                 }

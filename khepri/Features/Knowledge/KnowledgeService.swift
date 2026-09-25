@@ -16,6 +16,8 @@ protocol KnowledgeServicing: Sendable {
     func upload(filename: String, data: Data) async throws
     func delete(_ id: String) async throws
     func reindex(_ id: String) async throws
+    /// Re-reads every document, after a change in how the server indexes.
+    func reindexAll() async throws
 }
 
 struct KnowledgeService: KnowledgeServicing {
@@ -53,5 +55,9 @@ struct KnowledgeService: KnowledgeServicing {
 
     func reindex(_ id: String) async throws {
         try await NorthAPI.call { _ = try await api.reindexKnowledgeDocument(path: .init(documentID: id)).accepted }
+    }
+
+    func reindexAll() async throws {
+        try await NorthAPI.call { _ = try await api.reindexKnowledge().accepted }
     }
 }
