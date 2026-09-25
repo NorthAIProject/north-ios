@@ -29,6 +29,8 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>KhepriKeychainGroup</key>
+	<string>$(KHEPRI_KEYCHAIN_GROUP)</string>
 	<key>NorthAPIBaseURL</key>
 	<string>$(API_BASE_URL)</string>
 </dict>

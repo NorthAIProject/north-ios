@@ -57,6 +57,10 @@ target.build_configurations.each do |config|
   s["MARKETING_VERSION"] = "1.0"
   s["CURRENT_PROJECT_VERSION"] = "1"
   s["SWIFT_EMIT_LOC_STRINGS"] = "YES"
+  s["CODE_SIGN_ENTITLEMENTS"] = "#{NAME}/#{NAME}.entitlements"
+  # Widgets fetch their own data, so they need the server and the session.
+  s["API_BASE_URL"] = config.name == "Debug" ? "http:/$()/localhost:8090" : "https:/$()/kheprios.com"
+  s["KHEPRI_KEYCHAIN_GROUP"] = "$(AppIdentifierPrefix)#{APP_IDS.fetch(config.name)}.shared"
 end
 
 # NorthKit (the shared attributes type, colours) into the extension.
@@ -64,6 +68,38 @@ reference = project.root_object.package_references.find { |r| r.respond_to?(:rel
 unless target.package_product_dependencies.any? { |d| d.product_name == "NorthKit" }
   dependency = project.new(Xcodeproj::Project::Object::XCSwiftPackageProductDependency)
   dependency.product_name = "NorthKit"
+  dependency.package = reference
+  target.package_product_dependencies << dependency
+  build_file = project.new(Xcodeproj::Project::Object::PBXBuildFile)
+  build_file.product_ref = dependency
+  target.frameworks_build_phase.files << build_file
+end
+
+# Widget sources beyond the Live Activity.
+group = project.main_group.find_subpath(NAME, false)
+%w[TodayProvider.swift TodayWidget.swift LockScreenWidget.swift].each do |file|
+  next if target.source_build_phase.files_references.any? { |r| r.path == file }
+  target.add_file_references([group.files.find { |f| f.path == file } || group.new_reference(file)])
+end
+group.new_reference("#{NAME}.entitlements") unless group.files.any? { |f| f.path == "#{NAME}.entitlements" }
+
+# Shared/ is compiled into both the app and the extension: the mirrored
+# session, the client that reads it, the snapshot, and the water intent.
+shared = project.main_group.find_subpath("Shared", true)
+shared.set_source_tree("<group>")
+shared.set_path("Shared")
+Dir.children(File.expand_path("../Shared", __dir__)).grep(/\.swift\z/).sort.each do |file|
+  ref = shared.files.find { |f| f.path == file } || shared.new_reference(file)
+  [app, target].each do |t|
+    t.add_file_references([ref]) unless t.source_build_phase.files_references.include?(ref)
+  end
+end
+
+# NorthAPI too, now that widgets call the server.
+%w[NorthKit NorthAPI].each do |product|
+  next if target.package_product_dependencies.any? { |d| d.product_name == product }
+  dependency = project.new(Xcodeproj::Project::Object::XCSwiftPackageProductDependency)
+  dependency.product_name = product
   dependency.package = reference
   target.package_product_dependencies << dependency
   build_file = project.new(Xcodeproj::Project::Object::PBXBuildFile)

@@ -6,6 +6,7 @@ import SwiftUI
 struct MoreScreen: View {
     let user: APIUser
     @Environment(AppRouter.self) private var router
+    @State private var path: [String] = []
 
     private struct Section: Identifiable {
         let id: String
@@ -32,7 +33,7 @@ struct MoreScreen: View {
 
     var body: some View {
         @Bindable var router = router
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 sectionRows("Growth", growth)
                 sectionRows("Life", life)
@@ -46,9 +47,20 @@ struct MoreScreen: View {
                 }
             }
             .navigationTitle("More")
+            .navigationDestination(for: String.self) { id in
+                if let section = (growth + life).first(where: { $0.id == id }) {
+                    destination(for: section)
+                }
+            }
             .sheet(isPresented: $router.showsSettings) {
                 SettingsScreen(user: user)
             }
+        }
+        // A widget, a shortcut or a nudge naming a section lands on it.
+        .onChange(of: router.openSection, initial: true) { _, id in
+            guard let id else { return }
+            router.openSection = nil
+            path = [id]
         }
     }
 
@@ -72,9 +84,7 @@ struct MoreScreen: View {
     private func sectionRows(_ header: String, _ sections: [Section]) -> some View {
         SwiftUI.Section(header) {
             ForEach(sections) { section in
-                NavigationLink {
-                    destination(for: section)
-                } label: {
+                NavigationLink(value: section.id) {
                     Label(section.title, systemImage: section.systemImage)
                 }
             }

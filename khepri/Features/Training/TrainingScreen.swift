@@ -54,6 +54,14 @@ struct TrainingScreen: View {
             router.openTrainingDay = nil
             path = [.day(day)]
         }
+        // Start Today's Workout names no day; the plan decides which is next.
+        .onChange(of: [router.opensNextWorkout != nil, store.plan != nil], initial: true) {
+            guard let start = router.opensNextWorkout, let plan = store.plan else { return }
+            router.opensNextWorkout = nil
+            guard let day = NextSession.find(in: plan) else { return }
+            router.startsWorkout = start
+            path = [.day(day)]
+        }
     }
 
     @ViewBuilder

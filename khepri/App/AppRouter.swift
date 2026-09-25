@@ -16,6 +16,11 @@ enum AppDestination: Equatable {
     case trainingDay(Int)
     /// A day of a plan with its workout started: the reminder's Start button.
     case startWorkout(Int)
+    /// The plan's next session, from today: a widget or the Start Today's
+    /// Workout shortcut, which cannot know the plan's day index.
+    case nextWorkout(start: Bool)
+    /// One of More's sections by its web name, e.g. `care`, `check-ins`.
+    case section(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -35,6 +40,17 @@ final class AppRouter {
     /// Set with `openTrainingDay` when the workout should start on arrival;
     /// the day clears it.
     var startsWorkout = false
+    /// Set when a link asks for the next session; the Training tab resolves
+    /// it once the plan has loaded, and clears it. True starts the workout.
+    var opensNextWorkout: Bool?
+    /// Set when a link asks for a More section; the More tab opens it and
+    /// clears it.
+    var openSection: String?
+
+    /// More's sections, by the path the web uses for them.
+    static let sections: Set<String> = [
+        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
+    ]
 
     func open(_ destination: AppDestination) {
         switch destination {
@@ -50,6 +66,12 @@ final class AppRouter {
             selectedTab = .training
             startsWorkout = true
             openTrainingDay = day
+        case .nextWorkout(let start):
+            selectedTab = .training
+            opensNextWorkout = start
+        case .section(let id):
+            selectedTab = .more
+            openSection = id
         }
     }
 
@@ -66,6 +88,8 @@ final class AppRouter {
     ///
     ///     khepri://today           → Today tab
     ///     khepri://settings        → Settings
+    ///     khepri://care            → More → Care
+    ///     khepri://training/next/start → today's workout, started
     ///     /app/chat/…              → Coach tab (a web path from the server)
     static func destination(for url: URL) -> AppDestination? {
         let parts: [String]
@@ -82,6 +106,9 @@ final class AppRouter {
     private static func destination(forPath parts: [String]) -> AppDestination? {
         // khepri://training/<plan>/<day>[/start]: the plan id is
         // informational; the Training tab always shows the newest version.
+        if parts.first == "training", parts.count >= 2, parts[1] == "next" {
+            return .nextWorkout(start: parts.count == 3 && parts[2] == "start")
+        }
         if parts.first == "training", parts.count >= 3, let day = Int(parts[2]) {
             if parts.count == 4, parts[3] == "start" { return .startWorkout(day) }
             if parts.count == 3 { return .trainingDay(day) }
@@ -92,8 +119,8 @@ final class AppRouter {
         case "training", "workouts", "exercises", "activity": .tab(.training)
         case "insights", "fitness", "progress": .tab(.progress)
         case "settings": .settings
-        case "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "more":
-            .tab(.more)
+        case "more": .tab(.more)
+        case let id? where sections.contains(id): .section(id)
         default: nil
         }
     }
