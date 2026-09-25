@@ -220,6 +220,8 @@ private struct Composer: View {
         HStack(alignment: .bottom, spacing: 8) {
             TextField("Message your coach", text: $text, axis: .vertical)
                 .lineLimit(1...6)
+                // The placeholder names the field only while it is empty.
+                .accessibilityIdentifier("composer")
                 .focused(focused)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

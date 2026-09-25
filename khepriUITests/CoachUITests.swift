@@ -27,7 +27,7 @@ final class CoachUITests: XCTestCase {
         // Onboarding opened a first thread; start a fresh one for the test.
         tap(app.buttons["new-conversation"])
 
-        type(app.textFields["Message your coach"], "How do I do a push-up?")
+        type(app.textFields["composer"], "How do I do a push-up?")
         tap(app.buttons["Send"])
 
         XCTAssertTrue(app.buttons["Helpful"].waitForExistence(timeout: 60), "no finished reply")
@@ -76,7 +76,7 @@ final class CoachUITests: XCTestCase {
         openTab(app, "Coach")
         tap(app.buttons["new-conversation"])
 
-        let composer = app.textFields["Message your coach"]
+        let composer = app.textFields["composer"]
         let microphone = app.buttons["dictate"]
         tap(microphone)
         expectation(for: NSPredicate(format: "label == 'Stop dictating'"), evaluatedWith: microphone)
