@@ -24,6 +24,9 @@ enum AppDestination: Equatable {
     /// One decision, opened over the Decisions list: where a nudge asking
     /// how a choice turned out leads.
     case decision(String)
+    /// Today's check-in with its mood already chosen: a button under a
+    /// check-in nudge.
+    case checkIn(mood: Int)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -52,6 +55,9 @@ final class AppRouter {
     /// Set with `openSection` for a single decision; the Decisions screen
     /// opens it and clears it.
     var openDecision: String?
+    /// Set with `openSection` when a check-in should start from a mood; the
+    /// Check-ins screen takes it and clears it.
+    var checkInMood: Int?
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
@@ -82,6 +88,10 @@ final class AppRouter {
             selectedTab = .more
             openDecision = id
             openSection = "decisions"
+        case .checkIn(let mood):
+            selectedTab = .more
+            checkInMood = mood
+            openSection = "check-ins"
         }
     }
 
@@ -99,6 +109,7 @@ final class AppRouter {
     ///     khepri://today           → Today tab
     ///     khepri://settings        → Settings
     ///     khepri://care            → More → Care
+    ///     khepri://check-ins?mood=4 → today's check-in, mood set
     ///     khepri://training/next/start → today's workout, started
     ///     /app/chat/…              → Coach tab (a web path from the server)
     static func destination(for url: URL) -> AppDestination? {
@@ -110,7 +121,15 @@ final class AppRouter {
         } else {
             return nil
         }
+        if parts == ["check-ins"], let mood = moodQuery(url), (1...5).contains(mood) {
+            return .checkIn(mood: mood)
+        }
         return destination(forPath: parts)
+    }
+
+    private static func moodQuery(_ url: URL) -> Int? {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first { $0.name == "mood" }?.value.flatMap(Int.init)
     }
 
     private static func destination(forPath parts: [String]) -> AppDestination? {

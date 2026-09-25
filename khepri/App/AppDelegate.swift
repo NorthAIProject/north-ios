@@ -11,7 +11,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        center.setNotificationCategories([WorkoutReminders.category])
+        center.setNotificationCategories([WorkoutReminders.category, CheckInActions.category])
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
         Task { @MainActor in await PushRegistration.registerIfAllowed() }
@@ -33,11 +33,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     /// A tap, or the Start Workout button, opens where the notification says.
+    /// A mood button on a check-in nudge opens today's check-in with that mood
+    /// instead. The nudge is still opened first, so the server counts the tap.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         // A nudge from the server carries the web's link in `href`.
         if let href = response.notification.request.content.userInfo["href"] as? String {
-            await MainActor.run { [href] in
-                Task { @MainActor in await PushRegistration.open(href: href) { self.onOpenURL?($0) } }
+            let checkIn = CheckInActions.mood(forAction: response.actionIdentifier).map(CheckInActions.url(mood:))
+            await MainActor.run { [href, checkIn] in
+                Task { @MainActor in await PushRegistration.open(href: href) { self.onOpenURL?(checkIn ?? $0) } }
             }
             return
         }
