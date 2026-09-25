@@ -145,6 +145,27 @@ struct ContractTests {
         #expect(try decode(Schemas.FormCheck.self, "form-check").status == .running)
     }
 
+    @Test func phase6() throws {
+        let care = try decode(Schemas.Care.self, "care")
+        #expect(care.water.totalMl == 1250 && care.lastNight?.quality == 4)
+        #expect(care.habits.first?.daysOfWeek == [1, 3, 5] && care.reminders.first?.due == true)
+        let journal = try decode(Schemas.Journal.self, "journal")
+        #expect(journal.entries.first?.mood == 4 && journal.trend.count == 9)
+        #expect(try decode(Schemas.IngredientList.self, "nutrition-ingredients").ingredients.first?.own == false)
+        #expect(try decode(Schemas.MealPlanList.self, "nutrition-plans").plans.first?.mealCount == 1)
+        let plan = try decode(Schemas.MealPlanDetail.self, "nutrition-plan")
+        #expect(plan.value2.meals.first?.ingredients.first?.quantityGrams == 80)
+        let log = try decode(Schemas.FoodLog.self, "nutrition-log")
+        #expect(log.progress?.goal.calories == 2200 && log.entries.first?.quantityGrams == 80)
+        #expect(try decode(Schemas.DecisionList.self, "decisions").decisions.first?.outcome == "")
+        let bell = try decode(Schemas.NudgeList.self, "nudges")
+        #expect(bell.unread == 1 && bell.nudges.first?.href == "/app/check-ins")
+        let calculator = try decode(Schemas.Calculator.self, "calculator")
+        #expect(calculator.biometrics?.weightKg == 72 && calculator.goal?.calorieGoal == 2274)
+        #expect(calculator.options.goals.contains("maintenance"))
+        #expect(try decode(Schemas.NewsTicker.self, "news").items.first?.source == "BBC Health")
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -154,7 +175,9 @@ struct ContractTests {
                             "plan", "plans", "exercises", "activity-overview",
                             "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
-                            "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check"]
+                            "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
+                            "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
+                            "decisions", "nudges", "calculator", "news"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

@@ -56,7 +56,8 @@ final class CoachUITests: XCTestCase {
         attach(app, "02-card")
 
         card.tap()
-        XCTAssertTrue(app.staticTexts["WORKS"].waitForExistence(timeout: 15), "exercise sheet did not open")
+        // Headers are uppercase only visually (.textCase); accessibility reads "Works".
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label ==[c] 'works'")).firstMatch.waitForExistence(timeout: 15), "exercise sheet did not open")
         attach(app, "03-sheet")
     }
 
