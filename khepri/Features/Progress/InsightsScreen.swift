@@ -26,6 +26,9 @@ struct InsightsScreen: View {
                 .navigationDestination(for: MetricRoute.self) { route in
                     MetricDetailView(key: route.key, range: store.range, service: store.service)
                 }
+                .navigationDestination(for: InsightsDomain.self) { domain in
+                    InsightsDomainView(domain: domain, range: store.range)
+                }
                 .refreshable { await store.load() }
         }
         .task(id: store.range) { await store.load() }
@@ -80,7 +83,13 @@ private struct SummaryList: View {
 
             if !summary.scores.isEmpty {
                 Section("Areas") {
-                    ForEach(summary.scores, id: \.key) { ScoreRow(score: $0) }
+                    ForEach(summary.scores, id: \.key) { score in
+                        if let domain = InsightsDomain(rawValue: score.key) {
+                            NavigationLink(value: domain) { ScoreRow(score: score) }
+                        } else {
+                            ScoreRow(score: score)
+                        }
+                    }
                 }
             }
 
@@ -111,6 +120,14 @@ private struct SummaryList: View {
             if !summary.highlights.isEmpty {
                 Section("Highlights") {
                     ForEach(summary.highlights, id: \.self) { Text($0).font(.subheadline) }
+                }
+            }
+
+            Section("More") {
+                ForEach([InsightsDomain.timeline, .coach, .spend]) { domain in
+                    NavigationLink(value: domain) {
+                        Label(domain.title, systemImage: domain.systemImage)
+                    }
                 }
             }
         }
