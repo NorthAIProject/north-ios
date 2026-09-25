@@ -60,6 +60,9 @@ struct SettingsScreen: View {
                     NavigationLink { PreferenceSettings(service: service) } label: {
                         Label("Units", systemImage: "ruler")
                     }
+                    NavigationLink { DietSettings(service: service) } label: {
+                        Label("Diets", systemImage: "leaf")
+                    }
                     NavigationLink { BodyAndGoalScreen() } label: {
                         Label("Body & Goal", systemImage: "figure")
                     }
@@ -184,6 +187,13 @@ private struct ProfileSettings: View {
                     LabeledContent("Email", value: profile.value?.email ?? "")
                 }
                 Section {
+                    Picker("Language", selection: bind(\.locale)) {
+                        ForEach(Self.languages, id: \.tag) { Text($0.name).tag($0.tag) }
+                    }
+                } footer: {
+                    Text("The coach, reports and reminders use this language.")
+                }
+                Section {
                     LabeledContent("Time Zone", value: profile.value?.timezone ?? "")
                     if profile.value?.timezone != TimeZone.current.identifier {
                         Button("Use This iPhone's (\(TimeZone.current.identifier))") {
@@ -200,6 +210,12 @@ private struct ProfileSettings: View {
         .saveToolbar(profile) { try await service.save($0) }
         .task { await profile.load(service.profile) }
     }
+
+    /// The server's languages, each named in itself. The two Portugueses stay
+    /// apart, as they do on the web.
+    static let languages: [(tag: String, name: String)] = [
+        ("en", "English"), ("pt-PT", "Português (Portugal)"), ("pt-BR", "Português (Brasil)"), ("es", "Español"),
+    ]
 
     private func bind(_ keyPath: WritableKeyPath<SettingsModel.Profile, String>) -> Binding<String> {
         Binding(get: { profile.value?[keyPath: keyPath] ?? "" }, set: { profile.value?[keyPath: keyPath] = $0 })
@@ -306,6 +322,46 @@ private struct PreferenceSettings: View {
             guard old != nil, new != old else { return }
             Task { await preferences.save { try await service.save($0) } }
         }
+    }
+}
+
+// MARK: - Diets
+
+/// The diets the coach and the meal planner respect. Each toggle saves as it
+/// changes, like Units.
+private struct DietSettings: View {
+    let service: SettingsServicing
+    @State private var diets = Editable<SettingsModel.DietSettings>()
+
+    var body: some View {
+        Loaded(editable: diets) { settings in
+            Form {
+                Section {
+                    ForEach(settings.diets, id: \.id) { diet in
+                        Toggle(isOn: Binding(get: { diet.selected }, set: { toggle(diet.id, on: $0) })) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(diet.name)
+                                if !diet.description.isEmpty {
+                                    Text(diet.description).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                } footer: {
+                    Text("Meal suggestions and the coach's advice keep to these.")
+                }
+                if let error = diets.error { ErrorRow(error) }
+            }
+        }
+        .navigationTitle("Diets")
+        .task { await diets.load(service.diets) }
+    }
+
+    private func toggle(_ id: String, on: Bool) {
+        guard let current = diets.value else { return }
+        var ids = current.diets.filter(\.selected).map(\.id)
+        if on { ids.append(id) } else { ids.removeAll { $0 == id } }
+        Task { await diets.save { _ in try await service.saveDiets(ids) } }
     }
 }
 

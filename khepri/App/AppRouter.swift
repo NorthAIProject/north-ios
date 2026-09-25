@@ -21,6 +21,9 @@ enum AppDestination: Equatable {
     case nextWorkout(start: Bool)
     /// One of More's sections by its web name, e.g. `care`, `check-ins`.
     case section(String)
+    /// One decision, opened over the Decisions list: where a nudge asking
+    /// how a choice turned out leads.
+    case decision(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -46,6 +49,9 @@ final class AppRouter {
     /// Set when a link asks for a More section; the More tab opens it and
     /// clears it.
     var openSection: String?
+    /// Set with `openSection` for a single decision; the Decisions screen
+    /// opens it and clears it.
+    var openDecision: String?
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
@@ -72,6 +78,10 @@ final class AppRouter {
         case .section(let id):
             selectedTab = .more
             openSection = id
+        case .decision(let id):
+            selectedTab = .more
+            openDecision = id
+            openSection = "decisions"
         }
     }
 
@@ -112,6 +122,9 @@ final class AppRouter {
         if parts.first == "training", parts.count >= 3, let day = Int(parts[2]) {
             if parts.count == 4, parts[3] == "start" { return .startWorkout(day) }
             if parts.count == 3 { return .trainingDay(day) }
+        }
+        if parts.first == "decisions", parts.count == 2, UUID(uuidString: parts[1]) != nil {
+            return .decision(parts[1])
         }
         return switch parts.first {
         case nil, "today": .tab(.today)

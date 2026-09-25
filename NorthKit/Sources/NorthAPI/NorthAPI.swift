@@ -46,6 +46,7 @@ public enum NorthAPI {
             // the bearer middleware still sees a raw 401 and can sign out.
             middlewares: [
                 ErrorMappingMiddleware(),
+                LanguageMiddleware(),
                 BearerAuthMiddleware(token: token, onUnauthorized: onUnauthorized),
             ]
         )
@@ -54,6 +55,39 @@ public enum NorthAPI {
     /// Shared by the client and by tests that decode fixtures, so both read
     /// dates the same way.
     public static let configuration = Configuration(dateTranscoder: FlexibleISO8601DateTranscoder())
+}
+
+/// Sends the phone's languages as `Accept-Language`.
+///
+/// The server only uses it before there is an account: a sign-up from the app
+/// starts in the phone's language. Once signed in, the account's own setting
+/// wins, and changing it is Settings → Account.
+struct LanguageMiddleware: ClientMiddleware {
+    var preferred: @Sendable () -> [String] = { Locale.preferredLanguages }
+
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        var request = request
+        if request.headerFields[.acceptLanguage] == nil, let value = Self.header(for: preferred()) {
+            request.headerFields[.acceptLanguage] = value
+        }
+        return try await next(request, body, baseURL)
+    }
+
+    /// The first three languages, most preferred first, with falling weights:
+    /// `pt-PT, en;q=0.9`.
+    static func header(for languages: [String]) -> String? {
+        let tags = languages.prefix(3)
+        guard !tags.isEmpty else { return nil }
+        return tags.enumerated().map { index, tag in
+            index == 0 ? tag : "\(tag);q=0.\(10 - index)"
+        }.joined(separator: ", ")
+    }
 }
 
 /// Adds `Authorization: Bearer` to operations that need it and reports 401s.

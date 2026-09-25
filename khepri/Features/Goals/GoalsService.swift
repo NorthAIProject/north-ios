@@ -66,6 +66,8 @@ protocol GoalsServicing: Sendable {
     func addNote(_ id: String, note: String, progress: Int?) async throws
     func addMilestone(_ id: String, title: String) async throws
     func setMilestone(_ goalID: String, _ milestoneID: String, completed: Bool) async throws
+    /// Renames a milestone or moves its date; nil clears the date.
+    func updateMilestone(_ goalID: String, _ milestoneID: String, title: String, targetDate: Date?) async throws
     func deleteMilestone(_ goalID: String, _ milestoneID: String) async throws
 }
 
@@ -110,6 +112,13 @@ struct GoalsService: GoalsServicing {
         try await NorthAPI.call {
             _ = try await api.setMilestoneStatus(path: .init(goalID: goalID, milestoneID: milestoneID),
                                                  body: .json(.init(status: completed ? "completed" : "open"))).ok
+        }
+    }
+
+    func updateMilestone(_ goalID: String, _ milestoneID: String, title: String, targetDate: Date?) async throws {
+        let body = Components.Schemas.MilestoneRequest(title: title, targetDate: targetDate.map(CalendarDay.string(from:)))
+        try await NorthAPI.call {
+            _ = try await api.updateMilestone(path: .init(goalID: goalID, milestoneID: milestoneID), body: .json(body)).ok
         }
     }
 

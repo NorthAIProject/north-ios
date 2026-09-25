@@ -14,6 +14,15 @@ struct MiddlewareTests {
         #expect(transport.lastRequest?.headerFields[.authorization] == "Bearer session-token")
     }
 
+    @Test func sendsThePhonesLanguages() async throws {
+        #expect(LanguageMiddleware.header(for: ["pt-PT", "en-GB", "es", "fr"]) == "pt-PT, en-GB;q=0.9, es;q=0.8")
+        #expect(LanguageMiddleware.header(for: []) == nil)
+
+        let transport = CannedTransport(status: .ok, json: Self.meJSON)
+        _ = try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+        #expect(transport.lastRequest?.headerFields[.acceptLanguage] == "pt-PT, en-GB;q=0.9")
+    }
+
     @Test func keepsTheTokenOffSignIn() async throws {
         let transport = CannedTransport(status: .ok, json: Self.authJSON)
         _ = try await NorthAPI.call {
@@ -81,6 +90,7 @@ struct MiddlewareTests {
             transport: transport,
             middlewares: [
                 ErrorMappingMiddleware(),
+                LanguageMiddleware(preferred: { ["pt-PT", "en-GB"] }),
                 BearerAuthMiddleware(token: { "session-token" }, onUnauthorized: { onUnauthorized() }),
             ]
         )

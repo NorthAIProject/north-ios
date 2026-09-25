@@ -105,6 +105,8 @@ struct RouterTests {
         ("https://kheprios.com/app/training/abc", .tab(.training)),
         ("khepri://training/plan-1/2", .trainingDay(2)),
         ("khepri://training/plan-1/2/start", .startWorkout(2)),
+        ("/app/decisions/44444444-4444-4444-4444-444444444444", .decision("44444444-4444-4444-4444-444444444444")),
+        ("/app/decisions/not-an-id", .section("decisions")),
     ])
     func mapsLinksToDestinations(_ link: String, _ expected: AppDestination) throws {
         #expect(AppRouter.destination(for: try #require(URL(string: link))) == expected)

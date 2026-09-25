@@ -161,6 +161,15 @@ final class FakeActivity: ActivityServicing, @unchecked Sendable {
     func cancel(_ sessionID: String) async throws {
         calls.append("cancel \(sessionID)")
     }
+
+    func overview() async throws -> Components.Schemas.ActivityOverview {
+        .init(active: open, recent: [], kinds: [])
+    }
+
+    func log(_ request: Components.Schemas.LogActivityRequest) async throws -> ActivitySession {
+        calls.append("log \(request.activityCode) \(request.durationMinutes)")
+        return .fixture(id: "logged", status: .completed)
+    }
 }
 
 extension ActivitySession {

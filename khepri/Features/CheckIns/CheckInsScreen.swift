@@ -12,6 +12,7 @@ struct CheckInsScreen: View {
     @State private var activeGoals: [GoalSummary] = []
     @State private var error: String?
     @State private var editingToday = false
+    @State private var editingPast: PastCheckIn?
 
     var body: some View {
         Group {
@@ -25,6 +26,24 @@ struct CheckInsScreen: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle("Check-ins")
+        .sheet(item: $editingPast) { past in
+            NavigationStack {
+                Form {
+                    CheckInForm(title: past.title, existing: past.checkIn, goals: activeGoals) { request in
+                        _ = try await service.update(past.checkIn.id, request)
+                        editingPast = nil
+                        await load()
+                    }
+                }
+                .navigationTitle("Edit Check-in")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { editingPast = nil }
+                    }
+                }
+            }
+        }
         .task { await load() }
         .refreshable { await load() }
     }
@@ -52,7 +71,7 @@ struct CheckInsScreen: View {
                     Button("Edit Today's Check-in") { editingToday = true }
                 }
             } else {
-                CheckInForm(existing: list.today, goals: activeGoals) { request in
+                CheckInForm(title: "Today", existing: list.today, goals: activeGoals) { request in
                     _ = try await service.saveToday(request)
                     editingToday = false
                     await load()
@@ -64,6 +83,10 @@ struct CheckInsScreen: View {
                 Section("Earlier") {
                     ForEach(past, id: \.id) { checkIn in
                         CheckInSummary(checkIn: checkIn)
+                            .swipeActions(edge: .leading) {
+                                Button("Edit") { editingPast = PastCheckIn(checkIn: checkIn) }
+                                    .tint(NorthColor.signal)
+                            }
                             .swipeActions {
                                 Button("Delete", role: .destructive) {
                                     Task {
@@ -89,7 +112,19 @@ struct CheckInsScreen: View {
 }
 
 /// Today's check-in: two numbers and a few words.
+private struct PastCheckIn: Identifiable {
+    let checkIn: CheckIn
+    var id: String { checkIn.id }
+
+    var title: String {
+        guard let date = CalendarDay.date(from: checkIn.localDate) else { return checkIn.localDate }
+        return date.formatted(.dateTime.weekday(.wide).day().month())
+    }
+}
+
+/// A day's check-in: two numbers and a few words.
 private struct CheckInForm: View {
+    let title: String
     let existing: CheckIn?
     let goals: [GoalSummary]
     let onSave: (CheckInRequest) async throws -> Void
@@ -108,7 +143,7 @@ private struct CheckInForm: View {
             ScalePicker(title: "Mood", value: $mood)
             ScalePicker(title: "Energy", value: $energy)
         } header: {
-            Text("Today")
+            Text(title)
         } footer: {
             Text("1 is rough, 5 is great.")
         }

@@ -27,6 +27,9 @@ protocol SettingsServicing: Sendable {
     func telegramCode() async throws -> SettingsModel.TelegramCode
     func unlinkTelegram() async throws
 
+    func diets() async throws -> SettingsModel.DietSettings
+    func saveDiets(_ ids: [String]) async throws -> SettingsModel.DietSettings
+
     func calendar() async throws -> SettingsModel.CalendarSettings
     func connectCalendar(endpoint: String, token: String) async throws -> SettingsModel.CalendarSettings
     func disconnectCalendar() async throws
@@ -103,6 +106,14 @@ struct SettingsService: SettingsServicing {
 
     func unlinkTelegram() async throws {
         _ = try await NorthAPI.call { try await api.unlinkTelegram().noContent }
+    }
+
+    func diets() async throws -> SettingsModel.DietSettings {
+        try await NorthAPI.call { try await api.getDiets().ok.body.json }
+    }
+
+    func saveDiets(_ ids: [String]) async throws -> SettingsModel.DietSettings {
+        try await NorthAPI.call { try await api.updateDiets(body: .json(.init(dietIds: ids))).ok.body.json }
     }
 
     func calendar() async throws -> SettingsModel.CalendarSettings {
