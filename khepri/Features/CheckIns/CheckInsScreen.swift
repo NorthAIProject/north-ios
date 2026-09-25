@@ -8,11 +8,14 @@ struct CheckInsScreen: View {
     var service: CheckInsServicing = CheckInsService()
     var goals: GoalsServicing = GoalsService()
 
+    @Environment(AppRouter.self) private var router
     @State private var list: CheckInList?
     @State private var activeGoals: [GoalSummary] = []
     @State private var error: String?
     @State private var editingToday = false
     @State private var editingPast: PastCheckIn?
+    /// The mood a nudge's button picked, until today's form takes it.
+    @State private var startingMood: Int?
 
     var body: some View {
         Group {
@@ -46,6 +49,11 @@ struct CheckInsScreen: View {
         }
         .task { await load() }
         .refreshable { await load() }
+        .onChange(of: router.checkInMood, initial: true) { _, mood in
+            guard let mood else { return }
+            router.checkInMood = nil
+            startingMood = mood
+        }
     }
 
     private func content(_ list: CheckInList) -> some View {
@@ -71,7 +79,7 @@ struct CheckInsScreen: View {
                     Button("Edit Today's Check-in") { editingToday = true }
                 }
             } else {
-                CheckInForm(title: "Today", existing: list.today, goals: activeGoals) { request in
+                CheckInForm(title: "Today", existing: list.today, goals: activeGoals, startingMood: startingMood) { request in
                     _ = try await service.saveToday(request)
                     editingToday = false
                     await load()
@@ -127,6 +135,8 @@ private struct CheckInForm: View {
     let title: String
     let existing: CheckIn?
     let goals: [GoalSummary]
+    /// Where the mood starts when there is no check-in yet to edit.
+    var startingMood: Int? = nil
     let onSave: (CheckInRequest) async throws -> Void
 
     @State private var mood = 3
@@ -164,10 +174,14 @@ private struct CheckInForm: View {
             if let error { ErrorRow(error) }
         }
         .onAppear(perform: fill)
+        .onChange(of: startingMood) { fill() }
     }
 
     private func fill() {
-        guard let existing else { return }
+        guard let existing else {
+            if let startingMood { mood = startingMood }
+            return
+        }
         mood = existing.mood
         energy = existing.energy
         wins = existing.wins

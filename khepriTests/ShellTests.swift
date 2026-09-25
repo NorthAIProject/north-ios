@@ -1,6 +1,7 @@
 import Foundation
 import NorthAPI
 import Testing
+import UserNotifications
 @testable import khepri
 
 @MainActor
@@ -107,6 +108,9 @@ struct RouterTests {
         ("khepri://training/plan-1/2/start", .startWorkout(2)),
         ("/app/decisions/44444444-4444-4444-4444-444444444444", .decision("44444444-4444-4444-4444-444444444444")),
         ("/app/decisions/not-an-id", .section("decisions")),
+        ("khepri://check-ins?mood=4", .checkIn(mood: 4)),
+        ("/app/check-ins?mood=2", .checkIn(mood: 2)),
+        ("khepri://check-ins?mood=9", .section("check-ins")),
     ])
     func mapsLinksToDestinations(_ link: String, _ expected: AppDestination) throws {
         #expect(AppRouter.destination(for: try #require(URL(string: link))) == expected)
@@ -186,5 +190,28 @@ extension WizardModel {
         _ = await model.advance()
         model.setGoal("Run a half marathon")
         return model
+    }
+}
+
+@MainActor
+struct CheckInActionsTests {
+    @Test func eachButtonOpensTodaysCheckInWithItsMood() throws {
+        let actions = CheckInActions.category.actions
+        #expect(actions.map(\.title) == ["Good", "Okay", "Low"])
+        let moods = actions.map { CheckInActions.mood(forAction: $0.identifier) }
+        #expect(moods == [4, 3, 2])
+        for mood in moods.compactMap({ $0 }) {
+            #expect(AppRouter.destination(for: CheckInActions.url(mood: mood)) == .checkIn(mood: mood))
+        }
+    }
+
+    @Test func aPlainTapPicksNoMood() {
+        #expect(CheckInActions.mood(forAction: "com.apple.UNNotificationDefaultActionIdentifier") == nil)
+        #expect(CheckInActions.mood(forAction: "CHECKIN_MOOD_7") == nil)
+    }
+
+    @Test func matchesTheServersCategoryName() {
+        // nudges.CategoryCheckIn in north-web-app.
+        #expect(CheckInActions.categoryIdentifier == "CHECKIN")
     }
 }
