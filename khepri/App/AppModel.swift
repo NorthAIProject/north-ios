@@ -59,6 +59,9 @@ final class AppModel {
     /// A sign-in screen finished; the session is already stored.
     func didSignIn() async {
         await loadUser()
+        // The APNs token usually arrived before anybody was signed in.
+        await PushRegistration.resend()
+        await PushRegistration.registerIfAllowed()
     }
 
     /// The first-run wizard finished and the server accepted the answers.
@@ -71,6 +74,8 @@ final class AppModel {
     }
 
     func signOut() async {
+        // While the session can still authenticate the call.
+        await PushRegistration.unregister()
         await auth.logout()
         phase = .signedOut
     }

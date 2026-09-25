@@ -16,16 +16,22 @@ VARIANTS = {
     "APP_DISPLAY_NAME" => "Khepri Dev",
     # $() stops xcconfig-style parsing from reading // as a comment.
     "API_BASE_URL" => "http:/$()/localhost:8090",
+    "APS_ENVIRONMENT" => "development",
+    "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.shared",
   },
   "Beta" => {
     "PRODUCT_BUNDLE_IDENTIFIER" => "#{APP_BUNDLE_ID}.beta",
     "APP_DISPLAY_NAME" => "Khepri Beta",
     "API_BASE_URL" => "https:/$()/kheprios.com",
+    "APS_ENVIRONMENT" => "production",
+    "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.beta.shared",
   },
   "Release" => {
     "PRODUCT_BUNDLE_IDENTIFIER" => APP_BUNDLE_ID,
     "APP_DISPLAY_NAME" => "Khepri",
     "API_BASE_URL" => "https:/$()/kheprios.com",
+    "APS_ENVIRONMENT" => "production",
+    "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.shared",
   },
 }.freeze
 

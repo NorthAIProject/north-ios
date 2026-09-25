@@ -1,3 +1,4 @@
+import os
 import UIKit
 import UserNotifications
 
@@ -13,7 +14,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         center.setNotificationCategories([WorkoutReminders.category])
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
+        Task { @MainActor in await PushRegistration.registerIfAllowed() }
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task { @MainActor in await PushRegistration.didReceive(deviceToken: deviceToken) }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
+        Logger(subsystem: "com.fernandocorreia.khepri", category: "push")
+            .error("push: registration failed: \(error.localizedDescription, privacy: .public)")
     }
 
     /// Shown even when the app is open: a reminder is still useful then.
@@ -23,6 +34,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     /// A tap, or the Start Workout button, opens where the notification says.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        // A nudge from the server carries the web's link in `href`.
+        if let href = response.notification.request.content.userInfo["href"] as? String {
+            await MainActor.run { [href] in
+                Task { @MainActor in await PushRegistration.open(href: href) { self.onOpenURL?($0) } }
+            }
+            return
+        }
         guard let link = response.notification.request.content.userInfo["url"] as? String, var url = URL(string: link) else { return }
         if response.actionIdentifier == WorkoutReminders.startActionIdentifier {
             url.append(component: "start")

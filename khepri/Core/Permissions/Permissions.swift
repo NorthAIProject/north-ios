@@ -38,7 +38,10 @@ enum Permissions {
     /// Shows the notification prompt. Returns whether alerts are allowed.
     @discardableResult
     static func requestNotifications() async -> Bool {
-        (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound])) ?? false
+        let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound])) ?? false
+        // Allowed now, so nudges can come from the server too.
+        if granted { await PushRegistration.registerIfAllowed() }
+        return granted
     }
 
     enum Access { case undetermined, granted, denied }

@@ -1,5 +1,6 @@
 import Foundation
 import NorthAPI
+import WidgetKit
 
 public extension Notification.Name {
     static let authSessionDidAuthenticate = Notification.Name("khepri.authSessionDidAuthenticate")
@@ -49,11 +50,16 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
             return nil
         }
 
+        // Sessions from before widgets existed were never mirrored.
+        if SharedSession.token() != token {
+            SharedSession.store(token)
+        }
         return token
     }
 
     public func storeSession(token: String, user: APIUser?, expiresAt: Date?) async throws {
         try secureStore.setString(token, for: tokenKey)
+        SharedSession.store(token)
         if let expiresAt {
             try? secureStore.setString(expiresAt.formatted(.iso8601), for: expiresAtKey)
         } else {
@@ -63,6 +69,7 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
             try? secureStore.setString(userJson, for: userKey)
         }
 
+        WidgetCenter.shared.reloadAllTimelines()
         await MainActor.run {
             NotificationCenter.default.post(name: .authSessionDidAuthenticate, object: nil)
         }
@@ -80,6 +87,8 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
         try? secureStore.removeValue(for: tokenKey)
         try? secureStore.removeValue(for: userKey)
         try? secureStore.removeValue(for: expiresAtKey)
+        SharedSession.clear()
+        WidgetCenter.shared.reloadAllTimelines()
 
         await MainActor.run {
             NotificationCenter.default.post(name: .authSessionDidInvalidate, object: nil)

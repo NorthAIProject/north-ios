@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>aps-environment</key>
+	<string>$(APS_ENVIRONMENT)</string>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>
@@ -16,6 +18,10 @@
 	<array/>
 	<key>com.apple.developer.healthkit.background-delivery</key>
 	<true/>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(KHEPRI_KEYCHAIN_GROUP)</string>
+	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>$(APP_GROUP_ID)</string>

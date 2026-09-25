@@ -8,12 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+		1D12AC00C8E230CDDC061BD3 /* TodayProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */; };
 		243D15825794CC9E0B3F9902 /* KhepriWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2D28BB50B7EF28246FC190D7 /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = FEF37D107C5252F8E0439108 /* NorthAPI */; };
+		40F83AAE24A625A8F7FA807B /* Glance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B94846B0426BEFB857146 /* Glance.swift */; };
+		4419BBFD07C263AC8986E6E0 /* SharedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */; };
+		54AFB43EF1527A8035BB00EA /* Glance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B94846B0426BEFB857146 /* Glance.swift */; };
+		5F68B48949F7122A7A3DC8B6 /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
+		61CE67C2C2500168835F9B1A /* SharedAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021795DB2B753589DCE50E9C /* SharedAPI.swift */; };
 		6E856D1B873B65B9C70C50BE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9784842CA8BCC9867FB62BCB /* Foundation.framework */; };
 		77D2DEC09A977B76A7C2BBD9 /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = DBF1609B7085042FC274234E /* NorthKit */; };
+		7C988BAD246DEC2DAA6080C7 /* SharedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */; };
+		90BDDE56F2535CC07F1A101B /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
+		9ABBB1C0C7696F979AE9B00F /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = F775B8E682906FE491DDD79D /* NorthAPI */; };
+		A48D29FDBD4FC12232C10E01 /* TodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */; };
+		C24FAE1B554A1CDE066ADAE7 /* LockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */; };
 		CC9A10B1E3DD154A88F5E0AB /* KhepriWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */; };
 		D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 374D2B9F944381566FCEA46B /* NorthKit */; };
+		E29E555D29214E65735EDE32 /* SharedAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021795DB2B753589DCE50E9C /* SharedAPI.swift */; };
 		FB6BAB19AAE471A5AB44E779 /* WorkoutLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,15 +68,23 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		021795DB2B753589DCE50E9C /* SharedAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedAPI.swift; sourceTree = "<group>"; };
 		0BF497DE36C073C2C594CD1D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D195AAC305DBA800055016F /* khepri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = khepri.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195ABB305DBA810055016F /* khepriTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195AC5305DBA810055016F /* khepriUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KhepriWidgetsBundle.swift; sourceTree = "<group>"; };
 		3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutLiveActivity.swift; sourceTree = "<group>"; };
+		3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LogWaterIntent.swift; sourceTree = "<group>"; };
+		540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedSession.swift; sourceTree = "<group>"; };
+		85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayWidget.swift; sourceTree = "<group>"; };
+		8C2DE37EBDD501EF4882BC0B /* KhepriWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = KhepriWidgets.entitlements; sourceTree = "<group>"; };
 		9784842CA8BCC9867FB62BCB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayProvider.swift; sourceTree = "<group>"; };
+		B74B94846B0426BEFB857146 /* Glance.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Glance.swift; sourceTree = "<group>"; };
 		C5B1241A3C69C8907F58C460 /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = Config/Base.xcconfig; sourceTree = "<group>"; };
 		D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KhepriWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockScreenWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -122,6 +142,7 @@
 			files = (
 				6E856D1B873B65B9C70C50BE /* Foundation.framework in Frameworks */,
 				77D2DEC09A977B76A7C2BBD9 /* NorthKit in Frameworks */,
+				9ABBB1C0C7696F979AE9B00F /* NorthAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +159,7 @@
 				C5B1241A3C69C8907F58C460 /* Base.xcconfig */,
 				0D9F93BD36F7B227DB9035A5 /* Frameworks */,
 				F8DE6502E3820C15E829201D /* KhepriWidgets */,
+				2C32DD7648A9782391E61F89 /* Shared */,
 			);
 			sourceTree = "<group>";
 		};
@@ -160,6 +182,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		2C32DD7648A9782391E61F89 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */,
+				021795DB2B753589DCE50E9C /* SharedAPI.swift */,
+				540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */,
+				B74B94846B0426BEFB857146 /* Glance.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		75526703230CED8FE255537A /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -174,6 +208,10 @@
 				318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */,
 				3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */,
 				0BF497DE36C073C2C594CD1D /* Info.plist */,
+				ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */,
+				85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */,
+				E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */,
+				8C2DE37EBDD501EF4882BC0B /* KhepriWidgets.entitlements */,
 			);
 			name = KhepriWidgets;
 			path = KhepriWidgets;
@@ -266,6 +304,7 @@
 			name = KhepriWidgets;
 			packageProductDependencies = (
 				DBF1609B7085042FC274234E /* NorthKit */,
+				F775B8E682906FE491DDD79D /* NorthAPI */,
 			);
 			productName = KhepriWidgets;
 			productReference = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */;
@@ -356,6 +395,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F68B48949F7122A7A3DC8B6 /* LogWaterIntent.swift in Sources */,
+				E29E555D29214E65735EDE32 /* SharedAPI.swift in Sources */,
+				7C988BAD246DEC2DAA6080C7 /* SharedSession.swift in Sources */,
+				54AFB43EF1527A8035BB00EA /* Glance.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,6 +422,13 @@
 			files = (
 				CC9A10B1E3DD154A88F5E0AB /* KhepriWidgetsBundle.swift in Sources */,
 				FB6BAB19AAE471A5AB44E779 /* WorkoutLiveActivity.swift in Sources */,
+				1D12AC00C8E230CDDC061BD3 /* TodayProvider.swift in Sources */,
+				A48D29FDBD4FC12232C10E01 /* TodayWidget.swift in Sources */,
+				C24FAE1B554A1CDE066ADAE7 /* LockScreenWidget.swift in Sources */,
+				90BDDE56F2535CC07F1A101B /* LogWaterIntent.swift in Sources */,
+				61CE67C2C2500168835F9B1A /* SharedAPI.swift in Sources */,
+				4419BBFD07C263AC8986E6E0 /* SharedSession.swift in Sources */,
+				40F83AAE24A625A8F7FA807B /* Glance.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,6 +577,7 @@
 				API_BASE_URL = "http:/$()/localhost:8090";
 				APP_DISPLAY_NAME = "Khepri Dev";
 				APP_GROUP_ID = "group.$(PRODUCT_BUNDLE_IDENTIFIER)";
+				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
@@ -557,6 +608,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.shared";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri;
@@ -582,6 +634,7 @@
 				API_BASE_URL = "https:/$()/kheprios.com";
 				APP_DISPLAY_NAME = Khepri;
 				APP_GROUP_ID = "group.$(PRODUCT_BUNDLE_IDENTIFIER)";
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
@@ -612,6 +665,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.shared";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri;
@@ -731,6 +785,7 @@
 				API_BASE_URL = "https:/$()/kheprios.com";
 				APP_DISPLAY_NAME = "Khepri Beta";
 				APP_GROUP_ID = "group.$(PRODUCT_BUNDLE_IDENTIFIER)";
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
@@ -761,6 +816,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.beta.shared";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.beta;
@@ -859,7 +915,9 @@
 		9512759FA16BCDE90D45AC2F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				API_BASE_URL = "https:/$()/kheprios.com";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = KhepriWidgets/KhepriWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
@@ -867,6 +925,7 @@
 				INFOPLIST_FILE = KhepriWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.shared";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -888,7 +947,9 @@
 		B82DA0029BE99B6F04714A00 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				API_BASE_URL = "http:/$()/localhost:8090";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = KhepriWidgets/KhepriWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
@@ -896,6 +957,7 @@
 				INFOPLIST_FILE = KhepriWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.shared";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -940,7 +1002,9 @@
 		E78CAEABC1A67F7CDD3470A8 /* Beta */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				API_BASE_URL = "https:/$()/kheprios.com";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = KhepriWidgets/KhepriWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
@@ -948,6 +1012,7 @@
 				INFOPLIST_FILE = KhepriWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Khepri;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				KHEPRI_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)com.fernandocorreia.khepri.beta.shared";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1054,6 +1119,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
 			productName = NorthKit;
+		};
+		F775B8E682906FE491DDD79D /* NorthAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 87619A70F972236B2FAE07EB /* XCLocalSwiftPackageReference "NorthKit" */;
+			productName = NorthAPI;
 		};
 		FEF37D107C5252F8E0439108 /* NorthAPI */ = {
 			isa = XCSwiftPackageProductDependency;
