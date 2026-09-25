@@ -60,6 +60,10 @@ struct MoreScreen: View {
         case "reports": ReportsScreen()
         case "memories": MemoriesScreen()
         case "knowledge": KnowledgeScreen()
+        case "nutrition": NutritionScreen()
+        case "care": CareScreen()
+        case "mind": JournalScreen()
+        case "decisions": DecisionsScreen()
         default:
             PlaceholderScreen(title: section.title, systemImage: section.systemImage, phase: section.phase, summary: section.summary).content
         }

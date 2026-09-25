@@ -41,6 +41,9 @@ struct TodayScreen: View {
                 }
             }
             .navigationTitle("Today")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) { NudgesBellButton() }
+            }
             .refreshable { await load() }
         }
         .task { await load() }

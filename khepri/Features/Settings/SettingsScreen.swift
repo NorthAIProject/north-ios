@@ -60,6 +60,10 @@ struct SettingsScreen: View {
                     NavigationLink { PreferenceSettings(service: service) } label: {
                         Label("Units", systemImage: "ruler")
                     }
+                    NavigationLink { BodyAndGoalScreen() } label: {
+                        Label("Body & Goal", systemImage: "figure")
+                    }
+                    ExportRow()
                     Button {
                         Task {
                             await tour.restart()

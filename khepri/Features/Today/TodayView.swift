@@ -60,6 +60,7 @@ struct TodayView: View {
                         }
                     }
                 }
+                NewsSection()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
