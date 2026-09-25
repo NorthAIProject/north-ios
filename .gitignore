@@ -48,6 +48,9 @@ SourcePackages/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
+# The curated App Store set is committed so CI's release and metadata lanes
+# can upload it (scripts/compose-store-screenshots.py writes it).
+!fastlane/screenshots/en-US/*.png
 fastlane/test_output/
 fastlane/ui_test_output/
 fastlane/build/
