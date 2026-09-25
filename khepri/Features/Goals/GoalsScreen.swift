@@ -141,6 +141,7 @@ struct GoalDetailView: View {
     @State private var goal: GoalDetail?
     @State private var error: String?
     @State private var newMilestone = ""
+    @State private var editingMilestone: GoalMilestone?
     @State private var editing = false
     @State private var noting = false
     @State private var confirmingDelete = false
@@ -190,9 +191,15 @@ struct GoalDetailView: View {
                         Task { await act { try await service.setMilestone(id, milestone.id, completed: milestone.status == .open) } }
                     } label: {
                         Label {
-                            Text(milestone.title)
-                                .strikethrough(milestone.status == .completed)
-                                .foregroundStyle(milestone.status == .completed ? .secondary : .primary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(milestone.title)
+                                    .strikethrough(milestone.status == .completed)
+                                    .foregroundStyle(milestone.status == .completed ? .secondary : .primary)
+                                if let day = milestone.targetDate.flatMap(CalendarDay.date(from:)) {
+                                    Text("By \(day.formatted(date: .abbreviated, time: .omitted))")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
                         } icon: {
                             Image(systemName: milestone.status == .completed ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(NorthColor.signal)
@@ -203,6 +210,8 @@ struct GoalDetailView: View {
                         Button("Delete", role: .destructive) {
                             Task { await act { try await service.deleteMilestone(id, milestone.id) } }
                         }
+                        Button("Edit") { editingMilestone = milestone }
+                            .tint(NorthColor.signal)
                     }
                 }
                 HStack {
@@ -256,6 +265,13 @@ struct GoalDetailView: View {
         .sheet(isPresented: $editing) {
             GoalForm(title: "Edit Goal", draft: GoalDraft(goal: goal), categories: categories) { draft in
                 self.goal = try await service.update(id, draft)
+                onChange()
+            }
+        }
+        .sheet(item: $editingMilestone) { milestone in
+            MilestoneSheet(milestone: milestone) { title, date in
+                try await service.updateMilestone(id, milestone.id, title: title, targetDate: date)
+                await load()
                 onChange()
             }
         }
@@ -408,5 +424,67 @@ private struct GoalNoteSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+}
+
+extension GoalMilestone: @retroactive Identifiable {}
+
+/// Rename a milestone, or give it a date to aim for.
+private struct MilestoneSheet: View {
+    let milestone: GoalMilestone
+    let onSave: (String, Date?) async throws -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var title = ""
+    @State private var hasDate = false
+    @State private var date = Date.now
+    @State private var saving = false
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Milestone", text: $title)
+                Toggle("Target date", isOn: $hasDate)
+                if hasDate {
+                    DatePicker("By", selection: $date, displayedComponents: .date)
+                }
+                if let error { ErrorRow(error) }
+            }
+            .navigationTitle("Edit Milestone")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if saving {
+                        ProgressView()
+                    } else {
+                        Button("Save") { Task { await save() } }
+                            .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+            }
+            .onAppear {
+                title = milestone.title
+                if let day = milestone.targetDate.flatMap(CalendarDay.date(from:)) {
+                    hasDate = true
+                    date = day
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func save() async {
+        saving = true
+        defer { saving = false }
+        do {
+            try await onSave(title.trimmingCharacters(in: .whitespaces), hasDate ? date : nil)
+            dismiss()
+        } catch {
+            self.error = error.localizedDescription
+        }
     }
 }

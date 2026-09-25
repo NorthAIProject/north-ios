@@ -7,6 +7,8 @@ typealias BellNudge = Components.Schemas.BellNudge
 protocol NudgesServicing: Sendable {
     func nudges() async throws -> Components.Schemas.NudgeList
     func open(_ id: String) async throws -> BellNudge
+    /// Marks one read without following it.
+    func read(_ id: String) async throws -> BellNudge
     func dismiss(_ id: String) async throws
 }
 
@@ -15,6 +17,7 @@ struct NudgesService: NudgesServicing {
 
     func nudges() async throws -> Components.Schemas.NudgeList { try await NorthAPI.call { try await api.listNudges().ok.body.json } }
     func open(_ id: String) async throws -> BellNudge { try await NorthAPI.call { try await api.openNudge(path: .init(nudgeID: id)).ok.body.json } }
+    func read(_ id: String) async throws -> BellNudge { try await NorthAPI.call { try await api.readNudge(path: .init(nudgeID: id)).ok.body.json } }
     func dismiss(_ id: String) async throws { try await NorthAPI.call { _ = try await api.dismissNudge(path: .init(nudgeID: id)).ok } }
 }
 
@@ -72,6 +75,16 @@ private struct NudgesList: View {
                                 Text(nudge.body).font(.subheadline).foregroundStyle(.secondary)
                                 Text(nudge.createdAt.formatted(.relative(presentation: .named))).font(.caption).foregroundStyle(.tertiary)
                             }
+                        }
+                    }
+                    .swipeActions(edge: .leading) {
+                        if nudge.unread {
+                            Button("Mark Read", systemImage: "envelope.open") {
+                                Task {
+                                    do { _ = try await service.read(nudge.id); await load() } catch { self.error = error.localizedDescription }
+                                }
+                            }
+                            .tint(NorthColor.signal)
                         }
                     }
                     .swipeActions {

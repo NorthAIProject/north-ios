@@ -7,6 +7,7 @@ typealias DecisionInput = Components.Schemas.DecisionInput
 
 protocol DecisionsServicing: Sendable {
     func decisions() async throws -> [Decision]
+    func decision(_ id: String) async throws -> Decision
     func create(_ input: DecisionInput) async throws
     func update(_ id: String, _ input: DecisionInput) async throws
     func delete(_ id: String) async throws
@@ -17,6 +18,9 @@ struct DecisionsService: DecisionsServicing {
 
     func decisions() async throws -> [Decision] {
         try await NorthAPI.call { try await api.listDecisions().ok.body.json.decisions }
+    }
+    func decision(_ id: String) async throws -> Decision {
+        try await NorthAPI.call { try await api.getDecision(path: .init(decisionID: id)).ok.body.json }
     }
     func create(_ input: DecisionInput) async throws {
         try await NorthAPI.call { _ = try await api.createDecision(body: .json(input)).created }
@@ -38,6 +42,7 @@ struct DecisionsScreen: View {
     @State private var error: String?
     @State private var editing: Decision?
     @State private var creating = false
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         List {
@@ -89,6 +94,13 @@ struct DecisionsScreen: View {
         }
         .task { await load() }
         .refreshable { await load() }
+        // A link to one decision opens it, fetched by id so it does not wait
+        // on the list.
+        .task(id: router.openDecision) {
+            guard let id = router.openDecision else { return }
+            router.openDecision = nil
+            do { editing = try await service.decision(id) } catch { self.error = error.localizedDescription }
+        }
     }
 
     private func load() async {
