@@ -12,6 +12,10 @@ protocol ActivityServicing: Sendable {
     func resume(_ sessionID: String) async throws -> ActivitySession
     func stop(_ sessionID: String) async throws -> ActivitySession
     func cancel(_ sessionID: String) async throws
+    /// Recent sessions and every activity that can be timed or logged.
+    func overview() async throws -> Components.Schemas.ActivityOverview
+    /// Records something already done: a run before the app was open, a class.
+    func log(_ request: Components.Schemas.LogActivityRequest) async throws -> ActivitySession
 }
 
 struct ActivityService: ActivityServicing {
@@ -39,5 +43,13 @@ struct ActivityService: ActivityServicing {
 
     func cancel(_ sessionID: String) async throws {
         try await NorthAPI.call { _ = try await api.cancelActivity(path: .init(sessionID: sessionID)).noContent }
+    }
+
+    func overview() async throws -> Components.Schemas.ActivityOverview {
+        try await NorthAPI.call { try await api.getActivity().ok.body.json }
+    }
+
+    func log(_ request: Components.Schemas.LogActivityRequest) async throws -> ActivitySession {
+        try await NorthAPI.call { try await api.logActivity(body: .json(request)).created.body.json }
     }
 }

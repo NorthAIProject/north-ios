@@ -1,3 +1,4 @@
+import AVKit
 import CoreTransferable
 import NorthAPI
 import NorthKit
@@ -133,9 +134,21 @@ private struct FormCheckDetail: View {
 
     @State private var check: FormCheck?
     @State private var error: String?
+    /// Made once from the first signed link. Every poll returns a fresh link,
+    /// and swapping the player for each would restart the clip.
+    @State private var player: AVPlayer?
 
     var body: some View {
         List {
+            if let player {
+                Section {
+                    VideoPlayer(player: player)
+                        .aspectRatio(9 / 16, contentMode: .fit)
+                        .frame(maxHeight: 420)
+                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets())
+                }
+            }
             if let check {
                 if let result = check.result {
                     Section {
@@ -152,17 +165,24 @@ private struct FormCheckDetail: View {
                     if !result.issues.isEmpty {
                         Section("What to Fix") {
                             ForEach(Array(result.issues.enumerated()), id: \.offset) { _, issue in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack {
-                                        Text(timestamp(issue.at))
-                                            .font(.subheadline.monospacedDigit().weight(.medium))
-                                            .foregroundStyle(NorthColor.signal)
-                                        Text(issue.severity.capitalized).font(.caption).foregroundStyle(.secondary)
+                                Button {
+                                    seek(to: issue.at)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        HStack {
+                                            Label(timestamp(issue.at), systemImage: player == nil ? "clock" : "play.fill")
+                                                .font(.subheadline.monospacedDigit().weight(.medium))
+                                                .foregroundStyle(NorthColor.signal)
+                                            Text(issue.severity.capitalized).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                        Text(issue.observation)
+                                        Text(issue.correction).font(.subheadline).foregroundStyle(.secondary)
                                     }
-                                    Text(issue.observation)
-                                    Text(issue.correction).font(.subheadline).foregroundStyle(.secondary)
+                                    .padding(.vertical, 2)
                                 }
-                                .padding(.vertical, 2)
+                                .buttonStyle(.plain)
+                                .disabled(player == nil)
+                                .accessibilityHint(player == nil ? "" : "Plays the clip from this moment")
                             }
                         }
                     }
@@ -183,9 +203,20 @@ private struct FormCheckDetail: View {
             // Poll until the analysis settles.
             repeat {
                 do { check = try await service.check(id); error = nil } catch { self.error = error.localizedDescription; return }
+                if player == nil, let link = check?.playbackUrl, let url = URL(string: link) {
+                    player = AVPlayer(url: url)
+                }
                 if check?.inProgress == true { try? await Task.sleep(for: .seconds(4)) }
             } while check?.inProgress == true && !Task.isCancelled
         }
+    }
+
+    /// Starts a little before the moment, so the rep is seen going wrong
+    /// rather than already wrong.
+    private func seek(to seconds: Double) {
+        guard let player else { return }
+        player.seek(to: CMTime(seconds: max(seconds - 1, 0), preferredTimescale: 600))
+        player.play()
     }
 
     private func timestamp(_ seconds: Double) -> String {
