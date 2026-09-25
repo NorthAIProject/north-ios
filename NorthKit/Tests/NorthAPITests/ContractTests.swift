@@ -166,6 +166,27 @@ struct ContractTests {
         #expect(try decode(Schemas.NewsTicker.self, "news").items.first?.source == "BBC Health")
     }
 
+    @Test func phase8a() throws {
+        let timeline = try decode(Schemas.InsightsTimeline.self, "insights-timeline")
+        #expect(timeline.entries.first?.kind == "check_in" && timeline.filters.first?.selected == true)
+        let body = try decode(Schemas.InsightsBody.self, "insights-body")
+        #expect(body.adherence == 71 && body.habits.first?.streak == 3 && body.avgSleepMinutes == 438)
+        let mind = try decode(Schemas.InsightsMind.self, "insights-mind")
+        #expect(mind.mood == [4, 0, 3] && mind.labels.count == mind.energy.count)
+        let progress = try decode(Schemas.InsightsProgress.self, "insights-progress")
+        #expect(progress.statuses.map(\.label) == ["Active", "Achieved"] && progress.goals.first?.progress == 60)
+        let training = try decode(Schemas.InsightsTraining.self, "insights-training")
+        #expect(training.kinds.first?.value == 1 && training.delta.hasPrior)
+        let nutrition = try decode(Schemas.InsightsNutrition.self, "insights-nutrition")
+        #expect(nutrition.macros.map(\.label) == ["Protein", "Fat", "Carbs"] && nutrition.hasGoal)
+        #expect(try decode(Schemas.InsightsCoach.self, "insights-coach").helpfulRate == 80)
+        #expect(try decode(Schemas.InsightsSpend.self, "insights-spend").surfaces.first?.pct == 75)
+        let played = try decode(Schemas.FormCheck.self, "form-check-playback")
+        #expect(played.playbackUrl?.hasPrefix("https://") == true)
+        let diets = try decode(Schemas.DietSettings.self, "diets")
+        #expect(diets.diets.filter(\.selected).map(\.code) == ["vegetarian"])
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
@@ -177,7 +198,10 @@ struct ContractTests {
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
-                            "decisions", "nudges", "calculator", "news"]
+                            "decisions", "nudges", "calculator", "news",
+                            "insights-timeline", "insights-body", "insights-mind", "insights-progress",
+                            "insights-training", "insights-nutrition", "insights-coach", "insights-spend",
+                            "form-check-playback", "diets"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
