@@ -28,7 +28,10 @@ struct DictationButton: View {
     @State private var refused = false
 
     var body: some View {
-        Group {
+        // A ZStack, not a Group: a Group hands its modifiers to its children,
+        // and this one starts with none, so the task that makes the controller
+        // never ran and the microphone never appeared.
+        ZStack {
             if let controller, controller.isAvailable {
                 button(controller)
             }

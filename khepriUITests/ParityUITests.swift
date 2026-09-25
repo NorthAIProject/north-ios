@@ -45,8 +45,8 @@ final class ParityUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Hiking"].waitForExistence(timeout: 15), "the logged activity is not in the history")
         attach(app, "03-activity-history")
 
-        // A diet switched on is still on after leaving and coming back, so it
-        // reached the server.
+        // A diet switched is still switched after leaving and coming back, so
+        // it reached the server.
         openTab(app, "More")
         tap(app.buttons["Settings"])
         let diets = app.buttons["Diets"]
@@ -55,15 +55,16 @@ final class ParityUITests: XCTestCase {
         tap(diets)
         let glutenFree = app.switches.matching(NSPredicate(format: "label BEGINSWITH 'Gluten-free'")).firstMatch
         XCTAssertTrue(glutenFree.waitForExistence(timeout: 15))
-        XCTAssertEqual(glutenFree.value as? String, "0")
+        // Flipped from whatever it is, so the test can run twice on one seed.
+        let flipped = (glutenFree.value as? String) == "1" ? "0" : "1"
         glutenFree.switches.firstMatch.tap()
-        let on = NSPredicate(format: "value == '1'")
-        expectation(for: on, evaluatedWith: glutenFree)
+        let saved = NSPredicate(format: "value == %@", flipped)
+        expectation(for: saved, evaluatedWith: glutenFree)
         waitForExpectations(timeout: 10)
         app.navigationBars.buttons.element(boundBy: 0).tap()
         tap(diets)
         XCTAssertTrue(glutenFree.waitForExistence(timeout: 15))
-        expectation(for: on, evaluatedWith: glutenFree)
+        expectation(for: saved, evaluatedWith: glutenFree)
         waitForExpectations(timeout: 10)
         attach(app, "04-diets")
     }
