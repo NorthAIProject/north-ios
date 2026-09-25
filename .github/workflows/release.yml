@@ -1,6 +1,7 @@
 # iOS release pipeline.
 #   "iOS CI" green on main -> TestFlight build (beta lane)
-#   manual dispatch        -> App Store release (release/hotfix lane), gated by
+#   manual dispatch        -> App Store release (release/hotfix), external TestFlight
+#                             (beta_external) or metadata only (metadata), gated by
 #                             the GitHub environment "app-store" (required reviewer).
 #
 # Required repo secrets:
@@ -10,6 +11,9 @@
 #                                                          PAT with Contents:Read on NorthAIProject/north-ios-certificates
 #   SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN        — dSYM upload (optional)
 #   SECRETS_XCCONFIG                                     — contents of Config/Secrets.xcconfig (optional)
+#   REVIEW_FIRST_NAME, REVIEW_LAST_NAME, REVIEW_EMAIL,
+#   REVIEW_PHONE, REVIEW_DEMO_USER, REVIEW_DEMO_PASSWORD — App Review contact and demo
+#                                                          account (release, beta_external, metadata)
 name: Release
 
 on:
@@ -23,7 +27,7 @@ on:
         description: Release lane
         required: true
         type: choice
-        options: [release, hotfix]
+        options: [release, hotfix, beta_external, metadata]
         default: release
       version:
         description: Marketing version (e.g. 1.0) — empty keeps current
@@ -137,3 +141,9 @@ jobs:
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          REVIEW_FIRST_NAME: ${{ secrets.REVIEW_FIRST_NAME }}
+          REVIEW_LAST_NAME: ${{ secrets.REVIEW_LAST_NAME }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          REVIEW_PHONE: ${{ secrets.REVIEW_PHONE }}
+          REVIEW_DEMO_USER: ${{ secrets.REVIEW_DEMO_USER }}
+          REVIEW_DEMO_PASSWORD: ${{ secrets.REVIEW_DEMO_PASSWORD }}

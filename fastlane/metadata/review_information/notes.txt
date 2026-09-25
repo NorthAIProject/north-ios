@@ -1,0 +1,11 @@
+Sign in with the demo account above (email and password). It is seeded with a training plan, goals, check-ins and a coach conversation, so every tab has content.
+
+Where to look:
+- Coach tab: ask anything, e.g. "How do I do a push-up?" to see the inline exercise card.
+- Training tab: the plan, a day's exercises with animations, and "Start Workout" (Live Activity).
+- Progress tab: charts from check-ins and, if connected, Apple Health.
+- More: goals, check-ins, reports, memories, knowledge, nutrition, care, journal, decisions. Settings (More > Settings) holds Export My Data and, at the bottom, Delete Account.
+
+HealthKit: used to read workouts, activity, heart rate, sleep and weight for coaching, and to save workouts finished in the app. Nothing is used for advertising.
+Notifications: workout reminders are scheduled on the device; coaching nudges arrive by push.
+Sign in with Apple and Google are offered alongside email.

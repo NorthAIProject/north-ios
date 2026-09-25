@@ -1,0 +1,1 @@
+Khepri is an AI coach that remembers you: training plans with animated exercises, daily check-ins, goals, water, sleep, habits, meals and a journal, with Apple Health and Strava connected. This beta is the first iPhone version of the web app at kheprios.com; your account works on both.
