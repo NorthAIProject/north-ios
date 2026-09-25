@@ -1,0 +1,8 @@
+Thanks for trying Khepri. Please try:
+1. Sign up, go through the short setup, and do your first check-in.
+2. Ask the coach something real, by text or voice.
+3. Generate a training plan and start a workout.
+4. Add the Today widget and log water from it.
+5. Say "Capture in Khepri" to Siri and log something in one sentence.
+
+Anything confusing, broken or missing: use TestFlight's feedback (screenshot and send).
