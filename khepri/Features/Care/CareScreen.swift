@@ -173,11 +173,15 @@ struct CareScreen: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        Spacer(minLength: 0)
                     }
+                    // A plain button is hittable only where it draws; the
+                    // label spans the row so the whole row is the target.
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
                 // Plain, so the name reads as text rather than a link.
                 .buttonStyle(.plain)
-                .contentShape(Rectangle())
                 .accessibilityValue(habit.doneToday ? "Done" : "Not done")
                 .swipeActions {
                     Button("Delete", role: .destructive) { Task { await run { try await service.deleteHabit(habit.id) } } }
