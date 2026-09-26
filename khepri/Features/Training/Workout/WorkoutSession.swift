@@ -38,26 +38,54 @@ final class WorkoutSession {
     /// Why the workout is not being recorded, or anything else worth saying.
     private(set) var notice: String?
 
+    /// Every set done with a weight, in order. What the summary adds up and
+    /// what the next set's prefill comes from.
+    private(set) var logged: [LoggedSet] = []
+    /// The last workout's sets per exercise key, loaded at the start.
+    private(set) var lastTime: [String: [LiftSet]] = [:]
+    /// Sets the server did not take. Kept on the phone for the summary.
+    private(set) var unsavedSets = 0
+
     private var pausedAt: Date?
     private var pausedTotal: TimeInterval = 0
     /// Rest left when paused mid-rest, restored on resume.
     private var restRemaining: TimeInterval?
     private var connecting: Task<Void, Never>?
+    private var saving: [Task<Void, Never>] = []
+    /// Last time's numbers arriving; tests wait on it.
+    private(set) var loadingLastTime: Task<Void, Never>?
+    /// The server's ids for the sets it took, so a discard can take them back.
+    private var savedIDs: [String] = []
 
     private let service: ActivityServicing
     private let live: WorkoutLiveActivityControlling
     /// Saves the finished workout to Apple Health, when allowed.
     private let health: HealthWorkoutWriting?
+    /// Where each set's weight and reps go; nil keeps them on the phone.
+    private let lifts: LiftServicing?
     private let now: () -> Date
 
     init(title: String, day: TrainingDay, service: ActivityServicing, live: WorkoutLiveActivityControlling,
-         health: HealthWorkoutWriting? = nil, now: @escaping () -> Date = Date.init) {
+         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, now: @escaping () -> Date = Date.init) {
         self.title = title
         self.exercises = day.exercises.filter { $0.sets > 0 }
         self.service = service
         self.live = live
         self.health = health
+        self.lifts = lifts
         self.now = now
+    }
+
+    /// One set as it was done.
+    struct LoggedSet: Equatable {
+        let exerciseKey: String
+        let exerciseName: String
+        let setNumber: Int
+        let weightKg: Double
+        let reps: Int
+
+        var volumeKg: Double { weightKg * Double(reps) }
+        var e1rmKg: Double { LiftMath.e1rm(weightKg: weightKg, reps: reps) }
     }
 
     // MARK: - Where the workout is
@@ -85,6 +113,52 @@ final class WorkoutSession {
 
     var restEndsAt: Date? { if case .resting(let until) = phase { until } else { nil } }
 
+    // MARK: - Weights
+
+    func key(for exercise: DayExercise) -> String { LiftMath.key(slug: exercise.catalogSlug, name: exercise.name) }
+
+    /// What the set in hand starts from: this workout's previous set of the
+    /// exercise, else the same set last time, else last time's final set.
+    /// Nil when the exercise has never been done with a weight.
+    var suggestedWeightKg: Double? {
+        guard let current else { return nil }
+        let key = key(for: current)
+        if let previous = logged.last(where: { $0.exerciseKey == key }) { return previous.weightKg }
+        let last = lastTime[key] ?? []
+        return (last.first { $0.setNumber == setNumber } ?? last.last)?.weightKg
+    }
+
+    /// Reps start from the plan's number, else last time's.
+    var suggestedReps: Int {
+        guard let current else { return 1 }
+        if let planned = LiftMath.reps(from: current.reps) { return planned }
+        let last = lastTime[key(for: current)] ?? []
+        return (last.first { $0.setNumber == setNumber } ?? last.last)?.reps ?? 10
+    }
+
+    /// Last time's sets of the exercise in hand, for "last time" under the
+    /// weight field.
+    var lastTimeForCurrent: [LiftSet] {
+        guard let current else { return [] }
+        return lastTime[key(for: current)] ?? []
+    }
+
+    var volumeKg: Double { logged.reduce(0) { $0 + $1.volumeKg } }
+
+    /// Exercises whose best set today beat every set of the last workout, by
+    /// estimated max.
+    var improvements: [LoggedSet] {
+        var best: [String: LoggedSet] = [:]
+        for set in logged where set.weightKg > 0 {
+            if set.e1rmKg > (best[set.exerciseKey]?.e1rmKg ?? 0) { best[set.exerciseKey] = set }
+        }
+        return best.values.filter { set in
+            let previous = (lastTime[set.exerciseKey] ?? []).map(\.e1rmKg).max() ?? 0
+            return previous > 0 && set.e1rmKg > previous + 0.05
+        }
+        .sorted { $0.exerciseName < $1.exerciseName }
+    }
+
     // MARK: - Doing it
 
     func start() {
@@ -93,11 +167,24 @@ final class WorkoutSession {
         phase = .working
         live.start(title: title, startedAt: movingSince, state: liveState)
         connecting = Task { await connect() }
+        loadingLastTime = Task { await loadLastTime() }
+    }
+
+    private func loadLastTime() async {
+        guard let lifts else { return }
+        let keys = Array(Set(exercises.map(key(for:)))).sorted()
+        if let last = try? await lifts.last(keys) { lastTime = last }
     }
 
     /// The set in hand is done: rest, then the next one; or the workout is.
-    func completeSet() async {
+    /// With a weight, the set is logged: here at once, on the server as soon
+    /// as it answers.
+    func completeSet(weightKg: Double? = nil, reps: Int? = nil) async {
         guard phase == .working, !isPaused, let current else { return }
+        if let weightKg {
+            record(LoggedSet(exerciseKey: key(for: current), exerciseName: current.name, setNumber: setNumber,
+                             weightKg: max(0, weightKg), reps: max(1, reps ?? suggestedReps)), exercise: current)
+        }
         completedSets += 1
         if isLastSet {
             await finish()
@@ -148,6 +235,24 @@ final class WorkoutSession {
         await server { [service] id in try await service.resume(id) }
     }
 
+    private func record(_ set: LoggedSet, exercise: DayExercise) {
+        logged.append(set)
+        guard let lifts else { return }
+        let performedAt = now()
+        saving.append(Task { [weak self] in
+            await self?.connecting?.value
+            let input = Components.Schemas.LiftSetInput(
+                exerciseName: set.exerciseName, exerciseSlug: exercise.catalogSlug, setNumber: set.setNumber,
+                weightKg: set.weightKg, reps: set.reps, performedAt: performedAt, activitySessionId: self?.recorded?.id)
+            do {
+                let saved = try await lifts.log(input)
+                self?.savedIDs.append(saved.id)
+            } catch {
+                self?.unsavedSets += 1
+            }
+        })
+    }
+
     /// Ends the workout and records it, sets done or not.
     func finish() async {
         guard phase != .finished else { return }
@@ -162,6 +267,8 @@ final class WorkoutSession {
             await health.saveStrengthWorkout(start: startedAt, end: now())
         }
         await connecting?.value
+        for task in saving { await task.value }
+        saving = []
         guard let recorded else { return }
         do {
             self.recorded = try await service.stop(recorded.id)
@@ -176,6 +283,13 @@ final class WorkoutSession {
         live.end(liveState, dismissImmediately: true)
         phase = .finished
         await connecting?.value
+        for task in saving { await task.value }
+        saving = []
+        if let lifts {
+            for id in savedIDs { try? await lifts.delete(id) }
+        }
+        savedIDs = []
+        logged = []
         if let recorded {
             do { try await service.cancel(recorded.id) } catch { notice = error.localizedDescription }
         }

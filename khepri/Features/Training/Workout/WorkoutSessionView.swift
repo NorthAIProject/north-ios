@@ -8,6 +8,8 @@ struct WorkoutSessionView: View {
     @State private var session: WorkoutSession
     @State private var confirmingEnd = false
     @State private var viewing: ExerciseSlugRoute?
+    @State private var enteringSet = false
+    @State private var imperial = false
     @Environment(\.dismiss) private var dismiss
 
     init(session: WorkoutSession) {
@@ -50,6 +52,16 @@ struct WorkoutSessionView: View {
                 Text("\(session.completedSets) of \(session.totalSets) sets done.")
             }
             .sheet(item: $viewing) { route in ExerciseSheet(slug: route.slug) }
+            .sheet(isPresented: $enteringSet) {
+                if let exercise = session.current {
+                    SetEntrySheet(exerciseName: exercise.name, setNumber: session.setNumber,
+                                  suggestedWeightKg: session.suggestedWeightKg, suggestedReps: session.suggestedReps,
+                                  lastTime: session.lastTimeForCurrent, imperial: imperial) { kg, reps in
+                        Task { await session.completeSet(weightKg: kg, reps: reps) }
+                    }
+                }
+            }
+            .task { imperial = (try? await SettingsService().preferences().unitsSystem) == .imperial }
         }
         .interactiveDismissDisabled(session.phase != .finished)
         .onAppear { session.start() }
@@ -141,7 +153,9 @@ struct WorkoutSessionView: View {
             .frame(maxWidth: .infinity)
         } else {
             Button {
-                Task { await session.completeSet() }
+                // The weight comes before the next step: the set only counts
+                // once it has been entered.
+                enteringSet = true
             } label: {
                 Text(session.isLastSet ? "Finish Workout" : "Done · Set \(session.setNumber)")
                     .font(.headline)
@@ -213,6 +227,8 @@ private struct WorkoutSummary: View {
     let session: WorkoutSession
     let onDone: () -> Void
 
+    @State private var imperial = false
+
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
@@ -228,9 +244,34 @@ private struct WorkoutSummary: View {
             HStack(spacing: 32) {
                 stat(Duration.seconds(session.movingTime).formatted(.time(pattern: .minuteSecond)), "TIME")
                 stat("\(session.completedSets)/\(session.totalSets)", "SETS")
+                if session.volumeKg > 0 {
+                    stat(LiftMath.display(session.volumeKg, imperial: imperial).formatted(.number.precision(.fractionLength(0))),
+                         imperial ? "LB LIFTED" : "KG LIFTED")
+                }
                 if let calories = session.recorded?.caloriesBurned {
                     stat(calories.formatted(.number.precision(.fractionLength(0))), "KCAL")
                 }
+            }
+            if !session.improvements.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("BETTER THAN LAST TIME").northEyebrow(NorthColor.signal)
+                    ForEach(session.improvements, id: \.exerciseKey) { set in
+                        Label {
+                            Text("\(set.exerciseName): \(LiftMath.display(set.weightKg, imperial: imperial).formatted()) \(imperial ? "lb" : "kg") × \(set.reps)")
+                        } icon: {
+                            Image(systemName: "arrow.up.right.circle.fill").foregroundStyle(NorthColor.signal)
+                        }
+                        .font(.subheadline)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 12))
+            }
+            if session.unsavedSets > 0 {
+                Text("\(session.unsavedSets) of your sets could not be saved to your account.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
             Group {
                 if session.recorded != nil {
@@ -250,6 +291,7 @@ private struct WorkoutSummary: View {
             .controlSize(.large)
         }
         .padding(20)
+        .task { imperial = (try? await SettingsService().preferences().unitsSystem) == .imperial }
     }
 
     private func stat(_ value: String, _ label: String) -> some View {

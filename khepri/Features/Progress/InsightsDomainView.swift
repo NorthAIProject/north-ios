@@ -15,7 +15,7 @@ struct InsightsDomainView: View {
             case .body: DomainLoader(range: range, load: service.body) { BodyPage(model: $0) }
             case .mind: DomainLoader(range: range, load: service.mind) { MindPage(model: $0) }
             case .progress: DomainLoader(range: range, load: service.progress) { ProgressPage(model: $0) }
-            case .training: DomainLoader(range: range, load: service.training) { TrainingPage(model: $0) }
+            case .training: DomainLoader(range: range, load: service.training) { TrainingPage(model: $0, range: range) }
             case .nutrition: DomainLoader(range: range, load: service.nutrition) { NutritionPage(model: $0) }
             case .coach: DomainLoader(range: range, load: service.coach) { CoachPage(model: $0) }
             case .spend: DomainLoader(range: range, load: service.spend) { SpendPage(model: $0) }
@@ -178,6 +178,7 @@ private struct ProgressPage: View {
 
 private struct TrainingPage: View {
     let model: InsightsTraining
+    let range: String
 
     var body: some View {
         List {
@@ -195,6 +196,7 @@ private struct TrainingPage: View {
             }
             ChartSection(title: "Calories Burned", chart: model.burn, hasData: model.hasSessions)
             SegmentSection(title: "Activities", segments: model.kinds)
+            LiftingSections(range: range)
             if model.hasSessions {
                 Section("Sessions") {
                     ForEach(Array(model.sessions.enumerated()), id: \.offset) { _, session in

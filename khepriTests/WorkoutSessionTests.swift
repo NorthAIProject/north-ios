@@ -88,6 +88,52 @@ struct WorkoutSessionTests {
         #expect(service.calls == ["start strength_training", "pause s1", "resume s1"])
     }
 
+    @Test func eachSetStartsFromLastTimeThenFromTheSetBefore() async {
+        let lifts = FakeLifts(last: ["goblet squat": [.fixture(set: 1, kg: 20, reps: 8), .fixture(set: 2, kg: 22.5, reps: 8)]])
+        let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(), lifts: lifts)
+        session.start()
+        await session.loadingLastTime?.value
+
+        #expect(session.suggestedWeightKg == 20, "set 1 starts from last time's set 1")
+        #expect(session.suggestedReps == 8, "reps come from the plan")
+        await session.completeSet(weightKg: 24, reps: 8)
+        #expect(session.suggestedWeightKg == 24, "set 2 starts from the set just done")
+
+        session.endRest()
+        await session.completeSet(weightKg: 24, reps: 6)
+        #expect(session.current?.name == "Push-up")
+        #expect(session.suggestedWeightKg == nil, "never lifted with a weight: nothing to suggest")
+        #expect(session.suggestedReps == 10, "AMRAP has no number and there is no last time")
+
+        await session.finish()
+        #expect(session.logged.count == 2)
+        #expect(session.volumeKg == 24 * 8 + 24 * 6)
+        #expect(session.improvements.map(\.weightKg) == [24], "24x8 beats last time's best of 22.5x8")
+        let saved = await lifts.logged
+        #expect(saved.map(\.setNumber) == [1, 2])
+        #expect(saved.allSatisfy { $0.activitySessionId == "s1" }, "sets attach to the timed workout")
+    }
+
+    @Test func aSetDoneWithoutAWeightIsNotLogged() async {
+        let lifts = FakeLifts()
+        let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(), lifts: lifts)
+        session.start()
+        await session.completeSet()
+        await session.finish()
+        #expect(session.logged.isEmpty)
+        #expect(await lifts.logged.isEmpty)
+    }
+
+    @Test func discardingTakesTheSetsBack() async {
+        let lifts = FakeLifts()
+        let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(), lifts: lifts)
+        session.start()
+        await session.completeSet(weightKg: 20, reps: 8)
+        await session.discard()
+        #expect(await lifts.deleted == ["set-1"])
+        #expect(session.logged.isEmpty)
+    }
+
     @Test func discardingCancelsOnTheServer() async {
         let service = FakeActivity()
         let live = FakeLiveActivity()
@@ -181,13 +227,44 @@ extension ActivitySession {
 
 extension WorkoutSession {
     /// Two sets of squats with 90s rest, then one set of push-ups.
-    static func fixture(service: ActivityServicing, live: WorkoutLiveActivityControlling, clock: TestClock) -> WorkoutSession {
+    static func fixture(service: ActivityServicing, live: WorkoutLiveActivityControlling, clock: TestClock,
+                        lifts: LiftServicing? = nil) -> WorkoutSession {
         let day = TrainingDay(weekday: "Monday", focus: "Full body", exercises: [
             DayExercise(name: "Goblet squat", sets: 2, reps: "8", restSeconds: 90, equipment: "dumbbell",
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
             DayExercise(name: "Push-up", sets: 1, reps: "AMRAP", restSeconds: 60, equipment: "none",
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
         ])
-        return WorkoutSession(title: "Monday · Full body", day: day, service: service, live: live, now: { clock.now })
+        return WorkoutSession(title: "Monday · Full body", day: day, service: service, live: live, lifts: lifts,
+                              now: { clock.now })
+    }
+}
+
+actor FakeLifts: LiftServicing {
+    let history: [String: [LiftSet]]
+    private(set) var logged: [Components.Schemas.LiftSetInput] = []
+    private(set) var deleted: [String] = []
+
+    init(last: [String: [LiftSet]] = [:]) { history = last }
+
+    func last(_ keys: [String]) async throws -> [String: [LiftSet]] { history.filter { keys.contains($0.key) } }
+
+    func log(_ input: Components.Schemas.LiftSetInput) async throws -> LiftSet {
+        logged.append(input)
+        return .fixture(id: "set-\(logged.count)", set: input.setNumber, kg: input.weightKg, reps: input.reps)
+    }
+
+    func delete(_ id: String) async throws { deleted.append(id) }
+
+    func stats(range: String) async throws -> LiftStats {
+        LiftStats(range: range, workouts: 0, sets: 0, reps: 0, volumeKg: 0, priorVolumeKg: 0,
+                  exercises: [], records: [], weekly: [], muscles: [])
+    }
+}
+
+extension LiftSet {
+    static func fixture(id: String = "old", set: Int, kg: Double, reps: Int) -> LiftSet {
+        LiftSet(id: id, exerciseKey: "goblet squat", exerciseName: "Goblet squat", exerciseSlug: "", setNumber: set,
+                weightKg: kg, reps: reps, e1rmKg: LiftMath.e1rm(weightKg: kg, reps: reps), performedAt: .now)
     }
 }
