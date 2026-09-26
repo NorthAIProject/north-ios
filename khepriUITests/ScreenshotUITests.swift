@@ -34,7 +34,8 @@ final class ScreenshotUITests: XCTestCase {
         tap(app.staticTexts["Knee after the long run"])
         XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'left one again'")).firstMatch.waitForExistence(timeout: 20))
         try shoot("coach")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        // The thread hides the navigation bar; the header has its own Back.
+        tap(app.buttons["Back"])
 
         go(app, "Training")
         XCTAssertTrue(app.staticTexts["Lower body"].firstMatch.waitForExistence(timeout: 20))

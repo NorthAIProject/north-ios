@@ -75,6 +75,53 @@ struct ConversationStoreTests {
     }
 }
 
+/// The header's ring and status line, as Loci's Muse chat has them.
+@MainActor
+struct CoachActivityTests {
+    @Test func eachStateHasItsMoodAndStatus() {
+        #expect(CoachActivity.resolve(phase: .ready) == .ready)
+        #expect(CoachActivity.resolve(phase: .loading) == CoachActivity(mood: .working, status: "is catching up"))
+        #expect(CoachActivity.resolve(phase: .replying) == CoachActivity(mood: .working, status: "is thinking"))
+        #expect(CoachActivity.resolve(phase: .replying, hasReplyText: true) == CoachActivity(mood: .working, status: "is writing"))
+        #expect(CoachActivity.resolve(phase: .ready, awaitingApproval: true) == CoachActivity(mood: .idle, status: "needs your OK"))
+        #expect(CoachActivity.resolve(phase: .ready, flash: .done) == CoachActivity(mood: .celebrating, status: "is done"))
+        #expect(CoachActivity.resolve(phase: .ready, isListening: true) == CoachActivity(mood: .listening, status: "is listening"))
+        #expect(CoachActivity.resolve(phase: .ready, replyFailed: true) == CoachActivity(mood: .idle, status: "hit a snag"))
+        #expect(CoachActivity.resolve(phase: .failed("offline")) == CoachActivity(mood: .idle, status: "hit a snag"))
+        #expect(CoachActivity.resolve(phase: .ready, ended: true) == CoachActivity(mood: .idle, status: "finished this reflection"))
+    }
+
+    @Test func aReplyBeingWrittenOutranksEverythingElse() {
+        let activity = CoachActivity.resolve(phase: .replying, awaitingApproval: true, replyFailed: true, flash: .done, isListening: true)
+        #expect(activity.status == "is thinking")
+        #expect(CoachActivity.resolve(phase: .ready, awaitingApproval: true, isListening: true).status == "needs your OK")
+        #expect(CoachActivity.resolve(phase: .ready, replyFailed: true, isListening: true).mood == .listening)
+    }
+
+    @Test func onlyAReplyThatFinishesByItselfEarnsDone() {
+        #expect(CoachActivity.flash(from: .replying, to: .ready, replyFailed: false, awaitingApproval: false, stopped: false) == .done)
+        #expect(CoachActivity.flash(from: .replying, to: .ready, replyFailed: true, awaitingApproval: false, stopped: false) == nil)
+        #expect(CoachActivity.flash(from: .replying, to: .ready, replyFailed: false, awaitingApproval: true, stopped: false) == nil)
+        #expect(CoachActivity.flash(from: .replying, to: .ready, replyFailed: false, awaitingApproval: false, stopped: true) == nil)
+        #expect(CoachActivity.flash(from: .loading, to: .ready, replyFailed: false, awaitingApproval: false, stopped: false) == nil)
+    }
+
+    @Test func theStoreDrivesTheHeaderFromThinkingToWriting() async throws {
+        let coach = FakeCoach(reply: [.token("Hands under "), .done(messageID: "stored-1")])
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        #expect(CoachActivity.resolve(store, flash: nil, isListening: false).status == "is catching up")
+        await store.load()
+        #expect(CoachActivity.resolve(store, flash: nil, isListening: false) == .ready)
+
+        store.send("How do I do a push-up?")
+        #expect(CoachActivity.resolve(store, flash: nil, isListening: false).status == "is thinking")
+        for _ in 0..<200 where store.phase != .ready {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(CoachActivity.resolve(store, flash: nil, isListening: false) == .ready)
+    }
+}
+
 struct CoachEventDecodingTests {
     @Test func decodesEachFrameByName() throws {
         #expect(try CoachService.decode(ServerSentEvent(event: "token", data: #"{"text":"Hi"}"#)) == .token("Hi"))

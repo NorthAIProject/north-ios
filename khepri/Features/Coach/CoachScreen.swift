@@ -18,32 +18,38 @@ struct CoachScreen: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            Group {
-                if isLoading && conversations.isEmpty {
-                    ProgressView()
-                } else if conversations.isEmpty {
-                    empty
-                } else {
-                    list
+            ScrollViewReader { proxy in
+                Group {
+                    if isLoading && conversations.isEmpty {
+                        ProgressView()
+                    } else if conversations.isEmpty {
+                        empty
+                    } else {
+                        list
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGroupedBackground))
+                // Khepri's mark stands where the title was, as in the thread.
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    CoachHeader(
+                        activity: isLoading && conversations.isEmpty ? .catchingUp : .ready,
+                        canvas: Color(.systemGroupedBackground),
+                        anchorsTour: true,
+                        onLeading: {
+                            guard let first = conversations.first else { return }
+                            withAnimation { proxy.scrollTo(first.id, anchor: .top) }
+                        },
+                        onNew: { reflection in Task { await start(reflection: reflection) } }
+                    )
                 }
             }
             .navigationTitle("Coach")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("New Conversation", systemImage: "bubble.left") { Task { await start(reflection: false) } }
-                        Button("New Reflection", systemImage: "sparkles") { Task { await start(reflection: true) } }
-                    } label: {
-                        Label("New", systemImage: "square.and.pencil")
-                    } primaryAction: {
-                        Task { await start(reflection: false) }
-                    }
-                    .accessibilityIdentifier("new-conversation")
-                    .anchorGuidedTour(.coach)
-                }
-            }
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: ConversationSummary.self) { summary in
-                ConversationView(summary: summary, coach: coach)
+                ConversationView(summary: summary, coach: coach) { reflection in
+                    Task { await start(reflection: reflection) }
+                }
             }
             .refreshable { await load() }
             .alert("Coach unavailable", isPresented: Binding(get: { loadError != nil }, set: { if !$0 { loadError = nil } })) {
@@ -89,8 +95,9 @@ struct CoachScreen: View {
     }
 
     private var empty: some View {
+        // No icon: the header's mark already says who is listening.
         ContentUnavailableView {
-            Label("Talk to your coach", systemImage: "bubble.left.and.text.bubble.right")
+            Text("Talk to your coach")
         } description: {
             Text("Ask about training, a goal, or how your week went. The same coach answers on the web and in Telegram.")
         } actions: {
