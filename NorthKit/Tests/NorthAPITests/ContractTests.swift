@@ -33,6 +33,25 @@ struct ContractTests {
         #expect(response.snapshot.nudges.count == 1)
     }
 
+    @Test func day() throws {
+        let response = try decode(Schemas.DayResponse.self, "day")
+        #expect(response.date == "2026-09-26")
+        #expect(response.vitals.energyPercent == 32)
+        #expect(response.food.goal?.calories == 2200)
+        #expect(response.activity.move.percent == 100)
+        #expect(response.sleep?.stages.additionalProperties["deep"] == 64)
+        #expect(response.sleep?.blocks.first?.stage == .core)
+        #expect(response.body.bmiCategory == .overweight)
+        #expect(response.timeline.first?.kind == "food")
+        #expect(response.markers.first?.kind == "kitchen_closes")
+    }
+
+    @Test func dayRules() throws {
+        let response = try decode(Schemas.DayRulesResponse.self, "day_rules")
+        #expect(response.rules.first?.at == "20:00")
+        #expect(response.kinds.contains("screens_off"))
+    }
+
     @Test func passkeyCeremony() throws {
         let response = try decode(Schemas.PasskeyCeremonyResponse.self, "passkey-ceremony")
         #expect(response.challengeId == "66666666-6666-6666-6666-666666666666")
@@ -189,7 +208,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

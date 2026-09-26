@@ -24,6 +24,14 @@ struct HealthWorkoutRecord: Equatable {
     var indoor: Bool
 }
 
+/// One stretch of a single sleep stage, as a watch or sleep app recorded it.
+struct SleepStageBlock: Equatable {
+    enum Stage: String { case deep, rem, core, awake }
+    var stage: Stage
+    var start: Date
+    var end: Date
+}
+
 /// Everything one sync reads from Apple Health.
 struct HealthSnapshot {
     var steps: [DailyValue] = []
@@ -33,6 +41,21 @@ struct HealthSnapshot {
     /// Minutes asleep, keyed by the day the night ends.
     var sleep: [DailyValue] = []
     var workouts: [HealthWorkoutRecord] = []
+
+    // My Day. Daily totals unless noted.
+    var exerciseMinutes: [DailyValue] = []
+    var standHours: [DailyValue] = []
+    var daylightMinutes: [DailyValue] = []
+    /// Food and water other apps logged. What this app wrote is left out at
+    /// the query, because the server already has it as a log of its own.
+    var dietaryWater: [DailyValue] = []
+    var dietaryEnergy: [DailyValue] = []
+    var dietaryProtein: [DailyValue] = []
+    var dietaryCarbs: [DailyValue] = []
+    var dietaryFat: [DailyValue] = []
+    /// The day's last weighing.
+    var bodyMass: [DailyValue] = []
+    var sleepStages: [SleepStageBlock] = []
 }
 
 /// Turns a snapshot into the requests `POST /health/samples` takes.
@@ -59,6 +82,25 @@ enum HealthPayload {
         daily(snapshot.restingHeartRate, "resting_heart_rate", "count/min")
         daily(snapshot.hrv, "hrv_sdnn", "ms")
         daily(snapshot.sleep, "sleep_asleep", "min")
+        daily(snapshot.exerciseMinutes, "exercise_minutes", "min")
+        daily(snapshot.standHours, "stand_hours", "count")
+        daily(snapshot.daylightMinutes, "time_in_daylight", "min")
+        daily(snapshot.dietaryWater, "dietary_water", "ml")
+        daily(snapshot.dietaryEnergy, "dietary_energy", "kcal")
+        daily(snapshot.dietaryProtein, "dietary_protein", "g")
+        daily(snapshot.dietaryCarbs, "dietary_carbs", "g")
+        daily(snapshot.dietaryFat, "dietary_fat", "g")
+        // A weighing is an instant, and the day's start keeps one per day.
+        for v in snapshot.bodyMass where v.value > 0 {
+            readings.append(.init(metric: "body_mass", value: v.value, unit: "kg", startedAt: v.day))
+        }
+        // One reading per block, its start being the server's upsert key, so a
+        // re-read night replaces itself.
+        for b in snapshot.sleepStages where b.end > b.start {
+            let minutes = (b.end.timeIntervalSince(b.start) / 60 * 10).rounded() / 10
+            readings.append(.init(metric: "sleep_\(b.stage.rawValue)", value: minutes, unit: "min",
+                                  startedAt: b.start, endedAt: b.end))
+        }
 
         let workouts = snapshot.workouts.compactMap(workout)
 
@@ -113,5 +155,56 @@ enum SleepNights {
             }
         }
         return out
+    }
+}
+
+/// Sleep stages from Apple Health's samples.
+///
+/// Unlike the total, stages cannot be merged across devices: a watch saying
+/// "deep" and a phone saying "core" for the same minute do not add up to
+/// anything. So each night takes the stages from the one source that recorded
+/// the most staged time — in practice, the watch — and contiguous blocks of
+/// the same stage are joined.
+enum SleepStages {
+    struct Sample: Equatable {
+        var stage: SleepStageBlock.Stage
+        var start: Date
+        var end: Date
+        var source: String
+    }
+
+    static func blocks(from samples: [Sample], calendar: Calendar) -> [SleepStageBlock] {
+        var byNight: [Date: [Sample]] = [:]
+        for s in samples { byNight[calendar.startOfDay(for: s.end), default: []].append(s) }
+
+        var out: [SleepStageBlock] = []
+        for night in byNight.keys.sorted() {
+            let samples = byNight[night]!
+            var staged: [String: TimeInterval] = [:]
+            for s in samples { staged[s.source, default: 0] += s.end.timeIntervalSince(s.start) }
+            guard let primary = staged.max(by: { $0.value < $1.value || ($0.value == $1.value && $0.key > $1.key) })?.key else { continue }
+
+            let mine = samples.filter { $0.source == primary }.sorted { $0.start < $1.start }
+            for s in mine {
+                if let last = out.last, last.stage == s.stage, s.start <= last.end {
+                    out[out.count - 1].end = max(last.end, s.end)
+                } else {
+                    out.append(SleepStageBlock(stage: s.stage, start: s.start, end: s.end))
+                }
+            }
+        }
+        return out
+    }
+
+    /// The stage a sleep-analysis value names, or nil for in-bed and the
+    /// unspecified "asleep" older devices report.
+    static func stage(for value: Int) -> SleepStageBlock.Stage? {
+        switch HKCategoryValueSleepAnalysis(rawValue: value) {
+        case .asleepDeep: .deep
+        case .asleepREM: .rem
+        case .asleepCore: .core
+        case .awake: .awake
+        default: nil
+        }
     }
 }

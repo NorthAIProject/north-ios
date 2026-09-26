@@ -6,6 +6,7 @@ import SwiftUI
 /// and sleep, and what happened recently.
 struct TodayView: View {
     let snapshot: TodaySnapshot
+    var dayStore: DayStore?
     @Environment(AppRouter.self) private var router
 
     var body: some View {
@@ -53,21 +54,25 @@ struct TodayView: View {
                     }
                 }
 
-                TodaySection("Water and sleep") {
-                    Row {
-                        LabeledContent("Water", value: "\(snapshot.hydration.todayML) / \(snapshot.hydration.targetML) ml")
+                if let day = dayStore?.day {
+                    DayDashboard(day: day)
+                } else {
+                    TodaySection("Water and sleep") {
+                        Row {
+                            LabeledContent("Water", value: "\(snapshot.hydration.todayML) / \(snapshot.hydration.targetML) ml")
+                        }
+                        Divider().padding(.leading, 16)
+                        Row {
+                            LabeledContent("Sleep", value: snapshot.sleep.logged ? Duration.seconds(snapshot.sleep.durationMinutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)) : "Not logged")
+                        }
                     }
-                    Divider().padding(.leading, 16)
-                    Row {
-                        LabeledContent("Sleep", value: snapshot.sleep.logged ? Duration.seconds(snapshot.sleep.durationMinutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)) : "Not logged")
-                    }
-                }
 
-                if !snapshot.timeline.isEmpty {
-                    TodaySection("Recently") {
-                        ForEach(Array(snapshot.timeline.enumerated()), id: \.offset) { index, entry in
-                            if index > 0 { Divider().padding(.leading, 16) }
-                            TimelineRow(entry: entry)
+                    if !snapshot.timeline.isEmpty {
+                        TodaySection("Recently") {
+                            ForEach(Array(snapshot.timeline.enumerated()), id: \.offset) { index, entry in
+                                if index > 0 { Divider().padding(.leading, 16) }
+                                TimelineRow(entry: entry)
+                            }
                         }
                     }
                 }

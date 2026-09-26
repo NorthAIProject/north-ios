@@ -20,6 +20,22 @@ enum Permissions {
         HKQuantityType(.restingHeartRate),
         HKQuantityType(.bodyMass),
         HKCategoryType(.sleepAnalysis),
+        // My Day: rings, daylight, and what other apps logged about food.
+        HKQuantityType(.appleExerciseTime),
+        HKCategoryType(.appleStandHour),
+        HKQuantityType(.timeInDaylight),
+        HKQuantityType(.dietaryWater),
+        HKQuantityType(.dietaryCaffeine),
+        HKQuantityType(.dietaryEnergyConsumed),
+        HKQuantityType(.dietaryProtein),
+        HKQuantityType(.dietaryCarbohydrates),
+        HKQuantityType(.dietaryFatTotal),
+        HKQuantityType(.bodyMassIndex),
+        HKQuantityType(.bloodPressureSystolic),
+        HKQuantityType(.bloodPressureDiastolic),
+        HKQuantityType(.dietaryVitaminA),
+        HKQuantityType(.dietaryVitaminC),
+        HKQuantityType(.dietaryVitaminD),
     ]
 
     /// What Khepri writes: workouts finished in the app.

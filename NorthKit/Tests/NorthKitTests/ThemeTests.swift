@@ -6,7 +6,8 @@ import UIKit
 
 struct ThemeTests {
     @Test func everyTokenResolvesFromTheCatalog() {
-        let names = ["Background", "Foreground", "Card", "Primary", "Signal", "Agent", "Ember", "SportRun", "SportStrength"]
+        let names = ["Background", "Foreground", "Card", "Primary", "Signal", "Agent", "Ember", "SportRun", "SportStrength",
+                     "DayWater", "DayFood", "DayMove", "DaySleep", "DayNow"]
         for name in names {
             #expect(UIColor(named: name, in: NorthKitBundle.bundle, compatibleWith: nil) != nil, "missing colour set \(name)")
         }

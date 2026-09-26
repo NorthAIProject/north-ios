@@ -130,6 +130,10 @@ enum HealthBackgroundDelivery {
         HKQuantityType(.stepCount),
         HKQuantityType(.restingHeartRate),
         HKCategoryType(.sleepAnalysis),
+        HKQuantityType(.activeEnergyBurned),
+        HKQuantityType(.dietaryWater),
+        HKQuantityType(.dietaryEnergyConsumed),
+        HKQuantityType(.bodyMass),
     ]
 
     static func register(store: HKHealthStore = HealthStore.shared, sync: HealthSync = .shared) {

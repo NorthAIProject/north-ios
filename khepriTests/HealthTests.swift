@@ -204,3 +204,42 @@ actor FakeHealthWriter: HealthWorkoutWriting {
         saved.append(DateInterval(start: start, end: end))
     }
 }
+
+struct MyDayHealthTests {
+    @Test func stagesComeFromTheSourceThatRecordedMostAndJoinUp() {
+        let watch = "com.apple.health.watch", phone = "com.example.sleepapp"
+        let samples: [SleepStages.Sample] = [
+            .init(stage: .core, start: day(19, 23), end: day(20, 1), source: watch),
+            .init(stage: .core, start: day(20, 1), end: day(20, 2), source: watch),
+            .init(stage: .deep, start: day(20, 2), end: day(20, 3), source: watch),
+            .init(stage: .awake, start: day(20, 3), end: day(20, 3, 10), source: watch),
+            .init(stage: .rem, start: day(20, 0), end: day(20, 1), source: phone),
+        ]
+        let blocks = SleepStages.blocks(from: samples, calendar: utc)
+        #expect(blocks.map(\.stage) == [.core, .deep, .awake], "the phone's REM is dropped, the two core blocks join")
+        #expect(blocks.first == SleepStageBlock(stage: .core, start: day(19, 23), end: day(20, 2)))
+    }
+
+    @Test func stagesAndDayTotalsBecomeReadings() {
+        var snapshot = HealthSnapshot()
+        snapshot.sleepStages = [SleepStageBlock(stage: .deep, start: day(20, 1), end: day(20, 2, 30))]
+        snapshot.daylightMinutes = [DailyValue(day: day(20), value: 84)]
+        snapshot.dietaryWater = [DailyValue(day: day(20), value: 250)]
+        snapshot.bodyMass = [DailyValue(day: day(20), value: 83.9)]
+        let readings = HealthPayload.requests(from: snapshot, calendar: utc).first?.readings ?? []
+
+        let deep = readings.first { $0.metric == "sleep_deep" }
+        #expect(deep?.value == 90)
+        #expect(deep?.startedAt == day(20, 1) && deep?.endedAt == day(20, 2, 30))
+        #expect(readings.first { $0.metric == "time_in_daylight" }?.endedAt == day(21))
+        #expect(readings.first { $0.metric == "dietary_water" }?.unit == "ml")
+        let weight = readings.first { $0.metric == "body_mass" }
+        #expect(weight?.value == 83.9 && weight?.endedAt == nil, "a weighing is an instant")
+    }
+
+    @Test func onlyStagedValuesHaveAStage() {
+        #expect(SleepStages.stage(for: HKCategoryValueSleepAnalysis.asleepDeep.rawValue) == .deep)
+        #expect(SleepStages.stage(for: HKCategoryValueSleepAnalysis.inBed.rawValue) == nil)
+        #expect(SleepStages.stage(for: HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue) == nil)
+    }
+}
