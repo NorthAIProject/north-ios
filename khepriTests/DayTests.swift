@@ -101,6 +101,16 @@ struct DayMathTests {
         #expect(DayMath.timeline(response(isToday: false)).allSatisfy { $0.id != "now" })
     }
 
+    @Test func aRunningFastShadesTheRowsItCovers() {
+        var day = response()
+        day.fast = .init(startedAt: hour(-2), targetHours: 16, elapsedMinutes: 120, phase: .fasting, fraction: 0.125)
+        let rows = DayMath.timeline(day)
+        #expect(rows.contains { $0.id == "b0s" }, "the fast's start is a row")
+        #expect(!rows.contains { $0.id == "b0e" }, "a running fast has no end row")
+        #expect(rows.first { $0.id == "e0" }?.bands.first?.kind == "fast", "lunch an hour ago falls inside the fast")
+        #expect(rows.first { $0.id == "e1" }?.bands.isEmpty == true, "water an hour from now is after it")
+    }
+
     @Test func theHypnogramSpansTheNight() throws {
         let blocks = DayMath.hypnogram(try #require(response().sleep))
         #expect(blocks.map(\.start) == [0, 0.5])
