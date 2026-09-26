@@ -68,6 +68,13 @@ struct ContractTests {
         #expect(try decode(Schemas.TrackerList.self, "trackers").trackers.first?.due == true)
     }
 
+    @Test func dayTrends() throws {
+        let trends = try decode(Schemas.DayTrends.self, "day_trends")
+        #expect(trends.series.first?.key == .systolic)
+        #expect(trends.series.first?.headline == 122)
+        #expect(trends.fasts.first?.met == true)
+    }
+
     @Test func dayRules() throws {
         let response = try decode(Schemas.DayRulesResponse.self, "day_rules")
         #expect(response.rules.first?.at == "20:00")
@@ -230,7 +237,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "caffeine", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

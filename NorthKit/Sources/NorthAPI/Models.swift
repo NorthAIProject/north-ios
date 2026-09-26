@@ -31,6 +31,8 @@ public typealias FastingState = Components.Schemas.FastingState
 public typealias SupplementsToday = Components.Schemas.SupplementsToday
 public typealias SorenessToday = Components.Schemas.SorenessToday
 public typealias TrackerList = Components.Schemas.TrackerList
+public typealias DayTrends = Components.Schemas.DayTrends
+public typealias DayTrend = Components.Schemas.DayTrend
 
 public extension OpenAPIObjectContainer {
     /// Builds a container from a JSON-shaped dictionary, such as a WebAuthn

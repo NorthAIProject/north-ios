@@ -42,6 +42,10 @@ actor FakeDayService: DayServicing {
     }
 
     func failNext() { fail = true }
+
+    func trends() async throws -> DayTrends {
+        DayTrends(series: [], fasts: [])
+    }
 }
 
 @MainActor

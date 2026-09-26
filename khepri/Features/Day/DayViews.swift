@@ -22,6 +22,9 @@ struct DayDashboard: View {
             }
             BodyCard(measurements: day.body) { editingBody = true }
             DayTimeline(day: day)
+            if let trends = store?.trends, !trends.series.isEmpty || !trends.fasts.isEmpty {
+                TrendsSection(trends: trends)
+            }
         }
         .sheet(item: $detail) { kind in
             NavigationStack {
@@ -461,10 +464,8 @@ private struct BodyCard: View {
                     }
                 }
                 Spacer()
-                Image(systemName: "figure.stand")
-                    .font(.system(size: 110, weight: .ultraLight))
-                    .foregroundStyle(NorthColor.Day.stand.opacity(0.7))
-                    .accessibilityHidden(true)
+                Body3DView(soreness: Dictionary(measurements.soreness.map { ($0.region, $0.severity) }, uniquingKeysWith: max)) { _ in edit() }
+                    .frame(width: 150, height: 220)
             }
             if !measurements.soreness.isEmpty {
                 FlowTags(tags: measurements.soreness.map { "\(DayMath.regionName($0.region)) · \(DayMath.severityName($0.severity))" })
