@@ -16,9 +16,12 @@ struct InsightsDomainView: View {
             case .mind: DomainLoader(range: range, load: service.mind) { MindPage(model: $0) }
             case .progress: DomainLoader(range: range, load: service.progress) { ProgressPage(model: $0) }
             case .training: DomainLoader(range: range, load: service.training) { TrainingPage(model: $0, range: range) }
-            case .nutrition: DomainLoader(range: range, load: service.nutrition) { NutritionPage(model: $0) }
+            case .nutrition: DomainLoader(range: range, load: service.nutrition) { NutritionPage(model: $0, range: range) }
             case .coach: DomainLoader(range: range, load: service.coach) { CoachPage(model: $0) }
             case .spend: DomainLoader(range: range, load: service.spend) { SpendPage(model: $0) }
+            case .sleep: StatsLoader(range: range, load: { try await StatsService().sleep(range: $0) }) { SleepStatsPage(model: $0) }
+            case .cardio: StatsLoader(range: range, load: { try await StatsService().cardio(range: $0) }) { CardioStatsPage(model: $0) }
+            case .patterns: StatsLoader(range: range, load: { try await StatsService().patterns(range: $0) }) { PatternsPage(model: $0) }
             case .timeline: TimelinePage(range: range, service: service)
             }
         }
@@ -219,6 +222,7 @@ private struct TrainingPage: View {
 
 private struct NutritionPage: View {
     let model: InsightsNutrition
+    let range: String
 
     var body: some View {
         List {
@@ -241,6 +245,7 @@ private struct NutritionPage: View {
                 SegmentSection(title: "Macros (g)", segments: model.macros)
             }
             HighlightsSection(highlights: model.highlights)
+            EatingSections(range: range)
         }
     }
 }
