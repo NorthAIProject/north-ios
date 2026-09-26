@@ -133,7 +133,7 @@ private final class FakeCalculator: CalculatorServicing, @unchecked Sendable {
 
     func calculator() async throws -> Calculator {
         Calculator(
-            biometrics: weightKg.map { .init(weightKg: $0, heightCm: 180, dateOfBirth: "1996-01-01", sex: "male") },
+            biometrics: weightKg == nil ? nil : .init(weightKg: weightKg!, heightCm: 180, dateOfBirth: "1996-01-01", sex: "male"),
             options: .init(activityLevels: [], goals: [], macroSplits: [])
         )
     }

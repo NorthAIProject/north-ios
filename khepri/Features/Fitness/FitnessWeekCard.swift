@@ -78,12 +78,12 @@ private struct WeekBars: View {
                 if day.steps > 0 {
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Steps", day.steps))
                         .foregroundStyle(day.active ? AnyShapeStyle(NorthColor.ember) : AnyShapeStyle(Color(.systemGray3)))
-                        .clipShape(.rect(cornerRadius: 4))
+                        .cornerRadius(4)
                 } else {
                     // A thin track keeps empty and future days in the row.
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Steps", peak * 0.04))
                         .foregroundStyle(Color(.tertiarySystemFill))
-                        .clipShape(.rect(cornerRadius: 3))
+                        .cornerRadius(3)
                 }
             }
             .chartXAxis(.hidden)

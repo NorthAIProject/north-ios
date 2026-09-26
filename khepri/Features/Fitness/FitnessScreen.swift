@@ -9,11 +9,7 @@ struct FitnessRoute: Hashable {}
 /// VO2 max are trending. Read from Apple Health on the phone, so it works
 /// before anything has synced.
 struct FitnessScreen: View {
-    @State private var store: FitnessStore
-
-    init(store: FitnessStore = FitnessStore()) {
-        _store = State(initialValue: store)
-    }
+    @State private var store = FitnessStore()
 
     var body: some View {
         ScrollView {
@@ -288,7 +284,7 @@ private struct StepsCard: View {
                         Text(FitnessFormat.signed(delta))
                             .font(.north(.subheadline).weight(.medium))
                             .monospacedDigit()
-                            .foregroundStyle(delta > 0 ? .green : delta < 0 ? .red : .secondary)
+                            .foregroundStyle(delta > 0 ? Color.green : delta < 0 ? Color.red : Color.secondary)
                     }
                 }
                 .accessibilityElement(children: .combine)
