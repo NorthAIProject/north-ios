@@ -146,7 +146,8 @@ extension DayView {
             day: day,
             service: ActivityService(),
             live: WorkoutLiveActivityController(),
-            health: HealthWorkoutWriter()
+            health: HealthWorkoutWriter(),
+            lifts: LiftService()
         )
     }
 }

@@ -59,6 +59,15 @@ struct ContractTests {
         #expect(response.vitals.screenMinutes == 248)
     }
 
+    @Test func lifts() throws {
+        let stats = try decode(Schemas.LiftStats.self, "lift_stats")
+        #expect(stats.volumeKg == 1025)
+        #expect(stats.records.first?.e1rmKg == 122.5)
+        #expect(stats.exercises.first?.trend.count == 1)
+        let last = try decode(Schemas.LiftLast.self, "lift_last")
+        #expect(last.exercises.first?.sets.map(\.setNumber) == [1, 2])
+    }
+
     @Test func trackers() throws {
         #expect(try decode(Schemas.CaffeineToday.self, "caffeine").entries.first?.mg == 100)
         #expect(try decode(Schemas.FastingState.self, "fasting").current?.phase == .fatBurning)
@@ -237,7 +246,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
