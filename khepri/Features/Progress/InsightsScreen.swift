@@ -124,7 +124,7 @@ private struct SummaryList: View {
             }
 
             Section("More") {
-                ForEach([InsightsDomain.timeline, .coach, .spend]) { domain in
+                ForEach([InsightsDomain.sleep, .cardio, .patterns, .timeline, .coach, .spend]) { domain in
                     NavigationLink(value: domain) {
                         Label(domain.title, systemImage: domain.systemImage)
                     }

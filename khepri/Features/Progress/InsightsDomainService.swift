@@ -61,7 +61,7 @@ extension InsightsService: InsightsDomainServicing {
 /// Every insights page the Progress tab can open. The first five match the
 /// score keys the summary returns, so a score row opens its own page.
 enum InsightsDomain: String, CaseIterable, Identifiable, Hashable {
-    case body, mind, progress, training, nutrition, timeline, coach, spend
+    case body, mind, progress, training, nutrition, sleep, cardio, patterns, timeline, coach, spend
 
     var id: String { rawValue }
 
@@ -72,6 +72,9 @@ enum InsightsDomain: String, CaseIterable, Identifiable, Hashable {
         case .progress: "Goals"
         case .training: "Training"
         case .nutrition: "Nutrition"
+        case .sleep: "Sleep"
+        case .cardio: "Cardio"
+        case .patterns: "Patterns"
         case .timeline: "Timeline"
         case .coach: "Coach"
         case .spend: "AI Spend"
@@ -85,6 +88,9 @@ enum InsightsDomain: String, CaseIterable, Identifiable, Hashable {
         case .progress: "flag"
         case .training: "figure.run"
         case .nutrition: "fork.knife"
+        case .sleep: "moon.zzz"
+        case .cardio: "figure.run.circle"
+        case .patterns: "sparkles"
         case .timeline: "list.bullet.below.rectangle"
         case .coach: "bubble.left.and.bubble.right"
         case .spend: "eurosign.circle"

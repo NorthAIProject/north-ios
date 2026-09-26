@@ -522,37 +522,15 @@ struct DayTimeline: View {
                 Text("Nothing logged on this day yet.").font(.subheadline).foregroundStyle(.secondary)
             }
             ForEach(rows) { row in
-                switch row.kind {
-                case .entry(let entry):
-                    HStack(spacing: 10) {
-                        Circle().fill(DayMath.kindColor(entry.kind)).frame(width: 9, height: 9)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(entry.title).font(.subheadline.weight(.medium)).lineLimit(1)
-                            if let detail = entry.detail { Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
-                        }
-                        Spacer()
-                        Text(row.at, format: .dateTime.hour().minute()).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 6)
-                case .marker(let marker):
-                    HStack(spacing: 8) {
-                        Line().stroke(style: StrokeStyle(lineWidth: 1, dash: [3, 3])).foregroundStyle(.secondary).frame(height: 1)
-                        Text("\(marker.label) \(row.at.formatted(date: .omitted, time: .shortened))")
-                            .font(.caption2).foregroundStyle(.secondary)
-                    }
-                    .opacity(marker.passed ? 0.5 : 1)
-                    .padding(.vertical, 4)
-                case .now:
-                    HStack(spacing: 6) {
-                        Text(row.at, format: .dateTime.hour().minute())
-                            .font(.caption2.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(NorthColor.Day.now, in: .capsule)
-                        Rectangle().fill(NorthColor.Day.now).frame(height: 1)
-                    }
-                    .padding(.vertical, 4)
+                HStack(alignment: .center, spacing: 8) {
+                    Text(row.at, format: .dateTime.hour().minute())
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(isNow(row) ? NorthColor.Day.now : .secondary)
+                        .frame(width: 40, alignment: .trailing)
+                    BandGutter(bands: row.bands)
+                    content(row)
                 }
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(16)
@@ -560,6 +538,93 @@ struct DayTimeline: View {
     }
 
     private var rows: [DayMath.TimelineRow] { DayMath.timeline(day) }
+
+    private func isNow(_ row: DayMath.TimelineRow) -> Bool {
+        if case .now = row.kind { true } else { false }
+    }
+
+    @ViewBuilder
+    private func content(_ row: DayMath.TimelineRow) -> some View {
+        switch row.kind {
+        case .entry(let entry):
+            let color = DayMath.kindColor(entry.kind)
+            HStack(spacing: 10) {
+                Image(systemName: DayMath.kindSymbol(entry.kind))
+                    .font(.subheadline)
+                    .foregroundStyle(color)
+                    .frame(width: 20)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(entry.title).font(.subheadline.weight(.medium)).lineLimit(1)
+                    if let detail = entry.detail, !detail.isEmpty {
+                        Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(color.opacity(0.12), in: .rect(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(color.opacity(0.22)))
+            .padding(.vertical, 3)
+            .accessibilityElement(children: .combine)
+        case .marker(let marker):
+            HStack(spacing: 8) {
+                Line().stroke(style: StrokeStyle(lineWidth: 1, dash: [3, 3])).foregroundStyle(.secondary).frame(height: 1)
+                Text(marker.label).font(.caption2).foregroundStyle(.secondary)
+            }
+            .opacity(marker.passed ? 0.5 : 1)
+            .padding(.vertical, 6)
+        case .now:
+            HStack(spacing: 0) {
+                Circle().fill(NorthColor.Day.now).frame(width: 7, height: 7)
+                Rectangle().fill(NorthColor.Day.now).frame(height: 1)
+            }
+            .padding(.vertical, 6)
+            .accessibilityLabel("Now")
+        case .bandEdge(let band, let starts):
+            Text(bandLabel(band, starts: starts))
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(band.color)
+                .padding(.vertical, 5)
+        }
+    }
+
+    private func bandLabel(_ band: DayMath.Band, starts: Bool) -> String {
+        switch (band.kind, starts) {
+        case ("sleep", true): String(localized: "Fell asleep")
+        case ("sleep", false): String(localized: "Woke up")
+        case (_, true): band.open
+            ? String(localized: "Fast started · \(DayMath.clock(Int(day.now.timeIntervalSince(band.start) / 60))) so far")
+            : String(localized: "Fast started")
+        default: String(localized: "Fast ended")
+        }
+    }
+}
+
+/// The bands running at a row's time: a dashed stripe per band, so a fast
+/// or the night reads as one line down the timeline.
+private struct BandGutter: View {
+    let bands: [DayMath.Band]
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(bands.enumerated()), id: \.offset) { _, band in
+                VLine()
+                    .stroke(style: StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                    .foregroundStyle(band.color)
+                    .frame(width: 2)
+            }
+        }
+        .frame(width: 8)
+        .frame(maxHeight: .infinity)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct VLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { p in p.move(to: CGPoint(x: rect.midX, y: 0)); p.addLine(to: CGPoint(x: rect.midX, y: rect.maxY)) }
+    }
 }
 
 private struct Line: Shape {

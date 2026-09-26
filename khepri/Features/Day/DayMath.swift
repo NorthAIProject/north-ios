@@ -102,8 +102,53 @@ enum DayMath {
         case "activity": NorthColor.Day.fat
         case "checkin", "habit": NorthColor.ember
         case "journal": NorthColor.agent
+        case "caffeine": NorthColor.Day.caffeine
+        case "supplement": NorthColor.Day.protein
+        case "fasting": NorthColor.Day.fat
         default: NorthColor.signal
         }
+    }
+
+    /// The SF Symbol for a timeline entry's kind.
+    static func kindSymbol(_ kind: String) -> String {
+        switch kind {
+        case "food": "fork.knife"
+        case "hydration": "drop.fill"
+        case "sleep": "moon.fill"
+        case "activity": "figure.run"
+        case "checkin": "face.smiling"
+        case "habit": "checkmark.circle.fill"
+        case "journal": "book.closed.fill"
+        case "goal", "goal-note": "flag.fill"
+        case "caffeine": "cup.and.saucer.fill"
+        case "supplement": "pills.fill"
+        case "fasting": "timer"
+        default: "circle.fill"
+        }
+    }
+
+    /// A span of the day drawn beside the timeline: the night's sleep, or a
+    /// fast, running to now when it has not ended.
+    struct Band {
+        let kind: String
+        let start: Date
+        let end: Date
+        let open: Bool
+
+        var color: Color { kind == "sleep" ? NorthColor.Day.sleep : NorthColor.Day.fat }
+        func covers(_ date: Date) -> Bool { date >= start && date <= end }
+    }
+
+    static func bands(_ day: DayResponse) -> [Band] {
+        var out: [Band] = []
+        if let sleep = day.sleep, let start = sleep.start, let end = sleep.end, end > start {
+            out.append(Band(kind: "sleep", start: start, end: end, open: false))
+        }
+        if let fast = day.fast {
+            let end = fast.endedAt ?? day.now
+            if end > fast.startedAt { out.append(Band(kind: "fast", start: fast.startedAt, end: end, open: fast.endedAt == nil)) }
+        }
+        return out
     }
 
     struct TimelineRow: Identifiable {
@@ -111,11 +156,15 @@ enum DayMath {
             case entry(DayTimelineEntry)
             case marker(DayMarker)
             case now
+            /// Where a band starts or ends.
+            case bandEdge(Band, starts: Bool)
         }
 
         let id: String
         let at: Date
         let kind: Kind
+        /// The bands running at this row's time, drawn in its leading gutter.
+        var bands: [Band] = []
     }
 
     /// Entries, markers and the now line in one list, latest first — the
@@ -125,7 +174,18 @@ enum DayMath {
         for (i, e) in day.timeline.enumerated() { rows.append(TimelineRow(id: "e\(i)", at: e.at, kind: .entry(e))) }
         for (i, m) in day.markers.enumerated() { rows.append(TimelineRow(id: "m\(i)", at: m.at, kind: .marker(m))) }
         if day.isToday { rows.append(TimelineRow(id: "now", at: day.now, kind: .now)) }
-        return rows.sorted { $0.at > $1.at }
+        let spans = Self.bands(day)
+        for (i, band) in spans.enumerated() {
+            rows.append(TimelineRow(id: "b\(i)s", at: band.start, kind: .bandEdge(band, starts: true)))
+            if !band.open { rows.append(TimelineRow(id: "b\(i)e", at: band.end, kind: .bandEdge(band, starts: false))) }
+        }
+        return rows
+            .map { row in
+                var row = row
+                row.bands = spans.filter { $0.covers(row.at) }
+                return row
+            }
+            .sorted { $0.at > $1.at }
     }
 
     static func clock(_ minutes: Int) -> String {
