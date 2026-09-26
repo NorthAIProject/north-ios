@@ -26,6 +26,11 @@ public typealias DayTimelineEntry = Components.Schemas.DayTimelineEntry
 public typealias DayMarker = Components.Schemas.DayMarker
 public typealias DayRule = Components.Schemas.DayRule
 public typealias DayRulesResponse = Components.Schemas.DayRulesResponse
+public typealias CaffeineToday = Components.Schemas.CaffeineToday
+public typealias FastingState = Components.Schemas.FastingState
+public typealias SupplementsToday = Components.Schemas.SupplementsToday
+public typealias SorenessToday = Components.Schemas.SorenessToday
+public typealias TrackerList = Components.Schemas.TrackerList
 
 public extension OpenAPIObjectContainer {
     /// Builds a container from a JSON-shaped dictionary, such as a WebAuthn

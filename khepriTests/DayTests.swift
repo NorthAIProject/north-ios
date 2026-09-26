@@ -19,8 +19,12 @@ private func response(date: String = "2026-09-26", isToday: Bool = true) -> DayR
                               .init(stage: .awake, start: hour(-9), end: hour(-8))],
                      source: "apple_health"),
         workouts: .init(count: 0, minutes: 0, calories: 0, labels: []),
-        body: .init(),
+        body: .init(soreness: []),
         streak: 9,
+        level: 2,
+        caffeine: .init(totalMg: 100, activeMg: 72, limitMg: 400, afterCutoff: false),
+        nutrients: .init(covered: ["omega3"], missing: ["iron"], total: 2),
+        milestones: [],
         timeline: [.init(kind: "food", at: hour(-1), title: "Lunch", icon: "utensils"),
                    .init(kind: "hydration", at: hour(1), title: "Water", icon: "droplet")],
         markers: [.init(kind: "kitchen_closes", label: "Kitchen closes", at: hour(5), passed: false)]
@@ -103,5 +107,52 @@ struct DayMathTests {
     @Test func durationsReadLikeTheWeb() {
         #expect(DayMath.duration(433) == "7h 13m")
         #expect(DayMath.duration(45) == "45m")
+    }
+}
+
+actor RecordingActions: DayActing {
+    private(set) var calls: [String] = []
+    func logWater(_ ml: Int) async throws { calls.append("water \(ml)") }
+    func logCaffeine(preset: String) async throws { calls.append("caffeine \(preset)") }
+    func logSupplement(preset: String, count: Int) async throws { calls.append("supplement \(preset) \(count)") }
+    func startFast(hours: Int) async throws { calls.append("fast \(hours)") }
+    func stopFast() async throws { throw URLError(.badServerResponse) }
+    func setScreenTime(minutes: Int) async throws { calls.append("screen \(minutes)") }
+    func setSoreness(region: String, severity: Int) async throws { calls.append("sore \(region) \(severity)") }
+    func clearSoreness(region: String) async throws { calls.append("clear \(region)") }
+    func recordBloodPressure(systolic: Int, diastolic: Int) async throws { calls.append("bp \(systolic)/\(diastolic)") }
+    func setTargetWeight(_ kg: Double?) async throws { calls.append("target \(kg ?? 0)") }
+    func createTracker(name: String, lastDone: Date?) async throws { calls.append("tracker \(name)") }
+    func trackerDone(id: String) async throws { calls.append("done \(id)") }
+}
+
+@MainActor
+struct DayActionTests {
+    @Test func aWriteReloadsTheDay() async {
+        let service = FakeDayService()
+        let actions = RecordingActions()
+        let store = DayStore(service: service, actions: actions)
+        await store.perform { try await $0.logCaffeine(preset: "coffee") }
+        #expect(await actions.calls == ["caffeine coffee"])
+        #expect(await service.asked.count == 1, "the day reloads after the write")
+        #expect(store.actionError == nil)
+    }
+
+    @Test func aFailedWriteSaysWhyAndStillReloads() async {
+        let service = FakeDayService()
+        let store = DayStore(service: service, actions: RecordingActions())
+        await store.perform { try await $0.stopFast() }
+        #expect(store.actionError != nil)
+        #expect(await service.asked.count == 1)
+    }
+}
+
+struct DayNamesTests {
+    @Test func everyRegionTheServerKnowsHasAName() {
+        let server = ["neck", "shoulders", "chest", "upper_back", "lower_back", "abs", "biceps", "triceps",
+                      "forearms", "hips", "glutes", "quads", "hamstrings", "knees", "calves", "feet"]
+        #expect(DayMath.regions.map(\.key) == server)
+        #expect(DayMath.clock(766) == "12:46")
+        #expect(DayMath.nutrientName("omega3") == "Omega-3")
     }
 }

@@ -243,3 +243,15 @@ struct MyDayHealthTests {
         #expect(SleepStages.stage(for: HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue) == nil)
     }
 }
+
+struct MyDayHealthPhaseTwoTests {
+    @Test func bloodPressureBecomesTwoInstantReadings() {
+        var snapshot = HealthSnapshot()
+        snapshot.bloodPressure = [BloodPressureReading(at: day(20, 8), systolic: 122, diastolic: 79)]
+        snapshot.vitaminD = [DailyValue(day: day(20), value: 10)]
+        let readings = HealthPayload.requests(from: snapshot, calendar: utc).first?.readings ?? []
+        #expect(readings.first { $0.metric == "bp_systolic" }?.value == 122)
+        #expect(readings.first { $0.metric == "bp_diastolic" }?.startedAt == day(20, 8))
+        #expect(readings.first { $0.metric == "dietary_vitamin_d" }?.unit == "mcg")
+    }
+}

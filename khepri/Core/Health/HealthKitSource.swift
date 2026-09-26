@@ -18,6 +18,10 @@ protocol HealthDataSource: Sendable {
         async let carbs = daily(.dietaryCarbohydrates, .gram(), .cumulativeSum, start, end, calendar, excludingOwn: true)
         async let fat = daily(.dietaryFatTotal, .gram(), .cumulativeSum, start, end, calendar, excludingOwn: true)
         async let weight = daily(.bodyMass, .gramUnit(with: .kilo), .mostRecent, start, end, calendar)
+        async let vitaminA = daily(.dietaryVitaminA, .gramUnit(with: .micro), .cumulativeSum, start, end, calendar, excludingOwn: true)
+        async let vitaminC = daily(.dietaryVitaminC, .gramUnit(with: .milli), .cumulativeSum, start, end, calendar, excludingOwn: true)
+        async let vitaminD = daily(.dietaryVitaminD, .gramUnit(with: .micro), .cumulativeSum, start, end, calendar, excludingOwn: true)
+        async let pressure = bloodPressure(start, end)
         async let stand = standHours(start, end, calendar)
         async let night = sleepNights(start, end, calendar)
         async let workouts = workouts(start, end)
@@ -34,6 +38,10 @@ protocol HealthDataSource: Sendable {
         snapshot.dietaryFat = try await fat
         snapshot.bodyMass = try await weight
         snapshot.sleepStages = try await night.stages
+        snapshot.vitaminA = try await vitaminA
+        snapshot.vitaminC = try await vitaminC
+        snapshot.vitaminD = try await vitaminD
+        snapshot.bloodPressure = try await pressure
         return snapshot
     }
 
@@ -66,6 +74,24 @@ protocol HealthDataSource: Sendable {
             }
             guard let value = quantity?.doubleValue(for: unit), value > 0 else { return nil }
             return DailyValue(day: stats.startDate, value: (value * 10).rounded() / 10)
+        }
+    }
+
+    /// Cuff readings. Apple Health keeps each as a correlation of a systolic
+    /// and a diastolic sample taken together.
+    private func bloodPressure(_ start: Date, _ end: Date) async throws -> [BloodPressureReading] {
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.correlation(type: HKCorrelationType(.bloodPressure),
+                                      predicate: HKQuery.predicateForSamples(withStart: start, end: end))],
+            sortDescriptors: [SortDescriptor(\.startDate)]
+        )
+        let mmHg = HKUnit.millimeterOfMercury()
+        return try await descriptor.result(for: store).compactMap { correlation in
+            let sys = correlation.objects(for: HKQuantityType(.bloodPressureSystolic)).first as? HKQuantitySample
+            let dia = correlation.objects(for: HKQuantityType(.bloodPressureDiastolic)).first as? HKQuantitySample
+            guard let sys, let dia else { return nil }
+            return BloodPressureReading(at: correlation.startDate, systolic: sys.quantity.doubleValue(for: mmHg),
+                                        diastolic: dia.quantity.doubleValue(for: mmHg))
         }
     }
 

@@ -56,6 +56,19 @@ struct HealthSnapshot {
     /// The day's last weighing.
     var bodyMass: [DailyValue] = []
     var sleepStages: [SleepStageBlock] = []
+    /// Vitamins other apps logged from food, per day, in each vitamin's usual
+    /// unit. Only whether there was any counts toward coverage.
+    var vitaminA: [DailyValue] = []
+    var vitaminC: [DailyValue] = []
+    var vitaminD: [DailyValue] = []
+    var bloodPressure: [BloodPressureReading] = []
+}
+
+/// One cuff reading as Apple Health stores it: a correlation of two samples.
+struct BloodPressureReading: Equatable {
+    var at: Date
+    var systolic: Double
+    var diastolic: Double
 }
 
 /// Turns a snapshot into the requests `POST /health/samples` takes.
@@ -90,6 +103,14 @@ enum HealthPayload {
         daily(snapshot.dietaryProtein, "dietary_protein", "g")
         daily(snapshot.dietaryCarbs, "dietary_carbs", "g")
         daily(snapshot.dietaryFat, "dietary_fat", "g")
+        daily(snapshot.vitaminA, "dietary_vitamin_a", "mcg")
+        daily(snapshot.vitaminC, "dietary_vitamin_c", "mg")
+        daily(snapshot.vitaminD, "dietary_vitamin_d", "mcg")
+        // Each reading is an instant, two metrics at the same moment.
+        for bp in snapshot.bloodPressure where bp.systolic > 0 && bp.diastolic > 0 {
+            readings.append(.init(metric: "bp_systolic", value: bp.systolic, unit: "mmHg", startedAt: bp.at))
+            readings.append(.init(metric: "bp_diastolic", value: bp.diastolic, unit: "mmHg", startedAt: bp.at))
+        }
         // A weighing is an instant, and the day's start keeps one per day.
         for v in snapshot.bodyMass where v.value > 0 {
             readings.append(.init(metric: "body_mass", value: v.value, unit: "kg", startedAt: v.day))

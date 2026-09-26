@@ -8,6 +8,7 @@ import SwiftUI
 struct TodayScreen: View {
     @State private var state: LoadState = .loading
     @State private var dayStore: DayStore
+    @State private var addingToDay = false
     @Environment(\.scenePhase) private var scenePhase
 
     private let auth: AuthServicing
@@ -54,7 +55,12 @@ struct TodayScreen: View {
                         .accessibilityLabel("Next day")
                 }
                 ToolbarItem(placement: .primaryAction) { NudgesBellButton() }
+                ToolbarItem(placement: .primaryAction) {
+                    Button { addingToDay = true } label: { Image(systemName: "plus.circle.fill") }
+                        .accessibilityLabel("Add to your day")
+                }
             }
+            .sheet(isPresented: $addingToDay) { QuickAddSheet(store: dayStore) }
             .refreshable { await load() }
         }
         .task { await load() }

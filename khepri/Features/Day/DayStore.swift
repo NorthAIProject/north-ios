@@ -23,12 +23,28 @@ final class DayStore {
     /// nil means today, so a store left open past midnight follows the day.
     private(set) var date: Date?
 
+    /// The last write's failure, shown until the next one succeeds.
+    private(set) var actionError: String?
+
     private let service: DayServicing
+    let actions: DayActing
     private let calendar: Calendar
 
-    init(service: DayServicing = DayService(), calendar: Calendar = .current) {
+    init(service: DayServicing = DayService(), actions: DayActing = DayActions(), calendar: Calendar = .current) {
         self.service = service
+        self.actions = actions
         self.calendar = calendar
+    }
+
+    /// Runs one write and reloads the day, so every card reflects it.
+    func perform(_ action: @Sendable (DayActing) async throws -> Void) async {
+        do {
+            try await action(actions)
+            actionError = nil
+        } catch {
+            actionError = error.localizedDescription
+        }
+        await load()
     }
 
     var isToday: Bool { day?.isToday ?? (date == nil) }

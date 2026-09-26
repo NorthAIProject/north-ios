@@ -127,4 +127,60 @@ enum DayMath {
         if day.isToday { rows.append(TimelineRow(id: "now", at: day.now, kind: .now)) }
         return rows.sorted { $0.at > $1.at }
     }
+
+    static func clock(_ minutes: Int) -> String {
+        String(format: "%d:%02d", minutes / 60, minutes % 60)
+    }
+
+    static func phaseName(_ phase: Components.Schemas.DayFast.PhasePayload) -> String {
+        switch phase {
+        case .fed: String(localized: "Fed")
+        case .fasting: String(localized: "Fasting")
+        case .fatBurning: String(localized: "Fat burning")
+        case .ketosis: String(localized: "Ketosis")
+        }
+    }
+
+    static let nutrientNames: [String: String.LocalizationValue] = [
+        "vitamin_a": "Vitamin A", "vitamin_b12": "Vitamin B12", "vitamin_c": "Vitamin C", "vitamin_d": "Vitamin D",
+        "vitamin_e": "Vitamin E", "vitamin_k": "Vitamin K", "folate": "Folate", "calcium": "Calcium", "iron": "Iron",
+        "magnesium": "Magnesium", "zinc": "Zinc", "potassium": "Potassium", "iodine": "Iodine", "omega3": "Omega-3",
+        "fiber": "Fibre",
+    ]
+
+    static func nutrientName(_ key: String) -> String {
+        nutrientNames[key].map { String(localized: $0) } ?? key
+    }
+
+    /// Body regions, head to foot, with the keys the server and the 3D body use.
+    static let regions: [(key: String, name: String.LocalizationValue)] = [
+        ("neck", "Neck"), ("shoulders", "Shoulders"), ("chest", "Chest"), ("upper_back", "Upper back"),
+        ("lower_back", "Lower back"), ("abs", "Abs"), ("biceps", "Biceps"), ("triceps", "Triceps"),
+        ("forearms", "Forearms"), ("hips", "Hips"), ("glutes", "Glutes"), ("quads", "Quads"),
+        ("hamstrings", "Hamstrings"), ("knees", "Knees"), ("calves", "Calves"), ("feet", "Feet"),
+    ]
+
+    static func regionName(_ key: String) -> String {
+        regions.first { $0.key == key }.map { String(localized: $0.name) } ?? key
+    }
+
+    static func severityName(_ severity: Int) -> String {
+        switch severity {
+        case 3: String(localized: "Painful")
+        case 2: String(localized: "Sore")
+        default: String(localized: "Stiff")
+        }
+    }
+
+    /// Quick-add presets. The keys are the server's; the doses are shown only.
+    static let caffeinePresets: [(key: String, name: String.LocalizationValue, mg: Int)] = [
+        ("espresso", "Espresso", 63), ("coffee", "Coffee", 100), ("tea", "Tea", 45),
+        ("energy_drink", "Energy drink", 80), ("cola", "Cola", 35),
+    ]
+
+    static let supplementPresets: [(key: String, name: String)] = [
+        ("omega3", "Omega-3 (EPA/DHA)"), ("vitamin_d3", "Vitamin D3"), ("multivitamin", "Multivitamin"),
+        ("magnesium", "Magnesium"), ("vitamin_c", "Vitamin C"), ("b12", "Vitamin B12"), ("iron", "Iron"),
+        ("zinc", "Zinc"), ("calcium", "Calcium"), ("psyllium", "Psyllium husk"), ("creatine", "Creatine"),
+    ]
 }

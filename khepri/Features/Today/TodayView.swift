@@ -55,7 +55,7 @@ struct TodayView: View {
                 }
 
                 if let day = dayStore?.day {
-                    DayDashboard(day: day)
+                    DayDashboard(day: day, store: dayStore)
                 } else {
                     TodaySection("Water and sleep") {
                         Row {

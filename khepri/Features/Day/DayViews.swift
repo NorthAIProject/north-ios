@@ -6,7 +6,9 @@ import SwiftUI
 /// Every card opens its detail in a sheet.
 struct DayDashboard: View {
     let day: DayResponse
+    var store: DayStore?
     @State private var detail: DayCardKind?
+    @State private var editingBody = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -18,27 +20,32 @@ struct DayDashboard: View {
                         .accessibilityIdentifier("day-card-\(kind.rawValue)")
                 }
             }
-            BodyCard(measurements: day.body)
+            BodyCard(measurements: day.body) { editingBody = true }
             DayTimeline(day: day)
         }
         .sheet(item: $detail) { kind in
             NavigationStack {
-                ScrollView { DayCardDetail(kind: kind, day: day).padding(16) }
+                ScrollView { DayCardDetail(kind: kind, day: day, store: store).padding(16) }
                     .navigationTitle(kind.title)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { detail = nil } } }
             }
             .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $editingBody) {
+            if let store { BodySheet(day: day, store: store) }
+        }
     }
 }
 
 enum DayCardKind: String, CaseIterable, Identifiable {
-    case food, water, activity, sleep, workouts, streak
+    case fast, food, water, activity, sleep, workouts, nutrients, streak
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
         switch self {
+        case .fast: "Fasting"
+        case .nutrients: "Nutrients"
         case .food: "Food"
         case .water: "Water"
         case .activity: "Activity"
@@ -50,6 +57,8 @@ enum DayCardKind: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
+        case .fast: "timer"
+        case .nutrients: "leaf"
         case .food: "fork.knife"
         case .water: "drop"
         case .activity: "waveform.path.ecg"
@@ -61,6 +70,8 @@ enum DayCardKind: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
+        case .fast: NorthColor.Day.fat
+        case .nutrients: NorthColor.Day.food
         case .food: NorthColor.Day.food
         case .water: NorthColor.Day.water
         case .activity: NorthColor.Day.move
@@ -78,16 +89,21 @@ struct VitalsStrip: View {
 
     var body: some View {
         HStack(spacing: 6) {
+            VitalTile(label: "Caffeine", value: String(day.caffeine.activeMg), unit: "mg",
+                      fraction: DayMath.fraction(Double(day.caffeine.totalMg), Double(day.caffeine.limitMg)), color: NorthColor.Day.caffeine)
             VitalTile(label: "Energy", value: day.vitals.energyPercent.map(String.init), unit: "%",
                       fraction: Double(day.vitals.energyPercent ?? 0) / 100, color: NorthColor.Day.move)
             VitalTile(label: "Sunlight", value: day.vitals.daylightMinutes.map(String.init), unit: "min",
                       fraction: Double(day.vitals.daylightMinutes ?? 0) / 60, color: NorthColor.Day.sun)
-            VitalTile(label: "Water", value: String(format: "%.1f", Double(day.water.totalMl) / 1000), unit: "L",
-                      fraction: DayMath.fraction(Double(day.water.totalMl), Double(day.water.targetMl)), color: NorthColor.Day.water)
-            VitalTile(label: "Move", value: String(format: "%.0f", day.activity.move.value), unit: "kcal",
-                      fraction: DayMath.fraction(day.activity.move.value, day.activity.move.goal), color: NorthColor.Day.move)
-            VitalTile(label: "Streak", value: String(day.streak), unit: "d",
-                      fraction: Double(day.streak % 7) / 7, color: NorthColor.ember)
+            VitalTile(label: "Screen", value: day.vitals.screenMinutes.map(DayMath.duration), unit: "",
+                      fraction: Double(day.vitals.screenMinutes ?? 0) / 240, color: NorthColor.Day.screen)
+            if let tracker = day.milestones.first {
+                VitalTile(label: LocalizedStringKey(tracker.name), value: String(tracker.monthsSince), unit: "mo",
+                          fraction: tracker.fraction, color: tracker.due ? NorthColor.Day.move : NorthColor.Day.stand)
+            } else {
+                VitalTile(label: "Streak", value: String(day.streak), unit: "d",
+                          fraction: Double(day.streak % 7) / 7, color: NorthColor.ember)
+            }
         }
     }
 }
@@ -151,12 +167,34 @@ private struct DayCardView: View {
         case .food: String(format: "%.0f kcal", day.food.calories)
         case .workouts: String(day.workouts.count)
         case .sleep: day.sleep?.quality.map { "\($0)/5" } ?? ""
+        case .fast: day.fast.map { DayMath.phaseName($0.phase) } ?? ""
+        case .streak: "Level \(day.level)"
         default: ""
         }
     }
 
     @ViewBuilder private var content: some View {
         switch kind {
+        case .fast:
+            if let fast = day.fast {
+                ZStack {
+                    RingView(fraction: fast.fraction, color: NorthColor.Day.fat, lineWidth: 7)
+                    Text(DayMath.clock(fast.elapsedMinutes)).font(.title3.weight(.semibold).monospacedDigit())
+                }
+                .frame(width: 84, height: 84)
+                .frame(maxWidth: .infinity)
+            } else {
+                Text("Not fasting.").font(.subheadline).foregroundStyle(.secondary)
+            }
+        case .nutrients:
+            VStack(alignment: .leading, spacing: 4) {
+                (Text(day.nutrients.covered.count, format: .number) + Text("/\(day.nutrients.total)").font(.subheadline).foregroundStyle(.secondary))
+                    .font(.title.weight(.semibold).monospacedDigit())
+                if !day.nutrients.missing.isEmpty {
+                    Text(day.nutrients.missing.prefix(3).map(DayMath.nutrientName).joined(separator: ", "))
+                        .font(.caption).foregroundStyle(NorthColor.Day.fat).lineLimit(2)
+                }
+            }
         case .food:
             HStack {
                 MultiRingView(rings: DayMath.macroRings(day.food), lineWidth: 6)
@@ -252,11 +290,37 @@ private struct WaterGlass: View {
 private struct DayCardDetail: View {
     let kind: DayCardKind
     let day: DayResponse
+    var store: DayStore?
     @Environment(AppRouter.self) private var router
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             switch kind {
+            case .fast:
+                if let fast = day.fast {
+                    Text(DayMath.clock(fast.elapsedMinutes)).font(.largeTitle.weight(.semibold).monospacedDigit())
+                    Text("\(DayMath.phaseName(fast.phase)) · target \(fast.targetHours)h").foregroundStyle(.secondary)
+                }
+                if let store {
+                    if day.fast?.endedAt == nil && day.fast != nil && day.isToday {
+                        Button("End the fast") { Task { await store.perform { try await $0.stopFast() } } }
+                            .northProminentButton()
+                    } else {
+                        HStack {
+                            ForEach([12, 16, 18, 24], id: \.self) { hours in
+                                Button("\(hours)h") { Task { await store.perform { try await $0.startFast(hours: hours) } } }
+                                    .buttonStyle(.bordered)
+                            }
+                        }
+                    }
+                }
+            case .nutrients:
+                Text("\(day.nutrients.covered.count) of \(day.nutrients.total) tracked nutrients covered today.")
+                if !day.nutrients.missing.isEmpty {
+                    Text("Still missing").northEyebrow()
+                    Text(day.nutrients.missing.map(DayMath.nutrientName).joined(separator: " · "))
+                        .foregroundStyle(.secondary)
+                }
             case .food:
                 Grid(alignment: .leading, verticalSpacing: 8) {
                     FoodRow(label: "Energy", value: day.food.calories, goal: day.food.goal?.calories, unit: "kcal", color: .primary)
@@ -362,35 +426,75 @@ private struct RingRow: View {
 
 private struct BodyCard: View {
     let measurements: Components.Schemas.DayBody
+    let edit: () -> Void
 
     var body: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 8) {
-                if let weight = measurements.weightKg {
-                    Chip { Text(weight, format: .number.precision(.fractionLength(1))) + Text(" kg").font(.caption).foregroundStyle(.secondary) }
-                }
-                if let bmi = measurements.bmi {
-                    Chip {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text(bmi, format: .number.precision(.fractionLength(1)))
-                            if let category = measurements.bmiCategory {
-                                Text(DayMath.bmiName(category)).font(.caption.weight(.medium)).foregroundStyle(DayMath.bmiColor(category))
+        VStack(alignment: .trailing, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let weight = measurements.weightKg {
+                        Chip {
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(weight, format: .number.precision(.fractionLength(1))) + Text(" kg").font(.caption).foregroundStyle(.secondary)
+                                if let toGoal = measurements.toGoalKg {
+                                    Text("\(toGoal.formatted(.number.precision(.fractionLength(1)))) kg to goal")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
                             }
                         }
                     }
+                    if let bmi = measurements.bmi {
+                        Chip {
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text(bmi, format: .number.precision(.fractionLength(1)))
+                                if let category = measurements.bmiCategory {
+                                    Text(DayMath.bmiName(category)).font(.caption.weight(.medium)).foregroundStyle(DayMath.bmiColor(category))
+                                }
+                            }
+                        }
+                    }
+                    if let bp = measurements.bloodPressure {
+                        Chip { Text("\(bp.systolic)/\(bp.diastolic)") + Text(" mmHg").font(.caption).foregroundStyle(.secondary) }
+                    }
+                    if measurements.weightKg == nil {
+                        Text("No weight recorded yet.").font(.subheadline).foregroundStyle(.secondary)
+                    }
                 }
-                if measurements.weightKg == nil {
-                    Text("No weight recorded yet.").font(.subheadline).foregroundStyle(.secondary)
-                }
+                Spacer()
+                Image(systemName: "figure.stand")
+                    .font(.system(size: 110, weight: .ultraLight))
+                    .foregroundStyle(NorthColor.Day.stand.opacity(0.7))
+                    .accessibilityHidden(true)
             }
-            Spacer()
-            Image(systemName: "figure.stand")
-                .font(.system(size: 110, weight: .ultraLight))
-                .foregroundStyle(NorthColor.Day.stand.opacity(0.7))
-                .accessibilityHidden(true)
+            if !measurements.soreness.isEmpty {
+                FlowTags(tags: measurements.soreness.map { "\(DayMath.regionName($0.region)) · \(DayMath.severityName($0.severity))" })
+            }
+            Button("Update body", action: edit)
+                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
         }
         .padding(16)
         .background(NorthColor.surface, in: .rect(cornerRadius: NorthRadius.large))
+    }
+}
+
+/// Soreness chips, wrapping onto as many lines as they need.
+private struct FlowTags: View {
+    let tags: [String]
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) { chips }
+            VStack(alignment: .trailing, spacing: 6) { chips }
+        }
+    }
+    @ViewBuilder private var chips: some View {
+        ForEach(tags, id: \.self) { tag in
+            Text(tag)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(NorthColor.Day.move)
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(NorthColor.Day.move.opacity(0.15), in: .capsule)
+        }
     }
 }
 
