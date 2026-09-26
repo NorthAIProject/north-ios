@@ -61,6 +61,7 @@ struct TodayScreen: View {
                 }
             }
             .sheet(isPresented: $addingToDay) { QuickAddSheet(store: dayStore) }
+            .navigationDestination(for: FitnessRoute.self) { _ in FitnessScreen() }
             .refreshable { await load() }
         }
         .task { await load() }

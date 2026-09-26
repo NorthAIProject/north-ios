@@ -10,6 +10,7 @@ protocol HealthDataSource: Sendable {
         async let energy = daily(.activeEnergyBurned, .kilocalorie(), .cumulativeSum, start, end, calendar)
         async let resting = daily(.restingHeartRate, .count().unitDivided(by: .minute()), .discreteAverage, start, end, calendar)
         async let hrv = daily(.heartRateVariabilitySDNN, .secondUnit(with: .milli), .discreteAverage, start, end, calendar)
+        async let vo2 = daily(.vo2Max, .vo2Max, .discreteAverage, start, end, calendar)
         async let exercise = daily(.appleExerciseTime, .minute(), .cumulativeSum, start, end, calendar)
         async let daylight = daily(.timeInDaylight, .minute(), .cumulativeSum, start, end, calendar)
         async let water = daily(.dietaryWater, .literUnit(with: .milli), .cumulativeSum, start, end, calendar, excludingOwn: true)
@@ -27,7 +28,7 @@ protocol HealthDataSource: Sendable {
         async let workouts = workouts(start, end)
 
         var snapshot = try await HealthSnapshot(steps: steps, activeEnergy: energy, restingHeartRate: resting,
-                                                hrv: hrv, sleep: night.minutes, workouts: workouts)
+                                                hrv: hrv, vo2Max: vo2, sleep: night.minutes, workouts: workouts)
         snapshot.exerciseMinutes = try await exercise
         snapshot.standHours = try await stand
         snapshot.daylightMinutes = try await daylight
@@ -45,36 +46,9 @@ protocol HealthDataSource: Sendable {
         return snapshot
     }
 
-    /// Everything logged in a window, optionally leaving out what this app
-    /// wrote itself (its water and caffeine are already logs on the server).
-    private func predicate(_ start: Date, _ end: Date, excludingOwn: Bool) -> NSPredicate {
-        let window = HKQuery.predicateForSamples(withStart: start, end: end)
-        guard excludingOwn else { return window }
-        let own = NSCompoundPredicate(notPredicateWithSubpredicate: HKQuery.predicateForObjects(from: HKSource.default()))
-        return NSCompoundPredicate(andPredicateWithSubpredicates: [window, own])
-    }
-
     private func daily(_ id: HKQuantityTypeIdentifier, _ unit: HKUnit, _ options: HKStatisticsOptions,
                        _ start: Date, _ end: Date, _ calendar: Calendar, excludingOwn: Bool = false) async throws -> [DailyValue] {
-        let from = calendar.startOfDay(for: start)
-        let descriptor = HKStatisticsCollectionQueryDescriptor(
-            predicate: .quantitySample(type: HKQuantityType(id), predicate: predicate(from, end, excludingOwn: excludingOwn)),
-            options: options,
-            anchorDate: from,
-            intervalComponents: DateComponents(day: 1)
-        )
-        let collection = try await descriptor.result(for: store)
-        return collection.statistics().compactMap { stats in
-            let quantity: HKQuantity? = if options.contains(.cumulativeSum) {
-                stats.sumQuantity()
-            } else if options.contains(.mostRecent) {
-                stats.mostRecentQuantity()
-            } else {
-                stats.averageQuantity()
-            }
-            guard let value = quantity?.doubleValue(for: unit), value > 0 else { return nil }
-            return DailyValue(day: stats.startDate, value: (value * 10).rounded() / 10)
-        }
+        try await store.dailyValues(id, unit, options, from: start, to: end, calendar: calendar, excludingOwn: excludingOwn)
     }
 
     /// Cuff readings. Apple Health keeps each as a correlation of a systolic
@@ -164,6 +138,45 @@ protocol HealthDataSource: Sendable {
         }
         return nil
     }
+}
+
+extension HKHealthStore {
+    /// One figure per day: a sum for counts like steps, the latest for a
+    /// weighing, an average for rates like heart rate. Days with nothing
+    /// recorded are left out. excludingOwn leaves out what this app wrote
+    /// (its logs are already on the server).
+    func dailyValues(_ id: HKQuantityTypeIdentifier, _ unit: HKUnit, _ options: HKStatisticsOptions,
+                     from start: Date, to end: Date, calendar: Calendar, excludingOwn: Bool = false) async throws -> [DailyValue] {
+        let from = calendar.startOfDay(for: start)
+        var predicate: NSPredicate = HKQuery.predicateForSamples(withStart: from, end: end)
+        if excludingOwn {
+            let own = NSCompoundPredicate(notPredicateWithSubpredicate: HKQuery.predicateForObjects(from: HKSource.default()))
+            predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [predicate, own])
+        }
+        let descriptor = HKStatisticsCollectionQueryDescriptor(
+            predicate: .quantitySample(type: HKQuantityType(id), predicate: predicate),
+            options: options,
+            anchorDate: from,
+            intervalComponents: DateComponents(day: 1)
+        )
+        let collection = try await descriptor.result(for: self)
+        return collection.statistics().compactMap { stats in
+            let quantity: HKQuantity? = if options.contains(.cumulativeSum) {
+                stats.sumQuantity()
+            } else if options.contains(.mostRecent) {
+                stats.mostRecentQuantity()
+            } else {
+                stats.averageQuantity()
+            }
+            guard let value = quantity?.doubleValue(for: unit), value > 0 else { return nil }
+            return DailyValue(day: stats.startDate, value: (value * 10).rounded() / 10)
+        }
+    }
+}
+
+extension HKUnit {
+    /// ml/kg/min, the unit VO2 max is measured in.
+    static var vo2Max: HKUnit { .literUnit(with: .milli).unitDivided(by: .gramUnit(with: .kilo).unitMultiplied(by: .minute())) }
 }
 
 /// One store for the app. HealthKit recommends a single long-lived instance.

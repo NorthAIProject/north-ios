@@ -28,6 +28,15 @@ struct HealthPayloadTests {
         #expect(requests[0].readings?.first { $0.metric == "resting_heart_rate" }?.unit == "count/min")
     }
 
+    @Test func vo2MaxIsSentAsTheServersMetric() {
+        let snapshot = HealthSnapshot(vo2Max: [DailyValue(day: day(20), value: 41.9)])
+        let reading = HealthPayload.requests(from: snapshot, calendar: utc).first?.readings?.first
+
+        #expect(reading?.metric == "vo2max", "the name the server summarises for the coach")
+        #expect(reading?.unit == "ml/kg/min")
+        #expect(reading?.value == 41.9)
+    }
+
     @Test func emptyDaysAreNotSent() {
         let snapshot = HealthSnapshot(steps: [DailyValue(day: day(20), value: 0)])
         #expect(HealthPayload.requests(from: snapshot, calendar: utc).isEmpty)

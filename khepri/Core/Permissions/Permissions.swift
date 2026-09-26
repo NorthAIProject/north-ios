@@ -19,9 +19,11 @@ enum Permissions {
         HKQuantityType(.heartRateVariabilitySDNN),
         HKQuantityType(.restingHeartRate),
         HKQuantityType(.bodyMass),
+        HKQuantityType(.vo2Max),
+        HKQuantityType(.distanceWalkingRunning),
+        HKQuantityType(.appleExerciseTime),
         HKCategoryType(.sleepAnalysis),
         // My Day: rings, daylight, and what other apps logged about food.
-        HKQuantityType(.appleExerciseTime),
         HKCategoryType(.appleStandHour),
         HKQuantityType(.timeInDaylight),
         HKQuantityType(.dietaryWater),
