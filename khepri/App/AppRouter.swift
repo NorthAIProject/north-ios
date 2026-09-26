@@ -27,6 +27,9 @@ enum AppDestination: Equatable {
     /// Today's check-in with its mood already chosen: a button under a
     /// check-in nudge.
     case checkIn(mood: Int)
+    /// The check-in flow, presented as a sheet on the current tab instead
+    /// of navigating to More → Check-ins.
+    case checkInFlow
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -58,6 +61,9 @@ final class AppRouter {
     /// Set with `openSection` when a check-in should start from a mood; the
     /// Check-ins screen takes it and clears it.
     var checkInMood: Int?
+    /// Set when a check-in should start as a sheet on the current tab,
+    /// matching the web's inline check-in flow.
+    var showsCheckInFlow = false
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
@@ -92,6 +98,8 @@ final class AppRouter {
             selectedTab = .more
             checkInMood = mood
             openSection = "check-ins"
+        case .checkInFlow:
+            showsCheckInFlow = true
         }
     }
 

@@ -28,6 +28,16 @@ struct MainTabView: View {
             }
         }
         .guidedTourOverlay(tour, router: router)
+        .sheet(isPresented: $router.showsCheckInFlow) {
+            NavigationStack {
+                CheckInsScreen()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { router.showsCheckInFlow = false }
+                        }
+                    }
+            }
+        }
         .onAppear { tour.startIfNeeded() }
         // Apple Health catches up whenever the app comes forward; the sync
         // itself decides whether it is on.

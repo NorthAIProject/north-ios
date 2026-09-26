@@ -127,6 +127,13 @@ struct RouterTests {
         #expect(router.selectedTab == .more)
         #expect(router.showsSettings)
     }
+
+    @Test func checkInFlowPresentsWithoutLeavingTab() {
+        let router = AppRouter()
+        router.open(.checkInFlow)
+        #expect(router.selectedTab == .today)
+        #expect(router.showsCheckInFlow)
+    }
 }
 
 // MARK: - Fakes

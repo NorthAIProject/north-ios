@@ -19,14 +19,25 @@ struct TodayView: View {
 
                 if let nextStep = snapshot.nextStep {
                     NextStepCard(step: nextStep) {
-                        if let url = URL(string: nextStep.href) { router.open(url: url) }
+                        if nextStep.kind == "check_in" {
+                            router.open(.checkInFlow)
+                        } else if let url = URL(string: nextStep.href) {
+                            router.open(url: url)
+                        }
                     }
                     .anchorGuidedTour(.today)
                 }
 
                 HStack(spacing: 12) {
                     Metric(title: "Streak", value: snapshot.streak, unit: snapshot.streak == 1 ? "day" : "days")
-                    Metric(title: "Check-in", text: snapshot.checkedInToday ? "Done" : "Open")
+                    if snapshot.checkedInToday {
+                        Metric(title: "Check-in", text: "Done")
+                    } else {
+                        Button { router.open(.checkInFlow) } label: {
+                            Metric(title: "Check-in", text: "Open")
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 // Without a next step, the tour points at the day's numbers.
                 .modifier(TourAnchorIf(step: .today, when: snapshot.nextStep == nil))
