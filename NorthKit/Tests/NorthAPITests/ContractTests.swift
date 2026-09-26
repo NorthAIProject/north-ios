@@ -33,6 +33,54 @@ struct ContractTests {
         #expect(response.snapshot.nudges.count == 1)
     }
 
+    @Test func day() throws {
+        let response = try decode(Schemas.DayResponse.self, "day")
+        #expect(response.date == "2026-09-26")
+        #expect(response.vitals.energyPercent == 32)
+        #expect(response.food.goal?.calories == 2200)
+        #expect(response.activity.move.percent == 100)
+        #expect(response.sleep?.stages.additionalProperties["deep"] == 64)
+        #expect(response.sleep?.blocks.first?.stage == .core)
+        #expect(response.body.bmiCategory == .overweight)
+        #expect(response.timeline.first?.kind == "food")
+        #expect(response.markers.first?.kind == "kitchen_closes")
+    }
+
+    @Test func dayTrackers() throws {
+        let response = try decode(Schemas.DayResponse.self, "day")
+        #expect(response.level == 21)
+        #expect(response.caffeine.activeMg == 72)
+        #expect(response.fast?.phase == .fatBurning)
+        #expect(response.nutrients.total == 3)
+        #expect(response.milestones.first?.name == "Dentist")
+        #expect(response.body.toGoalKg == 3.9)
+        #expect(response.body.bloodPressure?.systolic == 122)
+        #expect(response.body.soreness.first?.region == "quads")
+        #expect(response.vitals.screenMinutes == 248)
+    }
+
+    @Test func trackers() throws {
+        #expect(try decode(Schemas.CaffeineToday.self, "caffeine").entries.first?.mg == 100)
+        #expect(try decode(Schemas.FastingState.self, "fasting").current?.phase == .fatBurning)
+        #expect(try decode(Schemas.SupplementsToday.self, "supplements").entries.first?.count == 3)
+        #expect(try decode(Schemas.ScreenTimeDay.self, "screen_time").minutes == 248)
+        #expect(try decode(Schemas.SorenessToday.self, "soreness").regions.contains("quads"))
+        #expect(try decode(Schemas.TrackerList.self, "trackers").trackers.first?.due == true)
+    }
+
+    @Test func dayTrends() throws {
+        let trends = try decode(Schemas.DayTrends.self, "day_trends")
+        #expect(trends.series.first?.key == .systolic)
+        #expect(trends.series.first?.headline == 122)
+        #expect(trends.fasts.first?.met == true)
+    }
+
+    @Test func dayRules() throws {
+        let response = try decode(Schemas.DayRulesResponse.self, "day_rules")
+        #expect(response.rules.first?.at == "20:00")
+        #expect(response.kinds.contains("screens_off"))
+    }
+
     @Test func passkeyCeremony() throws {
         let response = try decode(Schemas.PasskeyCeremonyResponse.self, "passkey-ceremony")
         #expect(response.challengeId == "66666666-6666-6666-6666-666666666666")
@@ -189,7 +237,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

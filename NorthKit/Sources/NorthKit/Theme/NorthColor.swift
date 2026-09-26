@@ -40,6 +40,24 @@ public enum NorthColor {
         public static let other = named("SportOther")
     }
 
+    /// My Day's trackers: one colour each, shared by the rings, the gauges
+    /// and the timeline dots, and identical to the web's `--north-day-*`.
+    public enum Day {
+        public static let water = named("DayWater")
+        public static let food = named("DayFood")
+        public static let protein = named("DayProtein")
+        public static let carb = named("DayCarb")
+        public static let fat = named("DayFat")
+        public static let move = named("DayMove")
+        public static let exercise = named("DayExercise")
+        public static let stand = named("DayStand")
+        public static let sleep = named("DaySleep")
+        public static let caffeine = named("DayCaffeine")
+        public static let sun = named("DaySun")
+        public static let screen = named("DayScreen")
+        public static let now = named("DayNow")
+    }
+
     private static func named(_ name: String) -> Color {
         Color(name, bundle: .module)
     }

@@ -7,12 +7,15 @@ import SwiftUI
 /// it meanwhile.
 struct TodayScreen: View {
     @State private var state: LoadState = .loading
+    @State private var dayStore: DayStore
+    @State private var addingToDay = false
     @Environment(\.scenePhase) private var scenePhase
 
     private let auth: AuthServicing
 
-    init(auth: AuthServicing = AuthService.shared) {
+    init(auth: AuthServicing = AuthService.shared, day: DayServicing = DayService()) {
         self.auth = auth
+        _dayStore = State(initialValue: DayStore(service: day))
     }
 
     enum LoadState {
@@ -29,7 +32,7 @@ struct TodayScreen: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .loaded(let snapshot):
-                    TodayView(snapshot: snapshot)
+                    TodayView(snapshot: snapshot, dayStore: dayStore)
                 case .failed(let message):
                     ContentUnavailableView {
                         Label("Today did not load", systemImage: "wifi.exclamationmark")
@@ -40,10 +43,24 @@ struct TodayScreen: View {
                     }
                 }
             }
-            .navigationTitle("Today")
+            .navigationTitle(dayStore.isToday ? "Today" : dayTitle)
             .toolbar {
+                ToolbarItemGroup(placement: .topBarLeading) {
+                    Button { Task { await dayStore.step(-1) } } label: { Image(systemName: "chevron.left") }
+                        .accessibilityLabel("Previous day")
+                    if !dayStore.isToday {
+                        Button("Today") { Task { await dayStore.goToToday() } }
+                    }
+                    Button { Task { await dayStore.step(1) } } label: { Image(systemName: "chevron.right") }
+                        .accessibilityLabel("Next day")
+                }
                 ToolbarItem(placement: .primaryAction) { NudgesBellButton() }
+                ToolbarItem(placement: .primaryAction) {
+                    Button { addingToDay = true } label: { Image(systemName: "plus.circle.fill") }
+                        .accessibilityLabel("Add to your day")
+                }
             }
+            .sheet(isPresented: $addingToDay) { QuickAddSheet(store: dayStore) }
             .navigationDestination(for: FitnessRoute.self) { _ in FitnessScreen() }
             .refreshable { await load() }
         }
@@ -53,14 +70,20 @@ struct TodayScreen: View {
         }
     }
 
+    private var dayTitle: String {
+        (dayStore.date ?? .now).formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+    }
+
     private func load() async {
+        // My Day loads beside Today; neither waits for the other.
+        async let day: Void = dayStore.load()
         do {
             state = .loaded(try await auth.today().snapshot)
         } catch {
             // Keep what is on screen if a refresh fails; only an empty screen
             // shows the error.
-            if case .loaded = state { return }
-            state = .failed(error.localizedDescription)
+            if case .loaded = state {} else { state = .failed(error.localizedDescription) }
         }
+        await day
     }
 }

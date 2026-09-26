@@ -51,6 +51,19 @@ TOKENS = {
     "north-sport-walk": "SportWalk",
     "north-sport-strength": "SportStrength",
     "north-sport-other": "SportOther",
+    "north-day-water": "DayWater",
+    "north-day-food": "DayFood",
+    "north-day-protein": "DayProtein",
+    "north-day-carb": "DayCarb",
+    "north-day-fat": "DayFat",
+    "north-day-move": "DayMove",
+    "north-day-exercise": "DayExercise",
+    "north-day-stand": "DayStand",
+    "north-day-sleep": "DaySleep",
+    "north-day-caffeine": "DayCaffeine",
+    "north-day-sun": "DaySun",
+    "north-day-screen": "DayScreen",
+    "north-day-now": "DayNow",
 }
 
 OKLCH = re.compile(r"oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:/\s*([\d.]+)%)?\s*\)")

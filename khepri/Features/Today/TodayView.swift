@@ -6,6 +6,7 @@ import SwiftUI
 /// the week's movement, goals, and what happened recently.
 struct TodayView: View {
     let snapshot: TodaySnapshot
+    var dayStore: DayStore?
     @Environment(AppRouter.self) private var router
     @State private var fitness = FitnessStore()
 
@@ -37,9 +38,14 @@ struct TodayView: View {
                     .accessibilityHint("Opens Fitness")
                 }
 
+                if let day = dayStore?.day {
+                    DayDashboard(day: day, store: dayStore)
+                }
+
                 GoalsCard(goals: snapshot.goals)
 
-                if !snapshot.timeline.isEmpty {
+                // My Day draws its own timeline; this is the fallback while it loads.
+                if dayStore?.day == nil, !snapshot.timeline.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         NorthCardHeader("Recently")
                         ForEach(Array(snapshot.timeline.enumerated()), id: \.offset) { index, entry in
