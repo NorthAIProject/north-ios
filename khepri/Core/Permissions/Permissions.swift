@@ -19,6 +19,9 @@ enum Permissions {
         HKQuantityType(.heartRateVariabilitySDNN),
         HKQuantityType(.restingHeartRate),
         HKQuantityType(.bodyMass),
+        HKQuantityType(.vo2Max),
+        HKQuantityType(.distanceWalkingRunning),
+        HKQuantityType(.appleExerciseTime),
         HKCategoryType(.sleepAnalysis),
     ]
 

@@ -44,6 +44,7 @@ struct TodayScreen: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) { NudgesBellButton() }
             }
+            .navigationDestination(for: FitnessRoute.self) { _ in FitnessScreen() }
             .refreshable { await load() }
         }
         .task { await load() }
