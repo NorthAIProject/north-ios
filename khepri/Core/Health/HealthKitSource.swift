@@ -27,10 +27,11 @@ struct HealthKitSource: HealthDataSource {
         async let energy = daily(.activeEnergyBurned, .kilocalorie(), .cumulativeSum, start, end, calendar)
         async let resting = daily(.restingHeartRate, .count().unitDivided(by: .minute()), .discreteAverage, start, end, calendar)
         async let hrv = daily(.heartRateVariabilitySDNN, .secondUnit(with: .milli), .discreteAverage, start, end, calendar)
+        async let vo2 = daily(.vo2Max, .vo2Max, .discreteAverage, start, end, calendar)
         async let sleep = sleepMinutes(start, end, calendar)
         async let workouts = workouts(start, end)
         return try await HealthSnapshot(steps: steps, activeEnergy: energy, restingHeartRate: resting,
-                                        hrv: hrv, sleep: sleep, workouts: workouts)
+                                        hrv: hrv, vo2Max: vo2, sleep: sleep, workouts: workouts)
     }
 
     private func daily(_ id: HKQuantityTypeIdentifier, _ unit: HKUnit, _ options: HKStatisticsOptions,
@@ -103,6 +104,11 @@ extension HKHealthStore {
             return DailyValue(day: stats.startDate, value: (value * 10).rounded() / 10)
         }
     }
+}
+
+extension HKUnit {
+    /// ml/kg/min, the unit VO2 max is measured in.
+    static var vo2Max: HKUnit { .literUnit(with: .milli).unitDivided(by: .gramUnit(with: .kilo).unitMultiplied(by: .minute())) }
 }
 
 /// One store for the app. HealthKit recommends a single long-lived instance.

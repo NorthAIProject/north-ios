@@ -102,12 +102,11 @@ struct HealthKitFitnessSource: FitnessDataSource {
         let from = min(weekStart, twoWeeks)
         let workoutsFrom = calendar.date(byAdding: .day, value: -Self.workoutWindowDays, to: today) ?? today
         let vo2From = calendar.date(byAdding: .day, value: -Self.vo2WindowDays, to: today) ?? today
-        let vo2Unit = HKUnit.literUnit(with: .milli).unitDivided(by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: .minute()))
 
         async let steps = store.dailyValues(.stepCount, .count(), .cumulativeSum, from: from, to: now, calendar: calendar)
         async let exercise = store.dailyValues(.appleExerciseTime, .minute(), .cumulativeSum, from: from, to: now, calendar: calendar)
         async let distance = store.dailyValues(.distanceWalkingRunning, .meterUnit(with: .kilo), .cumulativeSum, from: from, to: now, calendar: calendar)
-        async let vo2 = store.dailyValues(.vo2Max, vo2Unit, .discreteAverage, from: vo2From, to: now, calendar: calendar)
+        async let vo2 = store.dailyValues(.vo2Max, .vo2Max, .discreteAverage, from: vo2From, to: now, calendar: calendar)
         async let workouts = workouts(from: workoutsFrom, to: now)
 
         return try await FitnessSnapshot(steps: steps, exerciseMinutes: exercise, distanceKm: distance,

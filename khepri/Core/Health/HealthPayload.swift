@@ -30,6 +30,8 @@ struct HealthSnapshot {
     var activeEnergy: [DailyValue] = []
     var restingHeartRate: [DailyValue] = []
     var hrv: [DailyValue] = []
+    /// Apple Watch's daily VO2 max estimate in ml/kg/min, where there is one.
+    var vo2Max: [DailyValue] = []
     /// Minutes asleep, keyed by the day the night ends.
     var sleep: [DailyValue] = []
     var workouts: [HealthWorkoutRecord] = []
@@ -58,6 +60,7 @@ enum HealthPayload {
         daily(snapshot.activeEnergy, "active_calories", "kcal")
         daily(snapshot.restingHeartRate, "resting_heart_rate", "count/min")
         daily(snapshot.hrv, "hrv_sdnn", "ms")
+        daily(snapshot.vo2Max, "vo2max", "ml/kg/min")
         daily(snapshot.sleep, "sleep_asleep", "min")
 
         let workouts = snapshot.workouts.compactMap(workout)
