@@ -5,6 +5,23 @@ import HealthKit
 /// HealthKit, which the simulator has but a unit test cannot fill.
 protocol HealthDataSource: Sendable {
     var isAvailable: Bool { get }
+    func snapshot(from start: Date, to end: Date, calendar: Calendar) async throws -> HealthSnapshot
+}
+
+/// Apple Health through HealthKit's async query descriptors.
+///
+/// HealthKit never says whether reading was allowed. A refused type simply
+/// returns nothing, so a person who allowed steps but not sleep syncs steps
+/// and nothing else, with no error to show.
+struct HealthKitSource: HealthDataSource {
+    let store: HKHealthStore
+
+    init(store: HKHealthStore = HealthStore.shared) {
+        self.store = store
+    }
+
+    var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
+
     func snapshot(from start: Date, to end: Date, calendar: Calendar) async throws -> HealthSnapshot {
         async let steps = daily(.stepCount, .count(), .cumulativeSum, start, end, calendar)
         async let energy = daily(.activeEnergyBurned, .kilocalorie(), .cumulativeSum, start, end, calendar)
