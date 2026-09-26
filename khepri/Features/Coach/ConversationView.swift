@@ -8,10 +8,20 @@ struct ConversationView: View {
     @State private var store: ConversationStore
     @State private var draft = ""
     @State private var openExercise: String?
+    @State private var dictating = false
+    /// The moment after a reply ends, while the header says so.
+    @State private var flash: CoachActivity.Flash?
+    /// Whether the person stopped the reply, which earns no "is done".
+    @State private var stopped = false
     @FocusState private var composing: Bool
+    @Environment(\.dismiss) private var dismiss
 
-    init(summary: ConversationSummary, coach: CoachServicing) {
+    /// Starts another conversation or reflection from the header.
+    private let onNew: (_ reflection: Bool) -> Void
+
+    init(summary: ConversationSummary, coach: CoachServicing, onNew: @escaping (_ reflection: Bool) -> Void = { _ in }) {
         _store = State(initialValue: ConversationStore(conversationID: summary.id, title: summary.title, coach: coach))
+        self.onNew = onNew
     }
 
     var body: some View {
@@ -28,6 +38,7 @@ struct ConversationView: View {
                     }
                     if let approval = store.pendingApproval {
                         ApprovalCard(approval: approval) { approve in
+                            stopped = false
                             Task { await store.decide(approve: approve) }
                         }
                     }
@@ -63,10 +74,18 @@ struct ConversationView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if !store.ended {
-                Composer(text: $draft, isReplying: store.phase == .replying, canSend: store.canSend, focused: $composing) {
+                Composer(
+                    text: $draft,
+                    isReplying: store.phase == .replying,
+                    canSend: store.canSend,
+                    focused: $composing,
+                    onListeningChange: { dictating = $0 }
+                ) {
+                    stopped = false
                     store.send(draft)
                     draft = ""
                 } onStop: {
+                    stopped = true
                     store.stop()
                 }
             } else {
@@ -78,8 +97,32 @@ struct ConversationView: View {
                     .background(.bar)
             }
         }
+        // Khepri's mark in place of the navigation bar: its ring and status
+        // say whether the coach is thinking, writing or listening.
+        .safeAreaInset(edge: .top, spacing: 0) {
+            CoachHeader(
+                activity: .resolve(store, flash: flash, isListening: composing || dictating),
+                leadingSystemImage: "chevron.left",
+                leadingLabel: "Back",
+                newIdentifier: "thread-new-conversation",
+                onLeading: { dismiss() },
+                onNew: onNew
+            )
+        }
+        .onChange(of: store.phase) { old, new in
+            if let earned = CoachActivity.flash(
+                from: old, to: new,
+                replyFailed: store.replyError != nil,
+                awaitingApproval: store.pendingApproval != nil,
+                stopped: stopped
+            ) {
+                flash = earned
+            }
+        }
+        .coachFlash($flash)
         .navigationTitle(store.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbarVisibility(.hidden, for: .navigationBar)
+        .interactivePopEnabled()
         // A thread is a place to write, as in Messages: the tab bar would
         // crowd the composer.
         .toolbar(.hidden, for: .tabBar)
@@ -211,6 +254,7 @@ private struct Composer: View {
     let isReplying: Bool
     let canSend: Bool
     var focused: FocusState<Bool>.Binding
+    let onListeningChange: (Bool) -> Void
     let onSend: () -> Void
     let onStop: () -> Void
 
@@ -231,7 +275,7 @@ private struct Composer: View {
             // and stops on a pause; this one is a tap away and keeps
             // listening until tapped again.
             if !isReplying {
-                DictationButton(text: $text)
+                DictationButton(text: $text, onListeningChange: onListeningChange)
             }
 
             if isReplying {

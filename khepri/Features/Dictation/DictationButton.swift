@@ -20,6 +20,8 @@ extension EnvironmentValues {
 struct DictationButton: View {
     @Binding var text: String
     var font: Font = .title
+    /// Told when listening starts and stops, so a screen can show it too.
+    var onListeningChange: (Bool) -> Void = { _ in }
 
     @Environment(\.speechTranscriber) private var transcriber
     @Environment(\.openURL) private var openURL
@@ -41,7 +43,11 @@ struct DictationButton: View {
             self.controller = controller
             await controller.checkAvailability()
         }
-        .onDisappear { controller?.cancel() }
+        .onChange(of: controller?.phase == .listening) { _, listening in onListeningChange(listening) }
+        .onDisappear {
+            controller?.cancel()
+            onListeningChange(false)
+        }
     }
 
     private func button(_ controller: DictationController) -> some View {

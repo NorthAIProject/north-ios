@@ -12,23 +12,21 @@ struct MoreScreen: View {
         let id: String
         let title: String
         let systemImage: String
-        let phase: Int
-        let summary: String
     }
 
     private let growth: [Section] = [
-        .init(id: "goals", title: "Goals", systemImage: "target", phase: 5, summary: "Goals, milestones and the updates that move them."),
-        .init(id: "check-ins", title: "Check-ins", systemImage: "checkmark.circle", phase: 5, summary: "How you are arriving, day by day."),
-        .init(id: "reports", title: "Reports", systemImage: "doc.text", phase: 5, summary: "Weekly reviews your coach writes."),
-        .init(id: "memories", title: "Memories", systemImage: "brain", phase: 5, summary: "What your coach remembers, and what it should forget."),
-        .init(id: "knowledge", title: "Knowledge", systemImage: "books.vertical", phase: 5, summary: "Notes and documents your coach can search."),
+        .init(id: "goals", title: "Goals", systemImage: "target"),
+        .init(id: "check-ins", title: "Check-ins", systemImage: "checkmark.circle"),
+        .init(id: "reports", title: "Reports", systemImage: "doc.text"),
+        .init(id: "memories", title: "Memories", systemImage: "brain"),
+        .init(id: "knowledge", title: "Knowledge", systemImage: "books.vertical"),
     ]
 
     private let life: [Section] = [
-        .init(id: "nutrition", title: "Nutrition", systemImage: "fork.knife", phase: 6, summary: "Meal plans and what you ate."),
-        .init(id: "care", title: "Care", systemImage: "drop", phase: 6, summary: "Water, sleep, habits and reminders."),
-        .init(id: "mind", title: "Mind", systemImage: "sparkles", phase: 6, summary: "Journal and reflection."),
-        .init(id: "decisions", title: "Decisions", systemImage: "arrow.triangle.branch", phase: 6, summary: "Think a choice through with your coach."),
+        .init(id: "nutrition", title: "Nutrition", systemImage: "fork.knife"),
+        .init(id: "care", title: "Care", systemImage: "drop"),
+        .init(id: "mind", title: "Mind", systemImage: "sparkles"),
+        .init(id: "decisions", title: "Decisions", systemImage: "arrow.triangle.branch"),
     ]
 
     var body: some View {
@@ -76,8 +74,7 @@ struct MoreScreen: View {
         case "care": CareScreen()
         case "mind": JournalScreen()
         case "decisions": DecisionsScreen()
-        default:
-            PlaceholderScreen(title: section.title, systemImage: section.systemImage, phase: section.phase, summary: section.summary).content
+        default: EmptyView()
         }
     }
 

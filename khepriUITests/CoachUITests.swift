@@ -24,6 +24,9 @@ final class CoachUITests: XCTestCase {
 
         let app = launchSignedIn(email: email, password: password)
         openTab(app, "Coach")
+        // Khepri's mark heads the tab, saying it is ready.
+        let ready = NSPredicate(format: "identifier == 'coach-header' AND label CONTAINS 'Ready'")
+        XCTAssertTrue(app.descendants(matching: .any).matching(ready).firstMatch.waitForExistence(timeout: 15), "no ready coach header")
         // Onboarding opened a first thread; start a fresh one for the test.
         tap(app.buttons["new-conversation"])
 
