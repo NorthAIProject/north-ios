@@ -103,7 +103,7 @@ struct DayMathTests {
 
     @Test func aRunningFastShadesTheRowsItCovers() {
         var day = response()
-        day.fast = .init(startedAt: hour(-2), targetHours: 16, elapsedMinutes: 120, phase: .fasting, fraction: 0.125)
+        day.fast = .init(startedAt: day.now.addingTimeInterval(-2 * 3600), targetHours: 16, elapsedMinutes: 120, phase: .fasting, fraction: 0.125)
         let rows = DayMath.timeline(day)
         #expect(rows.contains { $0.id == "b0s" }, "the fast's start is a row")
         #expect(!rows.contains { $0.id == "b0e" }, "a running fast has no end row")
