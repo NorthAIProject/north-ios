@@ -2,6 +2,9 @@ import Foundation
 import NorthAPI
 import NorthKit
 import Observation
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 /// One training day, done: set by set, with rest between, timed on the
 /// server so the web, the coach and calorie totals see it.
@@ -262,7 +265,12 @@ final class WorkoutSession {
             isPaused = false
         }
         phase = .finished
-        live.end(liveState, dismissImmediately: false)
+        live.end(liveState, dismissImmediately: true)
+        defer {
+            #if canImport(WidgetKit)
+            WidgetCenter.shared.reloadAllTimelines()
+            #endif
+        }
         if let health, let startedAt {
             await health.saveStrengthWorkout(start: startedAt, end: now())
         }
@@ -282,6 +290,11 @@ final class WorkoutSession {
     func discard() async {
         live.end(liveState, dismissImmediately: true)
         phase = .finished
+        defer {
+            #if canImport(WidgetKit)
+            WidgetCenter.shared.reloadAllTimelines()
+            #endif
+        }
         await connecting?.value
         for task in saving { await task.value }
         saving = []
@@ -325,15 +338,27 @@ final class WorkoutSession {
     }
 
     var liveState: WorkoutLiveState {
-        WorkoutLiveState(
+        let currentPhase: WorkoutActivityAttributes.ContentState.Phase
+        if phase == .finished {
+            currentPhase = .finished
+        } else if isPaused {
+            currentPhase = .paused
+        } else if restEndsAt != nil {
+            currentPhase = .resting
+        } else {
+            currentPhase = .working
+        }
+
+        return WorkoutLiveState(
             exerciseName: current?.name ?? title,
             setNumber: setNumber,
             totalSets: current?.sets ?? 0,
-            phase: isPaused ? .paused : (restEndsAt == nil ? .working : .resting),
+            phase: currentPhase,
             restEndsAt: restEndsAt,
             exerciseNumber: min(exerciseIndex + 1, exercises.count),
             totalExercises: exercises.count,
-            movingSince: movingSince
+            movingSince: movingSince,
+            finalDuration: phase == .finished ? movingTime : nil
         )
     }
 }

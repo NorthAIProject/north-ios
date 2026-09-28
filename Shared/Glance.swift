@@ -33,24 +33,29 @@ struct Glance: Equatable, Sendable {
         let today = try await NorthAPI.call { try await client.getToday().ok.body.json.snapshot }
         let plans = (try? await NorthAPI.call { try await client.listPlans().ok.body.json.plans }) ?? []
         let newest = plans.max { $0.createdAt < $1.createdAt }
+        let completedToday = today.activityCalories > 0 || today.timeline.contains { $0.kind == "activity" || $0.kind == "workout" }
         return Glance(
             streak: today.streak,
             checkedInToday: today.checkedInToday,
             waterML: today.hydration.todayML,
             waterTargetML: today.hydration.targetML,
-            next: newest.flatMap { nextSession(in: $0.days, now: now, calendar: calendar) }
+            next: newest.flatMap { nextSession(in: $0.days, now: now, calendar: calendar, completedToday: completedToday) }
         )
     }
 
-    /// The day of the plan that comes next by weekday, today included.
-    static func nextSession(in days: [Components.Schemas.DaySummary], now: Date, calendar: Calendar) -> Session? {
+    /// The day of the plan that comes next by weekday, today included (unless already completed today).
+    static func nextSession(in days: [Components.Schemas.DaySummary], now: Date, calendar: Calendar, completedToday: Bool = false) -> Session? {
         let names = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
         let today = calendar.component(.weekday, from: now)
         let ahead: (Components.Schemas.DaySummary) -> Int? = { day in
             names.firstIndex(of: day.weekday.trimmingCharacters(in: .whitespaces).lowercased())
-                .map { ($0 + 1 - today + 7) % 7 }
+                .map { index in
+                    let diff = (index + 1 - today + 7) % 7
+                    return (diff == 0 && completedToday) ? 7 : diff
+                }
         }
         guard let day = days.filter({ ahead($0) != nil }).min(by: { ahead($0)! < ahead($1)! }) else { return nil }
-        return Session(focus: day.focus, weekday: day.weekday, startTime: day.startTime, isToday: ahead(day) == 0)
+        let offset = ahead(day) ?? 0
+        return Session(focus: day.focus, weekday: day.weekday, startTime: day.startTime, isToday: offset == 0)
     }
 }

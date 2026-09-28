@@ -33,14 +33,14 @@ struct WorkoutLiveActivity: Widget {
                         .lineLimit(1)
                 }
             } compactLeading: {
-                Image(systemName: context.state.phase == .resting ? "timer" : "figure.strengthtraining.traditional")
+                Image(systemName: context.state.phase == .finished ? "checkmark" : (context.state.phase == .resting ? "timer" : "figure.strengthtraining.traditional"))
                     .foregroundStyle(NorthColor.signal)
             } compactTrailing: {
                 Countdown(state: context.state)
                     .monospacedDigit()
                     .frame(maxWidth: 48)
             } minimal: {
-                Image(systemName: "timer")
+                Image(systemName: context.state.phase == .finished ? "checkmark" : "timer")
                     .foregroundStyle(NorthColor.signal)
             }
             .widgetURL(URL(string: "khepri://training"))
@@ -84,6 +84,7 @@ private struct LockScreenView: View {
         case .working: "Working"
         case .resting: "Rest"
         case .paused: "Paused"
+        case .finished: "Finished"
         }
     }
 }
@@ -94,7 +95,13 @@ private struct Countdown: View {
     let state: WorkoutActivityAttributes.ContentState
 
     var body: some View {
-        if state.phase == .resting, let end = state.restEndsAt, end > .now {
+        if state.phase == .finished {
+            if let duration = state.finalDuration {
+                Text(Duration.seconds(duration).formatted(.time(pattern: .minuteSecond)))
+            } else {
+                Text("Done")
+            }
+        } else if state.phase == .resting, let end = state.restEndsAt, end > .now {
             Text(timerInterval: Date.now...end, countsDown: true)
         } else if state.phase == .paused {
             Text("Paused")

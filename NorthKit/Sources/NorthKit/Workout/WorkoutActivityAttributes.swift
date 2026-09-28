@@ -11,7 +11,7 @@ public struct WorkoutActivityAttributes: ActivityAttributes {
     /// What changes during the workout.
     public struct ContentState: Codable, Hashable, Sendable {
         public enum Phase: String, Codable, Hashable, Sendable {
-            case working, resting, paused
+            case working, resting, paused, finished
         }
 
         public var exerciseName: String
@@ -26,9 +26,11 @@ public struct WorkoutActivityAttributes: ActivityAttributes {
         /// The start, moved later by time spent paused, so a timer counting
         /// up from it shows moving time.
         public var movingSince: Date
+        /// Fixed elapsed duration when finished, so the display does not continue counting.
+        public var finalDuration: TimeInterval?
 
         public init(exerciseName: String, setNumber: Int, totalSets: Int, phase: Phase, restEndsAt: Date?,
-                    exerciseNumber: Int, totalExercises: Int, movingSince: Date) {
+                    exerciseNumber: Int, totalExercises: Int, movingSince: Date, finalDuration: TimeInterval? = nil) {
             self.exerciseName = exerciseName
             self.setNumber = setNumber
             self.totalSets = totalSets
@@ -37,6 +39,7 @@ public struct WorkoutActivityAttributes: ActivityAttributes {
             self.exerciseNumber = exerciseNumber
             self.totalExercises = totalExercises
             self.movingSince = movingSince
+            self.finalDuration = finalDuration
         }
     }
 

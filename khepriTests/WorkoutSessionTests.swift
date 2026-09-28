@@ -43,6 +43,8 @@ struct WorkoutSessionTests {
         #expect(service.calls == ["start strength_training", "stop s1"])
         #expect(session.recorded?.status == .completed)
         #expect(live.ended)
+        #expect(live.dismissedImmediately)
+        #expect(live.last?.phase == .finished)
     }
 
     @Test func aServerRefusalKeepsTheWorkoutGoingAndSaysWhy() async {
@@ -166,6 +168,7 @@ final class FakeLiveActivity: WorkoutLiveActivityControlling {
     func start(title: String, startedAt: Date, state: WorkoutLiveState) { started = state; last = state }
     func update(_ state: WorkoutLiveState) { last = state }
     func end(_ state: WorkoutLiveState, dismissImmediately: Bool) {
+        last = state
         ended = true
         dismissedImmediately = dismissImmediately
     }

@@ -22,6 +22,26 @@ struct GlanceTests {
         #expect(next == .init(focus: "Upper", weekday: "Wednesday", startTime: "07:30", isToday: true))
     }
 
+    @Test func todaysSessionAdvancesWhenAlreadyCompleted() {
+        let next = Glance.nextSession(
+            in: [day("Monday", "Legs"), day("Wednesday", "Upper", at: "07:30")],
+            now: wednesday,
+            calendar: calendar,
+            completedToday: true
+        )
+        #expect(next == .init(focus: "Legs", weekday: "Monday", startTime: nil, isToday: false))
+    }
+
+    @Test func soleDayInPlanAdvancesToNextWeekWhenCompleted() {
+        let next = Glance.nextSession(
+            in: [day("Wednesday", "Upper", at: "07:30")],
+            now: wednesday,
+            calendar: calendar,
+            completedToday: true
+        )
+        #expect(next == .init(focus: "Upper", weekday: "Wednesday", startTime: "07:30", isToday: false))
+    }
+
     @Test func otherwiseTheNextDayAheadWrappingTheWeek() {
         let next = Glance.nextSession(in: [day("Monday", "Legs"), day("Tuesday", "Push")], now: wednesday, calendar: calendar)
         #expect(next?.focus == "Legs")

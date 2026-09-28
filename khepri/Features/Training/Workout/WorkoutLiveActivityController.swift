@@ -42,8 +42,17 @@ final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
     }
 
     func end(_ state: WorkoutLiveState, dismissImmediately: Bool) {
-        guard let activity else { return }
+        let active = activity
         self.activity = nil
-        Task { await activity.end(.init(state: state, staleDate: nil), dismissalPolicy: dismissImmediately ? .immediate : .default) }
+        let policy: ActivityUIDismissalPolicy = dismissImmediately ? .immediate : .default
+        let content = ActivityContent(state: state, staleDate: nil)
+        Task {
+            if let active {
+                await active.end(content, dismissalPolicy: policy)
+            }
+            for remaining in Activity<WorkoutActivityAttributes>.activities where remaining.id != active?.id {
+                await remaining.end(content, dismissalPolicy: policy)
+            }
+        }
     }
 }
