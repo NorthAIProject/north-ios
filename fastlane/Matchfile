@@ -18,12 +18,14 @@ git_url("https://github.com/NorthAIProject/north-ios-certificates.git")
 git_branch("main")
 storage_mode("git")
 type("appstore")
-# Each app and its widget extension (Live Activities, widgets) is signed
-# with its own profile.
+# Each app and its extensions (widgets and Live Activities; the Share
+# sheet) is signed with its own profile.
 app_identifier([
   "com.fernandocorreia.khepri",
   "com.fernandocorreia.khepri.widgets",
+  "com.fernandocorreia.khepri.share",
   "com.fernandocorreia.khepri.beta",
-  "com.fernandocorreia.khepri.beta.widgets"
+  "com.fernandocorreia.khepri.beta.widgets",
+  "com.fernandocorreia.khepri.beta.share"
 ])
 team_id("84X9WYBF36")
