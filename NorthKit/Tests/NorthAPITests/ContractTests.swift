@@ -142,7 +142,9 @@ struct ContractTests {
 
     @Test func settings() throws {
         #expect(try decode(Schemas.Profile.self, "profile").coachingTone == .direct)
-        #expect(try decode(Schemas.NotificationSettings.self, "notifications").statsDigestCadence == .weekly)
+        let notifications = try decode(Schemas.NotificationSettings.self, "notifications")
+        #expect(notifications.statsDigestCadence == .weekly)
+        #expect(notifications.briefingHour == 7 && notifications.eveningReflection && notifications.eveningHour == 21)
         let ai = try decode(Schemas.AISettings.self, "ai-settings")
         #expect(ai.current?.keyHint == "…9f2c")
         #expect(try decode(Schemas.ConnectionList.self, "connections").connections.first?.kind == .claudeCode)

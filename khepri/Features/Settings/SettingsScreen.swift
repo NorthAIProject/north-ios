@@ -387,6 +387,9 @@ private struct NotificationSettings: View {
 
                 Section {
                     Toggle("Daily briefing", isOn: bind(\.dailyBriefingAuto))
+                    if value.dailyBriefingAuto {
+                        HourPicker(title: "Arrives at", hour: int(\.briefingHour))
+                    }
                     Toggle("Weekly report", isOn: bind(\.weeklyReportAuto))
                     Picker("Stats digest", selection: Binding(
                         get: { settings.value?.statsDigestCadence ?? .off },
@@ -399,6 +402,17 @@ private struct NotificationSettings: View {
                     }
                 } header: {
                     Text("Written for you")
+                } footer: {
+                    Text("The briefing reads your sleep, heart rate and today's session, and suggests an easier day when you need one.")
+                }
+
+                Section {
+                    Toggle("Evening reflection", isOn: bind(\.eveningReflection))
+                    if value.eveningReflection {
+                        HourPicker(title: "At", hour: int(\.eveningHour))
+                    }
+                } footer: {
+                    Text("Once an evening: a check-in if you haven't done one, otherwise a line in your journal.")
                 }
 
                 Section {
@@ -514,5 +528,25 @@ private struct WorkoutReminderSection: View {
             WorkoutReminderSettings.leadMinutes = minutes
             Task { await WorkoutReminderSettings.apply() }
         }
+    }
+}
+
+/// A whole local hour. The server sends on the hour, so minutes would be a
+/// promise it cannot keep.
+private struct HourPicker: View {
+    let title: String
+    @Binding var hour: Int
+
+    var body: some View {
+        Picker(title, selection: $hour) {
+            ForEach(0..<24, id: \.self) { h in
+                Text(Self.label(h)).tag(h)
+            }
+        }
+    }
+
+    static func label(_ hour: Int) -> String {
+        let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? .now
+        return date.formatted(date: .omitted, time: .shortened)
     }
 }
