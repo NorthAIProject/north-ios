@@ -77,12 +77,14 @@ final class AppModel {
         // While the session can still authenticate the call.
         await PushRegistration.unregister()
         await auth.logout()
+        await SpotlightIndex.clear()
         phase = .signedOut
     }
 
     /// The session was rejected or cleared somewhere else, e.g. a 401.
     func sessionEnded() {
         phase = .signedOut
+        Task { await SpotlightIndex.clear() }
     }
 
     private func loadUser() async {
