@@ -86,3 +86,43 @@ struct NextUpView: View {
         return "\(next.isToday ? "Today" : next.weekday) · \(streak)"
     }
 }
+
+/// Lock Screen: the check-in streak in a circle, one tap from today's
+/// check-in. Its own widget so it can sit beside the water ring.
+struct CheckInAccessoryWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "CheckInAccessory", provider: TodayProvider()) { entry in
+            CheckInAccessoryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("Check-in")
+        .description("Your streak, and today's check-in in one tap.")
+        .supportedFamilies([.accessoryCircular])
+    }
+}
+
+struct CheckInAccessoryView: View {
+    let entry: TodayEntry
+
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            if let glance = entry.snapshot {
+                VStack(spacing: 0) {
+                    Image(systemName: glance.checkedInToday ? "checkmark.circle.fill" : "circle.dashed")
+                        .font(.caption)
+                    Text("\(glance.streak)")
+                        .font(.title3.weight(.semibold))
+                        .monospacedDigit()
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(glance.checkedInToday
+                    ? "Checked in today, \(glance.streak)-day streak"
+                    : "Check in, \(glance.streak)-day streak")
+            } else {
+                Image(systemName: "circle.dashed")
+            }
+        }
+        .widgetURL(URL(string: "khepri://check-ins"))
+    }
+}
