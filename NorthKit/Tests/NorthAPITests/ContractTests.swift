@@ -272,6 +272,14 @@ struct ContractTests {
         #expect(try decode(Schemas.HandleView.self, "handle").handle == "ana_runs")
     }
 
+    @Test func feed() throws {
+        let feed = try decode(Schemas.Feed.self, "feed")
+        #expect(feed.items.first?.category == .training && feed.items.first?.kudos == 3 && feed.items.first?.kudoed == true)
+        #expect(feed.before == nil)
+        let sharing = try decode(Schemas.Sharing.self, "sharing")
+        #expect(sharing.training && !sharing.streaks && sharing.goals)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
@@ -287,7 +295,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle"]
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

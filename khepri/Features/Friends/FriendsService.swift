@@ -4,6 +4,8 @@ import NorthAPI
 typealias SocialOverview = Components.Schemas.SocialOverview
 typealias Connection = Components.Schemas.ConnectionView
 typealias PublicPerson = Components.Schemas.PersonView
+typealias FeedItem = Components.Schemas.FeedItem
+typealias Sharing = Components.Schemas.Sharing
 
 protocol FriendsServicing: Sendable {
     func overview() async throws -> SocialOverview
@@ -17,6 +19,12 @@ protocol FriendsServicing: Sendable {
     /// Connects this account to whoever's link it was. False when it was
     /// already invited, or the link leads nowhere; neither is an error.
     func redeem(_ code: String) async throws -> Bool
+    /// Yours and what friends share with you, newest first.
+    func feed() async throws -> [FeedItem]
+    func sharing() async throws -> Sharing
+    func setSharing(_ sharing: Sharing) async throws -> Sharing
+    func giveKudos(_ achievementID: String) async throws
+    func takeKudos(_ achievementID: String) async throws
 }
 
 struct FriendsService: FriendsServicing {
@@ -56,6 +64,26 @@ struct FriendsService: FriendsServicing {
 
     func redeem(_ code: String) async throws -> Bool {
         try await NorthAPI.call { try await api.redeemInvite(path: .init(code: code)).ok.body.json.redeemed }
+    }
+
+    func feed() async throws -> [FeedItem] {
+        try await NorthAPI.call { try await api.getFeed().ok.body.json.items }
+    }
+
+    func sharing() async throws -> Sharing {
+        try await NorthAPI.call { try await api.getSharing().ok.body.json }
+    }
+
+    func setSharing(_ sharing: Sharing) async throws -> Sharing {
+        try await NorthAPI.call { try await api.setSharing(body: .json(sharing)).ok.body.json }
+    }
+
+    func giveKudos(_ achievementID: String) async throws {
+        try await NorthAPI.call { _ = try await api.giveKudos(path: .init(achievementID: achievementID)).noContent }
+    }
+
+    func takeKudos(_ achievementID: String) async throws {
+        try await NorthAPI.call { _ = try await api.takeKudos(path: .init(achievementID: achievementID)).noContent }
     }
 }
 

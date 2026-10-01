@@ -1,7 +1,7 @@
 import XCTest
 
 /// Friends against a local server: the seeded account was invited by Leo, so
-/// they follow each other; Zoe's invite link, opened from outside the app,
+/// they follow each other, and Leo shares an achieved goal; Zoe's invite link, opened from outside the app,
 /// connects Zoe too.
 ///
 /// Pass TEST_RUNNER_FRIENDS_EMAIL, TEST_RUNNER_FRIENDS_PASSWORD and
@@ -25,6 +25,10 @@ final class FriendsUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Friends"].waitForExistence(timeout: 15))
         XCTAssertTrue(app.buttons["Share Your Invite Link"].waitForExistence(timeout: 15))
         XCTAssertTrue(app.staticTexts["Leo"].waitForExistence(timeout: 10), "the inviter is not listed")
+        // Leo shares goals and achieved one: it is in Recent, with kudos.
+        XCTAssertTrue(app.staticTexts["Achieved a goal: Run a half marathon"].waitForExistence(timeout: 10), "Leo's goal is not in Recent")
+        tap(app.buttons["Give kudos"])
+        XCTAssertTrue(app.buttons["Take back kudos"].waitForExistence(timeout: 10), "kudos did not stick")
         attach(app, "01-friends")
 
         // A handle nobody has: the server's own words, not a crash.

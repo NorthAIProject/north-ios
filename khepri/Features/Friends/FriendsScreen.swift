@@ -9,6 +9,8 @@ struct FriendsScreen: View {
     var service: FriendsServicing = FriendsService()
 
     @State private var overview: SocialOverview?
+    @State private var feed: [FeedItem] = []
+    @State private var sharing: Sharing?
     @State private var error: String?
     @State private var handle = ""
     @State private var handleError: String?
@@ -45,6 +47,18 @@ struct FriendsScreen: View {
                     Label("You're connected with the friend who invited you.", systemImage: "person.2.fill")
                         .foregroundStyle(NorthColor.signal)
                 }
+            }
+
+            Section {
+                if feed.isEmpty {
+                    Text("Nothing yet. Finish a workout, keep a streak or complete a goal, and it shows here.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }
+                ForEach(feed, id: \.id) { item in
+                    FeedRow(item: item) { act { item.kudoed ? try await service.takeKudos(item.id) : try await service.giveKudos(item.id) } }
+                }
+            } header: {
+                Text("Recent")
             }
 
             Section {
@@ -95,6 +109,18 @@ struct FriendsScreen: View {
                                 Button("Decline", systemImage: "xmark") { act { try await service.removeFollower(request.value1.id) } }
                             }
                     }
+                }
+            }
+
+            if let sharing {
+                Section {
+                    Toggle("Workouts you finish", isOn: share(\.training, in: sharing))
+                    Toggle("Check-in streaks", isOn: share(\.streaks, in: sharing))
+                    Toggle("Goals and milestones", isOn: share(\.goals, in: sharing))
+                } header: {
+                    Text("What Followers See")
+                } footer: {
+                    Text("Off until you turn it on. Your journal, decisions, food and health numbers are never shared.")
                 }
             }
 
@@ -153,9 +179,25 @@ struct FriendsScreen: View {
         }
     }
 
+    /// A sharing switch that saves as it flips, like Units in Settings.
+    private func share(_ keyPath: WritableKeyPath<Sharing, Bool>, in current: Sharing) -> Binding<Bool> {
+        Binding(get: { sharing?[keyPath: keyPath] ?? current[keyPath: keyPath] }, set: { on in
+            var next = sharing ?? current
+            next[keyPath: keyPath] = on
+            sharing = next
+            Task {
+                do { sharing = try await service.setSharing(next) } catch { self.error = error.localizedDescription }
+            }
+        })
+    }
+
     private func load() async {
         do {
+            async let feedNow = service.feed()
+            async let sharingNow = service.sharing()
             let fresh = try await service.overview()
+            feed = (try? await feedNow) ?? feed
+            sharing = (try? await sharingNow) ?? sharing
             overview = fresh
             if handle.isEmpty || handle == overview?.handle { handle = fresh.handle }
             error = nil
@@ -220,5 +262,45 @@ private struct PersonRow: View {
     private var initials: String {
         let letters = person.displayName.split(separator: " ").prefix(2).compactMap(\.first)
         return letters.isEmpty ? "?" : String(letters).uppercased()
+    }
+}
+
+/// One moment: who, what, when, and kudos.
+private struct FeedRow: View {
+    let item: FeedItem
+    let toggleKudos: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(item.mine ? "You" : item.displayName).font(.subheadline.weight(.medium))
+                    Text("· \(item.occurredAt.formatted(.relative(presentation: .named)))")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Text(item.title)
+                if !item.detail.isEmpty {
+                    Text(item.detail).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            if item.mine {
+                if item.kudos > 0 {
+                    Label("\(item.kudos)", systemImage: "hands.clap.fill")
+                        .font(.caption.monospacedDigit()).foregroundStyle(NorthColor.signal)
+                        .accessibilityLabel("\(item.kudos) kudos")
+                }
+            } else {
+                Button(action: toggleKudos) {
+                    Label(item.kudos > 0 ? "\(item.kudos)" : "Kudos", systemImage: item.kudoed ? "hands.clap.fill" : "hands.clap")
+                        .font(.caption.monospacedDigit())
+                }
+                .buttonStyle(.bordered)
+                .tint(item.kudoed ? NorthColor.signal : .secondary)
+                .accessibilityLabel(item.kudoed ? "Take back kudos" : "Give kudos")
+                .sensoryFeedback(.success, trigger: item.kudoed) { _, given in given }
+            }
+        }
+        .padding(.vertical, 2)
     }
 }
