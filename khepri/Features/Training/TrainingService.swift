@@ -187,3 +187,12 @@ extension Operations.SetPrescription.Output: PlanEditOutput {
         get throws { if case .conflict(let conflict) = self { try conflict.body.json } else { nil } }
     }
 }
+
+extension TrainingService {
+    /// One page of the whole library, for indexing it in Spotlight.
+    func exercisePage(offset: Int, limit: Int) async throws -> Components.Schemas.ExerciseList {
+        try await NorthAPI.call {
+            try await api.searchExercises(query: .init(limit: limit, offset: offset)).ok.body.json
+        }
+    }
+}
