@@ -40,7 +40,8 @@ end
 APP_IDS = { "Debug" => "com.fernandocorreia.khepri", "Beta" => "com.fernandocorreia.khepri.beta", "Release" => "com.fernandocorreia.khepri" }
 target.build_configurations.each do |config|
   s = config.build_settings
-  s["PRODUCT_BUNDLE_IDENTIFIER"] = "#{APP_IDS.fetch(config.name)}.share"
+  # ".beta.share" was already taken in the Developer portal.
+  s["PRODUCT_BUNDLE_IDENTIFIER"] = config.name == "Beta" ? "#{APP_IDS.fetch(config.name)}.shareext" : "#{APP_IDS.fetch(config.name)}.share"
   s["PRODUCT_NAME"] = "$(TARGET_NAME)"
   s["INFOPLIST_FILE"] = "#{NAME}/Info.plist"
   s["GENERATE_INFOPLIST_FILE"] = "YES"

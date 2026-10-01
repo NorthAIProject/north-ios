@@ -983,7 +983,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.beta.share;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fernandocorreia.khepri.beta.shareext;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

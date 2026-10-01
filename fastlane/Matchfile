@@ -26,6 +26,6 @@ app_identifier([
   "com.fernandocorreia.khepri.share",
   "com.fernandocorreia.khepri.beta",
   "com.fernandocorreia.khepri.beta.widgets",
-  "com.fernandocorreia.khepri.beta.share"
+  "com.fernandocorreia.khepri.beta.shareext"
 ])
 team_id("84X9WYBF36")
