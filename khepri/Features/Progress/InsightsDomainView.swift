@@ -197,6 +197,27 @@ private struct TrainingPage: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            if let plan = model.plan {
+                Section {
+                    PlanWeekStrip(plan: plan)
+                } header: {
+                    Text("Plan This Week")
+                } footer: {
+                    if plan.rangePlanned > 0 { Text(plan.rangeSentence) }
+                }
+            }
+            if let recap = model.recap {
+                Section {
+                    let recapModel = WorkoutRecapModel(recap)
+                    Text(recap.sentence)
+                    if recapModel.hasVolume {
+                        WorkoutRecapChart(model: recapModel)
+                            .padding(.vertical, 4)
+                    }
+                } header: {
+                    Text(recapTitle(recap))
+                }
+            }
             ChartSection(title: "Calories Burned", chart: model.burn, hasData: model.hasSessions)
             SegmentSection(title: "Activities", segments: model.kinds)
             LiftingSections(range: range)
@@ -217,6 +238,54 @@ private struct TrainingPage: View {
                 }
             }
         }
+    }
+}
+
+private func recapTitle(_ recap: LiftRecap) -> String {
+    switch (recap.planWeekday, recap.focus) {
+    case let (day?, focus?) where !focus.isEmpty: "Last Workout · \(day), \(focus)"
+    case let (day?, _): "Last Workout · \(day)"
+    default: "Last Workout"
+    }
+}
+
+/// The plan's days this week, each done or still open, with the count.
+private struct PlanWeekStrip: View {
+    let plan: Components.Schemas.InsightsPlanWeek
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(plan.sentence).font(.subheadline.weight(.medium))
+                Spacer()
+                Text("\(plan.done)/\(plan.planned)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            ProgressView(value: Double(plan.done), total: Double(max(plan.planned, 1)))
+                .tint(NorthColor.signal)
+            HStack(spacing: 6) {
+                ForEach(plan.days, id: \.date) { day in
+                    VStack(spacing: 4) {
+                        Text(day.weekday.prefix(3).uppercased())
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(day.today ? .primary : .secondary)
+                        Image(systemName: day.done ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(day.done ? NorthColor.signal : Color.secondary.opacity(0.5))
+                        Text(day.focus)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(day.today ? Color(.tertiarySystemFill) : .clear, in: .rect(cornerRadius: 8))
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(day.weekday), \(day.focus), \(day.done ? "completed" : "not done")")
+                }
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

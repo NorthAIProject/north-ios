@@ -168,7 +168,7 @@ struct WorkoutHealthTests {
         let day = TrainingDay(weekday: "Monday", focus: "Full body", exercises: [
             DayExercise(name: "Push-up", sets: 1, reps: "10", restSeconds: 0, equipment: "none",
                         hasArt: false, primaryMuscles: [], secondaryMuscles: []),
-        ])
+        ], completedThisWeek: false, isNext: true)
         let session = WorkoutSession(title: "Monday", day: day, service: FakeActivity(), live: FakeLiveActivity(),
                                      health: writer, now: { clock.now })
         session.start()
