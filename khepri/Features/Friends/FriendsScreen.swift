@@ -134,6 +134,11 @@ struct FriendsScreen: View {
                         .disabled(followHandle.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
                 if let followError { ErrorRow(followError) }
+                NavigationLink {
+                    FindContactsScreen(inviteURL: URL(string: o.invite.url), service: service)
+                } label: {
+                    Label("Find Friends from Contacts", systemImage: "person.crop.circle.badge.plus")
+                }
             } header: {
                 Text("Follow Somebody")
             }
@@ -235,7 +240,7 @@ struct FriendsScreen: View {
     }
 }
 
-private struct PersonRow: View {
+struct PersonRow: View {
     let person: PublicPerson
     var pending = false
 
