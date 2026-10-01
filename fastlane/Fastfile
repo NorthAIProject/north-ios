@@ -232,11 +232,16 @@ platform :ios do
 
   # Project uses Xcode-managed signing for local dev; CI archives need the
   # match profile pinned explicitly, for the app and for each extension
-  # embedded in it (bundle ID + ".widgets", ".share").
+  # embedded in it (bundle ID + ".widgets", ".share"). The beta share
+  # extension is ".shareext": ".beta.share" was already taken in the portal.
+  def share_bundle_id(bundle_id)
+    bundle_id == BETA_BUNDLE_ID ? "#{bundle_id}.shareext" : "#{bundle_id}.share"
+  end
+
   private_lane :prepare_signing do |options|
     bundle_id = options[:bundle_id] || BUNDLE_ID
     config = options[:config] || "Release"
-    { "khepri" => bundle_id, "KhepriWidgets" => "#{bundle_id}.widgets", "KhepriShare" => "#{bundle_id}.share" }.each do |target, id|
+    { "khepri" => bundle_id, "KhepriWidgets" => "#{bundle_id}.widgets", "KhepriShare" => share_bundle_id(bundle_id) }.each do |target, id|
       update_code_signing_settings(
         path: PROJECT,
         use_automatic_signing: false,
