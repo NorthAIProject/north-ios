@@ -1,12 +1,15 @@
 # One-time (re-runnable) seeding of the match certificates repo.
 #
-# The Release workflow runs match in readonly mode, so the certs repo must be
-# seeded once with a distribution certificate + provisioning profile. Dispatch
-# this manually whenever signing assets need to be (re)generated — e.g. after
-# adding an entitlement or when the repo is empty.
+# Release runs match in readonly mode, so every bundle ID it signs must
+# already have an App Store profile in NorthAIProject/north-ios-certificates.
+# Dispatch this by hand whenever signing assets need to be (re)generated:
+# a new target (the Share Extension), a new entitlement, or an expired
+# certificate. The bundle IDs themselves must be registered in the Apple
+# Developer portal first; match creates profiles, not App IDs.
 #
-# Requires the same secrets as Release, but MATCH_GIT_BASIC_AUTHORIZATION's PAT
-# needs Contents:Read AND Write on the certificates repo for this workflow only.
+# Needs the same secrets as Release, but MATCH_GIT_BASIC_AUTHORIZATION's token
+# must have Contents: Read AND Write on north-ios-certificates for this
+# workflow, since it pushes the new profiles.
 name: Seed signing
 
 on:
