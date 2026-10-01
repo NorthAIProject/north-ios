@@ -18,10 +18,10 @@ struct CaptureIntent: AppIntent {
         Summary("Capture \(\.$text)")
     }
 
+    @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let parsed = try await NorthAPI.call {
-            try await API.shared.parseCapture(body: .json(.init(text: text))).ok.body.json
-        }
+        let service = CaptureService()
+        let parsed = try await service.parse(text)
         let writable = parsed.items.filter { $0.problem == nil }
         guard !writable.isEmpty else {
             let reason = parsed.items.compactMap(\.problem).first ?? "Nothing in that could be logged."
@@ -31,9 +31,7 @@ struct CaptureIntent: AppIntent {
         let preview = writable.map(\.source).joined(separator: ", ")
         try await requestConfirmation(result: .result(dialog: "Log \(preview)?"), confirmationActionName: .add)
 
-        let result = try await NorthAPI.call {
-            try await API.shared.commitCapture(body: .json(.init(items: writable))).ok.body.json
-        }
+        let result = try await service.commit(writable)
         WidgetCenter.shared.reloadAllTimelines()
         if result.failed > 0 {
             return .result(dialog: "Logged \(result.written), \(result.failed) could not be saved.")

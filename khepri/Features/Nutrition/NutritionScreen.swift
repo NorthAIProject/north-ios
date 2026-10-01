@@ -223,6 +223,17 @@ private struct LogFoodSheet: View {
                             .buttonStyle(.borderedProminent)
                     }
                 }
+                if picked == nil, query.isEmpty {
+                    Section {
+                        CaptureComposer(prompt: "Two eggs and a slice of toast…") {
+                            log { try await service.log() }
+                        }
+                    } header: {
+                        Text("Describe what you ate")
+                    } footer: {
+                        Text("Or search for each ingredient below to log it by weight.")
+                    }
+                }
                 if !meals.isEmpty, query.isEmpty {
                     Section("From Your Plans") {
                         ForEach(meals, id: \.id) { meal in
