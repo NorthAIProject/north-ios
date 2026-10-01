@@ -117,6 +117,14 @@ struct ContractTests {
         #expect(response.items.count == 3)
     }
 
+    @Test func captureFoods() throws {
+        let draft = try decode(Schemas.FoodDraft.self, "foods")
+        #expect(draft.lines.count == 3)
+        #expect(draft.lines[0].ingredientId == "11111111-1111-1111-1111-111111111111")
+        #expect(draft.lines[1].ingredientId == nil)
+        #expect(draft.lines[2].candidates.isEmpty)
+    }
+
     @Test func captureCommit() throws {
         let response = try decode(Schemas.CommitResponse.self, "commit")
         #expect(response.written == 1)
@@ -269,7 +277,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
