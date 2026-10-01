@@ -268,7 +268,13 @@ platform :ios do
   end
 
   private_lane :upload_dsyms do
-    next unless ENV["SENTRY_AUTH_TOKEN"]
+    # GitHub passes an unset secret as an empty string, so test for content,
+    # not presence; without all three there is nowhere to upload to.
+    sentry = %w[SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT].map { |k| ENV[k].to_s }
+    if sentry.any?(&:empty?)
+      UI.important("dSYM upload skipped: SENTRY_AUTH_TOKEN, SENTRY_ORG and SENTRY_PROJECT are not all set.")
+      next
+    end
 
     sh("npx --yes @sentry/cli upload-dif --org #{ENV.fetch('SENTRY_ORG')} " \
        "--project #{ENV.fetch('SENTRY_PROJECT')} ../fastlane/build")
