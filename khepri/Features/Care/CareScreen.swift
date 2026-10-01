@@ -136,6 +136,7 @@ struct CareScreen: View {
                 .padding(.top, 4)
             }
             .padding(.vertical, 4)
+            WaterAmountField { ml in Task { await run { try await service.logWater(ml) } } }
             ForEach(water.entries, id: \.id) { entry in
                 LabeledContent("\(entry.amountMl) ml", value: entry.loggedAt.formatted(date: .omitted, time: .shortened))
                     .swipeActions {

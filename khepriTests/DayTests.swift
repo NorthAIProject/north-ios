@@ -128,6 +128,7 @@ actor RecordingActions: DayActing {
     private(set) var calls: [String] = []
     func logWater(_ ml: Int) async throws { calls.append("water \(ml)") }
     func logCaffeine(preset: String) async throws { calls.append("caffeine \(preset)") }
+    func logCaffeine(mg: Int, label: String?) async throws { calls.append("caffeine \(mg) \(label ?? "")") }
     func logSupplement(preset: String, count: Int) async throws { calls.append("supplement \(preset) \(count)") }
     func startFast(hours: Int) async throws { calls.append("fast \(hours)") }
     func stopFast() async throws { throw URLError(.badServerResponse) }

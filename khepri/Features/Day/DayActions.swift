@@ -6,6 +6,8 @@ import NorthAPI
 protocol DayActing: Sendable {
     func logWater(_ ml: Int) async throws
     func logCaffeine(preset: String) async throws
+    /// A drink with no preset: the amount typed by hand and an optional name.
+    func logCaffeine(mg: Int, label: String?) async throws
     func logSupplement(preset: String, count: Int) async throws
     func startFast(hours: Int) async throws
     func stopFast() async throws
@@ -26,6 +28,9 @@ struct DayActions: DayActing {
     }
     func logCaffeine(preset: String) async throws {
         _ = try await NorthAPI.call { try await api.logCaffeine(body: .json(.init(preset: preset))).created.body.json }
+    }
+    func logCaffeine(mg: Int, label: String?) async throws {
+        _ = try await NorthAPI.call { try await api.logCaffeine(body: .json(.init(mg: mg, label: label))).created.body.json }
     }
     func logSupplement(preset: String, count: Int) async throws {
         _ = try await NorthAPI.call { try await api.logSupplement(body: .json(.init(preset: preset, count: count))).created.body.json }

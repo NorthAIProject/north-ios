@@ -4,9 +4,15 @@ import SwiftUI
 
 /// The "+" on My Day: every tracker one or two taps away. Each tap writes and
 /// reloads the day; the sheet stays open so several things can go in at once.
+///
+/// "Log anything" comes first because one sentence covers most of what the
+/// sections below do; the sections stay for exact amounts.
 struct QuickAddSheet: View {
     let store: DayStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppRouter.self) private var router
+    @State private var caffeineMg = ""
+    @State private var caffeineName = ""
     @State private var supplement = DayMath.supplementPresets[0].key
     @State private var supplementCount = 1
     @State private var screenHours = 0
@@ -17,6 +23,13 @@ struct QuickAddSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    CaptureComposer { Task { await store.load() } }
+                } header: {
+                    Text("Log anything")
+                } footer: {
+                    Text("Water, sleep, habits, weight, a check-in or food, in your own words. Check what was read before logging.")
+                }
                 Section("Water") {
                     HStack {
                         ForEach([250, 330, 500], id: \.self) { ml in
@@ -24,6 +37,7 @@ struct QuickAddSheet: View {
                                 .buttonStyle(.bordered).frame(maxWidth: .infinity)
                         }
                     }
+                    WaterAmountField { ml in run { try await $0.logWater(ml) } }
                 }
                 Section("Caffeine") {
                     ForEach(DayMath.caffeinePresets, id: \.key) { preset in
@@ -34,6 +48,7 @@ struct QuickAddSheet: View {
                             LabeledContent(String(localized: preset.name), value: "\(preset.mg) mg")
                         }
                     }
+                    otherCaffeine
                 }
                 Section("Supplements") {
                     Picker("Supplement", selection: $supplement) {
@@ -76,6 +91,12 @@ struct QuickAddSheet: View {
                     }
                     .disabled(trackerName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
+                Section("More") {
+                    open("Food", systemImage: "fork.knife", .section("nutrition"))
+                    open("Check-in", systemImage: "face.smiling", .section("check-ins"))
+                    open("Sleep", systemImage: "bed.double", .section("care"))
+                    open("Workout", systemImage: "figure.strengthtraining.traditional", .tab(.training))
+                }
                 if let error = store.actionError {
                     Section { Text(error).foregroundStyle(.red) }
                 }
@@ -83,6 +104,39 @@ struct QuickAddSheet: View {
             .navigationTitle("Add to your day")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+
+    /// A drink the presets do not cover: milligrams, and a name if wanted.
+    @ViewBuilder private var otherCaffeine: some View {
+        let mg = TypedAmount.parse(caffeineMg, in: TypedAmount.caffeineMg)
+        HStack {
+            TextField("Other amount", text: $caffeineMg)
+                .keyboardType(.numberPad)
+            Text("mg").foregroundStyle(.secondary)
+        }
+        HStack {
+            TextField("Name (optional)", text: $caffeineName)
+            Button("Add") {
+                guard let mg else { return }
+                let name = caffeineName.trimmingCharacters(in: .whitespaces)
+                caffeineMg = ""
+                caffeineName = ""
+                run { try await $0.logCaffeine(mg: mg, label: name.isEmpty ? nil : name) }
+            }
+            .buttonStyle(.bordered)
+            .disabled(mg == nil)
+        }
+    }
+
+    /// The full screen for something the sheet only skims. The sheet closes
+    /// first, since the destination is on another tab.
+    private func open(_ title: LocalizedStringKey, systemImage: String, _ destination: AppDestination) -> some View {
+        Button {
+            dismiss()
+            router.open(destination)
+        } label: {
+            Label(title, systemImage: systemImage)
         }
     }
 
