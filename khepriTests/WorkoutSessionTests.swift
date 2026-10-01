@@ -41,6 +41,7 @@ struct WorkoutSessionTests {
         #expect(session.phase == .finished)
         #expect(session.completedSets == 3)
         #expect(service.calls == ["start strength_training", "stop s1"])
+        #expect(service.startedFor == "Monday", "the session names its plan day, so finishing completes it")
         #expect(session.recorded?.status == .completed)
         #expect(live.ended)
         #expect(live.dismissedImmediately)
@@ -176,6 +177,8 @@ final class FakeLiveActivity: WorkoutLiveActivityControlling {
 
 final class FakeActivity: ActivityServicing, @unchecked Sendable {
     private(set) var calls: [String] = []
+    /// The plan day the last start named.
+    private(set) var startedFor: String?
     private let startError: APIError?
     private let open: ActivitySession?
 
@@ -184,8 +187,9 @@ final class FakeActivity: ActivityServicing, @unchecked Sendable {
         self.open = open
     }
 
-    func start(_ activityCode: String) async throws -> ActivitySession {
+    func start(_ activityCode: String, planWeekday: String?) async throws -> ActivitySession {
         calls.append("start \(activityCode)")
+        startedFor = planWeekday
         if let startError { throw startError }
         return .fixture(id: "s1", status: .active)
     }
@@ -237,7 +241,7 @@ extension WorkoutSession {
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
             DayExercise(name: "Push-up", sets: 1, reps: "AMRAP", restSeconds: 60, equipment: "none",
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
-        ])
+        ], completedThisWeek: false, isNext: true)
         return WorkoutSession(title: "Monday · Full body", day: day, service: service, live: live, lifts: lifts,
                               now: { clock.now })
     }

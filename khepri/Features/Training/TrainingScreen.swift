@@ -2,8 +2,8 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// The Training tab: the plan being followed, day by day, with the next
-/// session first.
+/// The Training tab: the plan being followed, day by day, each marked done
+/// this week or next as the server counts them.
 struct TrainingScreen: View {
     @State private var store = TrainingStore(timeZone: { AppTimeZone.current })
     @State private var path: [DayRoute] = []
@@ -52,6 +52,11 @@ struct TrainingScreen: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.load() } }
         }
+        // Back from a day, possibly from finishing its workout: the server
+        // now counts that day done, so read the plan again.
+        .onChange(of: path) { old, new in
+            if new.isEmpty, !old.isEmpty { Task { await store.load() } }
+        }
         // A reminder's Start Workout, or a khepri://training link, lands here.
         .onChange(of: router.openTrainingDay, initial: true) { _, day in
             guard let day else { return }
@@ -62,7 +67,7 @@ struct TrainingScreen: View {
         .onChange(of: [router.opensNextWorkout != nil, store.plan != nil], initial: true) {
             guard let start = router.opensNextWorkout, let plan = store.plan else { return }
             router.opensNextWorkout = nil
-            guard let day = NextSession.find(in: plan) else { return }
+            guard let day = plan.nextDayIndex else { return }
             router.startsWorkout = start
             path = [.day(day)]
         }
@@ -133,11 +138,10 @@ private struct PlanOverview: View {
                 .anchorGuidedTour(.training)
             }
 
-            let next = NextSession.find(in: plan)
             Section("Days") {
                 ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
                     NavigationLink(value: DayRoute.day(index)) {
-                        DayRow(day: day, isNext: next == index)
+                        DayRow(day: day)
                     }
                 }
             }
@@ -160,16 +164,22 @@ private struct PlanOverview: View {
 
 private struct DayRow: View {
     let day: TrainingDay
-    let isNext: Bool
 
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
                     Text(day.weekday).font(.headline)
-                    if isNext {
+                    switch day.status {
+                    case .completed:
+                        Label("Completed", systemImage: "checkmark.circle.fill")
+                            .labelStyle(.titleAndIcon)
+                            .northEyebrow()
+                    case .next:
                         Text("Next")
                             .northEyebrow(NorthColor.signal)
+                    case nil:
+                        EmptyView()
                     }
                 }
                 Text(day.focus)
@@ -191,19 +201,25 @@ private struct DayRow: View {
     }
 }
 
-/// Which day of the plan comes next, from today, by weekday.
-enum NextSession {
-    static func find(in plan: PlanDetail, now: Date = .now, calendar: Calendar = .current) -> Int? {
-        let today = calendar.component(.weekday, from: now)
-        let days = plan.days.enumerated().compactMap { index, day in
-            WorkoutReminders.weekday(named: day.weekday).map { (index, $0) }
-        }
-        return days.min { ahead($0.1, from: today) < ahead($1.1, from: today) }?.0
-    }
+/// Where a plan day stands this week. The server decides both, from the
+/// sessions it has recorded, so the phone and the web always agree.
+enum DayStatus: Equatable {
+    case completed
+    case next
+}
 
-    private static func ahead(_ weekday: Int, from today: Int) -> Int {
-        (weekday - today + 7) % 7
+extension TrainingDay {
+    var status: DayStatus? {
+        if completedThisWeek { return .completed }
+        if isNext { return .next }
+        return nil
     }
+}
+
+extension PlanDetail {
+    /// The day to train next: the first one not yet done this week, or next
+    /// week's first once everything is.
+    var nextDayIndex: Int? { days.firstIndex(where: \.isNext) }
 }
 
 /// The account's time zone, for scheduling. Kept here rather than read from
