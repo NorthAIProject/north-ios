@@ -16,11 +16,16 @@ final class ScreenshotUITests: XCTestCase {
             throw XCTSkip("seed with scripts/seed-screenshots.sh and pass TEST_RUNNER_SHOTS_EMAIL/PASSWORD/DIR")
         }
         let device = UIDevice.current.userInterfaceIdiom == .pad ? "ipad" : "iphone"
-        let app = launchSignedIn(email: email, password: password)
+        // US English for the en-US store listing, and demo Apple Health data
+        // because the simulator's Health store is empty.
+        let app = launchSignedIn(email: email, password: password,
+                                 arguments: ["-uitest-demo-health", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"])
 
         func shoot(_ name: String) throws {
-            // Let charts, images and the exercise loop settle.
-            sleep(3)
+            // Let charts, images and the exercise loop settle, and clear the
+            // save-password sheet, which can land late over the first screen.
+            dismissSavePassword(app, within: 3)
+            sleep(1)
             let url = URL(fileURLWithPath: dir).appending(path: "\(device)-\(name).png")
             try XCUIScreen.main.screenshot().pngRepresentation.write(to: url)
             attach(app, name)
@@ -40,8 +45,8 @@ final class ScreenshotUITests: XCTestCase {
         go(app, "Training")
         XCTAssertTrue(app.staticTexts["Lower body"].firstMatch.waitForExistence(timeout: 20))
         try shoot("training")
-        tap(app.staticTexts["Lower body"].firstMatch)
-        XCTAssertTrue(app.staticTexts["Goblet Squat"].firstMatch.waitForExistence(timeout: 20))
+        tap(labelled(app.buttons, "Lower body"))
+        XCTAssertTrue(labelled(app.staticTexts, "Goblet Squat").waitForExistence(timeout: 20))
         try shoot("training-day")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
@@ -51,11 +56,29 @@ final class ScreenshotUITests: XCTestCase {
 
         go(app, "More")
         tap(app.buttons["Goals"])
-        XCTAssertTrue(app.staticTexts["Run a 10k under an hour"].waitForExistence(timeout: 20))
+        let tenK = labelled(app.buttons, "Run a 10k under an hour")
+        XCTAssertTrue(tenK.waitForExistence(timeout: 20))
         try shoot("goals")
-        tap(app.staticTexts["Run a 10k under an hour"])
+        tap(tenK)
         sleep(2)
         try shoot("goal-detail")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        tap(app.buttons["Friends"])
+        XCTAssertTrue(labelled(app.descendants(matching: .any), "7 days of check-ins in a row").waitForExistence(timeout: 20))
+        try shoot("friends")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        tap(app.buttons["Crews"])
+        tap(labelled(app.buttons, env["SHOTS_CREW"] ?? "Morning runners"))
+        XCTAssertTrue(app.buttons["Invite to the Crew"].waitForExistence(timeout: 20))
+        try shoot("crew")
+    }
+
+    /// Rows read their title and details as one label, so match on part of it.
+    private func labelled(_ query: XCUIElementQuery, _ text: String) -> XCUIElement {
+        query.matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
     }
 
     /// iPad's iOS 26 tab bar floats at the top and is not exposed as a tab

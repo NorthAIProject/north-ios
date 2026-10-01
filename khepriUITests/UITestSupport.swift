@@ -6,9 +6,10 @@ extension XCTestCase {
     /// Launches from a clean install (no session, no saved progress, tour
     /// done) and signs in through the UI.
     @MainActor
-    func launchSignedIn(email: String, password: String, file: StaticString = #filePath, line: UInt = #line) -> XCUIApplication {
+    func launchSignedIn(email: String, password: String, arguments: [String] = [],
+                        file: StaticString = #filePath, line: UInt = #line) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour"]
+        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour"] + arguments
         app.launch()
         type(app.textFields["Email address"], email, file: file, line: line)
         type(app.secureTextFields["Password"], password, file: file, line: line)

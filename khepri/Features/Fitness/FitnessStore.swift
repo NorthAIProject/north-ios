@@ -20,7 +20,7 @@ final class FitnessStore {
     private let now: () -> Date
     let calendar: Calendar
 
-    init(source: FitnessDataSource = HealthKitFitnessSource(),
+    init(source: FitnessDataSource = FitnessStore.defaultSource,
          calculatorService: CalculatorServicing = CalculatorService(),
          sync: @escaping @Sendable () async -> Date? = FitnessStore.syncHealth,
          now: @escaping () -> Date = Date.init,
@@ -31,6 +31,13 @@ final class FitnessStore {
         self.now = now
         self.calendar = calendar
         self.lastSync = HealthSync.shared.lastReport?.at
+    }
+
+    nonisolated static var defaultSource: FitnessDataSource {
+        #if DEBUG
+        if DemoFitnessSource.isRequested { return DemoFitnessSource() }
+        #endif
+        return HealthKitFitnessSource()
     }
 
     nonisolated static func syncHealth() async -> Date? {
