@@ -20,6 +20,8 @@ struct MoreScreen: View {
         .init(id: "reports", title: "Reports", systemImage: "doc.text"),
         .init(id: "memories", title: "Memories", systemImage: "brain"),
         .init(id: "knowledge", title: "Knowledge", systemImage: "books.vertical"),
+        .init(id: "friends", title: "Friends", systemImage: "person.2"),
+        .init(id: "crews", title: "Crews", systemImage: "flag.2.crossed"),
     ]
 
     private let life: [Section] = [
@@ -74,6 +76,8 @@ struct MoreScreen: View {
         case "care": CareScreen()
         case "mind": JournalScreen()
         case "decisions": DecisionsScreen()
+        case "friends": FriendsScreen()
+        case "crews": CrewsScreen()
         default: EmptyView()
         }
     }

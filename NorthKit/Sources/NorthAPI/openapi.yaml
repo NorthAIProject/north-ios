@@ -2920,6 +2920,496 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ValidationError'
+  /social:
+    get:
+      operationId: getSocial
+      summary: Your handle, invite link, follow requests, followers, following and blocks
+      tags: [social]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /social/handle:
+    put:
+      operationId: setHandle
+      summary: Claim a handle, or clear it with an empty string
+      tags: [social]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [handle]
+              properties:
+                handle:
+                  type: string
+                  description: 3-20 lower-case letters, digits or underscores; a leading @ is dropped. Empty clears it.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandleView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /invites:
+    get:
+      operationId: getInvite
+      summary: Your invite link for a channel, made on first use and stable after
+      tags: [social]
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [link, messages, x, facebook, contacts]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /invites/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: previewInvite
+      summary: Who sent an invite link. Public, for the signed-out app.
+      tags: [social]
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitePreview'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /invites/{code}/redeem:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: redeemInvite
+      summary: Connect a new account to whoever invited it; both follow each other
+      tags: [social]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedeemView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /profiles/{handle}:
+    parameters:
+      - name: handle
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getPublicProfile
+      summary: Somebody's public profile and how you stand to them
+      tags: [social]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /follows:
+    post:
+      operationId: follow
+      summary: Ask to follow somebody by handle; it waits for their yes
+      tags: [social]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [handle]
+              properties:
+                handle:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /follows/{userID}:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: unfollow
+      summary: Stop following, or withdraw a request
+      tags: [social]
+      responses:
+        '204':
+          description: Unfollowed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /followers/{userID}/accept:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: acceptFollower
+      summary: Say yes to a follow request
+      tags: [social]
+      responses:
+        '204':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /followers/{userID}:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: removeFollower
+      summary: Decline a request or remove a follower; they are not told
+      tags: [social]
+      responses:
+        '204':
+          description: Removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /blocks/{userID}:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: block
+      summary: Block somebody; every follow between you ends and each is hidden from the other
+      tags: [social]
+      responses:
+        '204':
+          description: Blocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: unblock
+      summary: Unblock somebody. Follows do not come back.
+      tags: [social]
+      responses:
+        '204':
+          description: Unblocked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /feed:
+    get:
+      operationId: getFeed
+      summary: Your achievements and the ones friends share with you, newest first
+      tags: [social]
+      parameters:
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Cursor from the previous page's `before`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /social/sharing:
+    get:
+      operationId: getSharing
+      summary: Which kinds of achievement your followers may see
+      tags: [social]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sharing'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: setSharing
+      summary: Choose which kinds of achievement your followers may see
+      tags: [social]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sharing'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sharing'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /achievements/{achievementID}/kudos:
+    parameters:
+      - name: achievementID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: giveKudos
+      summary: Give kudos to a friend's achievement
+      tags: [social]
+      responses:
+        '204':
+          description: Given
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: takeKudos
+      summary: Take kudos back
+      tags: [social]
+      responses:
+        '204':
+          description: Taken back
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /crews:
+    get:
+      operationId: listCrews
+      summary: The crews you are in
+      tags: [crews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrewList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createCrew
+      summary: Start a crew, with you as owner and first member
+      tags: [crews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  description: 1-40 characters.
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Crew'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /crews/join/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: previewCrew
+      summary: The crew behind a join link
+      tags: [crews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Crew'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: joinCrew
+      summary: Join a crew by its link; joining twice changes nothing
+      tags: [crews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Crew'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /crews/{crewID}:
+    parameters:
+      - name: crewID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getCrewBoard
+      summary: Each member's today, streak and week, for members only
+      tags: [crews]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrewBoard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /crews/{crewID}/members/{userID}:
+    parameters:
+      - name: crewID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: removeCrewMember
+      summary: Leave (your own id) or, as owner, remove somebody
+      tags: [crews]
+      responses:
+        '204':
+          description: Done
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /crews/{crewID}/challenge:
+    parameters:
+      - name: crewID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      operationId: setCrewChallenge
+      summary: Set the weekly challenge (owner only)
+      tags: [crews]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrewChallenge'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrewBoard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: clearCrewChallenge
+      summary: Clear the weekly challenge (owner only)
+      tags: [crews]
+      responses:
+        '204':
+          description: Cleared
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /news:
     get:
       operationId: getNews
@@ -4225,6 +4715,239 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorBody'
   schemas:
+    Crew:
+      type: object
+      required: [id, name, memberCount, joinUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        memberCount:
+          type: integer
+        joinUrl:
+          type: string
+          format: uri
+    CrewList:
+      type: object
+      required: [crews]
+      properties:
+        crews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Crew'
+    CrewChallenge:
+      type: object
+      required: [kind, target]
+      properties:
+        kind:
+          type: string
+          enum: [checkins, workouts]
+        target:
+          type: integer
+          minimum: 1
+          maximum: 7
+    CrewMember:
+      type: object
+      required: [id, displayName, handle, checkedIn, workedOut, streak, weekProgress, owner, me]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        handle:
+          type: string
+        checkedIn:
+          type: boolean
+        workedOut:
+          type: boolean
+        streak:
+          type: integer
+        weekProgress:
+          type: integer
+          description: Toward the challenge, Monday to Sunday in the member's own time zone.
+        owner:
+          type: boolean
+        me:
+          type: boolean
+    CrewBoard:
+      allOf:
+        - $ref: '#/components/schemas/Crew'
+        - type: object
+          required: [members, weekStart, isOwner]
+          properties:
+            challenge:
+              $ref: '#/components/schemas/CrewChallenge'
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrewMember'
+            weekStart:
+              type: string
+              format: date-time
+            isOwner:
+              type: boolean
+    FeedItem:
+      type: object
+      required: [id, userId, displayName, handle, category, kind, title, detail, occurredAt, kudos, kudoed, mine]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        handle:
+          type: string
+        category:
+          type: string
+          enum: [training, streaks, goals]
+        kind:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        kudos:
+          type: integer
+        kudoed:
+          type: boolean
+        mine:
+          type: boolean
+    Feed:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedItem'
+        before:
+          type: string
+          format: date-time
+          description: Pass as `before` for the next page. Absent on the last page.
+    Sharing:
+      type: object
+      required: [training, streaks, goals]
+      properties:
+        training:
+          type: boolean
+        streaks:
+          type: boolean
+        goals:
+          type: boolean
+    PersonView:
+      type: object
+      required: [id, displayName, handle]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        handle:
+          type: string
+          description: Empty for somebody who never chose one.
+    ConnectionView:
+      allOf:
+        - $ref: '#/components/schemas/PersonView'
+        - type: object
+          required: [status, since]
+          properties:
+            status:
+              type: string
+              enum: [pending, accepted]
+            since:
+              type: string
+              format: date-time
+    InviteView:
+      type: object
+      required: [code, channel, url]
+      properties:
+        code:
+          type: string
+        channel:
+          type: string
+        url:
+          type: string
+          format: uri
+    InvitePreview:
+      type: object
+      required: [code, inviter]
+      properties:
+        code:
+          type: string
+        inviter:
+          $ref: '#/components/schemas/PersonView'
+    RedeemView:
+      type: object
+      required: [redeemed]
+      properties:
+        redeemed:
+          type: boolean
+          description: False when this account was already invited or the code leads nowhere. Neither is an error.
+    HandleView:
+      type: object
+      required: [handle]
+      properties:
+        handle:
+          type: string
+    SocialOverview:
+      type: object
+      required: [handle, invite, joined, requests, followers, following, blocked]
+      properties:
+        handle:
+          type: string
+        invite:
+          $ref: '#/components/schemas/InviteView'
+        joined:
+          type: integer
+          description: How many accounts came in through your links.
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionView'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectionView'
+        following:
+          type: array
+          description: Includes requests you sent that are still pending.
+          items:
+            $ref: '#/components/schemas/ConnectionView'
+        blocked:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonView'
+    ProfileView:
+      allOf:
+        - $ref: '#/components/schemas/PersonView'
+        - type: object
+          required: [followers, following, relationship]
+          properties:
+            followers:
+              type: integer
+            following:
+              type: integer
+            relationship:
+              type: object
+              required: [following, followsYou, self]
+              properties:
+                following:
+                  type: string
+                  description: Empty, pending or accepted.
+                followsYou:
+                  type: boolean
+                self:
+                  type: boolean
     CaffeineInput:
       type: object
       additionalProperties: false

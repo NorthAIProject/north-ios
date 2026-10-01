@@ -30,6 +30,12 @@ enum AppDestination: Equatable {
     /// The check-in flow, presented as a sheet on the current tab instead
     /// of navigating to More → Check-ins.
     case checkInFlow
+    /// Somebody's invite link (`/i/<code>`): kept, then redeemed as soon as
+    /// there is a session, and Friends opens to show the new connection.
+    case invite(String)
+    /// A crew's join link (`/i/c/<code>`): kept, joined once there is a
+    /// session, and the crew opens.
+    case crewJoin(String)
     /// One exercise, shown as a sheet over whatever is open: Spotlight, or
     /// "Show push-up in Khepri".
     case exercise(String)
@@ -69,6 +75,12 @@ final class AppRouter {
     /// Set when a check-in should start as a sheet on the current tab,
     /// matching the web's inline check-in flow.
     var showsCheckInFlow = false
+    /// Counts invite links opened while the app runs. Friends redeems on each
+    /// change, which also covers a link opened while Friends is already on
+    /// screen, where navigating to it changes nothing.
+    var invitesReceived = 0
+    /// Counts crew links opened, for Crews to join on each one.
+    var crewLinksReceived = 0
     /// Set when a link asks for one exercise; the tab view presents it and
     /// clears it on dismiss.
     var openExercise: String?
@@ -78,7 +90,7 @@ final class AppRouter {
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
-        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
+        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews",
     ]
 
     func open(_ destination: AppDestination) {
@@ -111,6 +123,16 @@ final class AppRouter {
             openSection = "check-ins"
         case .checkInFlow:
             showsCheckInFlow = true
+        case .crewJoin(let code):
+            PendingCrewJoin.store(code)
+            crewLinksReceived += 1
+            selectedTab = .more
+            openSection = "crews"
+        case .invite(let code):
+            PendingInvite.store(code)
+            invitesReceived += 1
+            selectedTab = .more
+            openSection = "friends"
         case .exercise(let slug):
             openExercise = slug
         case .goal(let id):
@@ -171,6 +193,12 @@ final class AppRouter {
         }
         if parts.first == "decisions", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .decision(parts[1])
+        }
+        if parts.first == "i", parts.count == 3, parts[1] == "c", parts[2].count == 10, parts[2].allSatisfy({ $0.isLetter || $0.isNumber }) {
+            return .crewJoin(parts[2].lowercased())
+        }
+        if parts.first == "i", parts.count == 2, parts[1].count == 10, parts[1].allSatisfy({ $0.isLetter || $0.isNumber }) {
+            return .invite(parts[1].lowercased())
         }
         if parts.first == "goals", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .goal(parts[1])
