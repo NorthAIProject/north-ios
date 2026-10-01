@@ -8,7 +8,7 @@
 #
 #   eval "$(scripts/seed-screenshots.sh)"   # exports TEST_RUNNER_SHOTS_*
 set -euo pipefail
-WEB="${NORTH_WEB_APP:-$(cd "$(dirname "$0")/../../.." && pwd)/north-web-app}"
+WEB="${NORTH_WEB_APP:-$(cd "$(dirname "$0")/../../.." && pwd)/north-client}"
 python3 - "$WEB" <<'PY'
 import datetime as dt, json, random, subprocess, sys, time, urllib.request, uuid
 web = sys.argv[1]

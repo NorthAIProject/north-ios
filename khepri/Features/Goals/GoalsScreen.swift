@@ -11,6 +11,8 @@ struct GoalsScreen: View {
     @State private var loaded = false
     @State private var error: String?
     @State private var creating = false
+    @State private var linked: LinkedGoal?
+    @Environment(AppRouter.self) private var router
 
     private var active: [GoalSummary] { goals.filter { $0.status == .active } }
     private var closed: [GoalSummary] { goals.filter { $0.status != .active } }
@@ -31,6 +33,22 @@ struct GoalsScreen: View {
             }
             .task { await load() }
             .refreshable { await load() }
+            // A link to one goal (Spotlight, a nudge) opens it over the list.
+            .task(id: router.openGoal) {
+                guard let id = router.openGoal else { return }
+                router.openGoal = nil
+                linked = LinkedGoal(id: id)
+            }
+            .sheet(item: $linked) { goal in
+                NavigationStack {
+                    GoalDetailView(id: goal.id, categories: categories, service: service) { Task { await load() } }
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { linked = nil }
+                            }
+                        }
+                }
+            }
     }
 
     @ViewBuilder
@@ -487,4 +505,8 @@ private struct MilestoneSheet: View {
             self.error = error.localizedDescription
         }
     }
+}
+
+private struct LinkedGoal: Identifiable {
+    let id: String
 }

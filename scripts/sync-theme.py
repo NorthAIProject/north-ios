@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the iOS colour sets from the web app's theme tokens.
 
-The web theme (north-web-app/web/assets/css/input.css) defines every colour in
+The web theme (north-client/web/assets/css/input.css) defines every colour in
 OKLCH under :root (light) and .dark. This script converts each token to
 Display P3 and writes one colour set per token, with a light and a dark
 appearance, into NorthKit's Theme.xcassets. Re-run it whenever the web theme
@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_CSS = ROOT.parent.parent / "north-web-app/web/assets/css/input.css"
+DEFAULT_CSS = ROOT.parent.parent / "north-client/web/assets/css/input.css"
 OUT = ROOT / "NorthKit/Sources/NorthKit/Resources/Theme.xcassets"
 # The app's global tint (buttons, links, toggles) follows the web's signal colour.
 ACCENT = ROOT / "khepri/Assets.xcassets/AccentColor.colorset/Contents.json"

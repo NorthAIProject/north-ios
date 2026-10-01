@@ -38,14 +38,24 @@ struct MainTabView: View {
                     }
             }
         }
+        // An exercise from Spotlight or Siri, over whatever tab is open.
+        .sheet(item: Binding(
+            get: { router.openExercise.map(ExerciseSlugRoute.init(slug:)) },
+            set: { router.openExercise = $0?.slug }
+        )) { route in
+            ExerciseSheet(slug: route.slug)
+        }
         .onAppear { tour.startIfNeeded() }
-        // Apple Health catches up whenever the app comes forward; the sync
-        // itself decides whether it is on. A workout Live Activity with no
-        // workout behind it (the app was killed mid-workout, say) ends here too.
+        // Apple Health catches up whenever the app comes forward, and
+        // Spotlight's copy of exercises and goals with it; each decides for
+        // itself whether there is anything to do. A workout Live Activity with
+        // no workout behind it (the app was killed mid-workout, say) ends here too.
         .onChange(of: scenePhase, initial: true) { _, phase in
-            guard phase == .active else { return }
-            WorkoutLiveActivityController.endOrphans()
-            Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
+            if phase == .active {
+                WorkoutLiveActivityController.endOrphans()
+                Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
+                Task.detached { await SpotlightIndex.refresh() }
+            }
         }
     }
 }

@@ -117,6 +117,14 @@ struct ContractTests {
         #expect(response.items.count == 3)
     }
 
+    @Test func captureFoods() throws {
+        let draft = try decode(Schemas.FoodDraft.self, "foods")
+        #expect(draft.lines.count == 3)
+        #expect(draft.lines[0].ingredientId == "11111111-1111-1111-1111-111111111111")
+        #expect(draft.lines[1].ingredientId == nil)
+        #expect(draft.lines[2].candidates.isEmpty)
+    }
+
     @Test func captureCommit() throws {
         let response = try decode(Schemas.CommitResponse.self, "commit")
         #expect(response.written == 1)
@@ -145,7 +153,9 @@ struct ContractTests {
 
     @Test func settings() throws {
         #expect(try decode(Schemas.Profile.self, "profile").coachingTone == .direct)
-        #expect(try decode(Schemas.NotificationSettings.self, "notifications").statsDigestCadence == .weekly)
+        let notifications = try decode(Schemas.NotificationSettings.self, "notifications")
+        #expect(notifications.statsDigestCadence == .weekly)
+        #expect(notifications.briefingHour == 7 && notifications.eveningReflection && notifications.eveningHour == 21)
         let ai = try decode(Schemas.AISettings.self, "ai-settings")
         #expect(ai.current?.keyHint == "…9f2c")
         #expect(try decode(Schemas.ConnectionList.self, "connections").connections.first?.kind == .claudeCode)
@@ -267,7 +277,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
