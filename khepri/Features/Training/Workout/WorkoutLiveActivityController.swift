@@ -16,21 +16,37 @@ protocol WorkoutLiveActivityControlling: AnyObject {
 
 @MainActor
 final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
+    /// How long an activity counts as current without an update. A workout
+    /// sends one every set, so past this the system marks it stale and the
+    /// widget stops counting.
+    static let freshFor: TimeInterval = 30 * 60
+
+    /// The controller of the workout running in this process. Weak, so a
+    /// workout that goes away without ending leaves an orphan, not a keeper.
+    private static weak var current: WorkoutLiveActivityController?
+
     private var activity: Activity<WorkoutActivityAttributes>?
     private let log = Logger(subsystem: "com.fernandocorreia.khepri", category: "live-activity")
+
+    /// Ends every workout activity no workout in this process is driving:
+    /// one left from a run the app was killed during, or a workout stopped
+    /// on the web or in Telegram. Safe to call on every launch and return
+    /// to the foreground.
+    static func endOrphans() {
+        endAll(except: current?.activity?.id)
+    }
 
     func start(title: String, startedAt: Date, state: WorkoutLiveState) {
         // Switched off in Settings: the workout goes on without it.
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         // One left over from a workout the app was quit during.
-        for stale in Activity<WorkoutActivityAttributes>.activities {
-            Task { await stale.end(nil, dismissalPolicy: .immediate) }
-        }
+        Self.endAll(except: nil)
         do {
             activity = try Activity.request(
                 attributes: WorkoutActivityAttributes(title: title, startedAt: startedAt),
-                content: .init(state: state, staleDate: nil)
+                content: Self.content(state)
             )
+            Self.current = self
         } catch {
             log.error("live activity did not start: \(error.localizedDescription, privacy: .public)")
         }
@@ -38,7 +54,8 @@ final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
 
     func update(_ state: WorkoutLiveState) {
         guard let activity else { return }
-        Task { await activity.update(.init(state: state, staleDate: nil)) }
+        let content = Self.content(state)
+        Task { await activity.update(content) }
     }
 
     func end(_ state: WorkoutLiveState, dismissImmediately: Bool) {
@@ -53,6 +70,23 @@ final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
             for remaining in Activity<WorkoutActivityAttributes>.activities where remaining.id != active?.id {
                 await remaining.end(content, dismissalPolicy: policy)
             }
+        }
+    }
+
+    private static func content(_ state: WorkoutLiveState) -> ActivityContent<WorkoutLiveState> {
+        ActivityContent(state: state, staleDate: Date.now.addingTimeInterval(freshFor))
+    }
+
+    /// Ends each workout activity but `kept` on its last state, marked
+    /// finished. The real moving time is unknown here, so it shows "Done".
+    private static func endAll(except kept: Activity<WorkoutActivityAttributes>.ID?) {
+        for leftover in Activity<WorkoutActivityAttributes>.activities where leftover.id != kept {
+            var state = leftover.content.state
+            state.phase = .finished
+            state.restEndsAt = nil
+            state.finalDuration = nil
+            let content = ActivityContent(state: state, staleDate: nil)
+            Task { await leftover.end(content, dismissalPolicy: .immediate) }
         }
     }
 }

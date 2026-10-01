@@ -291,8 +291,9 @@ final class WorkoutSession {
 
     /// Throws the workout away, here and on the server.
     func discard() async {
-        live.end(liveState, dismissImmediately: true)
+        // Finished first, so the activity's last state is not "working".
         phase = .finished
+        live.end(liveState, dismissImmediately: true)
         defer {
             #if canImport(WidgetKit)
             WidgetCenter.shared.reloadAllTimelines()
