@@ -23,18 +23,25 @@ private func workout(_ type: HKWorkoutActivityType, on d: Int, minutes: Double =
 
 @MainActor
 struct FitnessFormatTests {
+    /// Pinned to a locale: the simulator's own may write "6,5k".
+    private let us = Locale(identifier: "en_US")
+
     @Test func compactNumbersReadLikeTheDesign() {
-        #expect(FitnessFormat.compact(325) == "325")
-        #expect(FitnessFormat.compact(6_512) == "6.5k")
-        #expect(FitnessFormat.compact(10_020) == "10k")
-        #expect(FitnessFormat.compact(30_940) == "30.9k")
+        #expect(FitnessFormat.compact(325, locale: us) == "325")
+        #expect(FitnessFormat.compact(6_512, locale: us) == "6.5k")
+        #expect(FitnessFormat.compact(10_020, locale: us) == "10k")
+        #expect(FitnessFormat.compact(30_940, locale: us) == "30.9k")
+    }
+
+    @Test func compactNumbersUseThePersonsDecimalMark() {
+        #expect(FitnessFormat.compact(6_512, locale: Locale(identifier: "pt_PT")) == "6,5k")
     }
 
     @Test func deltasCarryTheirSign() {
-        #expect(FitnessFormat.signed(2_812) == "+2.8k")
-        #expect(FitnessFormat.signed(-1_630) == "-1.6k")
-        #expect(FitnessFormat.signed(325) == "+325")
-        #expect(FitnessFormat.signed(0.2) == "0")
+        #expect(FitnessFormat.signed(2_812, locale: us) == "+2.8k")
+        #expect(FitnessFormat.signed(-1_630, locale: us) == "-1.6k")
+        #expect(FitnessFormat.signed(325, locale: us) == "+325")
+        #expect(FitnessFormat.signed(0.2, locale: us) == "0")
     }
 
     @Test func paceIsMinutesAndSecondsPerKm() {
