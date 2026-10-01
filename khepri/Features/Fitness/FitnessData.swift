@@ -218,21 +218,22 @@ struct StepDay: Equatable, Identifiable {
 // MARK: - Formatting
 
 enum FitnessFormat {
-    /// "325", "6.5k", "10k", "30.9k".
-    static func compact(_ value: Double) -> String {
+    /// "325", "6.5k", "10k", "30.9k" — with the decimal mark of `locale`,
+    /// so "6,5k" in Portugal.
+    static func compact(_ value: Double, locale: Locale = .current) -> String {
         let magnitude = abs(value)
         if magnitude < 1000 {
-            return value.rounded().formatted(.number.precision(.fractionLength(0)))
+            return value.rounded().formatted(.number.precision(.fractionLength(0)).locale(locale))
         }
         let thousands = (value / 100).rounded() / 10
-        return thousands.formatted(.number.precision(.fractionLength(0...1))) + "k"
+        return thousands.formatted(.number.precision(.fractionLength(0...1)).locale(locale)) + "k"
     }
 
     /// "+2.8k", "-1.6k", "+325", "0".
-    static func signed(_ value: Double) -> String {
+    static func signed(_ value: Double, locale: Locale = .current) -> String {
         let rounded = value.rounded()
         if rounded == 0 { return "0" }
-        return (rounded > 0 ? "+" : "-") + compact(abs(rounded))
+        return (rounded > 0 ? "+" : "-") + compact(abs(rounded), locale: locale)
     }
 
     /// "51:51/km".
