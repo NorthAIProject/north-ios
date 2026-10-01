@@ -80,6 +80,9 @@ struct ContractTests {
         #expect(stats.exercises.first?.trend.count == 1)
         let last = try decode(Schemas.LiftLast.self, "lift_last")
         #expect(last.exercises.first?.sets.map(\.setNumber) == [1, 2])
+        let recap = try decode(Schemas.LiftRecap.self, "lift_recap")
+        #expect(recap.setsPrescribed == 6 && recap.planWeekday == "Thursday")
+        #expect(recap.exercises.first?.changeE1rmKg == 5.8 && recap.exercises.first?.previousVolumeKg == 975)
     }
 
     @Test func trackers() throws {
@@ -248,6 +251,10 @@ struct ContractTests {
         #expect(progress.statuses.map(\.label) == ["Active", "Achieved"] && progress.goals.first?.progress == 60)
         let training = try decode(Schemas.InsightsTraining.self, "insights-training")
         #expect(training.kinds.first?.value == 1 && training.delta.hasPrior)
+        #expect(training.plan == nil && training.recap == nil, "no plan, no recap: both absent")
+        let planned = try decode(Schemas.InsightsTraining.self, "insights-training-plan")
+        #expect(planned.plan?.days.map(\.done) == [true, false, false] && planned.plan?.days[1].today == true)
+        #expect(planned.recap?.sentence.hasPrefix("40 minutes") == true)
         let nutrition = try decode(Schemas.InsightsNutrition.self, "insights-nutrition")
         #expect(nutrition.macros.map(\.label) == ["Protein", "Fat", "Carbs"] && nutrition.hasGoal)
         #expect(try decode(Schemas.InsightsCoach.self, "insights-coach").helpfulRate == 80)
@@ -260,7 +267,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
@@ -271,7 +278,7 @@ struct ContractTests {
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
-                            "insights-training", "insights-nutrition", "insights-coach", "insights-spend",
+                            "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
