@@ -30,6 +30,9 @@ enum AppDestination: Equatable {
     /// The check-in flow, presented as a sheet on the current tab instead
     /// of navigating to More → Check-ins.
     case checkInFlow
+    /// Somebody's invite link (`/i/<code>`): kept, then redeemed as soon as
+    /// there is a session, and Friends opens to show the new connection.
+    case invite(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -64,10 +67,14 @@ final class AppRouter {
     /// Set when a check-in should start as a sheet on the current tab,
     /// matching the web's inline check-in flow.
     var showsCheckInFlow = false
+    /// Counts invite links opened while the app runs. Friends redeems on each
+    /// change, which also covers a link opened while Friends is already on
+    /// screen, where navigating to it changes nothing.
+    var invitesReceived = 0
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
-        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
+        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends",
     ]
 
     func open(_ destination: AppDestination) {
@@ -100,6 +107,11 @@ final class AppRouter {
             openSection = "check-ins"
         case .checkInFlow:
             showsCheckInFlow = true
+        case .invite(let code):
+            PendingInvite.store(code)
+            invitesReceived += 1
+            selectedTab = .more
+            openSection = "friends"
         }
     }
 
@@ -152,6 +164,9 @@ final class AppRouter {
         }
         if parts.first == "decisions", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .decision(parts[1])
+        }
+        if parts.first == "i", parts.count == 2, parts[1].count == 10, parts[1].allSatisfy({ $0.isLetter || $0.isNumber }) {
+            return .invite(parts[1].lowercased())
         }
         return switch parts.first {
         case nil, "today": .tab(.today)

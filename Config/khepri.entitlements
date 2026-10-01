@@ -11,6 +11,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:kheprios.com</string>
+		<string>applinks:kheprios.com</string>
 	</array>
 	<key>com.apple.developer.healthkit</key>
 	<true/>

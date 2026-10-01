@@ -258,6 +258,20 @@ struct ContractTests {
         #expect(diets.diets.filter(\.selected).map(\.code) == ["vegetarian"])
     }
 
+    @Test func social() throws {
+        let overview = try decode(Schemas.SocialOverview.self, "social")
+        #expect(overview.invite.url.hasSuffix("/i/k7m2p9qx4r") && overview.joined == 2)
+        #expect(overview.requests.first?.value2.status == .pending && overview.requests.first?.value1.handle == "")
+        #expect(overview.followers.first?.value1.handle == "ana_runs")
+        #expect(try decode(Schemas.InviteView.self, "invite").channel == "link")
+        #expect(try decode(Schemas.InvitePreview.self, "invite-preview").inviter.displayName == "Ana")
+        let profile = try decode(Schemas.ProfileView.self, "public-profile")
+        #expect(profile.value2.followers == 12 && profile.value2.relationship.following == "pending" && profile.value2.relationship.followsYou)
+        #expect(try decode(Schemas.ConnectionView.self, "connection").value2.status == .pending)
+        #expect(try decode(Schemas.RedeemView.self, "redeem").redeemed)
+        #expect(try decode(Schemas.HandleView.self, "handle").handle == "ana_runs")
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
@@ -272,7 +286,8 @@ struct ContractTests {
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-nutrition", "insights-coach", "insights-spend",
-                            "form-check-playback", "diets"]
+                            "form-check-playback", "diets",
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

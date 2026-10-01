@@ -62,11 +62,14 @@ final class AppModel {
         // The APNs token usually arrived before anybody was signed in.
         await PushRegistration.resend()
         await PushRegistration.registerIfAllowed()
+        // An invite link tapped before signing in.
+        await PendingInvite.redeemIfAny()
     }
 
     /// The first-run wizard finished and the server accepted the answers.
     func didCompleteOnboarding(_ user: APIUser) {
         phase = .signedIn(user)
+        Task { await PendingInvite.redeemIfAny() }
     }
 
     func retry() async {
