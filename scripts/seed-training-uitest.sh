@@ -10,7 +10,7 @@
 #
 #   eval "$(scripts/seed-training-uitest.sh)"   # exports TEST_RUNNER_TRAINING_*
 set -euo pipefail
-WEB="${NORTH_WEB_APP:-$(cd "$(dirname "$0")/../../.." && pwd)/north-web-app}"
+WEB="${NORTH_WEB_APP:-$(cd "$(dirname "$0")/../../.." && pwd)/north-client}"
 python3 - "$WEB" <<'PY'
 import json, subprocess, sys, time, urllib.request, uuid
 web = sys.argv[1]
