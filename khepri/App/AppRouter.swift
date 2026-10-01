@@ -36,6 +36,11 @@ enum AppDestination: Equatable {
     /// A crew's join link (`/i/c/<code>`): kept, joined once there is a
     /// session, and the crew opens.
     case crewJoin(String)
+    /// One exercise, shown as a sheet over whatever is open: Spotlight, or
+    /// "Show push-up in Khepri".
+    case exercise(String)
+    /// One goal, opened over the Goals list.
+    case goal(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -76,6 +81,12 @@ final class AppRouter {
     var invitesReceived = 0
     /// Counts crew links opened, for Crews to join on each one.
     var crewLinksReceived = 0
+    /// Set when a link asks for one exercise; the tab view presents it and
+    /// clears it on dismiss.
+    var openExercise: String?
+    /// Set with `openSection` for a single goal; the Goals screen opens it
+    /// and clears it.
+    var openGoal: String?
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
@@ -122,6 +133,12 @@ final class AppRouter {
             invitesReceived += 1
             selectedTab = .more
             openSection = "friends"
+        case .exercise(let slug):
+            openExercise = slug
+        case .goal(let id):
+            selectedTab = .more
+            openGoal = id
+            openSection = "goals"
         }
     }
 
@@ -141,6 +158,8 @@ final class AppRouter {
     ///     khepri://care            → More → Care
     ///     khepri://check-ins?mood=4 → today's check-in, mood set
     ///     khepri://training/next/start → today's workout, started
+    ///     khepri://exercises/push-up → the push-up, as a sheet
+    ///     khepri://goals/<id>      → More → Goals → that goal
     ///     /app/chat/…              → Coach tab (a web path from the server)
     static func destination(for url: URL) -> AppDestination? {
         let parts: [String]
@@ -180,6 +199,13 @@ final class AppRouter {
         }
         if parts.first == "i", parts.count == 2, parts[1].count == 10, parts[1].allSatisfy({ $0.isLetter || $0.isNumber }) {
             return .invite(parts[1].lowercased())
+        }
+        if parts.first == "goals", parts.count == 2, UUID(uuidString: parts[1]) != nil {
+            return .goal(parts[1])
+        }
+        // /app/exercises/<slug>, the web's own exercise page.
+        if parts.first == "exercises", parts.count == 2, !parts[1].isEmpty {
+            return .exercise(parts[1])
         }
         return switch parts.first {
         case nil, "today": .tab(.today)

@@ -22,6 +22,12 @@ struct KhepriShortcuts: AppShortcutsProvider {
             systemImageName: "figure.strengthtraining.traditional"
         )
         AppShortcut(
+            intent: OpenExerciseIntent(),
+            phrases: ["Show \(\.$target) in \(.applicationName)", "How do I do \(\.$target) in \(.applicationName)"],
+            shortTitle: "Show Exercise",
+            systemImageName: "figure.strengthtraining.traditional"
+        )
+        AppShortcut(
             intent: LogWaterIntent(),
             phrases: ["Log water in \(.applicationName)"],
             shortTitle: "Log Water",

@@ -5,7 +5,9 @@ import NorthAPI
 /// starts and stops, which is where calories and the coach's view of
 /// training come from.
 protocol ActivityServicing: Sendable {
-    func start(_ activityCode: String) async throws -> ActivitySession
+    /// Starts the timer. `planWeekday` names the plan day a guided workout is
+    /// for, so finishing it completes that day even when trained early.
+    func start(_ activityCode: String, planWeekday: String?) async throws -> ActivitySession
     /// The session open on the account, from any device, if there is one.
     func openSession() async throws -> ActivitySession?
     func pause(_ sessionID: String) async throws -> ActivitySession
@@ -21,8 +23,10 @@ protocol ActivityServicing: Sendable {
 struct ActivityService: ActivityServicing {
     var api: Client = API.shared
 
-    func start(_ activityCode: String) async throws -> ActivitySession {
-        try await NorthAPI.call { try await api.startActivity(body: .json(.init(activityCode: activityCode))).created.body.json }
+    func start(_ activityCode: String, planWeekday: String?) async throws -> ActivitySession {
+        try await NorthAPI.call {
+            try await api.startActivity(body: .json(.init(activityCode: activityCode, planWeekday: planWeekday))).created.body.json
+        }
     }
 
     func openSession() async throws -> ActivitySession? {

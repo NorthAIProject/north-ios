@@ -226,8 +226,13 @@ private struct CurrentExercise: View {
 private struct WorkoutSummary: View {
     let session: WorkoutSession
     let onDone: () -> Void
+    var recaps: RecapServicing = RecapService()
 
+    @Environment(AppRouter.self) private var router
     @State private var imperial = false
+    /// The server's recap once it answers; until then, and if it cannot,
+    /// the one built from what the phone saw.
+    @State private var recap: WorkoutRecapModel?
 
     var body: some View {
         VStack(spacing: 32) {
@@ -251,6 +256,9 @@ private struct WorkoutSummary: View {
                 if let calories = session.recorded?.caloriesBurned {
                     stat(calories.formatted(.number.precision(.fractionLength(0))), "KCAL")
                 }
+            }
+            if session.recorded != nil || !session.logged.isEmpty {
+                WorkoutRecapCard(model: recap ?? .local(from: session))
             }
             if !session.improvements.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
@@ -284,14 +292,33 @@ private struct WorkoutSummary: View {
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             Spacer()
-            Button(action: onDone) {
-                Text("Done").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 8)
+            VStack(spacing: 8) {
+                Button(action: onDone) {
+                    Text("Done").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 8)
+                }
+                .northProminentButton()
+                .controlSize(.large)
+                if session.recorded != nil {
+                    Button("See Progress") {
+                        onDone()
+                        router.open(.tab(.progress))
+                    }
+                    .font(.subheadline)
+                }
             }
-            .northProminentButton()
-            .controlSize(.large)
         }
         .padding(20)
         .task { imperial = (try? await SettingsService().preferences().unitsSystem) == .imperial }
+        .task(id: session.recorded?.id) { await loadRecap() }
+    }
+
+    /// Asks the server for the recap of the saved session. A failure keeps
+    /// the local one: the numbers the phone counted are still true.
+    private func loadRecap() async {
+        guard let id = session.recorded?.id, session.recorded?.status == .completed else { return }
+        if let fetched = try? await recaps.recap(sessionID: id) {
+            recap = WorkoutRecapModel(fetched)
+        }
     }
 
     private func stat(_ value: String, _ label: String) -> some View {

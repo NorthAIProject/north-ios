@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WEB="${NORTH_WEB_APP:-$ROOT/../../north-web-app}"
+WEB="${NORTH_WEB_APP:-$ROOT/../../north-client}"
 SPEC_DEST="$ROOT/NorthKit/Sources/NorthAPI/openapi.yaml"
 GOLDEN_DEST="$ROOT/NorthKit/Tests/NorthAPITests/Contract"
 

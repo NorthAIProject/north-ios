@@ -5,13 +5,14 @@ import UserNotifications
 @testable import khepri
 
 struct WorkoutReminderTests {
-    static func plan(_ days: [(String, String?)]) -> PlanDetail {
+    static func plan(_ days: [(String, String?)], completed: Set<String> = [], next: String? = nil) -> PlanDetail {
         PlanDetail(
             id: "plan-1", name: "Base", rationale: "", weeksTotal: 4,
             days: days.map { weekday, start in
                 TrainingDay(weekday: weekday, startTime: start, focus: "Full body",
                             exercises: [DayExercise(name: "Goblet squat", sets: 3, reps: "8", restSeconds: 90, equipment: "dumbbell",
-                                                    hasArt: true, primaryMuscles: [], secondaryMuscles: [])])
+                                                    hasArt: true, primaryMuscles: [], secondaryMuscles: [])],
+                            completedThisWeek: completed.contains(weekday), isNext: weekday == next)
             },
             problems: [], source: .ai, createdAt: .now
         )
@@ -128,5 +129,24 @@ extension PlanDetail {
         var copy = self
         copy.id = id
         return copy
+    }
+}
+
+struct DayStatusTests {
+    @Test func aFinishedDayReadsCompletedAndNextMovesOn() {
+        let plan = WorkoutReminderTests.plan([("Monday", nil), ("Wednesday", nil), ("Friday", nil)],
+                                             completed: ["Monday", "Wednesday"], next: "Friday")
+        #expect(plan.days.map(\.status) == [.completed, .completed, .next])
+        #expect(plan.nextDayIndex == 2)
+    }
+
+    @Test func aDayStillOpenCarriesNoMark() {
+        let plan = WorkoutReminderTests.plan([("Monday", nil), ("Friday", nil)], next: "Monday")
+        #expect(plan.days.map(\.status) == [.next, nil])
+    }
+
+    @Test func noNextDayMeansNothingToOpen() {
+        let plan = WorkoutReminderTests.plan([("Monday", nil)])
+        #expect(plan.nextDayIndex == nil)
     }
 }

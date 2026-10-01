@@ -28,6 +28,8 @@ final class WorkoutSession {
 
     let title: String
     let exercises: [DayExercise]
+    /// The plan day this workout is for; finishing it completes that day.
+    let planWeekday: String
 
     private(set) var phase: Phase = .ready
     private(set) var isPaused = false
@@ -72,6 +74,7 @@ final class WorkoutSession {
          health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, now: @escaping () -> Date = Date.init) {
         self.title = title
         self.exercises = day.exercises.filter { $0.sets > 0 }
+        self.planWeekday = day.weekday
         self.service = service
         self.live = live
         self.health = health
@@ -315,7 +318,7 @@ final class WorkoutSession {
     /// (started on the web, or before the app was quit).
     private func connect() async {
         do {
-            recorded = try await service.start(Self.activityCode)
+            recorded = try await service.start(Self.activityCode, planWeekday: planWeekday)
             return
         } catch {
             if let open = try? await service.openSession(), open.status == .active || open.status == .paused {

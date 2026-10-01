@@ -7,6 +7,8 @@ typealias Ingredient = Components.Schemas.Ingredient
 typealias MealPlanSummary = Components.Schemas.MealPlanSummary
 typealias MealPlanDetail = Components.Schemas.MealPlanDetail
 typealias Macros = Components.Schemas.Macros
+typealias FoodDraft = Components.Schemas.FoodDraft
+typealias FoodLine = Components.Schemas.FoodLine
 
 protocol NutritionServicing: Sendable {
     func log() async throws -> FoodLog
@@ -24,6 +26,7 @@ protocol NutritionServicing: Sendable {
     func removeMeal(_ id: String) async throws
     func addPortion(to mealID: String, ingredientID: String, grams: Double) async throws
     func removePortion(_ id: String) async throws
+    func parseFoods(_ text: String) async throws -> FoodDraft
 }
 
 struct NutritionService: NutritionServicing {
@@ -73,6 +76,9 @@ struct NutritionService: NutritionServicing {
     }
     func removePortion(_ id: String) async throws {
         try await NorthAPI.call { _ = try await api.removeMealPortion(path: .init(mealIngredientID: id)).noContent }
+    }
+    func parseFoods(_ text: String) async throws -> FoodDraft {
+        try await NorthAPI.call { try await api.parseMealFoods(body: .json(.init(text: text))).ok.body.json }
     }
 }
 
@@ -329,6 +335,7 @@ private struct MealPlanView: View {
     @State private var addingMeal = false
     @State private var mealName = ""
     @State private var portionFor: String?
+    @State private var speakingFor: String?
 
     var body: some View {
         List {
@@ -347,6 +354,7 @@ private struct MealPlanView: View {
                                 }
                         }
                         Button("Add Ingredient", systemImage: "plus") { portionFor = meal.id }
+                        Button("Say Ingredients", systemImage: "mic") { speakingFor = meal.id }
                     } header: {
                         HStack {
                             Text("\(meal.mealNumber). \(meal.name) · \(Int(meal.totalMacros.calories)) kcal")
@@ -376,6 +384,14 @@ private struct MealPlanView: View {
             PortionSheet(service: service) { ingredientID, grams in
                 try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams)
                 await load()
+            }
+        }
+        // Reloaded once on the way out rather than after every portion: a
+        // spoken meal adds several, and a partial failure leaves the sheet
+        // open with the rest, so the plan is redrawn when the person is done.
+        .sheet(item: Binding(get: { speakingFor.map(MealRef.init) }, set: { speakingFor = $0?.id }), onDismiss: { Task { await load() } }) { ref in
+            SpeakMealSheet(service: service) { ingredientID, grams in
+                try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams)
             }
         }
         .task { await load() }
