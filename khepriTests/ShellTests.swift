@@ -111,6 +111,8 @@ struct RouterTests {
         ("https://kheprios.com/i/k7m2p9qx4r", .invite("k7m2p9qx4r")),
         ("khepri://i/K7M2P9QX4R", .invite("k7m2p9qx4r")),
         ("khepri://friends", .section("friends")),
+        ("https://kheprios.com/i/c/q8w3n5k2ht", .crewJoin("q8w3n5k2ht")),
+        ("khepri://crews", .section("crews")),
         ("khepri://check-ins?mood=4", .checkIn(mood: 4)),
         ("/app/check-ins?mood=2", .checkIn(mood: 2)),
         ("khepri://check-ins?mood=9", .section("check-ins")),

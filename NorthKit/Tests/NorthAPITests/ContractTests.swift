@@ -280,6 +280,16 @@ struct ContractTests {
         #expect(sharing.training && !sharing.streaks && sharing.goals)
     }
 
+    @Test func crews() throws {
+        let list = try decode(Schemas.CrewList.self, "crews")
+        #expect(list.crews.first?.joinUrl.hasSuffix("/i/c/q8w3n5k2ht") == true)
+        #expect(try decode(Schemas.Crew.self, "crew").memberCount == 2)
+        let board = try decode(Schemas.CrewBoard.self, "crew-board")
+        #expect(board.value2.challenge?.kind == .checkins && board.value2.challenge?.target == 5)
+        #expect(board.value2.members.first?.me == true && board.value2.members.first?.weekProgress == 3)
+        #expect(board.value2.isOwner && board.value1.name == "Morning runners")
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit",
@@ -295,7 +305,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing"]
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

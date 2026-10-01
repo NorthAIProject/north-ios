@@ -33,6 +33,9 @@ enum AppDestination: Equatable {
     /// Somebody's invite link (`/i/<code>`): kept, then redeemed as soon as
     /// there is a session, and Friends opens to show the new connection.
     case invite(String)
+    /// A crew's join link (`/i/c/<code>`): kept, joined once there is a
+    /// session, and the crew opens.
+    case crewJoin(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -71,10 +74,12 @@ final class AppRouter {
     /// change, which also covers a link opened while Friends is already on
     /// screen, where navigating to it changes nothing.
     var invitesReceived = 0
+    /// Counts crew links opened, for Crews to join on each one.
+    var crewLinksReceived = 0
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
-        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends",
+        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews",
     ]
 
     func open(_ destination: AppDestination) {
@@ -107,6 +112,11 @@ final class AppRouter {
             openSection = "check-ins"
         case .checkInFlow:
             showsCheckInFlow = true
+        case .crewJoin(let code):
+            PendingCrewJoin.store(code)
+            crewLinksReceived += 1
+            selectedTab = .more
+            openSection = "crews"
         case .invite(let code):
             PendingInvite.store(code)
             invitesReceived += 1
@@ -164,6 +174,9 @@ final class AppRouter {
         }
         if parts.first == "decisions", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .decision(parts[1])
+        }
+        if parts.first == "i", parts.count == 3, parts[1] == "c", parts[2].count == 10, parts[2].allSatisfy({ $0.isLetter || $0.isNumber }) {
+            return .crewJoin(parts[2].lowercased())
         }
         if parts.first == "i", parts.count == 2, parts[1].count == 10, parts[1].allSatisfy({ $0.isLetter || $0.isNumber }) {
             return .invite(parts[1].lowercased())
