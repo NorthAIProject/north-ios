@@ -38,7 +38,7 @@ struct TodaySmallView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SessionLabel(session: glance.next)
+            SessionLabel(glance: glance)
             Spacer(minLength: 0)
             StreakLine(glance: glance)
             WaterBar(glance: glance)
@@ -55,7 +55,7 @@ struct TodayMediumView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                SessionLabel(session: glance.next)
+                SessionLabel(glance: glance)
                 Spacer(minLength: 0)
                 StreakLine(glance: glance)
             }
@@ -92,9 +92,10 @@ struct TodayMediumView: View {
     }
 }
 
-/// The next session, or a quiet note when there is no plan.
+/// Today's session once it is done, otherwise the next one, or a quiet note
+/// when there is no plan.
 private struct SessionLabel: View {
-    let session: Glance.Session?
+    let glance: Glance
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -102,16 +103,32 @@ private struct SessionLabel: View {
                 .font(.caption2.weight(.medium))
                 .tracking(1.5)
                 .foregroundStyle(.secondary)
-            Text(session?.focus ?? "No plan yet")
+            SessionHeadline(glance: glance)
                 .font(.headline)
                 .lineLimit(2)
         }
     }
 
     private var eyebrow: String {
-        guard let session else { return "TRAINING" }
+        if glance.completedSummary != nil { return "TODAY · DONE" }
+        guard let session = glance.next else { return "TRAINING" }
         let day = session.isToday ? "TODAY" : session.weekday.uppercased()
         return [day, session.startTime].compactMap { $0 }.joined(separator: " · ")
+    }
+}
+
+/// "✓ Upper A · 52m" once today's session is done, otherwise the next
+/// session's focus.
+struct SessionHeadline: View {
+    let glance: Glance
+
+    var body: some View {
+        if let done = glance.completedSummary {
+            Text("\(Image(systemName: "checkmark")) \(done)")
+                .accessibilityLabel("Done today, \(done)")
+        } else {
+            Text(glance.next?.focus ?? "No plan yet")
+        }
     }
 }
 

@@ -37,6 +37,7 @@ struct KhepriAccessoryView: View {
 
     static func inline(_ glance: Glance) -> String {
         let streak = "\(glance.streak)d"
+        if let done = glance.completedSessionName { return "\(streak) · ✓ \(done)" }
         guard let next = glance.next, next.isToday else { return "\(streak) · \(glance.waterML) ml" }
         return "\(streak) · \(next.focus)"
     }
@@ -65,7 +66,7 @@ struct NextUpView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(glance.next?.focus ?? "No plan yet")
+            SessionHeadline(glance: glance)
                 .font(.headline)
                 .lineLimit(1)
             Text(caption)
@@ -82,6 +83,7 @@ struct NextUpView: View {
     /// When the session is, then the streak: "Today · 6-day streak".
     private var caption: String {
         let streak = glance.streak == 1 ? "1-day streak" : "\(glance.streak)-day streak"
+        if glance.completedSessionName != nil { return "Done today · \(streak)" }
         guard let next = glance.next else { return streak }
         return "\(next.isToday ? "Today" : next.weekday) · \(streak)"
     }

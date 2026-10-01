@@ -8,7 +8,7 @@ import WidgetKit
 struct WorkoutLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WorkoutActivityAttributes.self) { context in
-            LockScreenView(title: context.attributes.title, state: context.state)
+            LockScreenView(title: context.attributes.title, state: context.state, isStale: context.isStale)
                 .activityBackgroundTint(nil)
                 .widgetURL(URL(string: "khepri://training"))
         } dynamicIsland: { context in
@@ -23,7 +23,7 @@ struct WorkoutLiveActivity: Widget {
                     .foregroundStyle(NorthColor.signal)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Countdown(state: context.state)
+                    Countdown(state: context.state, isStale: context.isStale)
                         .font(.headline.monospacedDigit())
                         .multilineTextAlignment(.trailing)
                 }
@@ -36,7 +36,7 @@ struct WorkoutLiveActivity: Widget {
                 Image(systemName: context.state.phase == .finished ? "checkmark" : (context.state.phase == .resting ? "timer" : "figure.strengthtraining.traditional"))
                     .foregroundStyle(NorthColor.signal)
             } compactTrailing: {
-                Countdown(state: context.state)
+                Countdown(state: context.state, isStale: context.isStale)
                     .monospacedDigit()
                     .frame(maxWidth: 48)
             } minimal: {
@@ -51,6 +51,7 @@ struct WorkoutLiveActivity: Widget {
 private struct LockScreenView: View {
     let title: String
     let state: WorkoutActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
@@ -71,7 +72,7 @@ private struct LockScreenView: View {
                 Text(label)
                     .font(.caption.weight(.medium))
                     .foregroundStyle(state.phase == .resting ? NorthColor.signal : .secondary)
-                Countdown(state: state)
+                Countdown(state: state, isStale: isStale)
                     .font(.title2.weight(.light).monospacedDigit())
                     .multilineTextAlignment(.trailing)
             }
@@ -80,7 +81,8 @@ private struct LockScreenView: View {
     }
 
     private var label: String {
-        switch state.phase {
+        if isStale && state.phase != .finished { return "Idle" }
+        return switch state.phase {
         case .working: "Working"
         case .resting: "Rest"
         case .paused: "Paused"
@@ -90,12 +92,16 @@ private struct LockScreenView: View {
 }
 
 /// Rest counts down to its end; otherwise moving time counts up. Both are
-/// timer text the system updates without the app running.
+/// timer text the system updates without the app running. Once the system
+/// marks the activity stale nothing is driving it, so it stops counting.
 private struct Countdown: View {
     let state: WorkoutActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
-        if state.phase == .finished {
+        if isStale && state.phase != .finished {
+            Text("--:--")
+        } else if state.phase == .finished {
             if let duration = state.finalDuration {
                 Text(Duration.seconds(duration).formatted(.time(pattern: .minuteSecond)))
             } else {

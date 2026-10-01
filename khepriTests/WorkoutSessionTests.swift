@@ -148,6 +148,7 @@ struct WorkoutSessionTests {
         #expect(service.calls.last == "cancel s1")
         #expect(session.recorded == nil)
         #expect(live.dismissedImmediately)
+        #expect(live.last?.phase == .finished)
     }
 }
 

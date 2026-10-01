@@ -14,6 +14,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         center.setNotificationCategories([WorkoutReminders.category, CheckInActions.category])
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
+        // A workout Live Activity from before a kill has nothing behind it now.
+        WorkoutLiveActivityController.endOrphans()
         Task { @MainActor in await PushRegistration.registerIfAllowed() }
         return true
     }

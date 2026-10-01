@@ -48,9 +48,11 @@ struct MainTabView: View {
         .onAppear { tour.startIfNeeded() }
         // Apple Health catches up whenever the app comes forward, and
         // Spotlight's copy of exercises and goals with it; each decides for
-        // itself whether there is anything to do.
+        // itself whether there is anything to do. A workout Live Activity with
+        // no workout behind it (the app was killed mid-workout, say) ends here too.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
+                WorkoutLiveActivityController.endOrphans()
                 Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
                 Task.detached { await SpotlightIndex.refresh() }
             }
