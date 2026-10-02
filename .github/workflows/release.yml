@@ -1,7 +1,8 @@
 # iOS release pipeline.
 #   "iOS CI" green on main -> TestFlight build (beta lane)
 #   manual dispatch        -> App Store release (release/hotfix), external TestFlight
-#                             (beta_external) or metadata only (metadata), gated by
+#                             (beta_external), metadata only (metadata) or a build
+#                             uploaded without submission (upload_build), gated by
 #                             the GitHub environment "app-store" (required reviewer).
 #
 # Required repo secrets:
@@ -27,7 +28,7 @@ on:
         description: Release lane
         required: true
         type: choice
-        options: [release, hotfix, beta_external, metadata]
+        options: [release, hotfix, beta_external, metadata, upload_build]
         default: release
       version:
         description: Marketing version (e.g. 1.0) — empty keeps current
