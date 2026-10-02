@@ -287,6 +287,9 @@ struct ContractTests {
         #expect(try decode(Schemas.ConnectionView.self, "connection").value2.status == .pending)
         #expect(try decode(Schemas.RedeemView.self, "redeem").redeemed)
         #expect(try decode(Schemas.HandleView.self, "handle").handle == "ana_runs")
+        let matches = try decode(Schemas.ContactMatches.self, "contacts-match").people
+        #expect(matches.first?.value1.handle == "ana_runs" && matches.first?.value2.following == "")
+        #expect(matches.last?.value2.following == "pending")
     }
 
     @Test func feed() throws {
@@ -333,7 +336,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board"]
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
