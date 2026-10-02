@@ -41,6 +41,9 @@ enum AppDestination: Equatable {
     case exercise(String)
     /// One goal, opened over the Goals list.
     case goal(String)
+    /// The weekly review, as a sheet over whatever is open: where the Sunday
+    /// nudge leads.
+    case weeklyReview
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -75,6 +78,8 @@ final class AppRouter {
     /// Set when a check-in should start as a sheet on the current tab,
     /// matching the web's inline check-in flow.
     var showsCheckInFlow = false
+    /// Set when a link asks for the weekly review; the tab view presents it.
+    var showsWeeklyReview = false
     /// Counts invite links opened while the app runs. Friends redeems on each
     /// change, which also covers a link opened while Friends is already on
     /// screen, where navigating to it changes nothing.
@@ -123,6 +128,8 @@ final class AppRouter {
             openSection = "check-ins"
         case .checkInFlow:
             showsCheckInFlow = true
+        case .weeklyReview:
+            showsWeeklyReview = true
         case .crewJoin(let code):
             PendingCrewJoin.store(code)
             crewLinksReceived += 1
@@ -160,6 +167,7 @@ final class AppRouter {
     ///     khepri://training/next/start → today's workout, started
     ///     khepri://exercises/push-up → the push-up, as a sheet
     ///     khepri://goals/<id>      → More → Goals → that goal
+    ///     khepri://weekly          → the weekly review, as a sheet
     ///     /app/chat/…              → Coach tab (a web path from the server)
     static func destination(for url: URL) -> AppDestination? {
         let parts: [String]
@@ -213,6 +221,7 @@ final class AppRouter {
         case "training", "workouts", "exercises", "activity": .tab(.training)
         case "insights", "fitness", "progress": .tab(.progress)
         case "settings": .settings
+        case "weekly": .weeklyReview
         case "more": .tab(.more)
         case let id? where sections.contains(id): .section(id)
         default: nil

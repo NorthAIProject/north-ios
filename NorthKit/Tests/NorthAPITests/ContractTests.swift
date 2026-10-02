@@ -307,6 +307,19 @@ struct ContractTests {
         #expect(board.value2.isOwner && board.value1.name == "Morning runners")
     }
 
+    @Test func weekly() throws {
+        let review = try decode(Schemas.WeeklyReview.self, "weekly-review")
+        #expect(review.planning == "2026-10-05" && review.report?.ready == true)
+        #expect(review.goals.first?.priority == 1 && review.last?.volume == .hold)
+        let focus = try decode(Schemas.WeeklyFocus.self, "weekly-focus")
+        #expect(focus.volume == .deload && focus.priorities.count == 2)
+    }
+
+    @Test func contactsMatch() throws {
+        let matches = try decode(Schemas.ContactMatches.self, "contacts-match")
+        #expect(matches.people.count == 2)
+    }
+
     @Test func xp() throws {
         let summary = try decode(Schemas.XPSummary.self, "summary")
         #expect(summary.total == 340 && summary.weekTotal == 40)
@@ -333,7 +346,8 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board"]
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
+                            "weekly-review", "weekly-focus", "contacts-match"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
