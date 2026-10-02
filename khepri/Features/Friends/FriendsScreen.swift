@@ -11,6 +11,8 @@ struct FriendsScreen: View {
     @State private var overview: SocialOverview?
     @State private var feed: [FeedItem] = []
     @State private var sharing: Sharing?
+    @State private var phone: PhoneStatus?
+    @State private var facebook: FacebookFriends?
     @State private var error: String?
     @State private var handle = ""
     @State private var handleError: String?
@@ -97,6 +99,18 @@ struct FriendsScreen: View {
                     }
                 }
                 if let handleError { ErrorRow(handleError) }
+                // Hidden while texting codes is off, unless there is a number to remove.
+                if let phone, phone.configured || !phone.number.isEmpty {
+                    NavigationLink {
+                        PhoneNumberScreen(service: service, status: $phone)
+                    } label: {
+                        LabeledContent {
+                            Text(phone.number.isEmpty ? (phone.pending.isEmpty ? "Add" : "Waiting for code") : phone.number)
+                        } label: {
+                            Label("Your Phone Number", systemImage: "phone")
+                        }
+                    }
+                }
             } header: {
                 Text("Your Handle")
             } footer: {
@@ -150,6 +164,17 @@ struct FriendsScreen: View {
                     FindContactsScreen(inviteURL: URL(string: o.invite.url), service: service)
                 } label: {
                     Label("Find Friends from Contacts", systemImage: "person.crop.circle.badge.plus")
+                }
+                if let facebook, facebook.configured || facebook.connected {
+                    NavigationLink {
+                        FacebookFriendsScreen(inviteURL: URL(string: o.invite.url), service: service, facebook: $facebook)
+                    } label: {
+                        LabeledContent {
+                            Text(facebook.connected ? "Connected" : "")
+                        } label: {
+                            Label("Facebook Friends", systemImage: "person.2.circle")
+                        }
+                    }
                 }
             } header: {
                 Text("Follow Somebody")
@@ -212,9 +237,14 @@ struct FriendsScreen: View {
         do {
             async let feedNow = service.feed()
             async let sharingNow = service.sharing()
+            async let phoneNow = service.phone()
+            async let facebookNow = service.facebook()
             let fresh = try await service.overview()
             feed = (try? await feedNow) ?? feed
             sharing = (try? await sharingNow) ?? sharing
+            // A server without them answers 404, and the rows stay hidden.
+            phone = (try? await phoneNow) ?? phone
+            facebook = (try? await facebookNow) ?? facebook
             overview = fresh
             if handle.isEmpty || handle == overview?.handle { handle = fresh.handle }
             error = nil

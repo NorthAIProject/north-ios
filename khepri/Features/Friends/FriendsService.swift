@@ -6,6 +6,8 @@ typealias Connection = Components.Schemas.ConnectionView
 typealias PublicPerson = Components.Schemas.PersonView
 typealias FeedItem = Components.Schemas.FeedItem
 typealias Sharing = Components.Schemas.Sharing
+typealias PhoneStatus = Components.Schemas.PhoneView
+typealias FacebookFriends = Components.Schemas.FacebookFriends
 
 protocol FriendsServicing: Sendable {
     func overview() async throws -> SocialOverview
@@ -17,9 +19,21 @@ protocol FriendsServicing: Sendable {
     func removeFollower(_ userID: String) async throws
     func block(_ userID: String) async throws
     func unblock(_ userID: String) async throws
-    /// People already on Khepri among SHA-256 hex digests of contact emails,
-    /// at most `ContactMatching.chunkSize` of them.
-    func matchContacts(_ hashes: [String]) async throws -> [ContactMatch]
+    /// People already on Khepri among SHA-256 hex digests of contact emails
+    /// and phone numbers, at most `ContactMatching.chunkSize` of them.
+    func matchContacts(_ hashes: ContactHashes) async throws -> [ContactMatch]
+    /// Your verified number, and the one a code is waiting for, if any.
+    func phone() async throws -> PhoneStatus
+    /// Texts a code. `countryCode` is the calling code a national number is
+    /// read in, digits only; nil when the number starts with "+" or "00".
+    func startPhoneVerification(_ phone: String, countryCode: String?) async throws -> PhoneStatus
+    func checkPhoneCode(_ code: String) async throws -> PhoneStatus
+    func cancelPhoneVerification() async throws
+    func removePhone() async throws
+    func facebook() async throws -> FacebookFriends
+    /// Facebook's consent page, for a web authentication session.
+    func facebookAuthorizeURL() async throws -> URL
+    func disconnectFacebook() async throws
     /// Connects this account to whoever's link it was. False when it was
     /// already invited, or the link leads nowhere; neither is an error.
     func redeem(_ code: String) async throws -> Bool
@@ -66,11 +80,47 @@ struct FriendsService: FriendsServicing {
         try await NorthAPI.call { _ = try await api.unblock(path: .init(userID: userID)).noContent }
     }
 
-    func matchContacts(_ hashes: [String]) async throws -> [ContactMatch] {
+    func matchContacts(_ hashes: ContactHashes) async throws -> [ContactMatch] {
         try await NorthAPI.call {
-            try await api.matchContacts(body: .json(.init(hashes: hashes))).ok.body.json.people
+            try await api.matchContacts(body: .json(.init(hashes: hashes.emails, phoneHashes: hashes.phones))).ok.body.json.people
                 .map { ContactMatch(person: $0.value1, following: $0.value2.following) }
         }
+    }
+
+    func phone() async throws -> PhoneStatus {
+        try await NorthAPI.call { try await api.getPhone().ok.body.json }
+    }
+
+    func startPhoneVerification(_ phone: String, countryCode: String?) async throws -> PhoneStatus {
+        try await NorthAPI.call {
+            try await api.startPhoneVerification(body: .json(.init(phone: phone, countryCode: countryCode))).ok.body.json
+        }
+    }
+
+    func checkPhoneCode(_ code: String) async throws -> PhoneStatus {
+        try await NorthAPI.call { try await api.checkPhoneCode(body: .json(.init(code: code))).ok.body.json }
+    }
+
+    func cancelPhoneVerification() async throws {
+        try await NorthAPI.call { _ = try await api.cancelPhoneVerification().noContent }
+    }
+
+    func removePhone() async throws {
+        try await NorthAPI.call { _ = try await api.removePhone().noContent }
+    }
+
+    func facebook() async throws -> FacebookFriends {
+        try await NorthAPI.call { try await api.getFacebookFriends().ok.body.json }
+    }
+
+    func facebookAuthorizeURL() async throws -> URL {
+        let raw = try await NorthAPI.call { try await api.connectFacebook().ok.body.json.authorizeUrl }
+        guard let url = URL(string: raw) else { throw APIError.invalidResponse }
+        return url
+    }
+
+    func disconnectFacebook() async throws {
+        try await NorthAPI.call { _ = try await api.disconnectFacebook().noContent }
     }
 
     func redeem(_ code: String) async throws -> Bool {
