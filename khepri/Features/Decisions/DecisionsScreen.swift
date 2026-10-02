@@ -4,6 +4,7 @@ import SwiftUI
 
 typealias Decision = Components.Schemas.Decision
 typealias DecisionInput = Components.Schemas.DecisionInput
+typealias DecisionCalibration = Components.Schemas.DecisionCalibration
 
 protocol DecisionsServicing: Sendable {
     func decisions() async throws -> [Decision]
@@ -11,6 +12,8 @@ protocol DecisionsServicing: Sendable {
     func create(_ input: DecisionInput) async throws
     func update(_ id: String, _ input: DecisionInput) async throws
     func delete(_ id: String) async throws
+    /// How calls held up among the ones looked back on.
+    func calibration() async throws -> DecisionCalibration
 }
 
 struct DecisionsService: DecisionsServicing {
@@ -31,6 +34,35 @@ struct DecisionsService: DecisionsServicing {
     func delete(_ id: String) async throws {
         try await NorthAPI.call { _ = try await api.deleteDecision(path: .init(decisionID: id)).noContent }
     }
+    func calibration() async throws -> DecisionCalibration {
+        try await NorthAPI.call { try await api.getDecisionCalibration().ok.body.json }
+    }
+}
+
+/// "Did it hold?" as the server spells it: yes, partly, no, or empty for not
+/// answered. Kept as a string so the form's picker and both generated enums
+/// (the decision's and the input's) meet in one place.
+enum DecisionHeld: String, CaseIterable, Identifiable {
+    case notYet = "", yes, partly, no
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .notYet: "Not yet"
+        case .yes: "Yes"
+        case .partly: "Partly"
+        case .no: "No"
+        }
+    }
+}
+
+extension DecisionCalibration {
+    /// "7 looked back on: 4 held, 2 partly, 1 didn't", or nil before any.
+    var summary: String? {
+        guard revisited > 0 else { return nil }
+        return "\(revisited) looked back on: \(yes) held, \(partly) partly, \(no) didn't"
+    }
 }
 
 /// A log of decisions: what was chosen between, why, and, later, how it
@@ -42,11 +74,18 @@ struct DecisionsScreen: View {
     @State private var error: String?
     @State private var editing: Decision?
     @State private var creating = false
+    @State private var calibration: DecisionCalibration?
     @Environment(AppRouter.self) private var router
 
     var body: some View {
         List {
             if let error { ErrorRow(error) }
+            if let summary = calibration?.summary {
+                Section {
+                    Label(summary, systemImage: "scope")
+                        .font(.subheadline)
+                }
+            }
             if loaded, decisions.isEmpty {
                 Text("Write down a decision as you make it. Coming back to how it turned out is where the learning is.")
                     .font(.subheadline)
@@ -87,7 +126,9 @@ struct DecisionsScreen: View {
         }
         .sheet(item: $editing) { decision in
             DecisionForm(title: "Decision", input: .init(title: decision.title, options: decision.options,
-                                                        rationale: decision.rationale, outcome: decision.outcome)) { input in
+                                                        rationale: decision.rationale, outcome: decision.outcome,
+                                                        held: decision.held.flatMap { .init(rawValue: $0.rawValue) }),
+                         asksHeld: true) { input in
                 try await service.update(decision.id, input)
                 await load()
             }
@@ -105,6 +146,7 @@ struct DecisionsScreen: View {
 
     private func load() async {
         do { decisions = try await service.decisions(); error = nil } catch { self.error = error.localizedDescription }
+        calibration = try? await service.calibration()
         loaded = true
     }
 }
@@ -114,9 +156,18 @@ extension Decision: Identifiable {}
 private struct DecisionForm: View {
     let title: String
     @State var input: DecisionInput
+    /// Only an existing decision can be looked back on.
+    var asksHeld = false
     let onSave: (DecisionInput) async throws -> Void
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
+
+    private var held: Binding<DecisionHeld> {
+        Binding(
+            get: { input.held.flatMap { DecisionHeld(rawValue: $0.rawValue) } ?? .notYet },
+            set: { input.held = .init(rawValue: $0.rawValue) }
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -130,6 +181,14 @@ private struct DecisionForm: View {
                 }
                 Section("How it turned out") {
                     TextField("Come back and fill this in", text: Binding($input.outcome, default: ""), axis: .vertical)
+                }
+                if asksHeld {
+                    Section("Did it hold?") {
+                        Picker("Did it hold?", selection: held) {
+                            ForEach(DecisionHeld.allCases) { Text($0.title).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
+                    }
                 }
                 if let error { ErrorRow(error) }
             }

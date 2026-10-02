@@ -241,7 +241,7 @@ struct ContractTests {
         #expect(plan.value2.meals.first?.ingredients.first?.quantityGrams == 80)
         let log = try decode(Schemas.FoodLog.self, "nutrition-log")
         #expect(log.progress?.goal.calories == 2200 && log.entries.first?.quantityGrams == 80)
-        #expect(try decode(Schemas.DecisionList.self, "decisions").decisions.first?.outcome == "")
+        #expect(try decode(Schemas.DecisionList.self, "decisions").decisions.first?.outcome == "March. The knee held up.")
         let bell = try decode(Schemas.NudgeList.self, "nudges")
         #expect(bell.unread == 1 && bell.nudges.first?.href == "/app/check-ins")
         let calculator = try decode(Schemas.Calculator.self, "calculator")
@@ -310,6 +310,25 @@ struct ContractTests {
         #expect(board.value2.isOwner && board.value1.name == "Morning runners")
     }
 
+    @Test func decisionRevisits() throws {
+        let list = try decode(Schemas.DecisionList.self, "decisions")
+        #expect(list.decisions.first?.held == .yes)
+        let calibration = try decode(Schemas.DecisionCalibration.self, "decision-calibration")
+        #expect(calibration.revisited == 7 && calibration.partly == 2)
+    }
+
+    @Test func inbox() throws {
+        let inbox = try decode(Schemas.Inbox.self, "inbox")
+        #expect(inbox.open == 2 && inbox.items.first?.suggestion?.destination.rawValue == "goal_note")
+        #expect(try decode(Schemas.InboxItem.self, "inbox-item").suggestion == nil)
+    }
+
+    @Test func areas() throws {
+        let areas = try decode(Schemas.InsightsAreas.self, "insights-areas")
+        #expect(areas.weeks.count == 2 && areas.areas.first?.trend.count == 2)
+        #expect(areas.focus.first == "Priorities: Three runs")
+    }
+
     @Test func weekly() throws {
         let review = try decode(Schemas.WeeklyReview.self, "weekly-review")
         #expect(review.planning == "2026-10-05" && review.report?.ready == true)
@@ -346,7 +365,8 @@ struct ContractTests {
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
-                            "weekly-review", "weekly-focus"]
+                            "weekly-review", "weekly-focus",
+                            "decision-calibration", "inbox", "inbox-item", "insights-areas"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

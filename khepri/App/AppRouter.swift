@@ -95,7 +95,7 @@ final class AppRouter {
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
-        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews",
+        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews", "inbox",
     ]
 
     func open(_ destination: AppDestination) {
