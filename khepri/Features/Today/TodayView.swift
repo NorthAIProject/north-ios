@@ -30,6 +30,9 @@ struct TodayView: View {
                     .anchorGuidedTour(.today)
                 }
 
+                // Only on a low-readiness morning with a session still to do.
+                LighterDayCard()
+
                 if fitness.isHealthAvailable {
                     NavigationLink(value: FitnessRoute()) {
                         FitnessWeekCard(week: fitness.week, compact: true)
