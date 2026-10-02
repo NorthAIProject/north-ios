@@ -10,12 +10,16 @@ typealias Sharing = Components.Schemas.Sharing
 protocol FriendsServicing: Sendable {
     func overview() async throws -> SocialOverview
     func setHandle(_ handle: String) async throws -> String
-    func follow(handle: String) async throws
+    /// Asks to follow; the connection says whether it waits for their yes.
+    @discardableResult func follow(handle: String) async throws -> Connection
     func unfollow(_ userID: String) async throws
     func accept(_ userID: String) async throws
     func removeFollower(_ userID: String) async throws
     func block(_ userID: String) async throws
     func unblock(_ userID: String) async throws
+    /// People already on Khepri among SHA-256 hex digests of contact emails,
+    /// at most `ContactMatching.chunkSize` of them.
+    func matchContacts(_ hashes: [String]) async throws -> [ContactMatch]
     /// Connects this account to whoever's link it was. False when it was
     /// already invited, or the link leads nowhere; neither is an error.
     func redeem(_ code: String) async throws -> Bool
@@ -38,8 +42,8 @@ struct FriendsService: FriendsServicing {
         try await NorthAPI.call { try await api.setHandle(body: .json(.init(handle: handle))).ok.body.json.handle }
     }
 
-    func follow(handle: String) async throws {
-        try await NorthAPI.call { _ = try await api.follow(body: .json(.init(handle: handle))).ok }
+    @discardableResult func follow(handle: String) async throws -> Connection {
+        try await NorthAPI.call { try await api.follow(body: .json(.init(handle: handle))).ok.body.json }
     }
 
     func unfollow(_ userID: String) async throws {
@@ -60,6 +64,13 @@ struct FriendsService: FriendsServicing {
 
     func unblock(_ userID: String) async throws {
         try await NorthAPI.call { _ = try await api.unblock(path: .init(userID: userID)).noContent }
+    }
+
+    func matchContacts(_ hashes: [String]) async throws -> [ContactMatch] {
+        try await NorthAPI.call {
+            try await api.matchContacts(body: .json(.init(hashes: hashes))).ok.body.json.people
+                .map { ContactMatch(person: $0.value1, following: $0.value2.following) }
+        }
     }
 
     func redeem(_ code: String) async throws -> Bool {
