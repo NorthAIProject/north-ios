@@ -37,6 +37,7 @@ protocol TrainingServicing: Sendable {
 
 struct TrainingService: TrainingServicing {
     var api: Client = API.shared
+    var generationAPI: Client = API.generation
 
     func plans() async throws -> [PlanSummary] {
         try await NorthAPI.call { try await api.listPlans().ok.body.json.plans }
@@ -58,7 +59,7 @@ struct TrainingService: TrainingServicing {
     }
 
     func createPlan(_ intake: TrainingIntake) async throws -> PlanDetail {
-        try await NorthAPI.call { try await api.createPlan(body: .json(intake)).created.body.json }
+        try await NorthAPI.call { try await generationAPI.createPlan(body: .json(intake)).created.body.json }
     }
 
     func setStartTime(plan: String, day: Int, to time: String?) async throws -> PlanEditResult {
