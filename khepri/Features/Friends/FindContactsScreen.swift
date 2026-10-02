@@ -3,8 +3,9 @@ import NorthKit
 import SwiftUI
 
 /// Find friends from contacts: who among your contacts is already on Khepri.
-/// Their email addresses are hashed on the phone and only the hashes are
-/// sent; nothing about your contacts is kept, here or on the server.
+/// Their email addresses and phone numbers are hashed on the phone and only
+/// the hashes are sent; nothing about your contacts is kept, here or on the
+/// server.
 struct FindContactsScreen: View {
     /// Your invite link, offered when nobody matched.
     let inviteURL: URL?
@@ -61,7 +62,7 @@ struct FindContactsScreen: View {
         ContentUnavailableView {
             Label("Find Friends from Contacts", systemImage: "person.crop.circle.badge.plus")
         } description: {
-            Text("Only hashed copies of your contacts' email addresses leave this iPhone, and nothing is kept.")
+            Text("Only hashed copies of your contacts' email addresses and phone numbers leave this iPhone, and nothing is kept.")
         } actions: {
             Button("Continue") {
                 Task {
@@ -110,8 +111,8 @@ struct FindContactsScreen: View {
                 Text("On Khepri")
             } footer: {
                 Text(limited
-                     ? "Only the contacts you chose for Khepri were checked, by hashed email."
-                     : "Only hashed email addresses left this iPhone, and nothing was kept.")
+                     ? "Only the contacts you chose for Khepri were checked, by hashed email and phone number."
+                     : "Only hashed email addresses and phone numbers left this iPhone, and nothing was kept.")
             }
         }
         .refreshable { await check() }
@@ -130,13 +131,22 @@ struct FindContactsScreen: View {
         limited = ContactBook.access == .limited
         if case .found = phase {} else { phase = .checking }
         do {
-            let hashes = try await ContactBook.emailHashes()
+            let hashes = try await ContactBook.hashes(home: await homeCallingCode())
             phase = .found(try await ContactMatching.matchAll(hashes) { try await service.matchContacts($0) })
             error = nil
         } catch is CancellationError {
         } catch {
             phase = .failed(error.localizedDescription)
         }
+    }
+
+    /// The country numbers saved without "+" are read in: your verified
+    /// number's, else this iPhone's region. Nil skips those numbers.
+    private func homeCallingCode() async -> CallingCode? {
+        if let number = try? await service.phone().number, let code = PhoneNumbers.callingCode(of: number) {
+            return code
+        }
+        return PhoneNumbers.callingCode(region: Locale.current.region?.identifier)
     }
 
     private func follow(_ match: ContactMatch) {
@@ -154,8 +164,9 @@ struct FindContactsScreen: View {
     }
 }
 
-/// A person found in your contacts, with the same ask-to-follow as Friends.
-private struct MatchRow: View {
+/// A person found in your contacts or on Facebook, with the same
+/// ask-to-follow as Friends.
+struct MatchRow: View {
     let match: ContactMatch
     let follow: () -> Void
 

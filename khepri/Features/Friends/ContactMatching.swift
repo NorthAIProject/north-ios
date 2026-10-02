@@ -12,10 +12,21 @@ nonisolated struct ContactMatch: Identifiable, Equatable, Sendable {
     var id: String { person.id }
 }
 
-/// Contact emails as the server matches them: trimmed, lower-cased and
-/// SHA-256 hashed here, so only the hex digests ever leave the phone.
+/// The digests one match request carries. The server takes at most
+/// `ContactMatching.chunkSize` of both kinds together.
+nonisolated struct ContactHashes: Equatable, Sendable {
+    var emails: [String] = []
+    /// Of E.164 numbers, plus included: see `PhoneNumbers`.
+    var phones: [String] = []
+
+    var count: Int { emails.count + phones.count }
+}
+
+/// Contact emails and phone numbers as the server matches them: normalised
+/// and SHA-256 hashed here, so only the hex digests ever leave the phone.
 nonisolated enum ContactMatching {
-    /// The most hashes the server takes in one request.
+    /// The most hashes, emails and phones together, the server takes in one
+    /// request.
     static let chunkSize = 2000
 
     /// What the server hashes: the address trimmed and lower-cased. Nil for
@@ -36,13 +47,19 @@ nonisolated enum ContactMatching {
         return emails.compactMap(normalize).filter { seen.insert($0).inserted }.map(hash)
     }
 
-    static func chunks(_ hashes: [String], size: Int = chunkSize) -> [[String]] {
-        stride(from: 0, to: hashes.count, by: size).map { Array(hashes[$0..<min($0 + size, hashes.count)]) }
+    /// Requests of at most `size` digests each: emails first, then phones,
+    /// with one request holding both where they meet.
+    static func chunks(_ hashes: ContactHashes, size: Int = chunkSize) -> [ContactHashes] {
+        let tagged = hashes.emails.map { (isEmail: true, hash: $0) } + hashes.phones.map { (isEmail: false, hash: $0) }
+        return stride(from: 0, to: tagged.count, by: size).map { start in
+            let slice = tagged[start..<min(start + size, tagged.count)]
+            return ContactHashes(emails: slice.filter(\.isEmail).map(\.hash), phones: slice.filter { !$0.isEmail }.map(\.hash))
+        }
     }
 
     /// Asks about every hash, a chunk at a time, and lists each person once
-    /// however many of their addresses you have, by name.
-    static func matchAll(_ hashes: [String], using match: ([String]) async throws -> [ContactMatch]) async throws -> [ContactMatch] {
+    /// however many of their addresses and numbers you have, by name.
+    static func matchAll(_ hashes: ContactHashes, using match: (ContactHashes) async throws -> [ContactMatch]) async throws -> [ContactMatch] {
         var people: [String: ContactMatch] = [:]
         for chunk in chunks(hashes) {
             for person in try await match(chunk) { people[person.id] = person }
@@ -58,8 +75,8 @@ enum ContactsAccess {
     case undecided, allowed, limited, refused, restricted
 }
 
-/// The phone's address book, read only to hash the email addresses in it.
-/// Nothing read here is kept, logged or sent as it is.
+/// The phone's address book, read only to hash the email addresses and
+/// phone numbers in it. Nothing read here is kept, logged or sent as it is.
 enum ContactBook {
     static var access: ContactsAccess {
         switch CNContactStore.authorizationStatus(for: .contacts) {
@@ -77,18 +94,23 @@ enum ContactBook {
         (try? await CNContactStore().requestAccess(for: .contacts)) ?? false
     }
 
-    /// The hashed email addresses of every contact Khepri may see: all of
-    /// them, or only the ones chosen under limited access. Read off the main
-    /// actor, since a large address book takes a moment; only the email key
-    /// is fetched, because the names shown come from Khepri, not from here.
-    @concurrent nonisolated static func emailHashes() async throws -> [String] {
-        let request = CNContactFetchRequest(keysToFetch: [CNContactEmailAddressesKey as CNKeyDescriptor])
+    /// The hashed email addresses and phone numbers of every contact Khepri
+    /// may see: all of them, or only the ones chosen under limited access.
+    /// Numbers saved without "+" or "00" are read as `home`'s. Read off the
+    /// main actor, since a large address book takes a moment; only the email
+    /// and phone keys are fetched, because the names shown come from Khepri,
+    /// not from here.
+    @concurrent nonisolated static func hashes(home: CallingCode?) async throws -> ContactHashes {
+        let keys = [CNContactEmailAddressesKey, CNContactPhoneNumbersKey] as [CNKeyDescriptor]
+        let request = CNContactFetchRequest(keysToFetch: keys)
         var emails: [String] = []
+        var numbers: [String] = []
         try CNContactStore().enumerateContacts(with: request) { contact, stop in
             if Task.isCancelled { stop.pointee = true }
             emails += contact.emailAddresses.map { $0.value as String }
+            numbers += contact.phoneNumbers.map { $0.value.stringValue }
         }
         try Task.checkCancellation()
-        return ContactMatching.hashes(of: emails)
+        return ContactHashes(emails: ContactMatching.hashes(of: emails), phones: PhoneNumbers.hashes(of: numbers, home: home))
     }
 }

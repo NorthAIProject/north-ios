@@ -292,6 +292,21 @@ struct ContractTests {
         #expect(matches.last?.value2.following == "pending")
     }
 
+    @Test func friendFinding() throws {
+        let phone = try decode(Schemas.PhoneView.self, "phone")
+        #expect(phone.configured && phone.number == "+351912345678" && phone.verifiedAt != nil && phone.pending == "")
+        let pending = try decode(Schemas.PhoneView.self, "phone-pending")
+        #expect(pending.number == "" && pending.verifiedAt == nil && pending.pending == "+447911123456")
+        let facebook = try decode(Schemas.FacebookFriends.self, "facebook-friends")
+        #expect(facebook.configured && facebook.connected && facebook.importedAt != nil)
+        #expect(facebook.people.first?.value1.handle == "ana_runs" && facebook.people.first?.value2.following == "")
+        #expect(facebook.people.last?.value2.following == "accepted")
+        let off = try decode(Schemas.FacebookFriends.self, "facebook-unconfigured")
+        #expect(!off.configured && !off.connected && off.people.isEmpty && off.importedAt == nil)
+        let connect = try decode(Schemas.FacebookConnect.self, "facebook-connect")
+        #expect(connect.authorizeUrl.hasPrefix("https://www.facebook.com/") && connect.authorizeUrl.contains("&state="))
+    }
+
     @Test func feed() throws {
         let feed = try decode(Schemas.Feed.self, "feed")
         #expect(feed.items.first?.category == .training && feed.items.first?.kudos == 3 && feed.items.first?.kudoed == true)
@@ -364,7 +379,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
                             "weekly-review", "weekly-focus",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)

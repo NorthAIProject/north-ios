@@ -303,8 +303,15 @@ platform :ios do
     app = Spaceship::ConnectAPI::App.find(bundle_id)
     UI.user_error!("Could not find #{bundle_id} on App Store Connect") unless app
 
-    build_numbers = app.get_builds.map { |build| Integer(build.version, exception: false) }.compact
-    next_build_number = (build_numbers.max || 0) + 1
+    # A build uploaded minutes ago is missing from get_builds until App Store
+    # Connect finishes processing it, and reusing its number fails the upload
+    # with "Redundant Binary Upload". So take the highest of three views:
+    # the processed builds, TestFlight's latest (which sees processing ones),
+    # and the number already in the project from the last local run.
+    build_numbers = app.get_builds.map { |build| Integer(build.version, exception: false) }
+    build_numbers << Integer(latest_testflight_build_number(api_key: api_key, app_identifier: bundle_id, initial_build_number: 0).to_s, exception: false)
+    build_numbers << Integer(get_build_number(xcodeproj: PROJECT).to_s, exception: false)
+    next_build_number = (build_numbers.compact.max || 0) + 1
 
     increment_build_number(build_number: next_build_number, xcodeproj: PROJECT)
   end
