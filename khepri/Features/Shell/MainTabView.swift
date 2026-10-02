@@ -38,6 +38,9 @@ struct MainTabView: View {
                     }
             }
         }
+        .sheet(isPresented: $router.showsWeeklyReview) {
+            WeeklyReviewFlow()
+        }
         // An exercise from Spotlight or Siri, over whatever tab is open.
         .sheet(item: Binding(
             get: { router.openExercise.map(ExerciseSlugRoute.init(slug:)) },

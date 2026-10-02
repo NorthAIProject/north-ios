@@ -213,7 +213,7 @@ private struct ExerciseRow: View {
                 .frame(width: 48, height: 48)
             VStack(alignment: .leading, spacing: 4) {
                 Text(exercise.name)
-                Text("\(exercise.sets) × \(exercise.reps) · rest \(exercise.restSeconds)s")
+                Text("\(exercise.forThisWeek.sets) × \(exercise.reps) · rest \(exercise.restSeconds)s")
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(.secondary)
                 if let cue = exercise.formCues, !cue.isEmpty {

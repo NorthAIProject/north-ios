@@ -196,3 +196,14 @@ extension TrainingService {
         }
     }
 }
+
+extension DayExercise {
+    /// The exercise with this week's set count: fewer in a deload week, one
+    /// more on a day's first two exercises in a build week. `sets` itself
+    /// stays the plan as written, which is what an edit changes.
+    var forThisWeek: DayExercise {
+        var copy = self
+        copy.sets = thisWeekSets ?? sets
+        return copy
+    }
+}

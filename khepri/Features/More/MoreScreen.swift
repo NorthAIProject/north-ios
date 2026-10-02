@@ -35,6 +35,16 @@ struct MoreScreen: View {
         @Bindable var router = router
         NavigationStack(path: $path) {
             List {
+                SwiftUI.Section {
+                    // A sheet rather than a pushed screen: the Sunday nudge
+                    // opens the same flow over whatever tab is showing.
+                    Button {
+                        router.open(.weeklyReview)
+                    } label: {
+                        Label("Plan the Week", systemImage: "calendar.badge.checkmark")
+                    }
+                    .foregroundStyle(.primary)
+                }
                 sectionRows("Growth", growth)
                 sectionRows("Life", life)
                 SwiftUI.Section {
