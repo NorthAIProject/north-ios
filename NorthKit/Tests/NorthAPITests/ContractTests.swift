@@ -294,7 +294,7 @@ struct ContractTests {
         #expect(feed.items.first?.category == .training && feed.items.first?.kudos == 3 && feed.items.first?.kudoed == true)
         #expect(feed.before == nil)
         let sharing = try decode(Schemas.Sharing.self, "sharing")
-        #expect(sharing.training && !sharing.streaks && sharing.goals)
+        #expect(sharing.training && !sharing.streaks && sharing.goals && sharing.xp == true)
     }
 
     @Test func crews() throws {
@@ -305,6 +305,17 @@ struct ContractTests {
         #expect(board.value2.challenge?.kind == .checkins && board.value2.challenge?.target == 5)
         #expect(board.value2.members.first?.me == true && board.value2.members.first?.weekProgress == 3)
         #expect(board.value2.isOwner && board.value1.name == "Morning runners")
+    }
+
+    @Test func xp() throws {
+        let summary = try decode(Schemas.XPSummary.self, "summary")
+        #expect(summary.total == 340 && summary.weekTotal == 40)
+        #expect(summary.level.number == 3 && summary.level.floor == 300 && summary.level.next == 800)
+        #expect(summary.week.map(\.kind) == [.workout, .habitKept] && summary.week.first?.points == 40)
+        let board = try decode(Schemas.Leaderboard.self, "board")
+        #expect(board.metric == .xp && board.period == .week && board.sharing)
+        #expect(board.entries.first?.level?.title == "Relentless" && board.entries.first?.level?.next == nil)
+        #expect(board.entries.last?.me == true && board.entries.last?.level == nil && board.entries.last?.handle == "")
     }
 
     /// Every golden file the sync script copied has a test above.
@@ -322,7 +333,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board"]
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
