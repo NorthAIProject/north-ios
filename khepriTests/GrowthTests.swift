@@ -31,3 +31,14 @@ struct InboxTests {
         #expect(suggestion.label == "Knowledge: Zone 2")
     }
 }
+
+struct LighterDayTests {
+    @Test func theWhyLineNamesBothReadings() {
+        let day = LighterDay(offered: true, readiness: .init(low: true, hrv: 38, hrvBaseline: 52, restingHeartRate: 61, restingHeartRateBaseline: 56))
+        #expect(day.why == "HRV 38 ms (-27%), resting heart rate 61 bpm (+9%) against your two-week average.")
+    }
+
+    @Test func noReadingsNoLine() {
+        #expect(LighterDay(offered: false, readiness: .init(low: false)).why == nil)
+    }
+}

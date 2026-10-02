@@ -344,6 +344,12 @@ struct ContractTests {
         #expect(areas.focus.first == "Priorities: Three runs")
     }
 
+    @Test func lighterDay() throws {
+        let day = try decode(Schemas.LighterDay.self, "today-lighter")
+        #expect(day.offered && day.readiness.low && day.readiness.hrv == 38)
+        #expect(day.session == "Lower body" && day.choice == nil)
+    }
+
     @Test func weekly() throws {
         let review = try decode(Schemas.WeeklyReview.self, "weekly-review")
         #expect(review.planning == "2026-10-05" && review.report?.ready == true)
@@ -381,7 +387,7 @@ struct ContractTests {
                             "form-check-playback", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
                             "weekly-review", "weekly-focus",
-                            "decision-calibration", "inbox", "inbox-item", "insights-areas"]
+                            "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
