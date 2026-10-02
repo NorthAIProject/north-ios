@@ -29,6 +29,9 @@ struct InsightsScreen: View {
                 .navigationDestination(for: InsightsDomain.self) { domain in
                     InsightsDomainView(domain: domain, range: store.range)
                 }
+                .navigationDestination(for: AreasRoute.self) { _ in
+                    AreasScreen()
+                }
                 .refreshable { await store.load() }
         }
         .task(id: store.range) { await store.load() }
@@ -83,6 +86,9 @@ private struct SummaryList: View {
 
             if !summary.scores.isEmpty {
                 Section("Areas") {
+                    NavigationLink(value: AreasRoute()) {
+                        Label("By Week", systemImage: "chart.line.uptrend.xyaxis")
+                    }
                     ForEach(summary.scores, id: \.key) { score in
                         if let domain = InsightsDomain(rawValue: score.key) {
                             NavigationLink(value: domain) { ScoreRow(score: score) }

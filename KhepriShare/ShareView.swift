@@ -72,11 +72,15 @@ struct ShareView: View {
                 TextField("Why it matters (optional)", text: $note, axis: .vertical)
                     .lineLimit(1...4)
             } footer: {
-                Text("Saved to Knowledge, where your coach can find it when it's relevant.")
+                Text("Save to Knowledge for your coach to draw on, or to the Inbox to decide later.")
             }
             Section {
                 Button("Save to Knowledge") { Task { await saveToKnowledge() } }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                // Not sure where it goes: the inbox keeps it, and the coach
+                // suggests a home later.
+                Button("Save to Inbox") { Task { await saveToInbox() } }
+                    .disabled(inboxText.isEmpty)
                 if item.isLoggable {
                     Button("Log It Instead") { Task { await parse() } }
                 }
@@ -137,6 +141,28 @@ struct ShareView: View {
                 try await api.createKnowledgeNote(body: .json(.init(title: title, body: noteBody))).created
             }
             phase = .finished("Saved to Knowledge")
+        } catch {
+            phase = .failed(error.localizedDescription)
+        }
+    }
+
+    /// What goes to the inbox: the title when it is more than the link
+    /// itself, then the same body a note would get.
+    private var inboxText: String {
+        let heading = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return [heading.isEmpty || heading == item.url?.absoluteString ? nil : heading, noteBody.isEmpty ? nil : noteBody]
+            .compactMap { $0 }
+            .joined(separator: "\n\n")
+    }
+
+    private func saveToInbox() async {
+        phase = .working
+        do {
+            let api = try SharedAPI.requireClient()
+            _ = try await NorthAPI.call {
+                try await api.addToInbox(body: .json(.init(text: String(inboxText.prefix(4000)), source: .share))).created
+            }
+            phase = .finished("Saved to Inbox")
         } catch {
             phase = .failed(error.localizedDescription)
         }
