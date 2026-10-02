@@ -50,6 +50,14 @@ struct FriendsScreen: View {
             }
 
             Section {
+                NavigationLink {
+                    LeaderboardScreen(inviteURL: URL(string: o.invite.url), friends: service)
+                } label: {
+                    Label("Leaderboard", systemImage: "trophy")
+                }
+            }
+
+            Section {
                 if feed.isEmpty {
                     Text("Nothing yet. Finish a workout, keep a streak or complete a goal, and it shows here.")
                         .font(.subheadline).foregroundStyle(.secondary)
@@ -117,6 +125,10 @@ struct FriendsScreen: View {
                     Toggle("Workouts you finish", isOn: share(\.training, in: sharing))
                     Toggle("Check-in streaks", isOn: share(\.streaks, in: sharing))
                     Toggle("Goals and milestones", isOn: share(\.goals, in: sharing))
+                    // Only a server that sent xp accepts it back.
+                    if sharing.xp != nil {
+                        Toggle("Your XP and level, on friends' leaderboards", isOn: share(\.sharesXP, in: sharing))
+                    }
                 } header: {
                     Text("What Followers See")
                 } footer: {
