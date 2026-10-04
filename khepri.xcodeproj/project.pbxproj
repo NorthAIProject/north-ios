@@ -266,6 +266,7 @@
 				0D195AA9305DBA800055016F /* Frameworks */,
 				0D195AAA305DBA800055016F /* Resources */,
 				35DB4F54CA453068720956C6 /* Embed Foundation Extensions */,
+				E9A07097C32F365804F8172B /* SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -372,6 +373,55 @@
 		};
 /* End PBXNativeTarget section */
 
+/* Begin PBXAggregateTarget section */
+		E3ED5E14E9A07097C32F3658 /* Periphery */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = ED5E14E9A07097C32F365804 /* Build configuration list for PBXAggregateTarget "Periphery" */;
+			buildPhases = (
+				5E14E9A07097C32F365804F8 /* Periphery */,
+			);
+			dependencies = (
+			);
+			name = Periphery;
+			productName = Periphery;
+		};
+/* End PBXAggregateTarget section */
+
+
+
+/* Begin PBXShellScriptBuildPhase section */
+		5E14E9A07097C32F365804F8 /* Periphery */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = Periphery;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.periphery.yml\" ] && [ -f \"${ROOT}/../.periphery.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nperiphery scan --format xcode\n";
+		};
+		E9A07097C32F365804F8172B /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.swiftlint.yml\" ] && [ -f \"${ROOT}/../.swiftlint.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXProject section */
 		0D195AA4305DBA800055016F /* Project object */ = {
 			isa = PBXProject;
@@ -416,6 +466,7 @@
 				0D195AC4305DBA810055016F /* khepriUITests */,
 				A47E19CFC48341A676F24187 /* KhepriWidgets */,
 				F6F31AA39948114F2795812E /* KhepriShare */,
+				E3ED5E14E9A07097C32F3658 /* Periphery */,
 			);
 		};
 /* End PBXProject section */
@@ -1228,6 +1279,20 @@
 			};
 			name = Beta;
 		};
+		7097C32F365804F8172B8C17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C32F365804F8172B8C174A7A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1287,6 +1352,15 @@
 				9512759FA16BCDE90D45AC2F /* Release */,
 				B82DA0029BE99B6F04714A00 /* Debug */,
 				E78CAEABC1A67F7CDD3470A8 /* Beta */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED5E14E9A07097C32F365804 /* Build configuration list for PBXAggregateTarget "Periphery" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7097C32F365804F8172B8C17 /* Debug */,
+				C32F365804F8172B8C174A7A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -235,63 +235,38 @@ private struct WorkoutSummary: View {
     @State private var recap: WorkoutRecapModel?
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
-            Image(systemName: "checkmark.circle")
-                .font(.system(size: 64, weight: .light))
-                .foregroundStyle(NorthColor.signal)
-            VStack(spacing: 8) {
-                Text("Workout done")
-                    .font(.north(.title2).weight(.semibold))
-                Text(session.title)
-                    .foregroundStyle(.secondary)
-            }
-            HStack(spacing: 32) {
-                stat(Duration.seconds(session.movingTime).formatted(.time(pattern: .minuteSecond)), "TIME")
-                stat("\(session.completedSets)/\(session.totalSets)", "SETS")
-                if session.volumeKg > 0 {
-                    stat(LiftMath.display(session.volumeKg, imperial: imperial).formatted(.number.precision(.fractionLength(0))),
-                         imperial ? "LB LIFTED" : "KG LIFTED")
-                }
-                if let calories = session.recorded?.caloriesBurned {
-                    stat(calories.formatted(.number.precision(.fractionLength(0))), "KCAL")
-                }
-            }
-            if session.recorded != nil || !session.logged.isEmpty {
-                WorkoutRecapCard(model: recap ?? .local(from: session))
-            }
-            if !session.improvements.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("BETTER THAN LAST TIME").northEyebrow(NorthColor.signal)
-                    ForEach(session.improvements, id: \.exerciseKey) { set in
-                        Label {
-                            Text("\(set.exerciseName): \(LiftMath.display(set.weightKg, imperial: imperial).formatted()) \(imperial ? "lb" : "kg") × \(set.reps)")
-                        } icon: {
-                            Image(systemName: "arrow.up.right.circle.fill").foregroundStyle(NorthColor.signal)
-                        }
-                        .font(.subheadline)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.system(size: 64, weight: .light))
+                        .foregroundStyle(NorthColor.signal)
+                        .padding(.top, 8)
+                    Text("Workout done")
+                        .font(.north(.title2).weight(.semibold))
+                    statGrid
+                    if session.recorded != nil || !session.logged.isEmpty {
+                        WorkoutRecapCard(model: recap ?? .local(from: session), imperial: imperial)
                     }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 12))
-            }
-            if session.unsavedSets > 0 {
-                Text("\(session.unsavedSets) of your sets could not be saved to your account.")
+                    if session.unsavedSets > 0 {
+                        Text("\(session.unsavedSets) of your sets could not be saved to your account.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Group {
+                        if session.recorded != nil {
+                            Text("Saved to your activity. Your coach will see it.")
+                        } else if let notice = session.notice {
+                            Text(notice)
+                        }
+                    }
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-            }
-            Group {
-                if session.recorded != nil {
-                    Text("Saved to your activity. Your coach will see it.")
-                } else if let notice = session.notice {
-                    Text(notice)
+                    .multilineTextAlignment(.center)
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
-            Spacer()
             VStack(spacing: 8) {
                 Button(action: onDone) {
                     Text("Done").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 8)
@@ -306,10 +281,43 @@ private struct WorkoutSummary: View {
                     .font(.subheadline)
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
         }
-        .padding(20)
         .task { imperial = (try? await SettingsService().preferences().unitsSystem) == .imperial }
         .task(id: session.recorded?.id) { await loadRecap() }
+    }
+
+    /// Two columns, so a long duration or a five-digit volume shrinks instead
+    /// of turning into "54:3…" and "11 5…".
+    private var statGrid: some View {
+        let items = headlineStats
+        return Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+            ForEach(Array(stride(from: 0, to: items.count, by: 2)), id: \.self) { start in
+                GridRow {
+                    ForEach(start..<min(start + 2, items.count), id: \.self) { index in
+                        stat(items[index].value, items[index].label)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+        }
+    }
+
+    private var headlineStats: [(value: String, label: String)] {
+        var items: [(value: String, label: String)] = [
+            (value: Duration.seconds(session.movingTime).formatted(.time(pattern: .minuteSecond)), label: "TIME"),
+            (value: "\(session.completedSets)/\(session.totalSets)", label: "SETS")
+        ]
+        if session.volumeKg > 0 {
+            let lifted = LiftMath.display(session.volumeKg, imperial: imperial)
+                .formatted(.number.precision(.fractionLength(0)).grouping(.automatic))
+            items.append((value: lifted, label: imperial ? "LB LIFTED" : "KG LIFTED"))
+        }
+        if let calories = session.recorded?.caloriesBurned {
+            items.append((value: calories.formatted(.number.precision(.fractionLength(0)).grouping(.automatic)), label: "KCAL"))
+        }
+        return items
     }
 
     /// Asks the server for the recap of the saved session. A failure keeps
@@ -322,9 +330,13 @@ private struct WorkoutSummary: View {
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
-        VStack(spacing: 4) {
-            Text(value).northDisplayNumber(.title)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .northDisplayNumber(.title2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
             Text(label).northEyebrow()
         }
+        .accessibilityElement(children: .combine)
     }
 }
