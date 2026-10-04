@@ -20,11 +20,12 @@ protocol NutritionServicing: Sendable {
     func deleteIngredient(_ id: String) async throws
     func plans() async throws -> [MealPlanSummary]
     func plan(_ id: String) async throws -> MealPlanDetail
-    func createPlan(name: String) async throws -> MealPlanDetail
+    func createPlan(name: String, planType: String?, customCarbPct: Double?) async throws -> MealPlanDetail
     func deletePlan(_ id: String) async throws
     func addMeal(to planID: String, name: String, number: Int) async throws -> MealPlanDetail
+    func updateMealDay(mealID: String, name: String, number: Int, weekday: Int?, dayPlanType: String?, customCarbG: Double?, customProteinG: Double?, customFatG: Double?) async throws -> MealPlanDetail
     func removeMeal(_ id: String) async throws
-    func addPortion(to mealID: String, ingredientID: String, grams: Double) async throws
+    func addPortion(to mealID: String, ingredientID: String, grams: Double, confirmOverage: Bool) async throws
     func removePortion(_ id: String) async throws
     func parseFoods(_ text: String) async throws -> FoodDraft
 }
@@ -55,8 +56,11 @@ struct NutritionService: NutritionServicing {
     func plan(_ id: String) async throws -> MealPlanDetail {
         try await NorthAPI.call { try await api.getMealPlan(path: .init(planID: id)).ok.body.json }
     }
-    func createPlan(name: String) async throws -> MealPlanDetail {
-        try await NorthAPI.call { try await api.createMealPlan(body: .json(.init(name: name))).created.body.json }
+    func createPlan(name: String, planType: String? = nil, customCarbPct: Double? = nil) async throws -> MealPlanDetail {
+        let pt: Components.Schemas.MealPlanRequest.planTypePayload? = planType.flatMap { .init(rawValue: $0) }
+        return try await NorthAPI.call {
+            try await api.createMealPlan(body: .json(.init(name: name, planType: pt, customCarbPct: customCarbPct))).created.body.json
+        }
     }
     func deletePlan(_ id: String) async throws {
         try await NorthAPI.call { _ = try await api.deleteMealPlan(path: .init(planID: id)).noContent }
@@ -66,12 +70,18 @@ struct NutritionService: NutritionServicing {
             try await api.addPlanMeal(path: .init(planID: planID), body: .json(.init(name: name, mealNumber: number))).created.body.json
         }
     }
+    func updateMealDay(mealID: String, name: String, number: Int, weekday: Int?, dayPlanType: String?, customCarbG: Double? = nil, customProteinG: Double? = nil, customFatG: Double? = nil) async throws -> MealPlanDetail {
+        let pt: Components.Schemas.MealRequest.dayPlanTypePayload? = dayPlanType.flatMap { .init(rawValue: $0) }
+        return try await NorthAPI.call {
+            try await api.updatePlanMealDay(path: .init(mealID: mealID), body: .json(.init(name: name, mealNumber: number, weekday: weekday, dayPlanType: pt, dayCustomCarbG: customCarbG, dayCustomProteinG: customProteinG, dayCustomFatG: customFatG))).ok.body.json
+        }
+    }
     func removeMeal(_ id: String) async throws {
         try await NorthAPI.call { _ = try await api.removePlanMeal(path: .init(mealID: id)).noContent }
     }
-    func addPortion(to mealID: String, ingredientID: String, grams: Double) async throws {
+    func addPortion(to mealID: String, ingredientID: String, grams: Double, confirmOverage: Bool = false) async throws {
         try await NorthAPI.call {
-            _ = try await api.addMealPortion(path: .init(mealID: mealID), body: .json(.init(ingredientId: ingredientID, quantityGrams: grams))).created
+            _ = try await api.addMealPortion(path: .init(mealID: mealID), body: .json(.init(ingredientId: ingredientID, quantityGrams: grams, confirmOverage: confirmOverage))).created
         }
     }
     func removePortion(_ id: String) async throws {
@@ -293,8 +303,7 @@ private struct MealPlansView: View {
     let service: NutritionServicing
     @State private var plans: [MealPlanSummary] = []
     @State private var error: String?
-    @State private var naming = false
-    @State private var newName = ""
+    @State private var creatingPlan = false
 
     var body: some View {
         List {
@@ -304,7 +313,18 @@ private struct MealPlansView: View {
                     MealPlanView(id: plan.id, service: service)
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(plan.name)
+                        HStack {
+                            Text(plan.name)
+                            if let pt = plan.planType, !pt.rawValue.isEmpty {
+                                Text(planTypeTitle(pt.rawValue))
+                                    .font(.caption2)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 1)
+                                    .background(Color.accentColor.opacity(0.15))
+                                    .foregroundStyle(Color.accentColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                            }
+                        }
                         Text("\(plan.mealCount) meals · \(Int(plan.totalMacros.calories)) kcal").font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -316,18 +336,12 @@ private struct MealPlansView: View {
                     }
                 }
             }
-            Button("New Plan", systemImage: "plus") { naming = true }
+            Button("New Plan", systemImage: "plus") { creatingPlan = true }
         }
-        .alert("New Meal Plan", isPresented: $naming) {
-            TextField("e.g. Training days", text: $newName)
-            Button("Create") {
-                let name = newName
-                newName = ""
-                Task {
-                    do { _ = try await service.createPlan(name: name); await load() } catch { self.error = error.localizedDescription }
-                }
+        .sheet(isPresented: $creatingPlan) {
+            NewPlanSheet(service: service) {
+                await load()
             }
-            Button("Cancel", role: .cancel) { newName = "" }
         }
         .task { await load() }
         .refreshable { await load() }
@@ -335,6 +349,61 @@ private struct MealPlansView: View {
 
     private func load() async {
         do { plans = try await service.plans(); error = nil } catch { self.error = error.localizedDescription }
+    }
+}
+
+private struct NewPlanSheet: View {
+    let service: NutritionServicing
+    let onCreated: () async -> Void
+    @State private var name = ""
+    @State private var planType = "low_carb"
+    @State private var customCarbPct = 20.0
+    @State private var error: String?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                if let error { ErrorRow(error) }
+                Section("Plan Details") {
+                    TextField("Name, e.g. Training days", text: $name)
+                    Picker("Carb Plan Type", selection: $planType) {
+                        Text("No Carb (0–5%)").tag("no_carb")
+                        Text("Low Carb (6–25%)").tag("low_carb")
+                        Text("Mid Carb (26–45%)").tag("mid_carb")
+                        Text("High Carb (46–65%)").tag("high_carb")
+                        Text("Custom %").tag("custom")
+                        Text("Unconstrained").tag("")
+                    }
+                    if planType == "custom" {
+                        Stepper("Carb % of goal: \(Int(customCarbPct))%", value: $customCarbPct, in: 0...100, step: 5)
+                    }
+                }
+            }
+            .navigationTitle("New Meal Plan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Create") {
+                        Task {
+                            do {
+                                let pt: String? = planType.isEmpty ? nil : planType
+                                let cp: Double? = planType == "custom" ? customCarbPct : nil
+                                _ = try await service.createPlan(name: name, planType: pt, customCarbPct: cp)
+                                await onCreated()
+                                dismiss()
+                            } catch {
+                                self.error = error.localizedDescription
+                            }
+                        }
+                    }
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
     }
 }
 
@@ -355,9 +424,36 @@ private struct MealPlanView: View {
                 Section {
                     MacroRow(macros: plan.value1.totalMacros, goal: nil)
                     LabeledContent("Calories", value: "\(Int(plan.value1.totalMacros.calories)) kcal")
+                    if let target = plan.value2.macroTarget {
+                        LabeledContent("Active Goal Target", value: "\(Int(target.calories)) kcal · \(Int(target.carbG))g C · \(Int(target.proteinG))g P · \(Int(target.fatG))g F")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 ForEach(plan.value2.meals, id: \.id) { meal in
                     Section {
+                        if let dayTarget = meal.dayTarget, let remaining = meal.remaining {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Day Target: \(Int(dayTarget.carbG))g C · \(Int(dayTarget.proteinG))g P · \(Int(dayTarget.fatG))g F")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                HStack(spacing: 8) {
+                                    Text("Remaining:")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                    Text("\(Int(remaining.carbG))g C")
+                                        .font(.caption2)
+                                        .foregroundStyle(remaining.carbG <= 0 ? .red : .primary)
+                                    Text("\(Int(remaining.proteinG))g P")
+                                        .font(.caption2)
+                                        .foregroundStyle(remaining.proteinG <= 0 ? .red : .primary)
+                                    Text("\(Int(remaining.fatG))g F")
+                                        .font(.caption2)
+                                        .foregroundStyle(remaining.fatG <= 0 ? .red : .primary)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
                         ForEach(meal.ingredients, id: \.id) { portion in
                             LabeledContent("\(portion.name) · \(Int(portion.quantityGrams)) g", value: "\(Int(portion.macros.calories)) kcal")
                                 .swipeActions {
@@ -368,10 +464,81 @@ private struct MealPlanView: View {
                         Button("Say Ingredients", systemImage: "mic") { speakingFor = meal.id }
                     } header: {
                         HStack {
-                            Text("\(meal.mealNumber). \(meal.name) · \(Int(meal.totalMacros.calories)) kcal")
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text("\(meal.mealNumber). \(meal.name)")
+                                    if let w = meal.weekday {
+                                        Text(weekdayTitle(w))
+                                            .font(.caption2)
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 1)
+                                            .background(Color.secondary.opacity(0.15))
+                                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                                    }
+                                    if let dpt = meal.dayPlanType, !dpt.rawValue.isEmpty {
+                                        Text(planTypeTitle(dpt.rawValue))
+                                            .font(.caption2)
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 1)
+                                            .background(Color.accentColor.opacity(0.15))
+                                            .foregroundStyle(Color.accentColor)
+                                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                                    }
+                                }
+                                Text("\(Int(meal.totalMacros.calories)) kcal · \(Int(meal.totalMacros.carbG))g C · \(Int(meal.totalMacros.proteinG))g P · \(Int(meal.totalMacros.fatG))g F")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                             Spacer()
-                            Button("Remove Meal", systemImage: "trash") { act { try await service.removeMeal(meal.id) } }
-                                .labelStyle(.iconOnly)
+                            Menu {
+                                Menu("Assign Day") {
+                                    ForEach(0..<7) { dayIndex in
+                                        Button(weekdayTitle(dayIndex)) {
+                                            act {
+                                                _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: dayIndex, dayPlanType: meal.dayPlanType?.rawValue, customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                            }
+                                        }
+                                    }
+                                    Divider()
+                                    Button("Unassigned") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: nil, dayPlanType: meal.dayPlanType?.rawValue, customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                }
+                                Menu("Carb Type Override") {
+                                    Button("Plan Default") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: meal.weekday, dayPlanType: nil, customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                    Button("No Carb (0–5%)") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: meal.weekday, dayPlanType: "no_carb", customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                    Button("Low Carb (6–25%)") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: meal.weekday, dayPlanType: "low_carb", customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                    Button("Mid Carb (26–45%)") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: meal.weekday, dayPlanType: "mid_carb", customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                    Button("High Carb (46–65%)") {
+                                        act {
+                                            _ = try await service.updateMealDay(mealID: meal.id, name: meal.name, number: meal.mealNumber, weekday: meal.weekday, dayPlanType: "high_carb", customCarbG: nil, customProteinG: nil, customFatG: nil)
+                                        }
+                                    }
+                                }
+                                Divider()
+                                Button("Remove Meal", role: .destructive) { act { try await service.removeMeal(meal.id) } }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -392,17 +559,14 @@ private struct MealPlanView: View {
             Button("Cancel", role: .cancel) { mealName = "" }
         }
         .sheet(item: Binding(get: { portionFor.map(MealRef.init) }, set: { portionFor = $0?.id })) { ref in
-            PortionSheet(service: service) { ingredientID, grams in
-                try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams)
+            PortionSheet(service: service) { ingredientID, grams, confirm in
+                try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams, confirmOverage: confirm)
                 await load()
             }
         }
-        // Reloaded once on the way out rather than after every portion: a
-        // spoken meal adds several, and a partial failure leaves the sheet
-        // open with the rest, so the plan is redrawn when the person is done.
         .sheet(item: Binding(get: { speakingFor.map(MealRef.init) }, set: { speakingFor = $0?.id }), onDismiss: { Task { await load() } }) { ref in
             SpeakMealSheet(service: service) { ingredientID, grams in
-                try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams)
+                try await service.addPortion(to: ref.id, ingredientID: ingredientID, grams: grams, confirmOverage: false)
             }
         }
         .task { await load() }
@@ -425,12 +589,13 @@ private struct MealRef: Identifiable {
 
 private struct PortionSheet: View {
     let service: NutritionServicing
-    let onAdd: (String, Double) async throws -> Void
+    let onAdd: (String, Double, Bool) async throws -> Void
     @State private var query = ""
     @State private var results: [Ingredient] = []
     @State private var picked: Ingredient?
     @State private var grams = 100.0
     @State private var error: String?
+    @State private var overageError: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -440,16 +605,54 @@ private struct PortionSheet: View {
                 if let picked {
                     Section(picked.name) {
                         Stepper("\(Int(grams)) g", value: $grams, in: 5...2000, step: 5)
-                        Button("Add") {
-                            Task {
-                                do { try await onAdd(picked.id, grams); dismiss() } catch { self.error = error.localizedDescription }
+                        if let overage = overageError {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Day Target Exceeded")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.red)
+                                Text(overage)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Button("Confirm & Save Anyway", role: .destructive) {
+                                    Task {
+                                        do {
+                                            try await onAdd(picked.id, grams, true)
+                                            dismiss()
+                                        } catch {
+                                            self.error = error.localizedDescription
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.red)
                             }
+                            .padding(.vertical, 4)
+                        } else {
+                            Button("Add") {
+                                Task {
+                                    do {
+                                        try await onAdd(picked.id, grams, false)
+                                        dismiss()
+                                    } catch {
+                                        let msg = error.localizedDescription
+                                        if msg.localizedCaseInsensitiveContains("exceed") || msg.localizedCaseInsensitiveContains("overage") {
+                                            self.overageError = msg
+                                        } else {
+                                            self.error = msg
+                                        }
+                                    }
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
                 }
                 ForEach(results, id: \.id) { ingredient in
-                    Button(ingredient.name) { picked = ingredient }
+                    Button(ingredient.name) {
+                        picked = ingredient
+                        overageError = nil
+                    }
                 }
             }
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search ingredients")
@@ -462,6 +665,23 @@ private struct PortionSheet: View {
                 do { results = try await service.ingredients(matching: query) } catch { self.error = error.localizedDescription }
             }
         }
+    }
+}
+
+private func weekdayTitle(_ day: Int) -> String {
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    guard day >= 0 && day < days.count else { return "Day \(day)" }
+    return days[day]
+}
+
+private func planTypeTitle(_ type: String) -> String {
+    switch type {
+    case "no_carb": return "No Carb"
+    case "low_carb": return "Low Carb"
+    case "mid_carb": return "Mid Carb"
+    case "high_carb": return "High Carb"
+    case "custom": return "Custom"
+    default: return type
     }
 }
 
