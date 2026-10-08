@@ -61,10 +61,32 @@ extension XCTestCase {
                 let button = owner.buttons.matching(refuse).firstMatch
                 if button.exists, button.isHittable {
                     button.tap()
+                    dismissRefusalFollowUps(owners)
                     return
                 }
             }
             usleep(250_000)
+        }
+    }
+
+    /// What iOS shows after Health is refused, one after another: an alert
+    /// that categories can be turned on later (OK), then, on an iPad without
+    /// iCloud Health sync, a sheet saying so (Not Now). Answers each until
+    /// nothing more arrives. A tap that lands while one is still animating in
+    /// does nothing, so the same button may be tapped again.
+    @MainActor
+    private func dismissRefusalFollowUps(_ owners: [XCUIApplication], within seconds: TimeInterval = 15) {
+        let deadline = Date.now.addingTimeInterval(seconds)
+        var quietSince = Date.now
+        while Date.now < deadline {
+            let followUps = owners.flatMap { [$0.alerts.buttons["OK"], $0.buttons["Not Now"]] }
+            if let button = followUps.first(where: \.exists) {
+                quietSince = Date.now
+                if button.isHittable { button.tap() }
+            } else if Date.now.timeIntervalSince(quietSince) > 3 {
+                return
+            }
+            usleep(500_000)
         }
     }
 
