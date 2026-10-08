@@ -8,6 +8,10 @@ typealias DayExercise = Components.Schemas.DayExercise
 typealias TrainingIntake = Components.Schemas.TrainingIntake
 typealias ExerciseSummary = Components.Schemas.ExerciseSummary
 typealias ActivitySession = Components.Schemas.ActivitySession
+typealias TrainingWeek = Components.Schemas.TrainingWeek
+typealias WeekSession = Components.Schemas.WeekSession
+typealias WeekRequest = Components.Schemas.WeekRequest
+typealias WeekSuggestion = Components.Schemas.WeekSuggestion
 
 /// What an edit produced: the new version, or the newest one when the edit
 /// was made against a version someone else had already replaced.
@@ -33,6 +37,16 @@ protocol TrainingServicing: Sendable {
     func suggestions(plan: String, day: Int) async throws -> [ExerciseSummary]
     func replacements(plan: String, day: Int, index: Int) async throws -> [ExerciseSummary]
     func searchExercises(_ query: String, muscle: String?) async throws -> [ExerciseSummary]
+
+    /// Follows a saved plan; answers with its newest version.
+    func follow(plan: String) async throws -> PlanDetail
+
+    /// This week, or next week, as the server schedules it.
+    func week(next: Bool) async throws -> TrainingWeek
+    func setWeek(_ request: WeekRequest, next: Bool) async throws -> TrainingWeek
+    func resetWeek(next: Bool) async throws -> TrainingWeek
+    /// What `setWeek` would make of a request, without saving it.
+    func suggestWeek(_ request: WeekRequest, next: Bool) async throws -> WeekSuggestion
 }
 
 struct TrainingService: TrainingServicing {
@@ -112,6 +126,30 @@ struct TrainingService: TrainingServicing {
     func searchExercises(_ query: String, muscle: String?) async throws -> [ExerciseSummary] {
         try await NorthAPI.call {
             try await api.searchExercises(query: .init(q: query.isEmpty ? nil : query, muscle: muscle, limit: 60)).ok.body.json.exercises
+        }
+    }
+
+    func follow(plan: String) async throws -> PlanDetail {
+        try await NorthAPI.call { try await api.activatePlan(path: .init(planID: plan)).ok.body.json }
+    }
+
+    func week(next: Bool) async throws -> TrainingWeek {
+        try await NorthAPI.call { try await api.getTrainingWeek(query: .init(week: next ? .next : nil)).ok.body.json }
+    }
+
+    func setWeek(_ request: WeekRequest, next: Bool) async throws -> TrainingWeek {
+        try await NorthAPI.call {
+            try await api.setTrainingWeek(query: .init(week: next ? .next : nil), body: .json(request)).ok.body.json
+        }
+    }
+
+    func resetWeek(next: Bool) async throws -> TrainingWeek {
+        try await NorthAPI.call { try await api.resetTrainingWeek(query: .init(week: next ? .next : nil)).ok.body.json }
+    }
+
+    func suggestWeek(_ request: WeekRequest, next: Bool) async throws -> WeekSuggestion {
+        try await NorthAPI.call {
+            try await api.suggestTrainingWeek(query: .init(week: next ? .next : nil), body: .json(request)).ok.body.json
         }
     }
 

@@ -2,12 +2,13 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// The Training tab: the plan being followed, day by day, each marked done
-/// this week or next as the server counts them.
+/// The Training tab: this week's sessions, then the plan being followed day
+/// by day, each marked done this week or next as the server counts them.
 struct TrainingScreen: View {
     @State private var store = TrainingStore(timeZone: { AppTimeZone.current })
     @State private var path: [DayRoute] = []
     @State private var creating = false
+    @State private var editingWeek = false
     @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,6 +28,13 @@ struct TrainingScreen: View {
                             NavigationLink(value: DayRoute.history) {
                                 Label("Activity History", systemImage: "clock.arrow.circlepath")
                             }
+                            if !store.otherPlans.isEmpty {
+                                Menu("Follow Another Plan", systemImage: "arrow.triangle.swap") {
+                                    ForEach(store.otherPlans, id: \.id) { other in
+                                        Button(other.name) { Task { await store.follow(other.id) } }
+                                    }
+                                }
+                            }
                             Button("New Plan", systemImage: "plus") { creating = true }
                         } label: {
                             Label("Training Options", systemImage: "ellipsis.circle")
@@ -36,6 +44,8 @@ struct TrainingScreen: View {
                 .navigationDestination(for: DayRoute.self) { route in
                     switch route {
                     case .day(let index): DayView(store: store, dayIndex: index)
+                    case .session(let planID, let index, let weekday):
+                        DayView(store: store, dayIndex: index, planID: planID, scheduledWeekday: weekday)
                     case .library: ExerciseLibrary(service: store.service)
                     case .formCheck: FormCheckScreen()
                     case .history: ActivityHistoryScreen()
@@ -46,6 +56,9 @@ struct TrainingScreen: View {
                     IntakeSheet(service: store.service) { plan in
                         Task { await store.show(plan) }
                     }
+                }
+                .sheet(isPresented: $editingWeek) {
+                    WeekEditorSheet(store: store)
                 }
         }
         .task { await store.load() }
@@ -63,10 +76,16 @@ struct TrainingScreen: View {
             router.openTrainingDay = nil
             path = [.day(day)]
         }
-        // Start Today's Workout names no day; the plan decides which is next.
+        // Start Today's Workout names no day; the week decides which is
+        // next, and the plan's own days when there is no week.
         .onChange(of: [router.opensNextWorkout != nil, store.plan != nil], initial: true) {
             guard let start = router.opensNextWorkout, let plan = store.plan else { return }
             router.opensNextWorkout = nil
+            if let next = store.week?.next {
+                router.startsWorkout = start
+                path = [.session(planID: next.planId, dayIndex: next.dayIndex, weekday: next.weekday)]
+                return
+            }
             guard let day = plan.nextDayIndex else { return }
             router.startsWorkout = start
             path = [.day(day)]
@@ -98,7 +117,7 @@ struct TrainingScreen: View {
             .anchorGuidedTour(.training)
         case .ready:
             if let plan = store.plan {
-                PlanOverview(plan: plan, notice: store.notice)
+                PlanOverview(plan: plan, week: store.week, notice: store.notice) { editingWeek = true }
             }
         }
     }
@@ -106,20 +125,28 @@ struct TrainingScreen: View {
 
 enum DayRoute: Hashable {
     case day(Int)
+    /// A session of the week: a day of any saved plan, trained on weekday.
+    case session(planID: String, dayIndex: Int, weekday: String)
     case library
     case formCheck
     case history
 }
 
-/// The plan: why it suits the person, then each day.
+/// This week, then the plan: why it suits the person, then each day.
 private struct PlanOverview: View {
     let plan: PlanDetail
+    let week: TrainingWeek?
     let notice: String?
+    let editWeek: () -> Void
 
     var body: some View {
         List {
             if let notice {
                 Section { Label(notice, systemImage: "arrow.triangle.2.circlepath").font(.subheadline) }
+            }
+
+            if let week {
+                WeekSection(week: week, followedPlanID: plan.id, edit: editWeek)
             }
 
             Section {
@@ -138,7 +165,7 @@ private struct PlanOverview: View {
                 .anchorGuidedTour(.training)
             }
 
-            Section("Days") {
+            Section(week == nil ? "Days" : "Plan Days") {
                 ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
                     NavigationLink(value: DayRoute.day(index)) {
                         DayRow(day: day)
