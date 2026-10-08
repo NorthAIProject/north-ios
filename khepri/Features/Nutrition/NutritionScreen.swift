@@ -57,7 +57,7 @@ struct NutritionService: NutritionServicing {
         try await NorthAPI.call { try await api.getMealPlan(path: .init(planID: id)).ok.body.json }
     }
     func createPlan(name: String, planType: String? = nil, customCarbPct: Double? = nil) async throws -> MealPlanDetail {
-        let pt: Components.Schemas.MealPlanRequest.planTypePayload? = planType.flatMap { .init(rawValue: $0) }
+        let pt: Components.Schemas.MealPlanRequest.PlanTypePayload? = planType.flatMap { .init(rawValue: $0) }
         return try await NorthAPI.call {
             try await api.createMealPlan(body: .json(.init(name: name, planType: pt, customCarbPct: customCarbPct))).created.body.json
         }
@@ -71,7 +71,7 @@ struct NutritionService: NutritionServicing {
         }
     }
     func updateMealDay(mealID: String, name: String, number: Int, weekday: Int?, dayPlanType: String?, customCarbG: Double? = nil, customProteinG: Double? = nil, customFatG: Double? = nil) async throws -> MealPlanDetail {
-        let pt: Components.Schemas.MealRequest.dayPlanTypePayload? = dayPlanType.flatMap { .init(rawValue: $0) }
+        let pt: Components.Schemas.MealRequest.DayPlanTypePayload? = dayPlanType.flatMap { .init(rawValue: $0) }
         return try await NorthAPI.call {
             try await api.updatePlanMealDay(path: .init(mealID: mealID), body: .json(.init(name: name, mealNumber: number, weekday: weekday, dayPlanType: pt, dayCustomCarbG: customCarbG, dayCustomProteinG: customProteinG, dayCustomFatG: customFatG))).ok.body.json
         }
