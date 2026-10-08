@@ -240,6 +240,23 @@ extension DayExercise {
     /// The exercise with this week's set count: fewer in a deload week, one
     /// more on a day's first two exercises in a build week. `sets` itself
     /// stays the plan as written, which is what an edit changes.
+    /// "3 × 8-12 · 100 kg · rest 90s", leaving out what the plan doesn't
+    /// state. An imported plan can leave sets, reps or rest blank, and "0 ×"
+    /// would read as an instruction to do nothing.
+    var prescription: String {
+        let week = forThisWeek
+        var parts: [String] = []
+        switch (week.sets > 0, !reps.isEmpty) {
+        case (true, true): parts.append("\(week.sets) × \(reps)")
+        case (true, false): parts.append("\(week.sets) sets")
+        case (false, true): parts.append("\(reps) reps")
+        case (false, false): parts.append("Sets & reps not set")
+        }
+        if let load, !load.isEmpty { parts.append(load) }
+        if restSeconds > 0 { parts.append("rest \(restSeconds)s") }
+        return parts.joined(separator: " · ")
+    }
+
     var forThisWeek: DayExercise {
         var copy = self
         copy.sets = thisWeekSets ?? sets

@@ -9,6 +9,7 @@ struct TrainingScreen: View {
     @State private var path: [DayRoute] = []
     @State private var creating = false
     @State private var editingWeek = false
+    @State private var importing = false
     @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
 
@@ -36,6 +37,7 @@ struct TrainingScreen: View {
                                 }
                             }
                             Button("New Plan", systemImage: "plus") { creating = true }
+                            Button("Import Plan", systemImage: "doc.badge.plus") { importing = true }
                         } label: {
                             Label("Training Options", systemImage: "ellipsis.circle")
                         }
@@ -59,6 +61,13 @@ struct TrainingScreen: View {
                 }
                 .sheet(isPresented: $editingWeek) {
                     WeekEditorSheet(store: store)
+                }
+                .sheet(isPresented: $importing) {
+                    WorkoutImportSheet { _ in
+                        // The server follows an imported plan, so it is the
+                        // one load shows.
+                        Task { await store.load() }
+                    }
                 }
         }
         .task { await store.load() }
@@ -113,6 +122,7 @@ struct TrainingScreen: View {
             } actions: {
                 Button("Create a Plan") { creating = true }
                     .northProminentButton()
+                Button("Import a Plan") { importing = true }
             }
             .anchorGuidedTour(.training)
         case .ready:
