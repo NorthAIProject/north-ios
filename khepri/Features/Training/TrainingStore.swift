@@ -2,8 +2,8 @@ import Foundation
 import NorthAPI
 import Observation
 
-/// The Training tab's state: the plan being followed, its edits, and keeping
-/// the phone's workout reminders in step with it.
+/// The Training tab's state: the plan being followed, the week it trains, its
+/// edits, and keeping the phone's workout reminders in step with both.
 @MainActor
 @Observable
 final class TrainingStore {
@@ -17,6 +17,13 @@ final class TrainingStore {
     private(set) var phase: Phase = .loading
     private(set) var plan: PlanDetail?
     private(set) var otherPlans: [PlanSummary] = []
+    /// This week as the server schedules it: which days train, and which
+    /// session each has. Nil when it could not be read; the plan's own days
+    /// stand in for it then.
+    private(set) var week: TrainingWeek?
+    /// Saved plans other than the one followed, read when a week puts one of
+    /// their sessions on a day.
+    private(set) var otherDetails: [String: PlanDetail] = [:]
     /// Set when an edit found the plan had changed elsewhere; the plan shown
     /// is the newest, and the person may want to redo their change.
     var notice: String?
@@ -24,13 +31,13 @@ final class TrainingStore {
 
     let service: TrainingServicing
     private let timeZone: () -> TimeZone
-    private let reschedule: @MainActor (PlanDetail?, TimeZone) async -> Void
+    private let reschedule: @MainActor (PlanDetail?, [TrainingWeek], TimeZone) async -> Void
 
     init(
         service: TrainingServicing = TrainingService(),
         timeZone: @escaping () -> TimeZone = { .current },
-        reschedule: @escaping @MainActor (PlanDetail?, TimeZone) async -> Void = { plan, zone in
-            await WorkoutReminders.schedule(WorkoutReminderSettings.enabled ? plan : nil, timeZone: zone)
+        reschedule: @escaping @MainActor (PlanDetail?, [TrainingWeek], TimeZone) async -> Void = { plan, weeks, zone in
+            await WorkoutReminders.schedule(WorkoutReminderSettings.enabled ? plan : nil, weeks: weeks, timeZone: zone)
         }
     ) {
         self.service = service
@@ -38,22 +45,24 @@ final class TrainingStore {
         self.reschedule = reschedule
     }
 
-    /// Loads the newest plan the person follows; the rest are listed.
+    /// Loads the plan the person follows — the server lists it first — and
+    /// this week; the other plans are listed.
     func load() async {
         do {
             let plans = try await service.plans()
-            guard let newest = plans.first else {
+            guard let followed = plans.first else {
                 plan = nil
                 otherPlans = []
+                week = nil
                 phase = .empty
-                await reschedule(nil, timeZone())
+                await reschedule(nil, [], timeZone())
                 return
             }
             otherPlans = Array(plans.dropFirst())
-            let detail = try await service.plan(newest.id)
+            let detail = try await service.plan(followed.id)
             plan = detail
             phase = .ready
-            await reschedule(detail, timeZone())
+            await refreshWeek()
         } catch {
             if plan == nil { phase = .failed(error.localizedDescription) }
         }
@@ -62,7 +71,70 @@ final class TrainingStore {
     func show(_ detail: PlanDetail) async {
         plan = detail
         phase = .ready
-        await reschedule(detail, timeZone())
+        await refreshWeek()
+    }
+
+    /// Every plan, the followed one first: what a week can be filled from.
+    var allPlans: [PlanSummary] {
+        guard let plan else { return otherPlans }
+        let followed = PlanSummary(
+            id: plan.id, name: plan.name, weeksTotal: plan.weeksTotal,
+            days: plan.days.map { .init(weekday: $0.weekday, startTime: $0.startTime, focus: $0.focus, exerciseCount: $0.exercises.count) },
+            source: .init(rawValue: plan.source.rawValue) ?? .ai, createdAt: plan.createdAt, active: true
+        )
+        return [followed] + otherPlans
+    }
+
+    /// The plan a week's session is read from: the followed one, or another
+    /// saved plan once read.
+    func detail(for planID: String) -> PlanDetail? {
+        planID == plan?.id ? plan : otherDetails[planID]
+    }
+
+    /// Reads another saved plan, for a day of the week that trains one of its
+    /// sessions.
+    func loadDetail(_ planID: String) async {
+        guard detail(for: planID) == nil else { return }
+        if let found = try? await service.plan(planID) { otherDetails[planID] = found }
+    }
+
+    // MARK: The week
+
+    /// Follows another saved plan. This week switches to its usual days,
+    /// keeping what was already trained.
+    func follow(_ planID: String) async {
+        do {
+            _ = try await service.follow(plan: planID)
+            otherDetails = [:]
+            await load()
+        } catch {
+            notice = error.localizedDescription
+        }
+    }
+
+    func saveWeek(_ request: WeekRequest, next: Bool) async throws {
+        let saved = try await service.setWeek(request, next: next)
+        if !next { week = saved }
+        await refreshWeek()
+    }
+
+    func resetWeek(next: Bool) async throws {
+        let reset = try await service.resetWeek(next: next)
+        if !next { week = reset }
+        await refreshWeek()
+    }
+
+    /// Reads this week and next, and reschedules reminders from them. An
+    /// older server without weeks leaves `week` nil, and reminders follow the
+    /// plan's own days as they did before.
+    private func refreshWeek() async {
+        let this = try? await service.week(next: false)
+        let following = try? await service.week(next: true)
+        week = this
+        for session in (this?.days ?? []) + (following?.days ?? []) where session.planId != plan?.id {
+            await loadDetail(session.planId)
+        }
+        await reschedule(plan, [this, following].compactMap(\.self), timeZone())
     }
 
     // MARK: Edits

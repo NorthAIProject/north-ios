@@ -62,7 +62,7 @@ struct TrainingStoreTests {
     @Test func anEditShowsTheVersionItMadeAndReschedules() async {
         let service = FakeTraining()
         var scheduled: [String?] = []
-        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _ in scheduled.append(plan?.id) })
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _, _ in scheduled.append(plan?.id) })
 
         await store.load()
         #expect(store.plan?.id == "v1")
@@ -77,7 +77,7 @@ struct TrainingStoreTests {
     @Test func anEditOnAReplacedVersionShowsTheNewestAndSaysSo() async {
         let service = FakeTraining()
         service.superseded = true
-        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { _, _ in })
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { _, _, _ in })
 
         await store.load()
         await store.setStartTime(day: 0, to: "07:00")
@@ -89,7 +89,7 @@ struct TrainingStoreTests {
         let service = FakeTraining()
         service.hasPlan = false
         var scheduled: [String?] = ["sentinel"]
-        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _ in scheduled = [plan?.id] })
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { plan, _, _ in scheduled = [plan?.id] })
 
         await store.load()
         #expect(store.phase == .empty)
@@ -122,6 +122,24 @@ final class FakeTraining: TrainingServicing, @unchecked Sendable {
     func suggestions(plan: String, day: Int) async throws -> [ExerciseSummary] { [] }
     func replacements(plan: String, day: Int, index: Int) async throws -> [ExerciseSummary] { [] }
     func searchExercises(_ query: String, muscle: String?) async throws -> [ExerciseSummary] { [] }
+
+    var week = TrainingWeek(weekStart: "2026-10-05", custom: false, weekVolume: .hold, days: [])
+    private(set) var savedWeeks: [WeekRequest] = []
+    private(set) var followed: [String] = []
+
+    func follow(plan: String) async throws -> PlanDetail {
+        followed.append(plan)
+        return Self.plan(plan)
+    }
+    func week(next: Bool) async throws -> TrainingWeek { week }
+    func setWeek(_ request: WeekRequest, next: Bool) async throws -> TrainingWeek {
+        savedWeeks.append(request)
+        return week
+    }
+    func resetWeek(next: Bool) async throws -> TrainingWeek { week }
+    func suggestWeek(_ request: WeekRequest, next: Bool) async throws -> WeekSuggestion {
+        WeekSuggestion(week: week, matchingPlans: [])
+    }
 }
 
 extension PlanDetail {
@@ -129,6 +147,61 @@ extension PlanDetail {
         var copy = self
         copy.id = id
         return copy
+    }
+}
+
+struct WeekReminderTests {
+    static func session(_ date: String, _ weekday: String, start: String?, completed: Bool = false, plan: String = "plan-1") -> WeekSession {
+        WeekSession(weekday: weekday, date: date, planId: plan, planName: "Base", dayIndex: 1, focus: "Lower A",
+                    startTime: start, exerciseCount: 4, completed: completed, isNext: false)
+    }
+
+    @Test func aScheduledWeekRemindsOnItsOwnDatesOnce() throws {
+        let lisbon = try #require(TimeZone(identifier: "Europe/Lisbon"))
+        // Wednesday 7 October 2026, 08:00 in Lisbon.
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-07T07:00:00Z"))
+        let week = TrainingWeek(weekStart: "2026-10-05", custom: true, weekVolume: .hold, days: [
+            Self.session("2026-10-06", "Tuesday", start: "18:00", completed: true),
+            Self.session("2026-10-07", "Wednesday", start: "07:30"),
+            Self.session("2026-10-08", "Thursday", start: "18:00"),
+            Self.session("2026-10-10", "Saturday", start: nil),
+        ])
+
+        let reminders = WorkoutReminders.reminders(for: [week], leadMinutes: 15, timeZone: lisbon, now: now)
+        #expect(reminders.count == 1, "done, already past, and untimed sessions get none")
+        let reminder = try #require(reminders.first)
+        #expect(reminder.date == DateComponents(year: 2026, month: 10, day: 8))
+        #expect("\(reminder.hour):\(reminder.minute)" == "17:45")
+        #expect(reminder.url.absoluteString == "khepri://training/next", "a week's session may be any plan's")
+
+        let trigger = try #require(WorkoutReminders.request(for: reminder, timeZone: lisbon).trigger as? UNCalendarNotificationTrigger)
+        #expect(!trigger.repeats)
+        #expect(trigger.dateComponents.day == 8 && trigger.dateComponents.hour == 17)
+    }
+}
+
+@MainActor
+struct TrainingWeekStoreTests {
+    @Test func loadingReadsTheWeekAndReschedulesFromIt() async {
+        let service = FakeTraining()
+        service.week = TrainingWeek(weekStart: "2026-10-05", custom: true, weekVolume: .hold, days: [
+            WeekReminderTests.session("2026-10-06", "Tuesday", start: "18:00"),
+        ])
+        var weeks: [Int] = []
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { _, scheduled, _ in weeks.append(scheduled.count) })
+
+        await store.load()
+        #expect(store.week?.custom == true)
+        #expect(weeks == [2], "this week and next")
+    }
+
+    @Test func followingAnotherPlanReloads() async {
+        let service = FakeTraining()
+        let store = TrainingStore(service: service, timeZone: { .gmt }, reschedule: { _, _, _ in })
+        await store.load()
+        await store.follow("other")
+        #expect(service.followed == ["other"])
+        #expect(store.phase == .ready)
     }
 }
 

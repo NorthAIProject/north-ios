@@ -171,6 +171,11 @@ struct ContractTests {
         #expect(plan.days.last?.startTime == nil)
         #expect(plan.days.first?.exercises.first?.hasArt == true)
         #expect(try decode(Schemas.PlanList.self, "plans").plans.first?.days.count == 2)
+        #expect(try decode(Schemas.PlanList.self, "plans").plans.first?.active == true)
+        let week = try decode(Schemas.TrainingWeek.self, "week")
+        #expect(week.days.map(\.weekday) == ["Monday", "Thursday"])
+        #expect(week.days.first?.completed == true)
+        #expect(week.next?.dayIndex == 1 && week.next?.isNext == true)
         #expect(try decode(Schemas.ExerciseList.self, "exercises").total == 42)
         let activity = try decode(Schemas.ActivityOverview.self, "activity-overview")
         #expect(activity.active?.status == .paused)
@@ -376,7 +381,7 @@ struct ContractTests {
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
-                            "plan", "plans", "exercises", "activity-overview",
+                            "plan", "plans", "week", "exercises", "activity-overview",
                             "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",

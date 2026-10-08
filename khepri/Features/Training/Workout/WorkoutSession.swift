@@ -70,13 +70,15 @@ final class WorkoutSession {
     private let lifts: LiftServicing?
     private let now: () -> Date
 
-    init(title: String, day: TrainingDay, service: ActivityServicing, live: WorkoutLiveActivityControlling,
+    /// `planWeekday` is the day the week trains this session on, which is the
+    /// day finishing it completes; it defaults to the plan day's own weekday.
+    init(title: String, day: TrainingDay, planWeekday: String? = nil, service: ActivityServicing, live: WorkoutLiveActivityControlling,
          health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, now: @escaping () -> Date = Date.init) {
         self.title = title
         // What this week asks for: the weekly review can make it a deload or
         // a build week without changing the plan.
         self.exercises = day.exercises.map(\.forThisWeek).filter { $0.sets > 0 }
-        self.planWeekday = day.weekday
+        self.planWeekday = planWeekday ?? day.weekday
         self.service = service
         self.live = live
         self.health = health

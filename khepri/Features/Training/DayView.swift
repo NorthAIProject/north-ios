@@ -4,9 +4,18 @@ import SwiftUI
 
 /// One training day: when it starts, and its exercises to reorder, swap,
 /// adjust or remove.
+///
+/// Opened from the week, it is that day's session, which may come from a
+/// saved plan other than the one followed; that one is shown to train, not
+/// to edit, since edits belong to the plan being followed.
 struct DayView: View {
     let store: TrainingStore
     let dayIndex: Int
+    /// The plan the session is from; nil is the followed plan.
+    var planID: String? = nil
+    /// The weekday the week trains it on, which is what finishing it
+    /// completes; nil is the plan day's own weekday.
+    var scheduledWeekday: String? = nil
 
     @State private var picking: PickerPurpose?
     @State private var adjusting: IndexedExercise?
@@ -22,8 +31,15 @@ struct DayView: View {
         return counts.max { $0.value < $1.value }?.key ?? "07:00"
     }
 
+    private var sourcePlan: PlanDetail? {
+        planID.flatMap(store.detail(for:)) ?? (planID == nil ? store.plan : nil)
+    }
+
+    /// Edits go to the followed plan only.
+    private var isEditable: Bool { sourcePlan?.id == store.plan?.id }
+
     private var day: TrainingDay? {
-        guard let plan = store.plan, plan.days.indices.contains(dayIndex) else { return nil }
+        guard let plan = sourcePlan, plan.days.indices.contains(dayIndex) else { return nil }
         return plan.days[dayIndex]
     }
 
@@ -49,8 +65,10 @@ struct DayView: View {
                     .listRowBackground(Color.clear)
                 }
 
-                StartTimeSection(startTime: day.startTime, suggested: suggestedStart, isSaving: store.isEditing) { time in
-                    Task { await store.setStartTime(day: dayIndex, to: time) }
+                if isEditable {
+                    StartTimeSection(startTime: day.startTime, suggested: suggestedStart, isSaving: store.isEditing) { time in
+                        Task { await store.setStartTime(day: dayIndex, to: time) }
+                    }
                 }
 
                 Section {
@@ -61,13 +79,16 @@ struct DayView: View {
                                 if let slug = exercise.catalogSlug { viewing = ExerciseSlugRoute(slug: slug) }
                             }
                             .swipeActions {
+                                if isEditable {
                                 Button("Remove", role: .destructive) {
                                     Task { await store.remove(day: dayIndex, index: index) }
                                 }
                                 Button("Swap") { picking = .swap(index) }
                                     .tint(NorthColor.agent)
+                                }
                             }
                             .contextMenu {
+                                if isEditable {
                                 Button("Change Sets & Reps", systemImage: "slider.horizontal.3") {
                                     adjusting = IndexedExercise(index: index, exercise: exercise)
                                 }
@@ -85,16 +106,23 @@ struct DayView: View {
                                 Button("Remove", systemImage: "trash", role: .destructive) {
                                     Task { await store.remove(day: dayIndex, index: index) }
                                 }
+                                }
                             }
                     }
-                    Button("Add Exercise", systemImage: "plus") { picking = .add }
+                    if isEditable {
+                        Button("Add Exercise", systemImage: "plus") { picking = .add }
+                    }
                 } header: {
                     Text("Exercises")
                 } footer: {
-                    Text("Swipe to swap or remove. Touch and hold for sets, reps and order.")
+                    if isEditable {
+                        Text("Swipe to swap or remove. Touch and hold for sets, reps and order.")
+                    } else if let name = sourcePlan?.name {
+                        Text("From \(name). Follow that plan to edit its sessions.")
+                    }
                 }
             }
-            .navigationTitle(day.weekday)
+            .navigationTitle(scheduledWeekday ?? day.weekday)
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
                 if store.isEditing { ProgressView().padding().background(.regularMaterial, in: .rect(cornerRadius: 10)) }
@@ -132,6 +160,8 @@ struct DayView: View {
                 router.startsWorkout = false
                 startWorkout(day)
             }
+        } else if let planID, store.detail(for: planID) == nil {
+            ProgressView().task { await store.loadDetail(planID) }
         } else {
             ContentUnavailableView("This day is no longer in the plan", systemImage: "calendar.badge.exclamationmark")
         }
@@ -141,9 +171,11 @@ struct DayView: View {
 extension DayView {
     private func startWorkout(_ day: TrainingDay) {
         guard workout == nil, !day.exercises.isEmpty else { return }
+        let weekday = scheduledWeekday ?? day.weekday
         workout = WorkoutSession(
-            title: "\(day.weekday) · \(day.focus)",
+            title: "\(weekday) · \(day.focus)",
             day: day,
+            planWeekday: weekday,
             service: ActivityService(),
             live: WorkoutLiveActivityController(),
             health: HealthWorkoutWriter(),
