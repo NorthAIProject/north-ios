@@ -49,39 +49,30 @@ struct SpeakMealTests {
         #expect(model.kept.map(\.ingredientID) == [Self.breast, Self.brown])
     }
 
-    @Test func addSendsEveryKeptRowInOrder() async {
+    @Test func addSendsEveryKeptRowInOneBatch() async {
         let model = await parsedModel()
         model.rows[1].ingredientID = Self.white
         model.rows[1].included = true
 
-        var sent: [(String, Double)] = []
-        let done = await model.add { sent.append(($0, $1)) }
+        var batches: [[(ingredientID: String, grams: Double)]] = []
+        let done = await model.add { batches.append($0); return true }
 
         #expect(done)
-        #expect(sent.map(\.0) == [Self.breast, Self.white])
-        #expect(sent.map(\.1) == [200, 100])
-        // The row nobody could add stays, so the person sees it was left out.
-        #expect(model.rows.map(\.query) == ["dragonfruit"])
+        #expect(batches.count == 1)
+        #expect(batches.first?.map(\.ingredientID) == [Self.breast, Self.white])
+        #expect(batches.first?.map(\.grams) == [200, 100])
     }
 
-    /// The rows still showing after a failure are exactly the ones not
-    /// added, so tapping Add again cannot add anything twice.
-    @Test func aFailureKeepsOnlyTheRowsNotYetAdded() async {
-        struct Refused: Error {}
+    /// The server adds a batch whole or not at all, so a refused one leaves
+    /// every row to send again.
+    @Test func aRefusedBatchKeepsEveryRow() async {
         let model = await parsedModel()
-        model.rows[1].ingredientID = Self.white
-        model.rows[1].included = true
 
-        var calls = 0
-        let done = await model.add { id, _ in
-            calls += 1
-            if id == Self.white { throw Refused() }
-        }
+        let done = await model.add { _ in false }
 
         #expect(!done)
-        #expect(calls == 2)
-        #expect(model.error != nil)
-        #expect(model.kept.map(\.ingredientID) == [Self.white])
+        #expect(model.kept.map(\.ingredientID) == [Self.breast])
+        #expect(model.rows.count == 3)
     }
 
     @Test func aFailedReadKeepsTheWords() async {

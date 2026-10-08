@@ -72,36 +72,26 @@ final class SpeakMealModel {
         }
     }
 
-    /// Adds the kept rows in order and reports whether all of them went in.
-    ///
-    /// A row that was added leaves the list. The first failure stops there,
-    /// so the rows still showing are exactly the ones not added yet and Add
-    /// can simply be tapped again.
-    func add(using onAdd: (String, Double) async throws -> Void) async -> Bool {
+    /// Sends the kept rows as one batch, which the server adds together or
+    /// not at all, and reports whether it went in. A refused batch leaves
+    /// every row showing, so Add can simply be tapped again.
+    func add(using onAdd: ([(ingredientID: String, grams: Double)]) async -> Bool) async -> Bool {
         busy = true
         defer { busy = false }
-        for row in kept {
-            guard let ingredientID = row.ingredientID else { continue }
-            do {
-                try await onAdd(ingredientID, row.grams)
-                rows.removeAll { $0.id == row.id }
-            } catch {
-                self.error = error.localizedDescription
-                return false
-            }
-        }
-        error = nil
-        return true
+        let portions = kept.compactMap { row in row.ingredientID.map { (ingredientID: $0, grams: row.grams) } }
+        return await onAdd(portions)
     }
 }
 
 struct SpeakMealSheet: View {
-    let onAdd: (String, Double) async throws -> Void
+    let store: MealPlanStore
+    let mealID: String
     @State private var model: SpeakMealModel
     @Environment(\.dismiss) private var dismiss
 
-    init(service: NutritionServicing, onAdd: @escaping (String, Double) async throws -> Void) {
-        self.onAdd = onAdd
+    init(store: MealPlanStore, service: NutritionServicing, mealID: String) {
+        self.store = store
+        self.mealID = mealID
         _model = State(initialValue: SpeakMealModel(parse: service.parseFoods))
     }
 
@@ -120,7 +110,7 @@ struct SpeakMealSheet: View {
                 } footer: {
                     Text("Say each food and how much. You check everything before it's added.")
                 }
-                if let error = model.error { ErrorRow(error) }
+                if let error = model.error ?? store.error { ErrorRow(error) }
                 if model.parsed && model.rows.isEmpty && model.error == nil {
                     Section { Text("No food found in that. Name each food and how much, like “150 g salmon”.") }
                 }
@@ -139,12 +129,13 @@ struct SpeakMealSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add \(model.kept.count)") {
-                        Task { if await model.add(using: onAdd) { dismiss() } }
+                        Task { if await model.add(using: { await store.addPortions(to: mealID, $0) }) { dismiss() } }
                     }
                     .disabled(model.kept.isEmpty || model.busy)
                 }
             }
             .overlay { if model.busy { ProgressView() } }
+            .overagePrompt(store, active: true) { dismiss() }
         }
     }
 }

@@ -241,9 +241,18 @@ struct ContractTests {
         let journal = try decode(Schemas.Journal.self, "journal")
         #expect(journal.entries.first?.mood == 4 && journal.trend.count == 9)
         #expect(try decode(Schemas.IngredientList.self, "nutrition-ingredients").ingredients.first?.own == false)
-        #expect(try decode(Schemas.MealPlanList.self, "nutrition-plans").plans.first?.mealCount == 1)
+        let plans = try decode(Schemas.MealPlanList.self, "nutrition-plans").plans
+        #expect(plans.first?.planType == .highCarb && plans.first?.mode == .advanced && plans.first?.dayCount == 2)
         let plan = try decode(Schemas.MealPlanDetail.self, "nutrition-plan")
-        #expect(plan.value2.meals.first?.ingredients.first?.quantityGrams == 80)
+        let monday = plan.value2.days.first
+        #expect(monday?.weekday == 1 && monday?.carbType == .lowCarb && monday?.status?.isOver == true)
+        #expect(monday?.status?.remaining.carbG == -13.9 && plan.value2.days.last?.status == nil)
+        #expect(monday?.meals.first?.ingredients.first?.quantityGrams == 80)
+        let options = try decode(Schemas.MealPlanOptions.self, "nutrition-plan-options")
+        #expect(options.planTypes.map(\.id) == [.midCarb, .custom] && options.planTypes.last?.advancedOnly == true)
+        let over = try decode(Schemas.MacroOverage.self, "nutrition-overage")
+        #expect(over.canConfirm && over.days.first?.over.carbG == 13.9)
+        #expect(try decode(Schemas.MealPortionList.self, "nutrition-portions").portions.count == 1)
         let log = try decode(Schemas.FoodLog.self, "nutrition-log")
         #expect(log.progress?.goal.calories == 2200 && log.entries.first?.quantityGrams == 80)
         #expect(try decode(Schemas.DecisionList.self, "decisions").decisions.first?.outcome == "March. The knee held up.")
@@ -386,6 +395,7 @@ struct ContractTests {
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
+                            "nutrition-plan-options", "nutrition-overage", "nutrition-portions",
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
