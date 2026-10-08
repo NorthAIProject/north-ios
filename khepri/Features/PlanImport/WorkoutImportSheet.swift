@@ -86,7 +86,7 @@ struct WorkoutImportSheet: View {
             draft = EditableWorkoutDraft(try await service.parseWorkout(filename: file.filename, data: file.data))
             error = nil
         } catch {
-            self.error = error.message
+            self.error = error.importMessage
         }
     }
 
@@ -99,19 +99,8 @@ struct WorkoutImportSheet: View {
             onSaved(id)
             dismiss()
         } catch {
-            self.error = error.message
+            self.error = error.importMessage
         }
-    }
-}
-
-private extension Error {
-    /// The server's own sentence for a refused file ("This PDF is
-    /// password-protected…") rather than the generic summary.
-    var message: String {
-        if let api = self as? APIError, case .fieldValidation(let message, let fields) = api {
-            return fields["file"] ?? fields["plan"] ?? message
-        }
-        return localizedDescription
     }
 }
 

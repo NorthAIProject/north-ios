@@ -8,6 +8,7 @@ struct MealPlansView: View {
     @State private var plans: [MealPlanSummary] = []
     @State private var error: String?
     @State private var creating = false
+    @State private var importing = false
 
     var body: some View {
         List {
@@ -32,9 +33,13 @@ struct MealPlansView: View {
                 }
             }
             Button("New Plan", systemImage: "plus") { creating = true }
+            Button("Import Plan", systemImage: "doc.badge.plus") { importing = true }
         }
         .sheet(isPresented: $creating, onDismiss: { Task { await load() } }) {
             NewPlanSheet(service: service)
+        }
+        .sheet(isPresented: $importing, onDismiss: { Task { await load() } }) {
+            MealImportSheet { _ in }
         }
         .task { await load() }
         .refreshable { await load() }

@@ -7,6 +7,11 @@ import UniformTypeIdentifiers
 typealias WorkoutImportDraft = Components.Schemas.WorkoutImportDraft
 typealias WorkoutImportDay = Components.Schemas.WorkoutImportDay
 typealias WorkoutImportExercise = Components.Schemas.WorkoutImportExercise
+typealias MealImportDraft = Components.Schemas.MealImportDraft
+typealias MealImportDay = Components.Schemas.MealImportDay
+typealias MealImportMeal = Components.Schemas.MealImportMeal
+typealias MealImportFood = Components.Schemas.MealImportFood
+typealias ImportMacros = Components.Schemas.ImportMacros
 
 /// Reading a plan out of a file, and saving it once the person has checked it.
 ///
@@ -18,6 +23,15 @@ protocol PlanImportServicing: Sendable {
     func parseWorkout(filename: String, data: Data) async throws -> WorkoutImportDraft
     /// Saves the reviewed draft as a new plan and returns its id.
     func commitWorkout(_ draft: WorkoutImportDraft) async throws -> String
+
+    /// Reads a meal plan and previews it against the macro target.
+    func parseMeal(filename: String, data: Data) async throws -> MealImportDraft
+    /// Recomputes an edited draft: ingredients, grams, each day's target and
+    /// overage. Writes nothing.
+    func previewMeal(_ draft: MealImportDraft) async throws -> MealImportDraft
+    /// Saves the reviewed draft as a new plan, or reports the days over their
+    /// target exactly as any other meal plan change would.
+    func commitMeal(_ draft: MealImportDraft, confirm: Bool) async throws -> PlanWrite<String>
 }
 
 struct PlanImportService: PlanImportServicing {
@@ -37,6 +51,30 @@ struct PlanImportService: PlanImportServicing {
 
     func commitWorkout(_ draft: WorkoutImportDraft) async throws -> String {
         try await NorthAPI.call { try await api.commitWorkoutImport(body: .json(draft)).created.body.json.planId }
+    }
+
+    func parseMeal(filename: String, data: Data) async throws -> MealImportDraft {
+        let part = OpenAPIRuntime.MultipartPart(
+            payload: Operations.ParseMealImport.Input.Body.MultipartFormPayload.FilePayload(body: HTTPBody(data)),
+            filename: filename
+        )
+        return try await NorthAPI.call {
+            try await generationAPI.parseMealImport(body: .multipartForm([.file(part)])).ok.body.json
+        }
+    }
+
+    func previewMeal(_ draft: MealImportDraft) async throws -> MealImportDraft {
+        try await NorthAPI.call { try await api.previewMealImport(body: .json(draft)).ok.body.json }
+    }
+
+    func commitMeal(_ draft: MealImportDraft, confirm: Bool) async throws -> PlanWrite<String> {
+        try await NorthAPI.call {
+            switch try await api.commitMealImport(body: .json(.init(draft: draft, confirmOverage: confirm))) {
+            case .created(let created): .saved(try created.body.json.planId)
+            case .conflict(let conflict): .over(try conflict.body.json)
+            default: throw APIError.invalidResponse
+            }
+        }
     }
 }
 
