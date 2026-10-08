@@ -16,7 +16,8 @@ extension EnvironmentValues {
 ///
 /// Absent where this iPhone cannot transcribe the person's language. The
 /// first tap says why the microphone is wanted before iOS asks, because a
-/// refusal can only be undone in the Settings app.
+/// refusal can only be undone in the Settings app. The explanation always
+/// continues to the iOS prompt, where the person says yes or no.
 struct DictationButton: View {
     @Binding var text: String
     var font: Font = .title
@@ -74,7 +75,8 @@ struct DictationButton: View {
                     }
                 }
             }
-            Button("Not now", role: .cancel) {}
+            // No way out but forward: App Review (5.1.1(iv)) rejects an
+            // explanation that lets the person put off the iOS prompt.
         } message: {
             Text("Khepri needs the microphone to hear you. Your words are turned into text on this iPhone and appear in the box for you to check before sending.")
         }
