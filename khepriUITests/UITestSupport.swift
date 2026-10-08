@@ -47,6 +47,27 @@ extension XCTestCase {
         return false
     }
 
+    /// Answers a permission prompt with "Don't Allow": the Health sheet, which
+    /// iOS draws inside the app, or an alert, which SpringBoard draws. A
+    /// simulator that has answered before shows neither, so the wait is short.
+    @MainActor
+    func refuseSystemPrompt(_ app: XCUIApplication, within seconds: TimeInterval = 8) {
+        // iOS spells it with a curly apostrophe.
+        let refuse = NSPredicate(format: "label BEGINSWITH 'Don' AND label ENDSWITH 'Allow'")
+        let owners = [app, XCUIApplication(bundleIdentifier: "com.apple.springboard")]
+        let deadline = Date.now.addingTimeInterval(seconds)
+        while Date.now < deadline {
+            for owner in owners {
+                let button = owner.buttons.matching(refuse).firstMatch
+                if button.exists, button.isHittable {
+                    button.tap()
+                    return
+                }
+            }
+            usleep(250_000)
+        }
+    }
+
     /// The first time a simulator shows the keyboard, iOS lays a one-time
     /// "slide to type" tip over it, with its own Continue button covering the
     /// app's. Dismiss it wherever it appears.

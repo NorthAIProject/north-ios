@@ -46,12 +46,17 @@ final class FirstRunUITests: XCTestCase {
         snapshot(app, "05-goal")
         tap(app.buttons["Continue"])
 
-        XCTAssertTrue(app.buttons["Connect Apple Health"].waitForExistence(timeout: 15), "answers were not accepted")
+        // The priming steps only continue, to the iOS prompt; refuse there,
+        // as a person may.
+        XCTAssertTrue(app.staticTexts["Bring in Apple Health"].waitForExistence(timeout: 15), "answers were not accepted")
         snapshot(app, "06-health")
-        tap(app.buttons["Not Now"])
+        tap(app.buttons["Continue"])
+        refuseSystemPrompt(app)
 
+        XCTAssertTrue(app.staticTexts["A nudge before it matters"].waitForExistence(timeout: 15), "health step did not move on")
         snapshot(app, "07-notifications")
-        tap(app.buttons["Not Now"])
+        tap(app.buttons["Continue"])
+        refuseSystemPrompt(app)
 
         // Tour, then the tabs.
         XCTAssertTrue(app.buttons["Next"].waitForExistence(timeout: 15), "tour did not start")

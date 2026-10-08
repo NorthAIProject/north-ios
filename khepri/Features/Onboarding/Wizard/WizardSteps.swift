@@ -190,6 +190,9 @@ struct FirstGoalStep: View {
     }
 }
 
+/// The priming steps only lead forward to the iOS prompt, where the person
+/// says yes or no. App Review (5.1.1(iv)) rejects an explanation that can be
+/// skipped or that labels its button like the system's "Allow".
 struct HealthStep: View {
     let next: () -> Void
     @State private var asking = false
@@ -198,9 +201,8 @@ struct HealthStep: View {
         WizardChrome(
             headline: "Bring in Apple Health",
             subhead: "Your coach sees workouts, sleep and heart rate next to what you tell it, so advice fits the day you actually had.",
-            primary: "Connect Apple Health",
+            primary: "Continue",
             isWorking: asking,
-            secondary: "Not Now",
             onPrimary: {
                 Task {
                     asking = true
@@ -213,8 +215,7 @@ struct HealthStep: View {
                     asking = false
                     next()
                 }
-            },
-            onSecondary: next
+            }
         ) {
             PrimingList(items: [
                 ("figure.run", "Workouts and activity", "Steps, active energy and every workout you log."),
@@ -233,9 +234,8 @@ struct NotificationsStep: View {
         WizardChrome(
             headline: "A nudge before it matters",
             subhead: "Only the reminders you set up. Nothing promotional.",
-            primary: "Allow Notifications",
+            primary: "Continue",
             isWorking: asking,
-            secondary: "Not Now",
             onPrimary: {
                 Task {
                     asking = true
@@ -243,8 +243,7 @@ struct NotificationsStep: View {
                     asking = false
                     next()
                 }
-            },
-            onSecondary: next
+            }
         ) {
             PrimingList(items: [
                 ("figure.strengthtraining.traditional", "Before a workout", "At the time you plan it, with a button to start."),
