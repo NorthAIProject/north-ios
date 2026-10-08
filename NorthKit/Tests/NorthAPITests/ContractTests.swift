@@ -375,9 +375,11 @@ struct ContractTests {
 
     @Test func xp() throws {
         let summary = try decode(Schemas.XPSummary.self, "summary")
-        #expect(summary.total == 340 && summary.weekTotal == 40)
+        #expect(summary.total == 340 && summary.weekTotal == 65)
         #expect(summary.level.number == 3 && summary.level.floor == 300 && summary.level.next == 800)
-        #expect(summary.week.map(\.kind) == [.workout, .habitKept] && summary.week.first?.points == 40)
+        // earned has every kind; the deprecated week keeps only the first five.
+        #expect(summary.earned.map(\.kind) == ["workout", "habit_kept", "week_reviewed"])
+        #expect(summary.earned.first?.points == 40 && summary.earned.last?.points == 25)
         let board = try decode(Schemas.Leaderboard.self, "board")
         #expect(board.metric == .xp && board.period == .week && board.sharing)
         #expect(board.entries.first?.level?.title == "Relentless" && board.entries.first?.level?.next == nil)
