@@ -3,7 +3,7 @@ import NorthAPI
 
 typealias XPSummary = Components.Schemas.XPSummary
 typealias XPLevel = Components.Schemas.LevelView
-typealias XPEarned = Components.Schemas.EarnedView
+typealias XPEarned = Components.Schemas.XPEarned
 typealias Leaderboard = Components.Schemas.Leaderboard
 typealias LeaderboardEntry = Components.Schemas.LeaderboardEntry
 
@@ -131,15 +131,26 @@ enum XPFormat {
         }
     }
 
-    /// What each kind pays for, rules included.
-    static func kindLabel(_ kind: XPEarned.KindPayload) -> String {
+    /// What each kind pays for, rules included. The server may add kinds
+    /// before this build knows them; those read as their own name.
+    static func kindLabel(_ kind: String) -> String {
         switch kind {
-        case .workout: "Workouts of 10 min or more (up to 2 a day)"
-        case .habitKept: "Habits kept on their days"
-        case .streakDay: "Check-in streak days (from day 3)"
-        case .milestone: "Milestones reached"
-        case .goal: "Goals achieved"
+        case "workout": "Workouts of 10 min or more (up to 2 a day)"
+        case "habit_kept": "Habits kept on their days"
+        case "streak_day": "Check-in streak days (from day 3)"
+        case "streak_mark": "Check-in streaks reaching 7, 30, 100 or 365 days"
+        case "week_reviewed": "Weekly reviews done"
+        case "challenge_met": "Crew challenges met"
+        case "milestone": "Milestones reached"
+        case "goal": "Goals achieved"
+        default: sentence(kind)
         }
+    }
+
+    /// "form_check" → "Form check"
+    private static func sentence(_ kind: String) -> String {
+        let words = kind.replacingOccurrences(of: "_", with: " ")
+        return words.prefix(1).uppercased() + words.dropFirst()
     }
 
     /// "2 × · 40 XP"

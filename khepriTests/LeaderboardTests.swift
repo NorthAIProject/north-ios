@@ -39,9 +39,14 @@ struct XPFormatTests {
     }
 
     @Test func kindsSayWhatTheyPayFor() {
-        #expect(XPFormat.kindLabel(.workout) == "Workouts of 10 min or more (up to 2 a day)")
-        #expect(XPFormat.kindLabel(.streakDay) == "Check-in streak days (from day 3)")
+        #expect(XPFormat.kindLabel("workout") == "Workouts of 10 min or more (up to 2 a day)")
+        #expect(XPFormat.kindLabel("streak_day") == "Check-in streak days (from day 3)")
+        #expect(XPFormat.kindLabel("week_reviewed") == "Weekly reviews done")
         #expect(XPFormat.earned(count: 2, points: 40) == "2 × · 40 XP")
+    }
+
+    @Test func aKindThisBuildDoesNotKnowReadsAsItsName() {
+        #expect(XPFormat.kindLabel("form_check") == "Form check")
     }
 }
 

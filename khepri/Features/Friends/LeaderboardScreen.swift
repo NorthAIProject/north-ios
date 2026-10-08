@@ -41,11 +41,11 @@ struct LeaderboardScreen: View {
             Section {
                 LevelCard(total: summary.total, level: summary.level)
             } footer: {
-                Text("XP comes only from things done: workouts, habits kept, streaks, milestones and goals.")
+                Text("XP comes only from things done: workouts, habits kept, streaks, weekly reviews, crew challenges, milestones and goals.")
             }
 
             Section {
-                ForEach(summary.week, id: \.kind) { earned in
+                ForEach(summary.earned, id: \.kind) { earned in
                     LabeledContent(XPFormat.kindLabel(earned.kind)) {
                         Text(XPFormat.earned(count: earned.count, points: earned.points)).monospacedDigit()
                     }
