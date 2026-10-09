@@ -9,7 +9,13 @@ typealias WorkoutLiveState = WorkoutActivityAttributes.ContentState
 /// protocol so the session's tests can see what it would have shown.
 @MainActor
 protocol WorkoutLiveActivityControlling: AnyObject {
+    /// The activity on screen, kept in the workout's snapshot so a relaunch
+    /// can find it again.
+    var activityID: String? { get }
     func start(title: String, startedAt: Date, state: WorkoutLiveState)
+    /// Takes over the activity a killed run left on screen, or starts a new
+    /// one when that is gone.
+    func reattach(activityID: String?, title: String, startedAt: Date, state: WorkoutLiveState)
     func update(_ state: WorkoutLiveState)
     func end(_ state: WorkoutLiveState, dismissImmediately: Bool)
 }
@@ -31,10 +37,13 @@ final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
     /// Ends every workout activity no workout in this process is driving:
     /// one left from a run the app was killed during, or a workout stopped
     /// on the web or in Telegram. Safe to call on every launch and return
-    /// to the foreground.
+    /// to the foreground. The activity of a workout waiting to be resumed
+    /// from its snapshot is kept for it to re-attach to.
     static func endOrphans() {
-        endAll(except: current?.activity?.id)
+        endAll(except: current?.activity?.id ?? WorkoutSnapshotStore().load()?.liveActivityID)
     }
+
+    var activityID: String? { activity?.id }
 
     func start(title: String, startedAt: Date, state: WorkoutLiveState) {
         // Switched off in Settings: the workout goes on without it.
@@ -50,6 +59,20 @@ final class WorkoutLiveActivityController: WorkoutLiveActivityControlling {
         } catch {
             log.error("live activity did not start: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    func reattach(activityID: String?, title: String, startedAt: Date, state: WorkoutLiveState) {
+        let running = Activity<WorkoutActivityAttributes>.activities.first {
+            $0.id == activityID && ($0.activityState == .active || $0.activityState == .stale)
+        }
+        guard let running else {
+            start(title: title, startedAt: startedAt, state: state)
+            return
+        }
+        activity = running
+        Self.current = self
+        Self.endAll(except: running.id)
+        update(state)
     }
 
     func update(_ state: WorkoutLiveState) {

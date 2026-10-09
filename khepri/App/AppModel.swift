@@ -37,9 +37,10 @@ final class AppModel {
     func start() async {
         #if DEBUG
         // UI tests start from a clean install: no session, no saved wizard or
-        // tour progress.
+        // tour progress, no workout left to resume.
         if ProcessInfo.processInfo.arguments.contains("-uitest-reset") {
             await sessions.invalidateSession()
+            WorkoutSnapshotStore().clear()
             if let domain = Bundle.main.bundleIdentifier {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
@@ -85,10 +86,13 @@ final class AppModel {
         await PushRegistration.unregister()
         await auth.logout()
         await SpotlightIndex.clear()
+        // A workout in progress belongs to this account, not the next one.
+        WorkoutSnapshotStore().clear()
         phase = .signedOut
     }
 
     /// The session was rejected or cleared somewhere else, e.g. a 401.
+    /// A workout in progress is kept: signing back in resumes it.
     func sessionEnded() {
         phase = .signedOut
         Task { await SpotlightIndex.clear() }

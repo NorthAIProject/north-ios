@@ -166,8 +166,21 @@ final class FakeLiveActivity: WorkoutLiveActivityControlling {
     private(set) var last: WorkoutLiveState?
     private(set) var ended = false
     private(set) var dismissedImmediately = false
+    private(set) var activityID: String?
+    /// The id a restored workout asked to take over.
+    private(set) var reattachedTo: String?
 
-    func start(title: String, startedAt: Date, state: WorkoutLiveState) { started = state; last = state }
+    func start(title: String, startedAt: Date, state: WorkoutLiveState) {
+        started = state
+        last = state
+        activityID = "live-1"
+    }
+
+    func reattach(activityID: String?, title: String, startedAt: Date, state: WorkoutLiveState) {
+        reattachedTo = activityID
+        self.activityID = activityID ?? "live-2"
+        last = state
+    }
     func update(_ state: WorkoutLiveState) { last = state }
     func end(_ state: WorkoutLiveState, dismissImmediately: Bool) {
         last = state
@@ -236,7 +249,8 @@ extension ActivitySession {
 extension WorkoutSession {
     /// Two sets of squats with 90s rest, then one set of push-ups.
     static func fixture(service: ActivityServicing, live: WorkoutLiveActivityControlling, clock: TestClock,
-                        lifts: LiftServicing? = nil) -> WorkoutSession {
+                        lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+                        restNotifications: RestNotificationScheduling? = nil) -> WorkoutSession {
         let day = TrainingDay(weekday: "Monday", focus: "Full body", exercises: [
             DayExercise(name: "Goblet squat", sets: 2, reps: "8", restSeconds: 90, equipment: "dumbbell",
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
@@ -244,7 +258,7 @@ extension WorkoutSession {
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
         ], completedThisWeek: false, isNext: true)
         return WorkoutSession(title: "Monday · Full body", day: day, service: service, live: live, lifts: lifts,
-                              now: { clock.now })
+                              snapshots: snapshots, restNotifications: restNotifications, now: { clock.now })
     }
 }
 
@@ -271,8 +285,9 @@ actor FakeLifts: LiftServicing {
 }
 
 extension LiftSet {
-    static func fixture(id: String = "old", set: Int, kg: Double, reps: Int) -> LiftSet {
+    static func fixture(id: String = "old", set: Int, kg: Double, reps: Int, kind: KindPayload? = nil) -> LiftSet {
         LiftSet(id: id, exerciseKey: "goblet squat", exerciseName: "Goblet squat", exerciseSlug: "", setNumber: set,
-                weightKg: kg, reps: reps, e1rmKg: LiftMath.e1rm(weightKg: kg, reps: reps), performedAt: .now)
+                weightKg: kg, reps: reps, e1rmKg: LiftMath.e1rm(weightKg: kg, reps: reps), performedAt: .now,
+                kind: kind)
     }
 }
