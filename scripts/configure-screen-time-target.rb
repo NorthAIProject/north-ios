@@ -65,6 +65,15 @@ target.build_configurations.each do |config|
   s["CODE_SIGN_ENTITLEMENTS"] = "#{NAME}/#{NAME}.entitlements"
 end
 
+# Compiles the app's half of the report (ScreenTimeReport.swift); without the
+# flag the app does not link DeviceActivity or FamilyControls at all.
+FLAG = "SCREEN_TIME_REPORT"
+app.build_configurations.each do |config|
+  conditions = Array(config.build_settings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] || "$(inherited)")
+  conditions = conditions.flat_map(&:split)
+  config.build_settings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = (conditions + [FLAG]).uniq.join(" ") unless conditions.include?(FLAG)
+end
+
 # The app asks for authorization, so it needs the entitlement too.
 app_entitlements = File.expand_path("../Config/khepri.entitlements", __dir__)
 plist = Xcodeproj::Plist.read_from_path(app_entitlements)

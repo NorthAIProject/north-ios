@@ -42,6 +42,43 @@ struct ConversationStoreTests {
         #expect(store.messages.last?.text == "Logged.")
     }
 
+    @Test func aSecondTapWhileAllowingSendsNothing() async throws {
+        let approval = ToolApproval(messageId: "m9", calls: [.init(name: "create_workout_plan", summary: "Create a 4-day plan")])
+        let coach = FakeCoach(reply: [.approval(approval), .done(messageID: nil)], resume: [.token("Done."), .done(messageID: "stored-2")])
+        coach.decideDelay = .milliseconds(200)
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+        store.send("Make me a plan")
+        try await waitUntilReady(store)
+
+        let first = Task { await store.decide(approve: true) }
+        for _ in 0..<100 where !store.isDeciding {
+            try await Task.sleep(for: .milliseconds(2))
+        }
+        #expect(store.isDeciding)
+        #expect(CoachActivity.resolve(store, flash: nil, isListening: false) == CoachActivity(mood: .working, status: "is on it"))
+
+        await store.decide(approve: true)
+        await first.value
+        #expect(coach.decisions == [true], "the second tap must not reach the server")
+        #expect(!store.isDeciding)
+    }
+
+    @Test func aFailedAllowKeepsTheQuestionToTryAgain() async throws {
+        let approval = ToolApproval(messageId: "m9", calls: [.init(name: "create_workout_plan", summary: "Create a 4-day plan")])
+        let coach = FakeCoach(reply: [.approval(approval), .done(messageID: nil)])
+        coach.decideError = URLError(.timedOut)
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+        store.send("Make me a plan")
+        try await waitUntilReady(store)
+
+        await store.decide(approve: true)
+        #expect(store.pendingApproval == approval)
+        #expect(store.replyError != nil)
+        #expect(!store.isDeciding, "the buttons come back so the person can try again")
+    }
+
     @Test func aFailedReplyShowsItsReasonAndKeepsTheQuestion() async throws {
         let coach = FakeCoach(reply: [.failed("The coach is busy right now."), .done(messageID: nil)])
         let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
@@ -84,6 +121,7 @@ struct CoachActivityTests {
         #expect(CoachActivity.resolve(phase: .replying) == CoachActivity(mood: .working, status: "is thinking"))
         #expect(CoachActivity.resolve(phase: .replying, hasReplyText: true) == CoachActivity(mood: .working, status: "is writing"))
         #expect(CoachActivity.resolve(phase: .ready, awaitingApproval: true) == CoachActivity(mood: .idle, status: "needs your OK"))
+        #expect(CoachActivity.resolve(phase: .ready, awaitingApproval: true, isDeciding: true) == CoachActivity(mood: .working, status: "is on it"))
         #expect(CoachActivity.resolve(phase: .ready, flash: .done) == CoachActivity(mood: .celebrating, status: "is done"))
         #expect(CoachActivity.resolve(phase: .ready, isListening: true) == CoachActivity(mood: .listening, status: "is listening"))
         #expect(CoachActivity.resolve(phase: .ready, replyFailed: true) == CoachActivity(mood: .idle, status: "hit a snag"))
@@ -143,6 +181,9 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     private(set) var sent: [String] = []
     private(set) var decisions: [Bool] = []
     private(set) var ratings: [Bool?] = []
+    /// How long deciding takes, as a training plan does on the server.
+    var decideDelay: Duration?
+    var decideError: Error?
 
     init(history: [ChatMessage] = [], reply: [CoachEvent] = [], resume: [CoachEvent] = []) {
         self.history = history
@@ -165,7 +206,11 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
 
     func resume(_ id: String) -> AsyncThrowingStream<CoachEvent, Error> { Self.stream(resumeEvents) }
 
-    func decide(in id: String, messageID: String, approve: Bool) async throws { decisions.append(approve) }
+    func decide(in id: String, messageID: String, approve: Bool) async throws {
+        decisions.append(approve)
+        if let decideDelay { try await Task.sleep(for: decideDelay) }
+        if let decideError { throw decideError }
+    }
 
     func rate(in id: String, messageID: String, helpful: Bool?) async throws -> ChatMessage {
         ratings.append(helpful)

@@ -1,6 +1,12 @@
+import SwiftUI
+
+// Compiled only once scripts/configure-screen-time-target.rb has added the
+// report extension, which also sets SCREEN_TIME_REPORT. Without it the app does
+// not link DeviceActivity or FamilyControls at all, so it has no Screen Time
+// functionality for App Review to ask about (2.1, 1.0 build 15).
+#if SCREEN_TIME_REPORT
 import DeviceActivity
 import FamilyControls
-import SwiftUI
 
 /// Today's screen time as Apple counts it, drawn by the KhepriScreenTimeReport
 /// extension. The number never reaches the app — Apple does not allow it — so
@@ -53,3 +59,9 @@ struct ScreenTimeReportView: View {
         }
     }
 }
+#else
+/// Nothing to show until the report extension ships.
+struct ScreenTimeReportView: View {
+    var body: some View { EmptyView() }
+}
+#endif

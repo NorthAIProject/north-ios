@@ -68,7 +68,11 @@ struct CoachHeader: View {
         }
         .padding(.bottom, 8)
         .frame(maxWidth: .infinity)
-        .background(alignment: .top) { CoachScrim(canvas: canvas).ignoresSafeArea(edges: .top) }
+        .background(alignment: .top) {
+            CoachScrim(canvas: canvas)
+                .padding(.bottom, -CoachHeaderMetrics.fadeHeight)
+                .ignoresSafeArea(edges: .top)
+        }
     }
 
     private var identity: some View {
@@ -95,7 +99,8 @@ struct CoachHeader: View {
 enum CoachHeaderMetrics {
     static let avatarSize: CGFloat = 110
     static let buttonSize: CGFloat = 40
-    static let scrimHeight: CGFloat = 120
+    /// How far below the header the scrim fades out.
+    static let fadeHeight: CGFloat = 24
     static let ringWidth: CGFloat = 3
     static let ringInset: CGFloat = 5
     /// Pills, the circle button and the avatar's plate: a fill that reads on
@@ -181,8 +186,10 @@ struct CoachRing: View {
     }
 }
 
-/// Solid canvas under the status bar, then a fade to clear, so what scrolls
-/// under the header fades out without a blur.
+/// Solid canvas behind the whole header, then a short fade to clear below
+/// it, so what scrolls under the header fades out without a blur. The fade
+/// sits below the header, never behind it: the avatar's plate and the pill are
+/// translucent, and text under them would show through.
 struct CoachScrim: View {
     let canvas: Color
 
@@ -190,7 +197,7 @@ struct CoachScrim: View {
         VStack(spacing: 0) {
             canvas
             LinearGradient(colors: [canvas, canvas.opacity(0)], startPoint: .top, endPoint: .bottom)
-                .frame(height: CoachHeaderMetrics.scrimHeight)
+                .frame(height: CoachHeaderMetrics.fadeHeight)
         }
         .allowsHitTesting(false)
     }

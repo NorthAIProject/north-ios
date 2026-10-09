@@ -28,12 +28,13 @@ struct CoachActivity: Equatable {
     static let ready = CoachActivity(mood: .idle, status: "Ready")
     static let catchingUp = CoachActivity(mood: .working, status: "is catching up")
 
-    /// Precedence: loading, a reply being written, a question for the person,
-    /// a flash, the composer, a failed reply, an ended reflection, then Ready.
+    /// Precedence: loading, a reply being written, an answered question still
+    /// running, a question for the person, a flash, the composer, a failed reply, an ended reflection, then Ready.
     static func resolve(
         phase: ConversationStore.Phase,
         hasReplyText: Bool = false,
         awaitingApproval: Bool = false,
+        isDeciding: Bool = false,
         replyFailed: Bool = false,
         ended: Bool = false,
         flash: Flash? = nil,
@@ -49,6 +50,8 @@ struct CoachActivity: Equatable {
         case .ready:
             break
         }
+        // Said yes: the write is running, so stop asking for the OK.
+        if isDeciding { return CoachActivity(mood: .working, status: "is on it") }
         if awaitingApproval { return CoachActivity(mood: .idle, status: "needs your OK") }
         if flash == .done { return CoachActivity(mood: .celebrating, status: "is done") }
         if isListening { return CoachActivity(mood: .listening, status: "is listening") }
@@ -64,6 +67,7 @@ struct CoachActivity: Equatable {
             phase: store.phase,
             hasReplyText: !(reply?.text.isEmpty ?? true),
             awaitingApproval: store.pendingApproval != nil,
+            isDeciding: store.isDeciding,
             replyFailed: store.replyError != nil,
             ended: store.ended,
             flash: flash,
