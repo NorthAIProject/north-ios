@@ -23,6 +23,9 @@ struct TrainingScreen: View {
                             NavigationLink(value: DayRoute.library) {
                                 Label("Exercise Library", systemImage: "books.vertical")
                             }
+                            NavigationLink(value: DayRoute.muscles) {
+                                Label("Muscles This Week", systemImage: "figure.stand")
+                            }
                             NavigationLink(value: DayRoute.formCheck) {
                                 Label("Form Check", systemImage: "video.badge.checkmark")
                             }
@@ -49,6 +52,7 @@ struct TrainingScreen: View {
                     case .session(let planID, let index, let weekday):
                         DayView(store: store, dayIndex: index, planID: planID, scheduledWeekday: weekday)
                     case .library: ExerciseLibrary(service: store.service)
+                    case .muscles: MusclesScreen()
                     case .formCheck: FormCheckScreen()
                     case .history: ActivityHistoryScreen()
                     }
@@ -138,6 +142,7 @@ enum DayRoute: Hashable {
     /// A session of the week: a day of any saved plan, trained on weekday.
     case session(planID: String, dayIndex: Int, weekday: String)
     case library
+    case muscles
     case formCheck
     case history
 }

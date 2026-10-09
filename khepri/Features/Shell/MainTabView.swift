@@ -50,6 +50,18 @@ struct MainTabView: View {
         )) { route in
             ExerciseSheet(slug: route.slug)
         }
+        // A muscle tapped on the body figure: its exercises, from any tab.
+        .sheet(item: Binding(
+            get: { router.openMuscle.map(MuscleLibraryRoute.init(muscle:)) },
+            set: { router.openMuscle = $0?.muscle }
+        )) { route in
+            NavigationStack {
+                ExerciseLibrary(service: TrainingService(), muscle: route.muscle)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { router.openMuscle = nil } }
+                    }
+            }
+        }
         .fullScreenCover(item: $resumedWorkout) { session in WorkoutSessionView(session: session) }
         .onAppear { tour.startIfNeeded() }
         .task { resumedWorkout = WorkoutSession.resumingKilledWorkout() }
@@ -66,4 +78,9 @@ struct MainTabView: View {
             }
         }
     }
+}
+
+private struct MuscleLibraryRoute: Identifiable {
+    let muscle: String
+    var id: String { muscle }
 }

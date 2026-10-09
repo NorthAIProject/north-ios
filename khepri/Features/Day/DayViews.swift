@@ -20,7 +20,7 @@ struct DayDashboard: View {
                         .accessibilityIdentifier("day-card-\(kind.rawValue)")
                 }
             }
-            BodyCard(measurements: day.body) { editingBody = true }
+            BodyCard(measurements: day.body, bodyMap: store?.bodyMap) { editingBody = true }
             DayTimeline(day: day)
             if let trends = store?.trends, !trends.series.isEmpty || !trends.fasts.isEmpty {
                 TrendsSection(trends: trends)
@@ -429,7 +429,10 @@ private struct RingRow: View {
 
 private struct BodyCard: View {
     let measurements: Components.Schemas.DayBody
+    let bodyMap: BodyMap?
     let edit: () -> Void
+    @State private var selected: String?
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 10) {
@@ -455,6 +458,14 @@ private struct BodyCard: View {
                                 }
                             }
                         }
+                    } else if measurements.weightKg != nil, measurements.heightCm == nil {
+                        // A weight from Apple Health with no height: no BMI to show,
+                        // so say what would make one rather than guess.
+                        Button(action: edit) {
+                            Chip { Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text("Add height") }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("body-add-height")
                     }
                     if let bp = measurements.bloodPressure {
                         Chip { Text("\(bp.systolic)/\(bp.diastolic)") + Text(" mmHg").font(.caption).foregroundStyle(.secondary) }
@@ -464,8 +475,21 @@ private struct BodyCard: View {
                     }
                 }
                 Spacer()
-                Body3DView(soreness: Dictionary(measurements.soreness.map { ($0.region, $0.severity) }, uniquingKeysWith: max)) { _ in edit() }
-                    .frame(width: 150, height: 220)
+                VStack(spacing: 4) {
+                    BodyMapView(heat: bodyMap?.heat ?? [:]) { selected = $0 }
+                        .frame(width: 150, height: 220)
+                        .popover(item: Binding(get: { selected.map(MuscleRoute.init(id:)) }, set: { selected = $0?.id })) { route in
+                            MuscleCallout(id: route.id, lastTrainedOn: bodyMap?.muscle(route.id)?.lastTrainedOn) {
+                                selected = nil
+                                router.open(.muscle(route.id))
+                            }
+                            .presentationCompactAdaptation(.popover)
+                        }
+                        .accessibilityIdentifier("body-map")
+                    if let caption {
+                        Text(caption).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
             }
             if !measurements.soreness.isEmpty {
                 FlowTags(tags: measurements.soreness.map { "\(DayMath.regionName($0.region)) · \(DayMath.severityName($0.severity))" })
@@ -476,6 +500,38 @@ private struct BodyCard: View {
         }
         .padding(16)
         .background(NorthColor.surface, in: .rect(cornerRadius: NorthRadius.large))
+    }
+
+    /// Why the figure is cold, when it is: never trained, or not lately.
+    private var caption: String? {
+        guard let bodyMap else { return nil }
+        if bodyMap.lastSessionOn == nil { return String(localized: "No session yet") }
+        if bodyMap.heat.values.allSatisfy({ $0 <= 0 }) { return String(localized: "Nothing in the last \(bodyMap.days) days") }
+        return nil
+    }
+}
+
+private struct MuscleRoute: Identifiable {
+    let id: String
+}
+
+/// What a tap on the figure shows: the region, when it was last trained, and
+/// the way to its exercises.
+private struct MuscleCallout: View {
+    let id: String
+    let lastTrainedOn: String?
+    let openInTraining: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(BodyMapText.name(id)).font(.headline)
+            Text(BodyMapText.lastTrained(lastTrainedOn)).font(.subheadline).foregroundStyle(.secondary)
+            Button("Open in Training", action: openInTraining)
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("body-open-training")
+        }
+        .padding(16)
+        .frame(minWidth: 220, alignment: .leading)
     }
 }
 

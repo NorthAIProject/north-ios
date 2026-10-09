@@ -58,6 +58,14 @@ public enum NorthColor {
         public static let now = named("DayNow")
     }
 
+    /// The body figure: untrained muscle, skin with no muscle under it, and
+    /// the light end of the heat ramp that runs up to `ember`.
+    public enum Body {
+        public static let idle = named("BodyIdle")
+        public static let base = named("BodyBase")
+        public static let heatLow = named("HeatLow")
+    }
+
     private static func named(_ name: String) -> Color {
         Color(name, bundle: .module)
     }

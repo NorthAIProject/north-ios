@@ -33,6 +33,7 @@ public typealias SorenessToday = Components.Schemas.SorenessToday
 public typealias TrackerList = Components.Schemas.TrackerList
 public typealias DayTrends = Components.Schemas.DayTrends
 public typealias DayTrend = Components.Schemas.DayTrend
+public typealias BodyMap = Components.Schemas.BodyMap
 
 public extension OpenAPIObjectContainer {
     /// Builds a container from a JSON-shaped dictionary, such as a WebAuthn

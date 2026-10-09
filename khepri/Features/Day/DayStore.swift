@@ -6,6 +6,8 @@ protocol DayServicing: Sendable {
     /// One local date; nil is today on the server's clock.
     func day(_ date: String?) async throws -> DayResponse
     func trends() async throws -> DayTrends
+    /// What the last `days` days of training heated, for the body figure.
+    func bodyMap(days: Int) async throws -> BodyMap
 }
 
 struct DayService: DayServicing {
@@ -18,6 +20,10 @@ struct DayService: DayServicing {
     func trends() async throws -> DayTrends {
         try await NorthAPI.call { try await api.getDayTrends().ok.body.json }
     }
+
+    func bodyMap(days: Int) async throws -> BodyMap {
+        try await NorthAPI.call { try await api.getBodyMap(query: .init(days: days)).ok.body.json }
+    }
 }
 
 /// My Day's state: which date is on screen and what the server said about it.
@@ -27,6 +33,9 @@ final class DayStore {
     /// The Overview's trend cards. Loaded beside the day; a failure leaves
     /// the section out rather than failing the screen.
     private(set) var trends: DayTrends?
+    /// The body figure's heat. Loaded beside the day like the trends; a
+    /// failure keeps the last one, or leaves the figure untrained.
+    private(set) var bodyMap: BodyMap?
     private(set) var error: String?
     /// nil means today, so a store left open past midnight follows the day.
     private(set) var date: Date?
@@ -59,6 +68,7 @@ final class DayStore {
 
     func load() async {
         async let loadedTrends = try? service.trends()
+        async let loadedBodyMap = try? service.bodyMap(days: 7)
         do {
             day = try await service.day(date.map(CalendarDay.string(from:)))
             error = nil
@@ -67,6 +77,7 @@ final class DayStore {
             if day == nil { self.error = error.localizedDescription }
         }
         if let fresh = await loadedTrends { trends = fresh }
+        if let fresh = await loadedBodyMap { bodyMap = fresh }
     }
 
     /// Moves a day back or forward. Stepping onto today goes back to "today"

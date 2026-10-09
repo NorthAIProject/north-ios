@@ -76,6 +76,9 @@ struct SettingsScreen: View {
                         Label("Show Me Around", systemImage: "hand.point.up.left")
                     }
                     ReviewSettingsRows()
+                    NavigationLink { Acknowledgements() } label: {
+                        Label("Acknowledgements", systemImage: "text.book.closed")
+                    }
                 }
 
                 Section {

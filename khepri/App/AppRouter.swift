@@ -39,6 +39,9 @@ enum AppDestination: Equatable {
     /// One exercise, shown as a sheet over whatever is open: Spotlight, or
     /// "Show push-up in Khepri".
     case exercise(String)
+    /// The exercises that train one muscle region, as a sheet over whatever
+    /// is open: where a tap on the body figure leads.
+    case muscle(String)
     /// One goal, opened over the Goals list.
     case goal(String)
     /// The weekly review, as a sheet over whatever is open: where the Sunday
@@ -89,6 +92,9 @@ final class AppRouter {
     /// Set when a link asks for one exercise; the tab view presents it and
     /// clears it on dismiss.
     var openExercise: String?
+    /// Set when a link asks for one muscle's exercises; the tab view presents
+    /// the library filtered to it and clears it on dismiss.
+    var openMuscle: String?
     /// Set with `openSection` for a single goal; the Goals screen opens it
     /// and clears it.
     var openGoal: String?
@@ -142,6 +148,8 @@ final class AppRouter {
             openSection = "friends"
         case .exercise(let slug):
             openExercise = slug
+        case .muscle(let id):
+            openMuscle = id
         case .goal(let id):
             selectedTab = .more
             openGoal = id

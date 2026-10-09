@@ -386,9 +386,16 @@ struct ContractTests {
         #expect(board.entries.last?.me == true && board.entries.last?.level == nil && board.entries.last?.handle == "")
     }
 
+    @Test func bodyMap() throws {
+        let map = try decode(Schemas.BodyMap.self, "body_map")
+        #expect(map.days == 7 && map.lastSessionOn != nil)
+        #expect(map.muscles.count == 15 && map.muscles.allSatisfy { (0...1).contains($0.intensity) })
+        #expect(map.muscles.first { $0.id == "quads" }?.lastTrainedOn != nil)
+    }
+
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

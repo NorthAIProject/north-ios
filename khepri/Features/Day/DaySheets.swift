@@ -145,7 +145,7 @@ struct QuickAddSheet: View {
     }
 }
 
-/// Soreness, target weight and blood pressure.
+/// Weight and height, soreness, target weight and blood pressure.
 struct BodySheet: View {
     let day: DayResponse
     let store: DayStore
@@ -158,6 +158,22 @@ struct BodySheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    // The same screen and write as Settings → Body and goal, so
+                    // there is one way to record measurements. The day reloads
+                    // on the way back, which is what updates the chips.
+                    NavigationLink {
+                        BodyAndGoalScreen()
+                            .onDisappear { Task { await store.load() } }
+                    } label: {
+                        LabeledContent("Weight and height") {
+                            if let kg = day.body.weightKg {
+                                Text("\(kg.formatted(.number.precision(.fractionLength(1)))) kg")
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("body-measurements")
+                }
                 Section("Where is it sore?") {
                     Picker("Region", selection: $region) {
                         ForEach(DayMath.regions, id: \.key) { Text(String(localized: $0.name)).tag($0.key) }

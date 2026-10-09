@@ -46,6 +46,10 @@ actor FakeDayService: DayServicing {
     func trends() async throws -> DayTrends {
         DayTrends(series: [], fasts: [])
     }
+
+    func bodyMap(days: Int) async throws -> BodyMap {
+        BodyMap(days: days, lastSessionOn: "2026-09-25", muscles: [.init(id: "quads", intensity: 0.6, lastTrainedOn: "2026-09-25")])
+    }
 }
 
 @MainActor
