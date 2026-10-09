@@ -18,7 +18,11 @@ protocol CoachServicing: Sendable {
     func start(reflection: Bool) async throws -> ConversationSummary
     func conversation(_ id: String) async throws -> ConversationDetail
     func delete(_ id: String) async throws
-    func reply(in id: String, text: String) -> AsyncThrowingStream<CoachEvent, Error>
+    /// Uploads a photo or document for the conversation's next reply to carry.
+    func uploadAttachment(in conversationID: String, file: ImportFile) async throws -> ChatAttachment
+    /// Sends a message, with an uploaded attachment's id when there is one;
+    /// the text may then be empty.
+    func reply(in id: String, text: String, mediaID: String?) -> AsyncThrowingStream<CoachEvent, Error>
     func resume(_ id: String) -> AsyncThrowingStream<CoachEvent, Error>
     func decide(in id: String, messageID: String, approve: Bool) async throws
     func rate(in id: String, messageID: String, helpful: Bool?) async throws -> ChatMessage
@@ -28,7 +32,8 @@ protocol CoachServicing: Sendable {
 struct CoachService: CoachServicing {
     var api: Client = API.shared
     /// For deciding on an approval: the approved write runs before the server
-    /// answers, and a new training plan takes longer than 60 s.
+    /// answers, and a new training plan takes longer than 60 s. Also for
+    /// attachments, which are up to 8 MB on a phone's upload.
     var generation: Client = API.generation
     var exercises = ExerciseCache.shared
 
@@ -50,9 +55,22 @@ struct CoachService: CoachServicing {
         _ = try await NorthAPI.call { try await api.deleteConversation(path: .init(id: id)).noContent }
     }
 
-    func reply(in id: String, text: String) -> AsyncThrowingStream<CoachEvent, Error> {
+    func uploadAttachment(in conversationID: String, file: ImportFile) async throws -> ChatAttachment {
+        let part = MultipartRawPart.file(filename: file.filename, contentType: file.mimeType, data: file.data)
+        return try await NorthAPI.call {
+            try await generation.uploadChatAttachment(
+                path: .init(id: conversationID),
+                body: .multipartForm([.undocumented(part)])
+            ).created.body.json
+        }
+    }
+
+    func reply(in id: String, text: String, mediaID: String?) -> AsyncThrowingStream<CoachEvent, Error> {
         events {
-            try await api.replyInConversation(path: .init(id: id), body: .json(.init(text: text))).ok.body.textEventStream
+            try await api.replyInConversation(
+                path: .init(id: id),
+                body: .json(.init(text: text, mediaId: mediaID))
+            ).ok.body.textEventStream
         }
     }
 

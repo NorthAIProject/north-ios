@@ -9,7 +9,12 @@ extension MultipartRawPart {
     /// `text/plain`, whatever it holds. Send this as the operation's
     /// `.undocumented` case instead: it still counts as the required part,
     /// since the client checks parts by name.
-    public static func file(field: String = "file", filename: String, contentType: String, data: Data) -> MultipartRawPart {
+    public static func file(
+        field: String = "file",
+        filename: String,
+        contentType: String,
+        data: Data
+    ) -> MultipartRawPart {
         MultipartRawPart(
             name: field,
             filename: filename,
