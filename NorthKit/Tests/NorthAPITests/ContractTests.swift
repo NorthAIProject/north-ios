@@ -198,6 +198,14 @@ struct ContractTests {
         let metric = try decode(Schemas.InsightMetric.self, "insights-metric")
         #expect(metric.trend.word == "up" && metric.comparison.priorPct == 96)
         #expect(metric.range.options.map(\.key) == ["week", "month"])
+        #expect(metric.health == nil && metric.usual == nil)
+        let healthMetric = try decode(Schemas.InsightMetric.self, "insights-metric-health")
+        #expect(healthMetric.health == true && healthMetric.usual?.state == "above")
+        #expect(healthMetric.usual?.low == "7900" && healthMetric.usual?.days == 28)
+        let health = try decode(Schemas.InsightsHealth.self, "insights-health")
+        #expect(health.metrics.map(\.key) == ["steps", "vo2max"])
+        #expect(health.metrics.first?.recent == [8800, 11200] && health.metrics.first?.usual?.z == 2)
+        #expect(health.metrics.last?.usual == nil && health.metrics.last?.latest == "44.2")
     }
 
     @Test func goalsAndCheckIns() throws {
@@ -405,7 +413,7 @@ struct ContractTests {
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "week", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric",
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
