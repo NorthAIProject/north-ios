@@ -34,6 +34,7 @@ struct JournalScreen: View {
             if let journal {
                 List {
                     if let error { ErrorRow(error) }
+                    // swiftlint:disable:next empty_count - `count` is the number of entries the trend covers, not a collection
                     if journal.trend.count > 0 {
                         Section {
                             HStack(spacing: 32) {

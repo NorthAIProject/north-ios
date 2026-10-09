@@ -265,6 +265,7 @@ struct CardioStatsPage: View {
                         }
                     }
                 }
+                // swiftlint:disable:next empty_count - `count` is the number of runs the server counted, not a collection
                 if model.runs.count > 0 {
                     Section {
                         LabeledContent("Runs", value: "\(model.runs.count)")

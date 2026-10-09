@@ -1,3 +1,9 @@
+# Runs as the khepri target's "SwiftLint" build phase, from Xcode and from
+# xcodebuild alike. That target sets ENABLE_USER_SCRIPT_SANDBOXING = NO: the
+# phase reads the whole repository, and the script sandbox only lets a phase
+# read the files it declares as inputs, so SwiftLint would find nothing to lint
+# and fail the build. Errors fail the build; keep main at zero.
+
 included:
   - khepri
   - khepriTests
@@ -17,11 +23,34 @@ line_length:
   ignores_urls: true
   ignores_comments: true
 
+# Single-letter names are the house style for short closures and loops
+# (`c` for a card, `s` for a set). Flag them, don't fail the build on them.
 identifier_name:
+  min_length:
+    warning: 2
+    error: 1
   excluded:
     - id
     - x
     - y
+
+large_tuple:
+  warning: 3
+  error: 5
+
+# SwiftUI bodies run long; past 200 lines is when one has to be split.
+function_body_length:
+  warning: 100
+  error: 200
+
+# A switch that maps one enum onto another is long but not complex.
+cyclomatic_complexity:
+  ignores_case_statements: true
+
+# Xcode's template name for the launch test.
+type_name:
+  excluded:
+    - khepriUITestsLaunchTests
 
 opt_in_rules:
   - empty_count
