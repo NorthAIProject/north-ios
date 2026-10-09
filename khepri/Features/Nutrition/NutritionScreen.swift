@@ -125,7 +125,7 @@ private struct LogFoodSheet: View {
 
     @State private var query = ""
     @State private var results: [Ingredient] = []
-    @State private var meals: [(plan: String, id: String, name: String, kcal: Double)] = []
+    @State private var meals: [LoggableMeal] = []
     @State private var picked: Ingredient?
     @State private var grams = 100.0
     @State private var error: String?
@@ -156,9 +156,9 @@ private struct LogFoodSheet: View {
                 }
                 if !meals.isEmpty, query.isEmpty {
                     Section("From Your Plans") {
-                        ForEach(meals, id: \.id) { meal in
+                        ForEach(meals) { meal in
                             Button { log { try await service.logMeal(meal.id) } } label: {
-                                LabeledContent("\(meal.plan) · \(meal.name)", value: "\(Int(meal.kcal)) kcal")
+                                LabeledContent(meal.title, value: "\(Int(meal.calories)) kcal")
                             }
                         }
                     }
@@ -189,12 +189,9 @@ private struct LogFoodSheet: View {
 
     private func loadMeals() async {
         do {
-            var out: [(plan: String, id: String, name: String, kcal: Double)] = []
+            var out: [LoggableMeal] = []
             for summary in try await service.plans() {
-                let plan = try await service.plan(summary.id)
-                for day in plan.value2.days {
-                    out += day.meals.map { ("\(plan.value1.name) · \(day.name)", $0.id, $0.name, $0.totalMacros.calories) }
-                }
+                out += try await service.plan(summary.id).loggableMeals
             }
             meals = out
         } catch {
