@@ -22,6 +22,12 @@ struct PortionSheet: View {
                 if let error = error ?? store.error { ErrorRow(error) }
                 if let dayID = store.day(holding: mealID)?.id, let left = store.remaining(on: dayID) {
                     Section("This day has left") { RemainingRow(left: left) }
+                } else if store.isAlternative(mealID) {
+                    Section {
+                        Text("This option is eaten instead of the meal's first, so it doesn't count toward the day.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 if let picked {
                     Section(picked.name) {
