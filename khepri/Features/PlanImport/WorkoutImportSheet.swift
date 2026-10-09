@@ -16,8 +16,6 @@ struct WorkoutImportSheet: View {
     @State private var saving = false
     @State private var error: String?
 
-    static let weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
     var body: some View {
         NavigationStack {
             Group {
@@ -46,18 +44,13 @@ struct WorkoutImportSheet: View {
                 error = message
             }
             .overlay {
-                if reading || saving {
-                    VStack(spacing: 12) {
-                        ProgressView()
-                        Text(reading ? "Reading your plan…" : "Saving…").font(.headline)
-                        if reading {
-                            Text("A document or photo can take up to a minute.")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(24)
-                    .background(.regularMaterial, in: .rect(cornerRadius: 10))
+                if reading {
+                    ImportProgressOverlay(
+                        title: "Reading your plan…",
+                        detail: "A document or photo can take up to a minute."
+                    )
+                } else if saving {
+                    ImportProgressOverlay(title: "Saving…")
                 }
             }
             .interactiveDismissDisabled(reading || saving || draft != nil)
@@ -100,118 +93,6 @@ struct WorkoutImportSheet: View {
             dismiss()
         } catch {
             self.error = error.importMessage
-        }
-    }
-}
-
-/// The draft as editable rows.
-struct WorkoutImportReview: View {
-    @Binding var draft: EditableWorkoutDraft
-    let error: String?
-
-    var body: some View {
-        Form {
-            Section {
-                TextField("Plan name", text: $draft.name)
-            } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("""
-                        This is what was read from your file. Blank fields weren't in it. \
-                        Give each day a day of the week, fix anything wrong, then save.
-                        """)
-                    if draft.hasMissingSets {
-                        Text("Exercises without a set count won't appear in a live workout until you add one.")
-                    }
-                }
-            }
-
-            if let error { ErrorRow(error) }
-
-            ForEach($draft.days) { $day in
-                ImportDaySection(day: $day) {
-                    draft.days.removeAll { $0.id == day.id }
-                }
-            }
-
-            if !draft.unparsed.isEmpty {
-                Section {
-                    ForEach(draft.unparsed, id: \.self) { Text("“\($0)”").font(.footnote) }
-                } header: {
-                    Text("Not imported")
-                } footer: {
-                    Text("These lines looked like part of the plan but couldn't be read as exercises.")
-                }
-            }
-        }
-    }
-}
-
-private struct ImportDaySection: View {
-    @Binding var day: EditableWorkoutDraft.Day
-    let onRemove: () -> Void
-
-    var body: some View {
-        Section {
-            Picker("Day of the week", selection: $day.weekday) {
-                Text("Choose…").tag("")
-                ForEach(WorkoutImportSheet.weekdays, id: \.self) { Text($0).tag($0) }
-            }
-            .foregroundStyle(day.weekday.isEmpty ? .red : .primary)
-
-            ForEach($day.exercises) { $item in
-                ImportExerciseRow(exercise: $item.exercise)
-            }
-            .onDelete { day.exercises.remove(atOffsets: $0) }
-        } header: {
-            HStack {
-                Text(day.label.isEmpty ? "Training day" : day.label)
-                Spacer()
-                Button("Remove Day", role: .destructive, action: onRemove).font(.caption)
-            }
-        }
-    }
-}
-
-private struct ImportExerciseRow: View {
-    @Binding var exercise: WorkoutImportExercise
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            TextField("Exercise", text: $exercise.name).font(.headline)
-            HStack {
-                LabeledField(label: "Sets", text: number($exercise.sets), keyboard: .numberPad)
-                LabeledField(label: "Reps", text: $exercise.reps)
-                LabeledField(label: "Load", text: $exercise.load)
-                LabeledField(label: "Rest s", text: number($exercise.restSeconds), keyboard: .numberPad)
-            }
-            TextField("Notes", text: $exercise.notes, axis: .vertical)
-                .font(.subheadline)
-                .lineLimit(1...3)
-            ForEach(exercise.flags ?? [], id: \.self) { flag in
-                Label(flag, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    /// An optional count as text: empty is "not stated", never zero.
-    private func number(_ value: Binding<Int?>) -> Binding<String> {
-        Binding(
-            get: { value.wrappedValue.map(String.init) ?? "" },
-            set: { value.wrappedValue = Int($0.filter(\.isNumber)) }
-        )
-    }
-}
-
-private struct LabeledField: View {
-    let label: String
-    @Binding var text: String
-    var keyboard: UIKeyboardType = .default
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(.caption2).foregroundStyle(.secondary)
-            TextField("—", text: $text).keyboardType(keyboard)
         }
     }
 }
