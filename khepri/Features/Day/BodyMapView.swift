@@ -172,12 +172,16 @@ enum BodyFigure {
             return mix(heatLow, ember, CGFloat(0.25 + 0.75 * min(heat, 1)))
         }
 
-        private func mix(_ a: UIColor, _ b: UIColor, _ t: CGFloat) -> UIColor {
-            var (ar, ag, ab, aa): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
-            var (br, bg, bb, ba): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
-            a.getRed(&ar, green: &ag, blue: &ab, alpha: &aa)
-            b.getRed(&br, green: &bg, blue: &bb, alpha: &ba)
-            return UIColor(red: ar + (br - ar) * t, green: ag + (bg - ag) * t, blue: ab + (bb - ab) * t, alpha: 1)
+        private func mix(_ from: UIColor, _ to: UIColor, _ fraction: CGFloat) -> UIColor {
+            let start = rgb(from)
+            let mixed = start + (rgb(to) - start) * Double(fraction)
+            return UIColor(red: mixed.x, green: mixed.y, blue: mixed.z, alpha: 1)
+        }
+
+        private func rgb(_ color: UIColor) -> SIMD3<Double> {
+            var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            return SIMD3(Double(red), Double(green), Double(blue))
         }
     }
 

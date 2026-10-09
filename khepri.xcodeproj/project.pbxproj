@@ -727,6 +727,7 @@
 				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
@@ -786,6 +787,7 @@
 				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
@@ -940,6 +942,7 @@
 				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
