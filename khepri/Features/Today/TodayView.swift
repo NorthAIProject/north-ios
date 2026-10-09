@@ -99,7 +99,18 @@ private struct StatGrid: View {
             GridRow {
                 StatTile(title: "Streak", systemImage: "flame.fill", tint: NorthColor.ember,
                          value: snapshot.streak.formatted(), unit: snapshot.streak == 1 ? "day" : "days")
-                if snapshot.checkedInToday {
+                if let today = snapshot.todayCheckIn {
+                    // Tapping shows the check-in, where it can be edited.
+                    Button(action: checkIn) {
+                        StatTile(title: "Check-in", systemImage: "checkmark.circle.fill", tint: .green,
+                                 value: "\(today.mood) · \(today.energy)",
+                                 caption: String(localized: "Mood · Energy · \(Self.time(today))"),
+                                 showsChevron: true)
+                            .accessibilityLabel(Self.accessibilityLabel(today))
+                    }
+                    .buttonStyle(.plain)
+                } else if snapshot.checkedInToday {
+                    // An older server says only that today is done.
                     StatTile(title: "Check-in", systemImage: "checkmark.circle.fill", tint: .green, value: "Done")
                 } else {
                     Button(action: checkIn) {
@@ -124,6 +135,14 @@ private struct StatGrid: View {
     private var sleepHours: String {
         (Double(snapshot.sleep.durationMinutes) / 60).formatted(.number.precision(.fractionLength(1)))
     }
+
+    private static func time(_ checkIn: TodayCheckIn) -> String {
+        checkIn.at.formatted(date: .omitted, time: .shortened)
+    }
+
+    private static func accessibilityLabel(_ checkIn: TodayCheckIn) -> String {
+        String(localized: "Check-in at \(time(checkIn)): mood \(checkIn.mood), energy \(checkIn.energy)")
+    }
 }
 
 private struct StatTile: View {
@@ -132,6 +151,8 @@ private struct StatTile: View {
     let tint: Color
     let value: String
     var unit: String?
+    /// A small line under the value, saying what the value means.
+    var caption: String?
     var progress: Double?
     var showsChevron = false
 
@@ -152,6 +173,13 @@ private struct StatTile: View {
             NorthBigValue(value, unit: unit, style: .title)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            if let caption {
+                Text(caption)
+                    .font(.north(.caption))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
             if let progress {
                 ProgressView(value: min(max(progress, 0), 1))
                     .tint(tint)

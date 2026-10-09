@@ -27,6 +27,9 @@ struct KhepriApp: App {
                 .onReceive(NotificationCenter.default.publisher(for: .authSessionDidInvalidate)) { _ in
                     app.sessionEnded()
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .dayDataDidChange)) { _ in
+                    router.dataChanged()
+                }
                 .onOpenURL { url in
                     // Google's sign-in callback, else one of our own links.
                     if !GIDSignIn.sharedInstance.handle(url) {

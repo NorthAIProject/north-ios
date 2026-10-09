@@ -21,6 +21,7 @@ struct ConversationStoreTests {
         #expect(reply.id == "stored-1")
         #expect(reply.isStored && !reply.isStreaming)
         #expect(coach.sent == ["How do I do a push-up?"])
+        #expect(store.dataChanges == 0, "a plain reply changes nothing else")
     }
 
     @Test func aTurnThatStopsToAskLeavesNoEmptyBubble() async throws {
@@ -40,6 +41,7 @@ struct ConversationStoreTests {
         #expect(coach.decisions == [true])
         #expect(store.pendingApproval == nil)
         #expect(store.messages.last?.text == "Logged.")
+        #expect(store.dataChanges == 2, "on approval, and again once the tools' reply ends")
     }
 
     @Test func aSecondTapWhileAllowingSendsNothing() async throws {

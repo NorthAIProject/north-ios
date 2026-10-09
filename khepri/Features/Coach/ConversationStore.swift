@@ -58,6 +58,11 @@ final class ConversationStore {
     /// messages so a retry does not leave it behind.
     private(set) var replyError: String?
     private(set) var ended = false
+    /// Counts the moments an approved action may have changed the person's
+    /// data: when the approval is accepted and when the reply after it ends,
+    /// since the tools may still be writing until then. The view passes each
+    /// one on to `AppRouter.dataChanged()`.
+    private(set) var dataChanges = 0
 
     private let coach: CoachServicing
     private var replyTask: Task<Void, Never>?
@@ -83,7 +88,7 @@ final class ConversationStore {
             phase = .ready
             // Answered on another device, reply still owed: collect it.
             if detail.awaitingResume {
-                stream(coach.resume(conversationID))
+                stream(coach.resume(conversationID), changesData: true)
             }
         } catch {
             if messages.isEmpty { phase = .failed(error.localizedDescription) }
@@ -110,7 +115,8 @@ final class ConversationStore {
         do {
             try await coach.decide(in: conversationID, messageID: approval.messageId, approve: approve)
             pendingApproval = nil
-            stream(coach.resume(conversationID))
+            if approve { dataChanges += 1 }
+            stream(coach.resume(conversationID), changesData: approve)
         } catch {
             replyError = error.localizedDescription
         }
@@ -133,7 +139,9 @@ final class ConversationStore {
         replyTask?.cancel()
     }
 
-    private func stream(_ events: AsyncThrowingStream<CoachEvent, Error>) {
+    /// Streams a reply in. `changesData` marks a reply that runs approved
+    /// tools, which counts as a change once it ends.
+    private func stream(_ events: AsyncThrowingStream<CoachEvent, Error>, changesData: Bool = false) {
         replyError = nil
         phase = .replying
         let reply = DisplayMessage(role: .coach, text: "", isStreaming: true)
@@ -150,6 +158,7 @@ final class ConversationStore {
                 self?.replyError = error.localizedDescription
             }
             self?.finishReply()
+            if changesData { self?.dataChanges += 1 }
         }
     }
 

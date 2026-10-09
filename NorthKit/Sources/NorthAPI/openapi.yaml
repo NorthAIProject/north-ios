@@ -339,7 +339,11 @@ paths:
     post:
       operationId: decideToolCalls
       summary: Allow or refuse the writes the coach asked to make
-      description: The tools run inside this request. Then call resumeConversation for the reply.
+      description: >-
+        The tools run inside this request, which can take minutes for a new
+        training plan. They finish and are recorded even if the caller hangs up.
+        A second call while the first is still running answers 409. Then call
+        resumeConversation for the reply.
       requestBody:
         required: true
         content:
@@ -4969,6 +4973,40 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '500':
           $ref: '#/components/responses/InternalError'
+  /lifts/import/hevy:
+    post:
+      operationId: importHevyWorkouts
+      summary: Import workout history from a Hevy export
+      description: >-
+        Each workout in the CSV becomes a finished strength session with its
+        sets, warm-ups, drop sets and effort. Importing the same file again
+        adds nothing; a workout Apple Health already recorded keeps that
+        session and gains the sets. Exercise names are matched to the catalog;
+        names with no match are kept as typed and listed in unmatched. A file
+        that is not a Hevy export is a 422 with the reason in fields.file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV from Hevy's Export Workouts. Up to 10 MB.
+      responses:
+        '200':
+          description: What the import did
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiftImport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /lifts/sessions/{sessionID}/recap:
     parameters:
       - name: sessionID
@@ -5193,6 +5231,155 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupplementsToday'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /medications:
+    get:
+      operationId: getMedications
+      summary: Active medications and today's doses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      operationId: addMedication
+      summary: Add a medication as the person describes it; answers with the medications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationInput'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /medications/{medicationID}:
+    parameters:
+      - name: medicationID
+        in: path
+        required: true
+        description: The medication to change.
+        schema:
+          type: string
+    put:
+      operationId: updateMedication
+      summary: Change an active medication; only the fields present change
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /medications/{medicationID}/stop:
+    parameters:
+      - name: medicationID
+        in: path
+        required: true
+        description: The medication to stop.
+        schema:
+          type: string
+    post:
+      operationId: stopMedication
+      summary: Stop a medication; its doses stay as history
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /medications/{medicationID}/doses:
+    parameters:
+      - name: medicationID
+        in: path
+        required: true
+        description: The medication the dose is of.
+        schema:
+          type: string
+    post:
+      operationId: logMedicationDose
+      summary: Log a dose taken or skipped; without a slot, the nearest unanswered time today
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationDoseInput'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /medications/doses/{logID}:
+    parameters:
+      - name: logID
+        in: path
+        required: true
+        description: The dose to undo.
+        schema:
+          type: string
+    delete:
+      operationId: undoMedicationDose
+      summary: Undo a logged dose
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medications'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6629,6 +6816,26 @@ components:
           minimum: 0
           maximum: 10
           description: "Reps in reserve: 0 is to failure."
+    LiftImport:
+      type: object
+      required: [workouts, duplicates, sets, skipped, unmatched]
+      properties:
+        workouts:
+          type: integer
+          description: Workouts whose sets were imported.
+        duplicates:
+          type: integer
+          description: Workouts already imported by an earlier upload, left alone.
+        sets:
+          type: integer
+        skipped:
+          type: integer
+          description: Rows that were not lifting sets (cardio, timed) or held impossible numbers.
+        unmatched:
+          type: array
+          items:
+            type: string
+          description: Exercise names with no catalog entry, kept as typed.
     LiftLastExercise:
       type: object
       required: [key, name, performedOn, sets]
@@ -6955,6 +7162,148 @@ components:
           type: array
           items:
             type: string
+    MedicationInput:
+      type: object
+      additionalProperties: false
+      description: >-
+        On POST, name is required and remind defaults to true. On PUT, only the
+        fields present change.
+      properties:
+        name:
+          type: string
+        dose:
+          type: string
+          description: Free text as the person says it, such as "500 mg" or "1 puff".
+        times:
+          type: array
+          description: HH:MM in the person's zone; empty means as needed.
+          items:
+            type: string
+        daysOfWeek:
+          type: array
+          description: 0 (Sunday) to 6; empty means every day.
+          items:
+            type: integer
+        remind:
+          type: boolean
+        notes:
+          type: string
+    MedicationDoseInput:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          description: taken (the default) or skipped.
+        slot:
+          type: string
+          description: The scheduled HH:MM this answers; omit to use the nearest unanswered time today.
+    Medication:
+      type: object
+      required: [id, name, dose, times, daysOfWeek, remind, notes, asNeeded]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        dose:
+          type: string
+        times:
+          type: array
+          items:
+            type: string
+        daysOfWeek:
+          type: array
+          items:
+            type: integer
+        remind:
+          type: boolean
+        notes:
+          type: string
+        asNeeded:
+          type: boolean
+    MedicationSlot:
+      type: object
+      required: [medicationId, name, dose, time, status]
+      properties:
+        medicationId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        dose:
+          type: string
+        time:
+          type: string
+        status:
+          type: string
+          description: >-
+            taken, skipped, due or upcoming today. A plain string rather than an
+            enum: a client must accept a value it does not know.
+        logId:
+          type: string
+          format: uuid
+    MedicationDose:
+      type: object
+      required: [id, medicationId, name, status, loggedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        medicationId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slot:
+          type: string
+        status:
+          type: string
+          description: taken or skipped; a plain string, not an enum.
+        loggedAt:
+          type: string
+          format: date-time
+    MedicationAsNeeded:
+      type: object
+      required: [medicationId, name, dose, doses]
+      properties:
+        medicationId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        dose:
+          type: string
+        doses:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationDose'
+    MedicationsToday:
+      type: object
+      required: [date, slots, asNeeded]
+      properties:
+        date:
+          type: string
+          description: The person's local date, YYYY-MM-DD.
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationSlot'
+        asNeeded:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationAsNeeded'
+    Medications:
+      type: object
+      required: [medications, today]
+      properties:
+        medications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Medication'
+        today:
+          $ref: '#/components/schemas/MedicationsToday'
     ScreenTimeInput:
       type: object
       required: [minutes]
@@ -8047,6 +8396,25 @@ components:
             $ref: '#/components/schemas/Nudge'
         briefing:
           type: string
+        todayCheckIn:
+          $ref: '#/components/schemas/TodayCheckIn'
+    TodayCheckIn:
+      type: object
+      required: [mood, energy, source, at]
+      properties:
+        mood:
+          type: integer
+        energy:
+          type: integer
+        stress:
+          type: integer
+        sleepQuality:
+          type: integer
+        source:
+          type: string
+        at:
+          type: string
+          format: date-time
     TodayGoal:
       type: object
       required: [id, title, category, status, milestoneTotal, milestoneDone]
@@ -9249,7 +9617,7 @@ components:
           type: string
     CheckIn:
       type: object
-      required: [id, localDate, mood, energy, wins, challenges, notes, updatedAt]
+      required: [id, localDate, mood, energy, wins, challenges, notes, updatedAt, createdAt, source, tags]
       properties:
         id:
           type: string
@@ -9279,6 +9647,24 @@ components:
         updatedAt:
           type: string
           format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          description: Where the check-in was filed - web, ios, siri, coach, mcp, capture or unknown. Open-ended; clients show values they do not know generically.
+        stress:
+          type: integer
+          minimum: 1
+          maximum: 5
+        sleepQuality:
+          type: integer
+          minimum: 1
+          maximum: 5
+        tags:
+          type: array
+          items:
+            type: string
     CheckInList:
       type: object
       required: [recent, streak]
@@ -9308,6 +9694,17 @@ components:
         relatedGoalId:
           type: string
           format: uuid
+        stress:
+          type: integer
+        sleepQuality:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+          description: Where the check-in was filed, e.g. ios or siri.
     ReportSummary:
       type: object
       required: [id, kind, title, periodStart, periodEnd, status, archived]

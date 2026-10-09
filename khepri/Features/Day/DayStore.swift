@@ -53,11 +53,17 @@ final class DayStore {
         self.calendar = calendar
     }
 
+    /// Counts writes that succeeded. The day reloads itself; the screen
+    /// owning the store watches this to refresh what else shows the write,
+    /// such as Today's water tile.
+    private(set) var writes = 0
+
     /// Runs one write and reloads the day, so every card reflects it.
     func perform(_ action: @Sendable (DayActing) async throws -> Void) async {
         do {
             try await action(actions)
             actionError = nil
+            writes += 1
         } catch {
             actionError = error.localizedDescription
         }
