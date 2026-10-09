@@ -1,6 +1,9 @@
+Resubmission after the 5 October rejection (guideline 5.1.1(iv)): the microphone, Apple Health and notification explainers now have a single Continue button that always leads to the iOS permission prompt; none can be skipped or postponed, and none is labelled "Allow".
+
 Sign in with the demo account above (email and password). It is seeded with a training plan, goals, check-ins and a coach conversation, so every tab has content.
 
 Where to look:
+- Today: the body figure shows the muscles trained in the last 7 days. Tap a highlighted muscle to see when it was last trained and open its exercises.
 - Coach tab: ask anything, e.g. "How do I do a push-up?" to see the inline exercise card.
 - Training tab: the plan, a day's exercises with animations, and "Start Workout" (Live Activity).
 - Progress tab: charts from check-ins and, if connected, Apple Health.

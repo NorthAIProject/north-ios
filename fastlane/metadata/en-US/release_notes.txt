@@ -1,1 +1,9 @@
-First release.
+Khepri's first release on the App Store.
+
+New in this build:
+- Your body on Today: the muscles you trained this week light up from your logged sets. Tap one to see when you last trained it and jump to its exercises.
+- Muscles This Week in Training, with a front and back view.
+- Workouts survive the app being closed, the rest timer notifies you when it ends, and you can log warm-ups and reps in reserve.
+- Training weeks that fit your schedule: move sessions between days, rotate plans, or change one week only.
+- Meal plans built around your macro targets, day by day.
+- Weight and height can be updated from the Body sheet on Today.
