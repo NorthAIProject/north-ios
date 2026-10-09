@@ -39,6 +39,7 @@ private struct FoodLogView: View {
     @State private var log: FoodLog?
     @State private var error: String?
     @State private var adding = false
+    @State private var importing = false
 
     var body: some View {
         List {
@@ -81,6 +82,8 @@ private struct FoodLogView: View {
                         }
                     }
                     Button("Log Food", systemImage: "plus") { adding = true }
+                    Button("Import Plan", systemImage: "doc.badge.plus") { importing = true }
+                        .accessibilityHint("Reads a meal plan from a file or photo")
                 }
             } else if error == nil {
                 ProgressView()
@@ -88,6 +91,9 @@ private struct FoodLogView: View {
         }
         .sheet(isPresented: $adding) {
             LogFoodSheet(service: service) { newLog in log = newLog }
+        }
+        .sheet(isPresented: $importing) {
+            MealImportSheet { _ in }
         }
         .task { await run { try await service.log() } }
         .refreshable { await run { try await service.log() } }
