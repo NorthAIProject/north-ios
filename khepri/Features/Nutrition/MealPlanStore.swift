@@ -223,12 +223,18 @@ struct LoggableMeal: Identifiable, Hashable {
 }
 
 extension MealPlanDetail {
-    /// Every option of every meal, in plan order. A slot with alternatives
-    /// names each option ("Lunch · Option 2"); one without stays "Lunch".
-    var loggableMeals: [LoggableMeal] {
-        value2.days.flatMap { day in
-            day.meals.flatMap { meal in
-                let title = "\(value1.name) · \(day.name) · \(meal.name)"
+    /// Every option of today's meals, in plan order, as the web offers them.
+    /// `today` counts as the API does, 0 for Sunday. A plan with no day for
+    /// today offers all its days, each title naming its weekday; otherwise
+    /// the weekday goes without saying. A slot with alternatives names each
+    /// option ("Lunch · Option 2"); one without stays "Lunch".
+    func loggableMeals(today: Int) -> [LoggableMeal] {
+        let todays = value2.days.filter { $0.weekday == today }
+        let days = todays.isEmpty ? value2.days : todays
+        return days.flatMap { day in
+            let prefix = todays.isEmpty ? "\(value1.name) · \(day.name)" : value1.name
+            return day.meals.flatMap { meal in
+                let title = "\(prefix) · \(meal.name)"
                 guard meal.hasAlternatives else {
                     return [LoggableMeal(id: meal.id, title: title, calories: meal.totalMacros.calories)]
                 }

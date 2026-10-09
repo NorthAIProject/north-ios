@@ -195,9 +195,11 @@ private struct LogFoodSheet: View {
 
     private func loadMeals() async {
         do {
+            // The API counts weekdays from 0 for Sunday; Calendar from 1.
+            let today = Calendar.current.component(.weekday, from: .now) - 1
             var out: [LoggableMeal] = []
             for summary in try await service.plans() {
-                out += try await service.plan(summary.id).loggableMeals
+                out += try await service.plan(summary.id).loggableMeals(today: today)
             }
             meals = out
         } catch {

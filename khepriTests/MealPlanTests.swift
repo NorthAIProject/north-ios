@@ -115,18 +115,45 @@ struct MealPlanTests {
         return plan
     }
 
-    @Test func theLogListOffersEveryOptionByItsOwnID() {
-        let meals = Self.planWithOptions().loggableMeals
-        let monday = Calendar.current.standaloneWeekdaySymbols[1]
+    /// The options plan with a Tuesday copy of Monday, as an every-day
+    /// import saves the same meals on each weekday.
+    private static func twoDayPlanWithOptions() -> MealPlanDetail {
+        var plan = planWithOptions()
+        var tuesday = plan.value2.days[0]
+        tuesday.id = "88888888-0000-0000-0000-000000000000"
+        tuesday.weekday = 2
+        tuesday.meals = tuesday.meals.map { meal in
+            var meal = meal
+            meal.id = "t-" + meal.id
+            meal.alternatives = meal.alternatives?.map { var option = $0; option.id = "t-" + option.id; return option }
+            return meal
+        }
+        plan.value2.days.append(tuesday)
+        return plan
+    }
+
+    @Test func theLogListOffersOnlyTodaysOptionsEachByItsOwnID() {
+        let meals = Self.twoDayPlanWithOptions().loggableMeals(today: 1)
 
         #expect(meals.map(\.id) == [Self.breakfast, Self.lunch, Self.lunchFish, Self.lunchTofu])
         #expect(meals.map(\.title) == [
-            "Week · \(monday) · Breakfast",
-            "Week · \(monday) · Almoço · Opção 1",
-            "Week · \(monday) · Almoço · Opção 2",
-            "Week · \(monday) · Almoço · Option 3"
+            "Week · Breakfast",
+            "Week · Almoço · Opção 1",
+            "Week · Almoço · Opção 2",
+            "Week · Almoço · Option 3"
         ])
         #expect(meals[2].calories == 206)
+    }
+
+    @Test func aPlanWithNoDayForTodayOffersEveryDayByWeekday() {
+        let meals = Self.twoDayPlanWithOptions().loggableMeals(today: 0)
+        let weekdays = Calendar.current.standaloneWeekdaySymbols
+
+        #expect(meals.count == 8)
+        #expect(meals.map(\.id).prefix(4) == [Self.breakfast, Self.lunch, Self.lunchFish, Self.lunchTofu])
+        #expect(meals.map(\.id).suffix(4).allSatisfy { $0.hasPrefix("t-") })
+        #expect(meals[0].title == "Week · \(weekdays[1]) · Breakfast")
+        #expect(meals[7].title == "Week · \(weekdays[2]) · Almoço · Option 3")
     }
 
     @Test func anAlternativeIsFoundButNeverCountsTowardItsDay() async {
