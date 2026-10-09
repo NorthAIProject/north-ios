@@ -27,7 +27,7 @@ struct SetKindTests {
 
         await session.finishSaving()
         let sent = await lifts.logged
-        #expect(sent.map(\.kind) == [.warmup, .work])
+        #expect(sent.map(\.kind) == [.warmup, nil], "a work set leaves kind out")
         #expect(sent.map(\.rir) == [nil, 3], "a skipped RIR is not sent")
     }
 
@@ -42,7 +42,7 @@ struct SetKindTests {
         #expect(input.performedAt == set.performedAt, "a resent set keeps the time it was done")
 
         let plain = WorkoutSession.LoggedSet.fixture(setNumber: 1).input(activitySessionID: nil)
-        #expect(plain.kind == .work)
+        #expect(plain.kind == nil, "older servers reject the field, and work is the default")
         #expect(plain.rir == nil)
     }
 

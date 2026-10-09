@@ -24,14 +24,16 @@ extension WorkoutSession {
 
         var serverID: String? { if case .saved(let id) = upload { id } else { nil } }
 
-        /// What `POST /lifts/sets` is sent for the set. A work set says so,
-        /// which is also what the server assumes when it is left out; reps in
-        /// reserve are sent only when given.
+        /// What `POST /lifts/sets` is sent for the set. Kind and reps in
+        /// reserve are sent only when they say something: a work set is what
+        /// the server assumes without one, and a server that predates the two
+        /// fields rejects any body that carries them, so leaving them out keeps
+        /// ordinary sets saving against it.
         func input(activitySessionID: String?) -> Components.Schemas.LiftSetInput {
             Components.Schemas.LiftSetInput(
                 exerciseName: exerciseName, exerciseSlug: exerciseSlug, setNumber: setNumber,
                 weightKg: weightKg, reps: reps, performedAt: performedAt, activitySessionId: activitySessionID,
-                kind: kind.payload, rir: rir)
+                kind: kind == .work ? nil : kind.payload, rir: rir)
         }
     }
 }
