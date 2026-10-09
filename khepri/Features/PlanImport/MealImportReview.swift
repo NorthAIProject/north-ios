@@ -14,11 +14,14 @@ struct MealImportReview: View {
             MealImportSettingsSection(draft: $draft, recompute: recompute)
             if let error { ErrorRow(error) }
             ForEach($draft.days) { $day in
-                MealImportDaySection(day: $day, advanced: draft.isAdvanced, recompute: recompute) {
+                MealImportDaySection(
+                    day: $day, advanced: draft.isAdvanced, everyDay: draft.isEveryDay, recompute: recompute
+                ) {
                     draft.days.removeAll { $0.id == day.id }
                     recompute()
                 }
             }
+            if let notes = draft.notes { PlanNotesSection(notes: notes) }
             if !draft.settings.unparsed.isEmpty {
                 Section {
                     ForEach(draft.settings.unparsed, id: \.self) { Text("“\($0)”").font(.footnote) }
