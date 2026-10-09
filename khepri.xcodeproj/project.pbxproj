@@ -6,6 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		E3ED5E14E9A07097C32F3658 /* Periphery */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = ED5E14E9A07097C32F365804 /* Build configuration list for PBXAggregateTarget "Periphery" */;
+			buildPhases = (
+				5E14E9A07097C32F365804F8 /* Periphery */,
+			);
+			dependencies = (
+			);
+			name = Periphery;
+			productName = Periphery;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
 		19BB542257EA3CACC0A4F9EA /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1D1045C44A55B7EAA0FDD331 /* NorthKit */; };
@@ -373,55 +387,6 @@
 		};
 /* End PBXNativeTarget section */
 
-/* Begin PBXAggregateTarget section */
-		E3ED5E14E9A07097C32F3658 /* Periphery */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = ED5E14E9A07097C32F365804 /* Build configuration list for PBXAggregateTarget "Periphery" */;
-			buildPhases = (
-				5E14E9A07097C32F365804F8 /* Periphery */,
-			);
-			dependencies = (
-			);
-			name = Periphery;
-			productName = Periphery;
-		};
-/* End PBXAggregateTarget section */
-
-
-
-/* Begin PBXShellScriptBuildPhase section */
-		5E14E9A07097C32F365804F8 /* Periphery */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = Periphery;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.periphery.yml\" ] && [ -f \"${ROOT}/../.periphery.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nperiphery scan --format xcode\n";
-		};
-		E9A07097C32F365804F8172B /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.swiftlint.yml\" ] && [ -f \"${ROOT}/../.swiftlint.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXProject section */
 		0D195AA4305DBA800055016F /* Project object */ = {
 			isa = PBXProject;
@@ -508,6 +473,39 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5E14E9A07097C32F365804F8 /* Periphery */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = Periphery;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.periphery.yml\" ] && [ -f \"${ROOT}/../.periphery.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nperiphery scan --format xcode\n";
+		};
+		E9A07097C32F365804F8172B /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nROOT=\"${PROJECT_DIR}\"\nif [ ! -f \"${ROOT}/.swiftlint.yml\" ] && [ -f \"${ROOT}/../.swiftlint.yml\" ]; then\n  ROOT=\"${ROOT}/..\"\nfi\ncd \"${ROOT}\"\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0D195AA8305DBA800055016F /* Sources */ = {
@@ -724,7 +722,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -735,10 +733,10 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "Khepri turns your contacts' email addresses into hashes on this iPhone and sends only those, to show which of your contacts are already on Khepri. Nothing about your contacts is kept.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach or say what you ate instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -784,7 +782,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -795,10 +793,10 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "Khepri turns your contacts' email addresses into hashes on this iPhone and sends only those, to show which of your contacts are already on Khepri. Nothing about your contacts is kept.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach or say what you ate instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -926,6 +924,13 @@
 			};
 			name = Release;
 		};
+		0DAF083E3078FD98009259FA /* Beta */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Periphery;
+			};
+			name = Beta;
+		};
 		2FFE9D6233B07F4E1FD31DAF /* Beta */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C5B1241A3C69C8907F58C460 /* Base.xcconfig */;
@@ -939,7 +944,7 @@
 				CODE_SIGN_ENTITLEMENTS = Config/khepri.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -950,10 +955,10 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
 				INFOPLIST_KEY_GIDClientID = "$(GOOGLE_IOS_CLIENT_ID)";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "Khepri turns your contacts' email addresses into hashes on this iPhone and sends only those, to show which of your contacts are already on Khepri. Nothing about your contacts is kept.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Khepri saves workouts you finish in the app to Apple Health.";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Khepri uses the camera only when you photograph a workout or meal plan to import.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Khepri listens only while the microphone button is on, to turn what you say into text.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Your words are turned into text on this iPhone so you can speak to your coach or say what you ate instead of typing.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -1110,6 +1115,13 @@
 			};
 			name = Beta;
 		};
+		7097C32F365804F8172B8C17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
 		81AEFAF4016B15533A141541 /* Beta */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1195,6 +1207,13 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		C32F365804F8172B8C174A7A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
 		};
 		DCC90CCB7F623391E4339EEC /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1285,20 +1304,6 @@
 			};
 			name = Beta;
 		};
-		7097C32F365804F8172B8C17 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		C32F365804F8172B8C174A7A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1367,6 +1372,7 @@
 			buildConfigurations = (
 				7097C32F365804F8172B8C17 /* Debug */,
 				C32F365804F8172B8C174A7A /* Release */,
+				0DAF083E3078FD98009259FA /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
