@@ -66,7 +66,14 @@ struct ExerciseLibrary: View {
     @State private var error: String?
     @State private var viewing: ExerciseSlugRoute?
 
-    private let muscles = ["chest", "back", "shoulders", "biceps", "triceps", "core", "quads", "hamstrings", "glutes", "calves"]
+    /// Opens filtered to one muscle key, e.g. from a tap on the body figure.
+    init(service: TrainingServicing, muscle: String? = nil) {
+        self.service = service
+        _muscle = State(initialValue: muscle)
+    }
+
+    /// The catalog's muscle keys, which is what `?muscle=` matches on.
+    private let muscles = ["chest", "delts", "traps", "lats", "rhomboids", "erectors", "biceps", "triceps", "forearms", "abs", "glutes", "quads", "hamstrings", "adductors", "calves"]
 
     var body: some View {
         List {
@@ -86,7 +93,7 @@ struct ExerciseLibrary: View {
                 Menu {
                     Picker("Muscle", selection: $muscle) {
                         Text("All muscles").tag(String?.none)
-                        ForEach(muscles, id: \.self) { Text($0.capitalized).tag(Optional($0)) }
+                        ForEach(muscles, id: \.self) { Text(BodyMapText.name($0)).tag(Optional($0)) }
                     }
                 } label: {
                     Label("Muscle", systemImage: muscle == nil ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")

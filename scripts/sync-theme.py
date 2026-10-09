@@ -64,6 +64,9 @@ TOKENS = {
     "north-day-sun": "DaySun",
     "north-day-screen": "DayScreen",
     "north-day-now": "DayNow",
+    "north-body-idle": "BodyIdle",
+    "north-body-base": "BodyBase",
+    "north-heat-low": "HeatLow",
 }
 
 OKLCH = re.compile(r"oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:/\s*([\d.]+)%)?\s*\)")
