@@ -172,15 +172,7 @@ extension DayView {
     private func startWorkout(_ day: TrainingDay) {
         guard workout == nil, !day.exercises.isEmpty else { return }
         let weekday = scheduledWeekday ?? day.weekday
-        workout = WorkoutSession(
-            title: "\(weekday) · \(day.focus)",
-            day: day,
-            planWeekday: weekday,
-            service: ActivityService(),
-            live: WorkoutLiveActivityController(),
-            health: HealthWorkoutWriter(),
-            lifts: LiftService()
-        )
+        workout = .live(title: "\(weekday) · \(day.focus)", day: day, planWeekday: weekday)
     }
 }
 

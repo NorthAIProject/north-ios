@@ -14,7 +14,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         center.setNotificationCategories([WorkoutReminders.category, CheckInActions.category])
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
-        // A workout Live Activity from before a kill has nothing behind it now.
+        // A workout Live Activity from before a kill has nothing behind it
+        // now, unless that workout is about to be resumed.
         WorkoutLiveActivityController.endOrphans()
         Task { @MainActor in await PushRegistration.registerIfAllowed() }
         return true
@@ -30,8 +31,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     /// Shown even when the app is open: a reminder is still useful then.
+    /// The end of a rest is not: the workout on screen says it with a haptic.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+        notification.request.identifier == RestNotifications.identifier ? [] : [.banner, .sound]
     }
 
     /// A tap, or the Start Workout button, opens where the notification says.

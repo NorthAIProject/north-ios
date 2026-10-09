@@ -2,7 +2,17 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// Asked before a set counts as done: what was on the bar and how many reps.
+/// What the set sheet hands back: the set as it was done.
+struct SetEntry: Equatable {
+    var weightKg: Double
+    var reps: Int
+    var kind: SetKind
+    /// Reps in reserve; nil when skipped, and then nothing is sent.
+    var rir: Int?
+}
+
+/// Asked before a set counts as done: what was on the bar, how many reps,
+/// and optionally what kind of set it was and how close to failure.
 /// Prefilled from this workout's previous set or from last time, so most sets
 /// are one tap.
 struct SetEntrySheet: View {
@@ -10,15 +20,17 @@ struct SetEntrySheet: View {
     let setNumber: Int
     let lastTime: [LiftSet]
     let imperial: Bool
-    let onLog: (_ weightKg: Double, _ reps: Int) -> Void
+    let onLog: (SetEntry) -> Void
 
     @State private var weight: Double
     @State private var reps: Int
     @State private var bodyweight: Bool
+    @State private var kind: SetKind
+    @State private var rir: Int?
     @Environment(\.dismiss) private var dismiss
 
     init(exerciseName: String, setNumber: Int, suggestedWeightKg: Double?, suggestedReps: Int,
-         lastTime: [LiftSet], imperial: Bool, onLog: @escaping (_ weightKg: Double, _ reps: Int) -> Void) {
+         suggestedKind: SetKind = .work, lastTime: [LiftSet], imperial: Bool, onLog: @escaping (SetEntry) -> Void) {
         self.exerciseName = exerciseName
         self.setNumber = setNumber
         self.lastTime = lastTime
@@ -27,6 +39,7 @@ struct SetEntrySheet: View {
         _weight = State(initialValue: LiftMath.display(suggestedWeightKg ?? 0, imperial: imperial))
         _reps = State(initialValue: suggestedReps)
         _bodyweight = State(initialValue: suggestedWeightKg == 0)
+        _kind = State(initialValue: suggestedKind)
     }
 
     private var unit: String { imperial ? "lb" : "kg" }
@@ -35,6 +48,20 @@ struct SetEntrySheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Picker("Set kind", selection: $kind) {
+                        ForEach(SetKind.allCases, id: \.self) { option in
+                            Text(option.title).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("set-kind")
+                } footer: {
+                    if kind == .warmup {
+                        Text("Left out of volume and records. Set \(setNumber) is still to come.")
+                    }
+                }
+
                 Section {
                     if !bodyweight {
                         HStack(spacing: 16) {
@@ -57,8 +84,9 @@ struct SetEntrySheet: View {
                 } footer: {
                     if !lastTime.isEmpty {
                         Text("Last time: " + lastTime.map { set in
-                            set.weightKg == 0 ? "BW × \(set.reps)"
+                            let done = set.weightKg == 0 ? "BW × \(set.reps)"
                                 : "\(LiftMath.display(set.weightKg, imperial: imperial).formatted()) × \(set.reps)"
+                            return set.setKind == .warmup ? "warm-up \(done)" : done
                         }.joined(separator: ", "))
                     }
                 }
@@ -68,8 +96,23 @@ struct SetEntrySheet: View {
                         Text("\(reps) reps").font(.headline.monospacedDigit())
                     }
                 }
+
+                Section {
+                    Picker("Reps in reserve", selection: $rir) {
+                        Text("Skip").tag(Int?.none)
+                        ForEach(RepsInReserve.choices, id: \.self) { value in
+                            Text(RepsInReserve.label(value)).tag(Int?.some(value))
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("set-rir")
+                } header: {
+                    Text("Reps in reserve")
+                } footer: {
+                    Text("How many more you could have done. 0 is to failure.")
+                }
             }
-            .navigationTitle("\(exerciseName) · Set \(setNumber)")
+            .navigationTitle(kind == .warmup ? "\(exerciseName) · Warm-up" : "\(exerciseName) · Set \(setNumber)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -78,7 +121,7 @@ struct SetEntrySheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Log Set") {
                         let kg = bodyweight ? 0 : LiftMath.kilograms(max(0, weight), imperial: imperial)
-                        onLog((kg * 10).rounded() / 10, reps)
+                        onLog(SetEntry(weightKg: (kg * 10).rounded() / 10, reps: reps, kind: kind, rir: rir))
                         dismiss()
                     }
                     .disabled(!bodyweight && weight <= 0)

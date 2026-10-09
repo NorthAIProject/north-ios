@@ -7,6 +7,8 @@ struct MainTabView: View {
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
     @Environment(\.scenePhase) private var scenePhase
+    /// A workout the app was killed during, picked up where it was.
+    @State private var resumedWorkout: WorkoutSession?
 
     var body: some View {
         @Bindable var router = router
@@ -48,11 +50,14 @@ struct MainTabView: View {
         )) { route in
             ExerciseSheet(slug: route.slug)
         }
+        .fullScreenCover(item: $resumedWorkout) { session in WorkoutSessionView(session: session) }
         .onAppear { tour.startIfNeeded() }
+        .task { resumedWorkout = WorkoutSession.resumingKilledWorkout() }
         // Apple Health catches up whenever the app comes forward, and
         // Spotlight's copy of exercises and goals with it; each decides for
         // itself whether there is anything to do. A workout Live Activity with
-        // no workout behind it (the app was killed mid-workout, say) ends here too.
+        // no workout behind it (one stopped on the web, say) ends here too;
+        // one a killed workout left is kept for the resumed workout.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 WorkoutLiveActivityController.endOrphans()

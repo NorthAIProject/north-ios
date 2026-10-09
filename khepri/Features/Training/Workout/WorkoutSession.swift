@@ -13,6 +13,9 @@ import WidgetKit
 /// the server session is joined as soon as it answers, and when the server
 /// refuses (no body weight yet, say) the workout goes on and the finish says
 /// why it was not recorded.
+///
+/// Nor does it depend on the app staying alive: every change is written to a
+/// snapshot, and a relaunch resumes from it (`init(restoring:)`).
 @MainActor
 @Observable
 final class WorkoutSession {
@@ -49,18 +52,22 @@ final class WorkoutSession {
     /// The last workout's sets per exercise key, loaded at the start.
     private(set) var lastTime: [String: [LiftSet]] = [:]
     /// Sets the server did not take. Kept on the phone for the summary.
-    private(set) var unsavedSets = 0
+    var unsavedSets: Int { logged.count(where: { $0.upload == .failed }) }
 
-    private var pausedAt: Date?
-    private var pausedTotal: TimeInterval = 0
+    private(set) var pausedAt: Date?
+    private(set) var pausedTotal: TimeInterval = 0
     /// Rest left when paused mid-rest, restored on resume.
-    private var restRemaining: TimeInterval?
+    private(set) var restRemaining: TimeInterval?
     private var connecting: Task<Void, Never>?
-    private var saving: [Task<Void, Never>] = []
+    /// Sets on their way to the server; tests wait on them.
+    private(set) var saving: [Task<Void, Never>] = []
     /// Last time's numbers arriving; tests wait on it.
     private(set) var loadingLastTime: Task<Void, Never>?
-    /// The server's ids for the sets it took, so a discard can take them back.
-    private var savedIDs: [String] = []
+    /// Set by `init(restoring:)`: `start()` then picks the workout up where
+    /// the snapshot left it instead of starting it.
+    private var isRestored = false
+    /// The Live Activity a restored workout re-attaches to.
+    private(set) var restoredActivityID: String?
 
     private let service: ActivityServicing
     private let live: WorkoutLiveActivityControlling
@@ -68,12 +75,19 @@ final class WorkoutSession {
     private let health: HealthWorkoutWriting?
     /// Where each set's weight and reps go; nil keeps them on the phone.
     private let lifts: LiftServicing?
-    private let now: () -> Date
+    /// Where the workout is written down between launches; nil keeps it
+    /// only in memory.
+    private let snapshots: WorkoutSnapshotStoring?
+    /// "Rest over" while the phone is in a pocket; nil says nothing.
+    private let restNotifications: RestNotificationScheduling?
+    /// The session's clock; tests move it by hand.
+    let now: () -> Date
 
     /// `planWeekday` is the day the week trains this session on, which is the
     /// day finishing it completes; it defaults to the plan day's own weekday.
     init(title: String, day: TrainingDay, planWeekday: String? = nil, service: ActivityServicing, live: WorkoutLiveActivityControlling,
-         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, now: @escaping () -> Date = Date.init) {
+         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init) {
         self.title = title
         // What this week asks for: the weekly review can make it a deload or
         // a build week without changing the plan.
@@ -83,118 +97,104 @@ final class WorkoutSession {
         self.live = live
         self.health = health
         self.lifts = lifts
+        self.snapshots = snapshots
+        self.restNotifications = restNotifications
         self.now = now
     }
 
-    /// One set as it was done.
-    struct LoggedSet: Equatable {
-        let exerciseKey: String
-        let exerciseName: String
-        let setNumber: Int
-        let weightKg: Double
-        let reps: Int
-
-        var volumeKg: Double { weightKg * Double(reps) }
-        var e1rmKg: Double { LiftMath.e1rm(weightKg: weightKg, reps: reps) }
-    }
-
-    // MARK: - Where the workout is
-
-    var current: DayExercise? { exercises.indices.contains(exerciseIndex) ? exercises[exerciseIndex] : nil }
-
-    var next: DayExercise? {
-        guard let current else { return nil }
-        if setNumber < current.sets { return current }
-        return exercises.indices.contains(exerciseIndex + 1) ? exercises[exerciseIndex + 1] : nil
-    }
-
-    var totalSets: Int { exercises.reduce(0) { $0 + $1.sets } }
-
-    var isLastSet: Bool { exerciseIndex == exercises.count - 1 && setNumber == (current?.sets ?? 0) }
-
-    /// Start moved later by paused time: a timer from here shows moving time.
-    var movingSince: Date { (startedAt ?? now()).addingTimeInterval(pausedTotal) }
-
-    var movingTime: TimeInterval {
-        guard let startedAt else { return 0 }
-        let end = pausedAt ?? now()
-        return end.timeIntervalSince(startedAt) - pausedTotal
-    }
-
-    var restEndsAt: Date? { if case .resting(let until) = phase { until } else { nil } }
-
-    // MARK: - Weights
-
-    func key(for exercise: DayExercise) -> String { LiftMath.key(slug: exercise.catalogSlug, name: exercise.name) }
-
-    /// What the set in hand starts from: this workout's previous set of the
-    /// exercise, else the same set last time, else last time's final set.
-    /// Nil when the exercise has never been done with a weight.
-    var suggestedWeightKg: Double? {
-        guard let current else { return nil }
-        let key = key(for: current)
-        if let previous = logged.last(where: { $0.exerciseKey == key }) { return previous.weightKg }
-        let last = lastTime[key] ?? []
-        return (last.first { $0.setNumber == setNumber } ?? last.last)?.weightKg
-    }
-
-    /// Reps start from the plan's number, else last time's.
-    var suggestedReps: Int {
-        guard let current else { return 1 }
-        if let planned = LiftMath.reps(from: current.reps) { return planned }
-        let last = lastTime[key(for: current)] ?? []
-        return (last.first { $0.setNumber == setNumber } ?? last.last)?.reps ?? 10
-    }
-
-    /// Last time's sets of the exercise in hand, for "last time" under the
-    /// weight field.
-    var lastTimeForCurrent: [LiftSet] {
-        guard let current else { return [] }
-        return lastTime[key(for: current)] ?? []
-    }
-
-    var volumeKg: Double { logged.reduce(0) { $0 + $1.volumeKg } }
-
-    /// Exercises whose best set today beat every set of the last workout, by
-    /// estimated max.
-    var improvements: [LoggedSet] {
-        var best: [String: LoggedSet] = [:]
-        for set in logged where set.weightKg > 0 {
-            if set.e1rmKg > (best[set.exerciseKey]?.e1rmKg ?? 0) { best[set.exerciseKey] = set }
-        }
-        return best.values.filter { set in
-            let previous = (lastTime[set.exerciseKey] ?? []).map(\.e1rmKg).max() ?? 0
-            return previous > 0 && set.e1rmKg > previous + 0.05
-        }
-        .sorted { $0.exerciseName < $1.exerciseName }
+    /// The workout a killed run left behind, as it was. `start()` resumes it.
+    init(restoring snapshot: WorkoutSnapshot, service: ActivityServicing, live: WorkoutLiveActivityControlling,
+         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init) {
+        title = snapshot.title
+        exercises = snapshot.exercises
+        planWeekday = snapshot.planWeekday
+        self.service = service
+        self.live = live
+        self.health = health
+        self.lifts = lifts
+        self.snapshots = snapshots
+        self.restNotifications = restNotifications
+        self.now = now
+        exerciseIndex = snapshot.exerciseIndex
+        setNumber = snapshot.setNumber
+        completedSets = snapshot.completedSets
+        startedAt = snapshot.startedAt
+        phase = snapshot.restEndsAt.map { .resting(until: $0) } ?? .working
+        isPaused = snapshot.isPaused
+        pausedAt = snapshot.pausedAt
+        pausedTotal = snapshot.pausedTotal
+        restRemaining = snapshot.restRemaining
+        recorded = snapshot.recorded
+        notice = snapshot.notice
+        logged = snapshot.logged
+        lastTime = snapshot.lastTime
+        restoredActivityID = snapshot.liveActivityID
+        isRestored = true
     }
 
     // MARK: - Doing it
 
     func start() {
+        if isRestored {
+            resumeRestored()
+            return
+        }
         guard phase == .ready, !exercises.isEmpty else { return }
         startedAt = now()
         phase = .working
         live.start(title: title, startedAt: movingSince, state: liveState)
+        persist()
         connecting = Task { await connect() }
         loadingLastTime = Task { await loadLastTime() }
+    }
+
+    /// Picks up a workout the app was killed during. Rest is measured by the
+    /// clock, so one that ran out while the app was gone is over; the Live
+    /// Activity left on screen is taken over; sets the server never answered
+    /// for are sent again.
+    private func resumeRestored() {
+        isRestored = false
+        if case .resting(let until) = phase, !isPaused, until <= now() {
+            phase = .working
+        }
+        live.reattach(activityID: restoredActivityID, title: title, startedAt: startedAt ?? now(), state: liveState)
+        restoredActivityID = nil
+        syncRestNotification()
+        persist()
+        if recorded == nil {
+            connecting = Task { await rejoin() }
+        }
+        if lastTime.isEmpty {
+            loadingLastTime = Task { await loadLastTime() }
+        }
+        for set in logged where set.upload == .pending {
+            upload(set)
+        }
     }
 
     private func loadLastTime() async {
         guard let lifts else { return }
         let keys = Array(Set(exercises.map(key(for:)))).sorted()
-        if let last = try? await lifts.last(keys) { lastTime = last }
+        if let last = try? await lifts.last(keys) {
+            lastTime = last
+            persist()
+        }
     }
 
     /// The set in hand is done: rest, then the next one; or the workout is.
     /// With a weight, the set is logged: here at once, on the server as soon
-    /// as it answers.
-    func completeSet(weightKg: Double? = nil, reps: Int? = nil) async {
+    /// as it answers. A warm-up is logged but leaves the plan where it is:
+    /// set 1 is still to come after it.
+    func completeSet(weightKg: Double? = nil, reps: Int? = nil, kind: SetKind = .work, rir: Int? = nil) async {
         guard phase == .working, !isPaused, let current else { return }
         if let weightKg {
-            record(LoggedSet(exerciseKey: key(for: current), exerciseName: current.name, setNumber: setNumber,
-                             weightKg: max(0, weightKg), reps: max(1, reps ?? suggestedReps)), exercise: current)
+            record(LoggedSet(exerciseKey: key(for: current), exerciseName: current.name,
+                             exerciseSlug: current.catalogSlug, setNumber: setNumber, weightKg: max(0, weightKg),
+                             reps: max(1, reps ?? suggestedReps), kind: kind, rir: rir.map { min(max($0, 0), 10) },
+                             performedAt: now()))
         }
+        guard kind.counts else { return }
         completedSets += 1
         if isLastSet {
             await finish()
@@ -208,19 +208,19 @@ final class WorkoutSession {
             setNumber = 1
         }
         phase = rest > 0 ? .resting(until: now().addingTimeInterval(rest)) : .working
-        live.update(liveState)
+        publish()
     }
 
     func endRest() {
         guard case .resting = phase, !isPaused else { return }
         phase = .working
-        live.update(liveState)
+        publish()
     }
 
     func extendRest(by seconds: TimeInterval) {
         guard case .resting(let until) = phase, !isPaused else { return }
         phase = .resting(until: max(until, now()).addingTimeInterval(seconds))
-        live.update(liveState)
+        publish()
     }
 
     func pause() async {
@@ -228,7 +228,7 @@ final class WorkoutSession {
         isPaused = true
         pausedAt = now()
         if let restEndsAt { restRemaining = max(0, restEndsAt.timeIntervalSince(now())) }
-        live.update(liveState)
+        publish()
         await server { [service] id in try await service.pause(id) }
     }
 
@@ -241,26 +241,35 @@ final class WorkoutSession {
             phase = restRemaining > 0 ? .resting(until: now().addingTimeInterval(restRemaining)) : .working
             self.restRemaining = nil
         }
-        live.update(liveState)
+        publish()
         await server { [service] id in try await service.resume(id) }
     }
 
-    private func record(_ set: LoggedSet, exercise: DayExercise) {
+    private func record(_ set: LoggedSet) {
         logged.append(set)
+        persist()
+        upload(set)
+    }
+
+    private func upload(_ set: LoggedSet) {
         guard let lifts else { return }
-        let performedAt = now()
         saving.append(Task { [weak self] in
             await self?.connecting?.value
-            let input = Components.Schemas.LiftSetInput(
-                exerciseName: set.exerciseName, exerciseSlug: exercise.catalogSlug, setNumber: set.setNumber,
-                weightKg: set.weightKg, reps: set.reps, performedAt: performedAt, activitySessionId: self?.recorded?.id)
+            let input = set.input(activitySessionID: self?.recorded?.id)
+            let upload: SetUpload
             do {
-                let saved = try await lifts.log(input)
-                self?.savedIDs.append(saved.id)
+                upload = .saved(id: try await lifts.log(input).id)
             } catch {
-                self?.unsavedSets += 1
+                upload = .failed
             }
+            self?.mark(set.id, upload)
         })
+    }
+
+    private func mark(_ setID: UUID, _ upload: SetUpload) {
+        guard let index = logged.firstIndex(where: { $0.id == setID }) else { return }
+        logged[index].upload = upload
+        persist()
     }
 
     /// Ends the workout and records it, sets done or not.
@@ -273,6 +282,8 @@ final class WorkoutSession {
         }
         phase = .finished
         live.end(liveState, dismissImmediately: true)
+        restNotifications?.cancel()
+        snapshots?.clear()
         defer {
             #if canImport(WidgetKit)
             WidgetCenter.shared.reloadAllTimelines()
@@ -298,6 +309,8 @@ final class WorkoutSession {
         // Finished first, so the activity's last state is not "working".
         phase = .finished
         live.end(liveState, dismissImmediately: true)
+        restNotifications?.cancel()
+        snapshots?.clear()
         defer {
             #if canImport(WidgetKit)
             WidgetCenter.shared.reloadAllTimelines()
@@ -307,9 +320,8 @@ final class WorkoutSession {
         for task in saving { await task.value }
         saving = []
         if let lifts {
-            for id in savedIDs { try? await lifts.delete(id) }
+            for id in logged.compactMap(\.serverID) { try? await lifts.delete(id) }
         }
-        savedIDs = []
         logged = []
         if let recorded {
             do { try await service.cancel(recorded.id) } catch { notice = error.localizedDescription }
@@ -322,6 +334,7 @@ final class WorkoutSession {
     /// Starts the server's timer, or joins one already open on the account
     /// (started on the web, or before the app was quit).
     private func connect() async {
+        defer { persist() }
         do {
             recorded = try await service.start(Self.activityCode, planWeekday: planWeekday)
             return
@@ -335,6 +348,16 @@ final class WorkoutSession {
         }
     }
 
+    /// A restored workout whose server session never answered: joins the one
+    /// open on the account, if the start did reach the server. Starting a
+    /// new one now would time the workout from the wrong moment.
+    private func rejoin() async {
+        guard let open = try? await service.openSession(),
+              open.status == .active || open.status == .paused else { return }
+        recorded = open
+        persist()
+    }
+
     private func server(_ call: @escaping (String) async throws -> ActivitySession) async {
         await connecting?.value
         guard let id = recorded?.id else { return }
@@ -343,32 +366,34 @@ final class WorkoutSession {
         } catch {
             notice = error.localizedDescription
         }
+        persist()
     }
 
-    var liveState: WorkoutLiveState {
-        let currentPhase: WorkoutActivityAttributes.ContentState.Phase
-        if phase == .finished {
-            currentPhase = .finished
-        } else if isPaused {
-            currentPhase = .paused
-        } else if restEndsAt != nil {
-            currentPhase = .resting
-        } else {
-            currentPhase = .working
-        }
+    // MARK: - Outside the app
 
-        return WorkoutLiveState(
-            exerciseName: current?.name ?? title,
-            setNumber: setNumber,
-            totalSets: current?.sets ?? 0,
-            phase: currentPhase,
-            restEndsAt: restEndsAt,
-            exerciseNumber: min(exerciseIndex + 1, exercises.count),
-            totalExercises: exercises.count,
-            movingSince: movingSince,
-            finalDuration: phase == .finished ? movingTime : nil
-        )
+    /// Tells everything outside the session where it is now: the Live
+    /// Activity, the rest-end notification and the snapshot.
+    private func publish() {
+        live.update(liveState)
+        syncRestNotification()
+        persist()
     }
+
+    /// A notification for the end of the rest under way; none while working
+    /// or paused. Scheduling again replaces the last one.
+    private func syncRestNotification() {
+        guard let restNotifications else { return }
+        if let restEnd { restNotifications.schedule(restEnd) } else { restNotifications.cancel() }
+    }
+
+    private func persist() {
+        guard let snapshots, let snapshot else { return }
+        snapshots.save(snapshot)
+    }
+
+    /// The Lock Screen activity, or the one a restored workout is about to
+    /// take over.
+    var liveActivityID: String? { live.activityID ?? restoredActivityID }
 }
 
 /// Presented with `fullScreenCover(item:)`; identity is the instance.

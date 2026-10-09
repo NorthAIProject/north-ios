@@ -56,8 +56,12 @@ struct WorkoutSessionView: View {
                 if let exercise = session.current {
                     SetEntrySheet(exerciseName: exercise.name, setNumber: session.setNumber,
                                   suggestedWeightKg: session.suggestedWeightKg, suggestedReps: session.suggestedReps,
-                                  lastTime: session.lastTimeForCurrent, imperial: imperial) { kg, reps in
-                        Task { await session.completeSet(weightKg: kg, reps: reps) }
+                                  suggestedKind: session.suggestedKind, lastTime: session.lastTimeForCurrent,
+                                  imperial: imperial) { entry in
+                        Task {
+                            await session.completeSet(weightKg: entry.weightKg, reps: entry.reps,
+                                                      kind: entry.kind, rir: entry.rir)
+                        }
                     }
                 }
             }
@@ -102,6 +106,10 @@ struct WorkoutSessionView: View {
                     Text(next.name == session.current?.name ? "Next: set \(session.setNumber + 1)" : "Next: \(next.name)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+
+                if !session.loggedForCurrent.isEmpty {
+                    LoggedSetsList(sets: session.loggedForCurrent, imperial: imperial)
                 }
             }
             .padding(.horizontal, 20)

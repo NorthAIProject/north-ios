@@ -86,13 +86,14 @@ struct WorkoutRecapModel: Equatable {
     }
 
     /// The recap from what the phone saw: the sets logged and the last
-    /// workout's sets it loaded at the start.
+    /// workout's sets it loaded at the start. Warm-ups are left out, as the
+    /// server leaves them out of its recap.
     @MainActor
     static func local(from session: WorkoutSession) -> WorkoutRecapModel {
         var order: [String] = []
         var names: [String: String] = [:]
         var grouped: [String: [WorkoutSession.LoggedSet]] = [:]
-        for set in session.logged {
+        for set in session.logged where set.counts {
             if grouped[set.exerciseKey] == nil { order.append(set.exerciseKey) }
             names[set.exerciseKey] = set.exerciseName
             grouped[set.exerciseKey, default: []].append(set)
@@ -104,7 +105,7 @@ struct WorkoutRecapModel: Equatable {
             let best = sets.filter { $0.weightKg > 0 }.max { $0.e1rmKg < $1.e1rmKg }
             var previous: Double?
             var change: Double?
-            if let last = session.lastTime[key], !last.isEmpty {
+            if let last = session.lastTime[key]?.filter(\.setKind.counts), !last.isEmpty {
                 previous = last.reduce(0) { $0 + $1.weightKg * Double($1.reps) }
                 if let best, let prevMax = last.map(\.e1rmKg).max(), prevMax > 0 {
                     change = best.e1rmKg - prevMax
