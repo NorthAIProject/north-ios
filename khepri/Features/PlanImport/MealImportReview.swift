@@ -15,7 +15,8 @@ struct MealImportReview: View {
             if let error { ErrorRow(error) }
             ForEach($draft.days) { $day in
                 MealImportDaySection(
-                    day: $day, advanced: draft.isAdvanced, everyDay: draft.isEveryDay, recompute: recompute
+                    day: $day, advanced: draft.isAdvanced, everyDay: draft.isEveryDay,
+                    canRemove: draft.canRemoveDay, recompute: recompute
                 ) {
                     draft.days.removeAll { $0.id == day.id }
                     recompute()

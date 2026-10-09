@@ -68,6 +68,16 @@ struct PlanImportTests {
         #expect(draft.days[0].meals[0].foods[0].food == "Oats")
     }
 
+    @Test func theLastDayOfADraftCannotBeRemoved() {
+        var editable = EditableMealDraft(Self.mealDraft([[("Breakfast", [Self.food("Oats")])]]))
+        #expect(!editable.canRemoveDay, "nothing can add a day back, and a draft needs one")
+
+        let two = EditableMealDraft(Self.mealDraft([[("Breakfast", [Self.food("Oats")])], [("Lunch", [Self.food("Rice")])]]))
+        #expect(two.canRemoveDay)
+        editable.days.append(two.days[1])
+        #expect(editable.canRemoveDay)
+    }
+
     /// An every-day draft with notes and one lunch of three options, as the
     /// reader returns a nutritionist's PDF.
     private static func optionsDraft() -> MealImportDraft {

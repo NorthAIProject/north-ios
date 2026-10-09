@@ -8,6 +8,7 @@ struct MealImportDaySection: View {
     @Binding var day: EditableMealDraft.Day
     let advanced: Bool
     var everyDay = false
+    var canRemove = true
     let recompute: () -> Void
     let onRemove: () -> Void
 
@@ -49,7 +50,9 @@ struct MealImportDaySection: View {
                     }
                 }
             }
-            Button("Remove Day", systemImage: "trash", role: .destructive, action: onRemove)
+            if canRemove {
+                Button("Remove Day", systemImage: "trash", role: .destructive, action: onRemove)
+            }
         } header: {
             Text(title)
         }

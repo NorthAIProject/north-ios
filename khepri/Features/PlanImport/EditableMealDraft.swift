@@ -137,6 +137,10 @@ struct EditableMealDraft {
 
     var isEveryDay: Bool { settings.everyDay == true }
 
+    /// The last day stays: nothing in the sheet adds one back, and the
+    /// server refuses a draft with none.
+    var canRemoveDay: Bool { days.count > 1 }
+
     /// The advice the file carried beside its meals; nil when blank.
     var notes: String? {
         let notes = settings.notes?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
