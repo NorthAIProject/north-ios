@@ -15,6 +15,7 @@ struct ConversationView: View {
     @State private var stopped = false
     @FocusState private var composing: Bool
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppRouter.self) private var router
 
     /// Starts another conversation or reflection from the header.
     private let onNew: (_ reflection: Bool) -> Void
@@ -127,6 +128,9 @@ struct ConversationView: View {
         // crowd the composer.
         .toolbar(.hidden, for: .tabBar)
         .task { await store.load() }
+        // An approved action may have written a check-in, a plan or a meal:
+        // the screens showing them reload.
+        .onChange(of: store.dataChanges) { router.dataChanged() }
         .sheet(item: Binding(get: { openExercise.map(ExerciseSlug.init) }, set: { openExercise = $0?.id })) { slug in
             ExerciseSheet(slug: slug.id)
         }

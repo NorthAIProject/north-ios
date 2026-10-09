@@ -16,6 +16,7 @@ public typealias TodayNextStep = Components.Schemas.NextStep
 public typealias TodayTimelineEntry = Components.Schemas.TimelineEntry
 public typealias TodayNudge = Components.Schemas.Nudge
 public typealias TodayDelta = Components.Schemas.Delta
+public typealias TodayCheckIn = Components.Schemas.TodayCheckIn
 
 // My Day
 public typealias DayResponse = Components.Schemas.DayResponse

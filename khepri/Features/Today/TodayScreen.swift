@@ -2,14 +2,18 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// Loads Today and keeps it fresh: on appear, on pull-to-refresh, and when the
-/// app returns to the foreground, since the web or Telegram may have changed
-/// it meanwhile.
+/// Loads Today and keeps it fresh: on appear, on pull-to-refresh, when the
+/// app returns to the foreground or the tab is picked again, since the web or
+/// Telegram may have changed it meanwhile, and after any write on this device.
 struct TodayScreen: View {
     @State private var state: LoadState = .loading
     @State private var dayStore: DayStore
     @State private var addingToDay = false
+    /// The router's data version the last load started at, so a change this
+    /// screen has already caught up with does not load twice.
+    @State private var loadedVersion: Int?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppRouter.self) private var router
 
     private let auth: AuthServicing
 
@@ -64,9 +68,24 @@ struct TodayScreen: View {
             .navigationDestination(for: FitnessRoute.self) { _ in FitnessScreen() }
             .refreshable { await load() }
         }
-        .task { await load() }
+        .task(id: router.dataVersion) {
+            guard loadedVersion != router.dataVersion else { return }
+            await load()
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await load() } }
+        }
+        // The tab bar keeps Today alive, so coming back to it loads nothing
+        // by itself.
+        .onChange(of: router.selectedTab) { _, tab in
+            if tab == .today { Task { await load() } }
+        }
+        // A quick add already reloaded My Day; the tiles above it and every
+        // other screen showing the day follow.
+        .onChange(of: dayStore.writes) {
+            router.dataChanged()
+            loadedVersion = router.dataVersion
+            Task { await loadSnapshot() }
         }
     }
 
@@ -75,15 +94,22 @@ struct TodayScreen: View {
     }
 
     private func load() async {
+        loadedVersion = router.dataVersion
         // My Day loads beside Today; neither waits for the other.
         async let day: Void = dayStore.load()
+        await loadSnapshot()
+        await day
+    }
+
+    private func loadSnapshot() async {
         do {
             state = .loaded(try await auth.today().snapshot)
         } catch {
+            // A newer change cancelled this load and started the next one.
+            if Task.isCancelled { return }
             // Keep what is on screen if a refresh fails; only an empty screen
             // shows the error.
             if case .loaded = state {} else { state = .failed(error.localizedDescription) }
         }
-        await day
     }
 }

@@ -40,6 +40,11 @@ struct MainTabView: View {
                     }
             }
         }
+        // Closing the check-in refreshes the tab under it, however the sheet
+        // went away: Done or a swipe.
+        .onChange(of: router.showsCheckInFlow) { _, shown in
+            if !shown { router.dataChanged() }
+        }
         .sheet(isPresented: $router.showsWeeklyReview) {
             WeeklyReviewFlow()
         }

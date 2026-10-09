@@ -31,6 +31,9 @@ struct ContractTests {
         #expect(response.snapshot.goals.first?.progress == 40)
         #expect(response.snapshot.sleep.quality == 4)
         #expect(response.snapshot.nudges.count == 1)
+        let checkIn = try #require(response.snapshot.todayCheckIn)
+        #expect(checkIn.mood == 4 && checkIn.energy == 3 && checkIn.source == "siri")
+        #expect(checkIn.stress == 2 && checkIn.sleepQuality == 4)
     }
 
     @Test func day() throws {
@@ -208,6 +211,8 @@ struct ContractTests {
         let checkIns = try decode(Schemas.CheckInList.self, "check-ins")
         #expect(checkIns.today?.relatedGoalTitle == "Run a half marathon")
         #expect(checkIns.streak == 6)
+        #expect(checkIns.today?.source == "siri" && checkIns.today?.tags == ["travel", "race week"])
+        #expect(checkIns.today?.stress == 2 && checkIns.today?.sleepQuality == 4)
     }
 
     @Test func reportsAndMemories() throws {
@@ -422,7 +427,10 @@ struct ContractTests {
     }
 
     private func decode<T: Decodable>(_ type: T.Type, _ name: String) throws -> T {
-        let data = try Data(contentsOf: contractDirectory.appending(path: "\(name).golden.json"))
+        try decode(type, data: Data(contentsOf: contractDirectory.appending(path: "\(name).golden.json")))
+    }
+
+    private func decode<T: Decodable>(_ type: T.Type, data: Data) throws -> T {
         let decoder = JSONDecoder()
         let transcoder = NorthAPI.configuration.dateTranscoder
         decoder.dateDecodingStrategy = .custom { decoder in
@@ -430,6 +438,46 @@ struct ContractTests {
             return try transcoder.decode(raw)
         }
         return try decoder.decode(T.self, from: data)
+    }
+}
+
+/// Variations on a golden file: the shapes the server may also send.
+extension ContractTests {
+    /// A day without a check-in leaves `todayCheckIn` out, and so does an
+    /// older server; both must still decode.
+    @Test func todayWithoutCheckIn() throws {
+        var json = try golden("today")
+        var snapshot = try #require(json["snapshot"] as? [String: Any])
+        snapshot["todayCheckIn"] = nil
+        snapshot["checkedInToday"] = false
+        json["snapshot"] = snapshot
+        let response = try decode(Schemas.TodayResponse.self, from: json)
+        #expect(response.snapshot.todayCheckIn == nil)
+        #expect(!response.snapshot.checkedInToday)
+    }
+
+    /// Stress and sleep quality are optional; source stays an open string so
+    /// a value this build has never seen still decodes.
+    @Test func checkInWithoutOptionalMetadata() throws {
+        let json = try golden("check-ins")
+        var recent = try #require(json["recent"] as? [[String: Any]])
+        recent[0]["stress"] = nil
+        recent[0]["sleepQuality"] = nil
+        recent[0]["tags"] = [String]()
+        recent[0]["source"] = "telepathy"
+        let checkIn = try decode(Schemas.CheckIn.self, from: recent[0])
+        #expect(checkIn.stress == nil && checkIn.sleepQuality == nil)
+        #expect(checkIn.tags.isEmpty && checkIn.source == "telepathy")
+    }
+
+    /// A golden file as a dictionary, for tests that decode a variation of it.
+    private func golden(_ name: String) throws -> [String: Any] {
+        let data = try Data(contentsOf: contractDirectory.appending(path: "\(name).golden.json"))
+        return try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+    }
+
+    private func decode<T: Decodable>(_ type: T.Type, from json: [String: Any]) throws -> T {
+        try decode(type, data: JSONSerialization.data(withJSONObject: json))
     }
 }
 

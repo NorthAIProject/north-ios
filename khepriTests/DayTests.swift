@@ -155,6 +155,7 @@ struct DayActionTests {
         #expect(await actions.calls == ["caffeine coffee"])
         #expect(await service.asked.count == 1, "the day reloads after the write")
         #expect(store.actionError == nil)
+        #expect(store.writes == 1, "Today refreshes its snapshot on each write")
     }
 
     @Test func aFailedWriteSaysWhyAndStillReloads() async {
@@ -163,6 +164,7 @@ struct DayActionTests {
         await store.perform { try await $0.stopFast() }
         #expect(store.actionError != nil)
         #expect(await service.asked.count == 1)
+        #expect(store.writes == 0, "nothing changed, so nothing else reloads")
     }
 }
 

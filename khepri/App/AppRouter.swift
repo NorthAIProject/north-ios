@@ -1,6 +1,13 @@
 import Foundation
 import Observation
 
+extension Notification.Name {
+    /// Posted on the main actor when something outside the view tree, such
+    /// as a Siri shortcut, wrote to the day. The root view turns it into
+    /// `AppRouter.dataChanged()`.
+    static let dayDataDidChange = Notification.Name("khepri.dayDataDidChange")
+}
+
 /// The five tabs. The web's sidebar has more sections than a tab bar should
 /// hold, so the rest live under More.
 enum AppTab: String, CaseIterable, Hashable {
@@ -98,6 +105,16 @@ final class AppRouter {
     /// Set with `openSection` for a single goal; the Goals screen opens it
     /// and clears it.
     var openGoal: String?
+    /// Counts writes on this device that change the day: a check-in, a quick
+    /// add, an approved coach action, a Siri shortcut. Screens that show the
+    /// day reload on each change, since a tab kept alive by the tab bar does
+    /// not reload by itself. A screen must not bump it from its own load.
+    private(set) var dataVersion = 0
+
+    /// Says the day's data changed, so every screen showing it reloads.
+    func dataChanged() {
+        dataVersion += 1
+    }
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
