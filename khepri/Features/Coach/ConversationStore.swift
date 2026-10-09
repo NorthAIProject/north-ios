@@ -51,6 +51,8 @@ final class ConversationStore {
     private(set) var title: String
     private(set) var messages: [DisplayMessage] = []
     private(set) var pendingApproval: ToolApproval?
+    /// An answer to the approval is on its way and the tools are running.
+    private(set) var isDeciding = false
     private(set) var phase: Phase = .loading
     /// A reply that failed, shown under the conversation, kept apart from the
     /// messages so a retry does not leave it behind.
@@ -97,8 +99,14 @@ final class ConversationStore {
     }
 
     /// Allows or refuses what the coach asked to do, then collects the reply.
+    ///
+    /// A write such as a new training plan runs for minutes before this
+    /// returns, so a second tap in the meantime is ignored rather than sent.
     func decide(approve: Bool) async {
-        guard let approval = pendingApproval else { return }
+        guard let approval = pendingApproval, !isDeciding else { return }
+        isDeciding = true
+        defer { isDeciding = false }
+        replyError = nil
         do {
             try await coach.decide(in: conversationID, messageID: approval.messageId, approve: approve)
             pendingApproval = nil

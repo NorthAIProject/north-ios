@@ -27,6 +27,9 @@ protocol CoachServicing: Sendable {
 
 struct CoachService: CoachServicing {
     var api: Client = API.shared
+    /// For deciding on an approval: the approved write runs before the server
+    /// answers, and a new training plan takes longer than 60 s.
+    var generation: Client = API.generation
     var exercises = ExerciseCache.shared
 
     func conversations() async throws -> [ConversationSummary] {
@@ -59,7 +62,7 @@ struct CoachService: CoachServicing {
 
     func decide(in id: String, messageID: String, approve: Bool) async throws {
         _ = try await NorthAPI.call {
-            try await api.decideToolCalls(path: .init(id: id, messageID: messageID), body: .json(.init(approve: approve))).noContent
+            try await generation.decideToolCalls(path: .init(id: id, messageID: messageID), body: .json(.init(approve: approve))).noContent
         }
     }
 

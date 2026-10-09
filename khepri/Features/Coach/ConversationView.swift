@@ -37,7 +37,7 @@ struct ConversationView: View {
                         .id(message.id)
                     }
                     if let approval = store.pendingApproval {
-                        ApprovalCard(approval: approval) { approve in
+                        ApprovalCard(approval: approval, isBusy: store.isDeciding) { approve in
                             stopped = false
                             Task { await store.decide(approve: approve) }
                         }
@@ -223,6 +223,8 @@ private struct TypingIndicator: View {
 /// The coach wants to change something and waits for a yes.
 private struct ApprovalCard: View {
     let approval: ToolApproval
+    /// The answer is on its way; both buttons wait until it lands.
+    let isBusy: Bool
     let onDecide: (Bool) -> Void
 
     var body: some View {
@@ -237,9 +239,16 @@ private struct ApprovalCard: View {
             HStack {
                 Button("Not Now") { onDecide(false) }
                     .buttonStyle(.bordered)
-                Button("Allow") { onDecide(true) }
-                    .northProminentButton()
+                Button { onDecide(true) } label: {
+                    if isBusy {
+                        ProgressView().accessibilityLabel("Allowing")
+                    } else {
+                        Text("Allow")
+                    }
+                }
+                .northProminentButton()
             }
+            .disabled(isBusy)
         }
         .northCard()
         .overlay {
