@@ -1,4 +1,6 @@
 import Foundation
+import HTTPTypes
+import Synchronization
 import NorthAPI
 import OpenAPIRuntime
 import Testing
@@ -112,7 +114,10 @@ struct ConversationStoreTests {
         await store.load()
 
         store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
-        #expect(store.isUploading && !store.canSendMessage(""), "nothing goes while the file is on its way")
+        #expect(store.isUploading)
+        #expect(!store.canSendMessage("hello"), "nothing goes while the file is on its way")
+        store.send("hello")
+        #expect(coach.sent.isEmpty && store.messages.isEmpty, "sending during the upload sends nothing")
         try await waitUntilUploaded(store)
         #expect(store.attachment == coach.uploaded)
         #expect(store.canSendMessage(""), "a file alone is a message")
@@ -168,6 +173,22 @@ struct ConversationStoreTests {
         #expect(store.attachment == nil)
         #expect(store.attachmentError == refusal)
         #expect(!store.canSendMessage(""))
+    }
+
+    @Test func anOldServerWithoutUploadsSaysSoInsteadOfNotFound() async throws {
+        for status in [404, 405] {
+            let transport = StatusTransport(status: status)
+            let client = NorthAPI.client(baseURL: URL(string: "https://example.com")!, token: { nil }, transport: transport)
+            let store = ConversationStore(
+                conversationID: "c1", title: "", coach: CoachService(api: client, generation: client)
+            )
+
+            store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
+            try await waitUntilUploaded(store)
+            #expect(transport.lastPath?.hasSuffix("/conversations/c1/attachments") == true)
+            #expect(store.attachment == nil)
+            #expect(store.attachmentError == "Attachments aren't available yet.", "status \(status)")
+        }
     }
 
     @Test func aFileOverTheLimitIsNotUploaded() async throws {
@@ -335,5 +356,20 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
             for event in events { continuation.yield(event) }
             continuation.finish()
         }
+    }
+}
+
+/// Answers every request with one status and an empty body, and records the path.
+final class StatusTransport: ClientTransport, Sendable {
+    private let status: Int
+    private let path = Mutex<String?>(nil)
+
+    init(status: Int) { self.status = status }
+
+    var lastPath: String? { path.withLock { $0 } }
+
+    func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
+        path.withLock { $0 = baseURL.path() + (request.path ?? "") }
+        return (HTTPResponse(status: .init(code: status)), nil)
     }
 }

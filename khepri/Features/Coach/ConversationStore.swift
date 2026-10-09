@@ -156,11 +156,21 @@ final class ConversationStore {
             } catch {
                 // Removed while uploading: the person no longer wants it.
                 guard !Task.isCancelled else { return }
-                self?.attachmentError = error.importMessage
+                self?.attachmentError = Self.uploadMessage(for: error)
             }
             self?.uploadingName = nil
             self?.uploadTask = nil
         }
+    }
+
+    /// An old server has no upload route and answers 404 or 405; the generic
+    /// "could not be found" would read as the conversation being gone.
+    private static func uploadMessage(for error: any Error) -> String {
+        if let api = error as? APIError {
+            if api.isNotFound { return "Attachments aren't available yet." }
+            if case .invalidStatus(405) = api { return "Attachments aren't available yet." }
+        }
+        return error.importMessage
     }
 
     /// Drops the pending attachment, or stops the one still uploading.

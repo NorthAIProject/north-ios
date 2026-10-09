@@ -78,14 +78,16 @@ struct PendingAttachmentBar: View {
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(.rect)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(removeLabel)
         }
         .font(.footnote)
         .padding(.leading, 10)
-        .padding(.trailing, 6)
-        .padding(.vertical, 6)
+        // The remove button is 44 pt square and supplies the chip's height
+        // and trailing room.
         .background(Color(.secondarySystemBackground), in: .capsule)
     }
 }
