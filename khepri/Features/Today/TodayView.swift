@@ -9,6 +9,8 @@ struct TodayView: View {
     var dayStore: DayStore?
     @Environment(AppRouter.self) private var router
     @State private var fitness = FitnessStore()
+    @State private var recovery = RecoveryStore()
+    @State private var lighter = LighterDayStore()
 
     var body: some View {
         ScrollView {
@@ -30,8 +32,13 @@ struct TodayView: View {
                     .anchorGuidedTour(.today)
                 }
 
-                // Only on a low-readiness morning with a session still to do.
-                LighterDayCard()
+                // Today's recovery against the usual; nothing without a watch.
+                if let today = recovery.recovery {
+                    RecoveryCard(recovery: today)
+                }
+
+                // Only on a low-recovery morning with a session still to do.
+                LighterDayCard(store: lighter)
 
                 if fitness.isHealthAvailable {
                     NavigationLink(value: FitnessRoute()) {
@@ -66,7 +73,11 @@ struct TodayView: View {
             .padding(.bottom, 24)
             .animation(.snappy, value: fitness.snapshot)
         }
-        .onAppear { Task { await fitness.loadActivity() } }
+        .onAppear {
+            Task { await fitness.loadActivity() }
+            Task { await recovery.load() }
+            Task { await lighter.load() }
+        }
     }
 }
 
