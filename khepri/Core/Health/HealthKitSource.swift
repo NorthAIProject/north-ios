@@ -43,6 +43,13 @@ struct HealthKitSource: HealthDataSource {
         async let stand = standHours(start, end, calendar)
         async let night = sleepNights(start, end, calendar)
         async let workouts = workouts(start, end)
+        let bpm = HKUnit.count().unitDivided(by: .minute())
+        async let distance = daily(.distanceWalkingRunning, .meterUnit(with: .kilo), .cumulativeSum, start, end, calendar)
+        async let flights = daily(.flightsClimbed, .count(), .cumulativeSum, start, end, calendar)
+        async let walkingHR = daily(.walkingHeartRateAverage, bpm, .discreteAverage, start, end, calendar)
+        async let breathing = daily(.respiratoryRate, bpm, .discreteAverage, start, end, calendar)
+        async let oxygen = daily(.oxygenSaturation, .percent(), .discreteAverage, start, end, calendar)
+        async let mindful = mindfulMinutes(start, end, calendar)
 
         var snapshot = try await HealthSnapshot(steps: steps, activeEnergy: energy, restingHeartRate: resting,
                                                 hrv: hrv, vo2Max: vo2, sleep: night.minutes, workouts: workouts)
@@ -60,6 +67,12 @@ struct HealthKitSource: HealthDataSource {
         snapshot.vitaminC = try await vitaminC
         snapshot.vitaminD = try await vitaminD
         snapshot.bloodPressure = try await pressure
+        snapshot.walkingRunningKm = try await distance
+        snapshot.flightsClimbed = try await flights
+        snapshot.walkingHeartRate = try await walkingHR
+        snapshot.respiratoryRate = try await breathing
+        snapshot.bloodOxygen = try await oxygen
+        snapshot.mindfulMinutes = try await mindful
         return snapshot
     }
 
@@ -99,6 +112,17 @@ struct HealthKitSource: HealthDataSource {
             byDay[calendar.startOfDay(for: sample.startDate), default: 0] += 1
         }
         return byDay.keys.sorted().map { DailyValue(day: $0, value: byDay[$0]!) }
+    }
+
+    /// Minutes of mindful sessions per day, from any app that logs them.
+    private func mindfulMinutes(_ start: Date, _ end: Date, _ calendar: Calendar) async throws -> [DailyValue] {
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.categorySample(type: HKCategoryType(.mindfulSession),
+                                         predicate: HKQuery.predicateForSamples(withStart: calendar.startOfDay(for: start), end: end))],
+            sortDescriptors: [SortDescriptor(\.startDate)]
+        )
+        let sessions = try await descriptor.result(for: store).map { DateInterval(start: $0.startDate, end: $0.endDate) }
+        return MindfulDays.minutes(sessions, calendar: calendar)
     }
 
     private func sleepNights(_ start: Date, _ end: Date, _ calendar: Calendar) async throws -> (minutes: [DailyValue], stages: [SleepStageBlock]) {

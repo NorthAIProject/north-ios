@@ -48,7 +48,7 @@ APP_SETTINGS = {
   # Usage strings iOS shows in its permission prompts. Required: asking for
   # Health access without them crashes the app.
   "INFOPLIST_KEY_NSHealthShareUsageDescription" =>
-    "Khepri reads your workouts, activity, heart rate, sleep and weight so your coach can see how training and recovery are going.",
+    "Khepri reads your workouts, activity, heart rate, breathing, blood oxygen, mindful minutes, sleep and weight so your coach can see how training and recovery are going.",
   # The workout on the Lock Screen and in the Dynamic Island.
   "INFOPLIST_KEY_NSSupportsLiveActivities" => "YES",
   # Only HTTPS and Apple's own crypto, which are exempt: answers App Store
