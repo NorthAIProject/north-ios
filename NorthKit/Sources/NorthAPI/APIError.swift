@@ -94,6 +94,17 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     }
 }
 
+public extension APIError {
+    /// A non-2xx answer to a request sent outside the generated client, such
+    /// as a background upload, read exactly as `ErrorMappingMiddleware`
+    /// reads one: the server's message and field errors when the body is an
+    /// `ErrorBody`, else just the status.
+    init(status: Int, body: Data) {
+        let detail = try? JSONDecoder().decode(ErrorMappingMiddleware.ErrorEnvelope.self, from: body).error
+        self = ErrorMappingMiddleware.error(status: status, detail: detail)
+    }
+}
+
 public extension NorthAPI {
     /// Runs a generated call and rethrows any failure as `APIError`.
     ///
