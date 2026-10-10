@@ -69,6 +69,7 @@ final class LockedStore: SecureStringStoring, @unchecked Sendable {
     func removeValue(for key: String) throws { removed.append(key) }
 }
 
+@MainActor
 struct LockedSessionTests {
     /// Not being able to read the token is not being signed out: the error
     /// reaches the caller, and nothing is deleted.

@@ -38,7 +38,7 @@ struct BackgroundTasks: Sendable {
     var begin: @MainActor @Sendable (_ name: String, _ expiration: @escaping Expiration) -> UIBackgroundTaskIdentifier
     var end: @MainActor @Sendable (UIBackgroundTaskIdentifier) -> Void
 
-    static let application = BackgroundTasks(
+    nonisolated static let application = BackgroundTasks(
         begin: { name, expiration in
             UIApplication.shared.beginBackgroundTask(withName: name, expirationHandler: expiration)
         },

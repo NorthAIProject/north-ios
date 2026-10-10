@@ -10,14 +10,14 @@ import UIKit
 /// the app hangs up, and stores what they produce. Locking the phone or
 /// switching apps mid-reply cuts the connection; the reply is then fetched
 /// with the conversation rather than shown as a failure.
-struct ReplyRecovery {
+struct ReplyRecovery: Sendable {
     var pollInterval: Duration
     var attempts: Int
-    var isInBackground: @MainActor () -> Bool
+    var isInBackground: @MainActor @Sendable () -> Bool
 
     /// Every 2 s for about a minute. Attempts, not a deadline: time spent
     /// suspended in the background does not use them up.
-    static let standard = ReplyRecovery(
+    nonisolated static let standard = ReplyRecovery(
         pollInterval: .seconds(2),
         attempts: 30,
         isInBackground: { UIApplication.shared.applicationState == .background }

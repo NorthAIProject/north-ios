@@ -262,7 +262,7 @@ extension ReplyRecovery {
     /// Polls without waiting, a few times, in the foreground.
     static let immediate = ReplyRecovery(pollInterval: .milliseconds(1), attempts: 3, isInBackground: { false })
 
-    static func immediate(isInBackground: @escaping @MainActor () -> Bool) -> ReplyRecovery {
+    static func immediate(isInBackground: @escaping @MainActor @Sendable () -> Bool) -> ReplyRecovery {
         ReplyRecovery(pollInterval: .milliseconds(1), attempts: 3, isInBackground: isInBackground)
     }
 }
