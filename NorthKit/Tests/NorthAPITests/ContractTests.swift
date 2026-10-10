@@ -70,6 +70,9 @@ struct ContractTests {
         #expect(cardio.runs.best5kSeconds == 1500)
         #expect(cardio.restingHeartRate.count == 2)
         #expect(cardio.byKind.first?.measure == "pace" && cardio.byKind.first?.avgPaceSeconds == 300)
+        let consistency = try decode(Schemas.InsightsConsistency.self, "insights-consistency")
+        #expect(consistency.days.count == 11 && consistency.weeks.count == 2 && consistency.currentStreak == 3)
+        #expect(consistency.days[1].trained && consistency.days[1].checkedIn && consistency.sentence.hasSuffix("check-in streak 1 day."))
         let kind = try decode(Schemas.StatsCardioKind.self, "stats_cardio_kind")
         #expect(kind.name == "Running" && kind.measure == "pace" && kind.outdoor == 3)
         #expect(kind.bests.map(\.key) == ["fastest_5k", "fastest_10k", "longest"] && kind.bests.first?.unit == "s")
@@ -437,7 +440,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_cardio_kind", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_cardio_kind", "insights-consistency", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "chat_attachment", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

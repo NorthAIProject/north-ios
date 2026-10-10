@@ -20,6 +20,10 @@ private struct FakeInsights: InsightsServicing {
         return try JSONDecoder().decode(InsightsRecovery.self, from: Data(json.utf8))
     }
 
+    func consistency() async throws -> InsightsConsistency {
+        throw URLError(.unsupportedURL)
+    }
+
     func health() async throws -> [InsightsHealthMetric] {
         if let healthError { throw healthError }
         return [
@@ -59,5 +63,20 @@ struct InsightsStoreTests {
     @Test func anUnknownKeyStillGetsASymbol() {
         #expect(HealthSymbol.name(for: "steps") == "figure.walk")
         #expect(HealthSymbol.name(for: "a-metric-from-a-later-server") == "heart.text.square")
+    }
+}
+
+struct ConsistencyPageTests {
+    @Test func dayCountsReadNaturally() {
+        #expect(ConsistencyPage.days(1) == "1 day")
+        #expect(ConsistencyPage.days(0) == "0 days" && ConsistencyPage.days(12) == "12 days")
+    }
+
+    @Test func theWeekLineNamesTheUsualOnceThereIsOne() throws {
+        let json = #"{"days":[],"weeks":[],"currentStreak":0,"longestStreak":0,"longestGap":0,"bestWeek":{"start":"2026-10-05","days":0},"thisWeek":2,"usualPerWeek":4.5,"checkInStreak":0,"sentence":""}"#
+        var model = try JSONDecoder().decode(InsightsConsistency.self, from: Data(json.utf8))
+        #expect(ConsistencyPage.weekLine(model) == "Active days so far. Usually 4.5 a week.")
+        model.usualPerWeek = 0
+        #expect(ConsistencyPage.weekLine(model) == "Active days so far this week.")
     }
 }
