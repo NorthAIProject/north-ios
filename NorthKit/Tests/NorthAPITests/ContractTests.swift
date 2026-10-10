@@ -223,6 +223,9 @@ struct ContractTests {
         #expect(health.metrics.map(\.key) == ["steps", "vo2max"])
         #expect(health.metrics.first?.recent == [8800, 11200] && health.metrics.first?.usual?.z == 2)
         #expect(health.metrics.last?.usual == nil && health.metrics.last?.latest == "44.2")
+        let recovery = try decode(Schemas.InsightsRecovery.self, "insights-recovery")
+        #expect(recovery.hasData && recovery.points == 0 && recovery.verdict == "low")
+        #expect(recovery.signals.first?.key == "hrv" && recovery.signals.first?.latest == "38ms")
     }
 
     @Test func goalsAndCheckIns() throws {
@@ -430,7 +433,7 @@ struct ContractTests {
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "week", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health",
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health", "insights-recovery",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
