@@ -46,10 +46,13 @@ public enum NorthAPI {
             transport: transport,
             // Outermost first. Error mapping wraps the bearer middleware so
             // the bearer middleware still sees a raw 401 and can sign out.
+            // Retry sits next to the transport, so a second attempt carries
+            // the same headers as the first.
             middlewares: [
                 ErrorMappingMiddleware(),
                 LanguageMiddleware(),
                 BearerAuthMiddleware(token: token, onUnauthorized: onUnauthorized),
+                RetryMiddleware(),
             ]
         )
     }
@@ -140,6 +143,49 @@ struct BearerAuthMiddleware: ClientMiddleware {
         "signUp", "logIn", "signInWithGoogle", "signInWithApple", "requestPasswordReset",
         "beginPasskeyRegistration", "finishPasskeyRegistration", "beginPasskeyLogin", "finishPasskeyLogin",
     ]
+}
+
+/// Asks again, once, when a read lost its connection.
+///
+/// Coming back from the background, the first requests often ride pooled
+/// connections the system closed while the app was suspended, and fail with
+/// "the network connection was lost" before reaching the server. Only GET and
+/// HEAD are retried: a write may have arrived before the drop, and sending it
+/// again could do it twice. Event streams are never retried here.
+struct RetryMiddleware: ClientMiddleware {
+    var delay: Duration = .milliseconds(500)
+
+    static let retriedMethods: Set<HTTPRequest.Method> = [.get, .head]
+
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        guard Self.retriedMethods.contains(request.method), !Self.isEventStream(request) else {
+            return try await next(request, body, baseURL)
+        }
+        do {
+            return try await next(request, body, baseURL)
+        } catch where Self.isTransient(error) {
+            try await Task.sleep(for: delay)
+            return try await next(request, body, baseURL)
+        }
+    }
+
+    /// A dropped, timed-out or not-yet-up connection, as the transport
+    /// reports it (wrapped in the runtime's `ClientError`).
+    static func isTransient(_ error: any Error) -> Bool {
+        let cause = (error as? ClientError)?.underlyingError ?? error
+        guard let urlError = cause as? URLError else { return false }
+        return APIError.interruptionCodes.contains(urlError.code)
+    }
+
+    private static func isEventStream(_ request: HTTPRequest) -> Bool {
+        request.headerFields[.accept]?.contains("text/event-stream") == true
+    }
 }
 
 /// Reads RFC 3339 timestamps with or without fractional seconds.

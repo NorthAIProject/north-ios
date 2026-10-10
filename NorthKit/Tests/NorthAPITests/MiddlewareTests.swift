@@ -130,6 +130,72 @@ struct MiddlewareTests {
         #expect(!signedOut.withLock { $0 })
     }
 
+    // MARK: - Retrying a dropped connection
+
+    /// Coming back from the background, the first request often rides a
+    /// pooled connection the system already closed.
+    @Test func aDroppedReadIsRetriedOnce() async throws {
+        let transport = CannedTransport(status: .ok, json: Self.meJSON, failures: [URLError(.networkConnectionLost)])
+        let me = try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+        #expect(me.user.displayName == "Ana")
+        #expect(transport.requestCount == 2)
+    }
+
+    @Test func aReadIsRetriedOnlyOnce() async throws {
+        let transport = CannedTransport(status: .ok, json: Self.meJSON, failures: [URLError(.timedOut), URLError(.timedOut)])
+        let error = await #expect(throws: APIError.self) {
+            try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+        }
+        #expect(error?.isInterruption == true)
+        #expect(transport.requestCount == 2)
+    }
+
+    @Test func eachTransientFailureIsRetriedAndNothingElse() async throws {
+        for code in [URLError.Code.networkConnectionLost, .timedOut, .notConnectedToInternet] {
+            let transport = CannedTransport(status: .ok, json: Self.meJSON, failures: [URLError(code)])
+            _ = try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+            #expect(transport.requestCount == 2, "\(code)")
+        }
+        for code in [URLError.Code.cannotFindHost, .badServerResponse, .cancelled, .userAuthenticationRequired] {
+            let transport = CannedTransport(status: .ok, json: Self.meJSON, failures: [URLError(code)])
+            await #expect(throws: APIError.self) {
+                try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+            }
+            #expect(transport.requestCount == 1, "\(code)")
+        }
+    }
+
+    /// A write may have reached the server before the connection dropped;
+    /// sending it again could do it twice.
+    @Test func aWriteIsNeverRetried() async throws {
+        let transport = CannedTransport(status: .ok, json: Self.authJSON, failures: [URLError(.networkConnectionLost)])
+        await #expect(throws: APIError.self) {
+            try await NorthAPI.call {
+                try await client(transport).logIn(body: .json(.init(email: "ana@example.com", password: "pw"))).ok.body.json
+            }
+        }
+        #expect(transport.requestCount == 1)
+    }
+
+    /// The app's own client carries the retry, with its real delay.
+    @Test func theAppsClientRetriesReads() async throws {
+        let transport = CannedTransport(status: .ok, json: Self.meJSON, failures: [URLError(.networkConnectionLost)])
+        let api = NorthAPI.client(baseURL: URL(string: "https://example.com")!, token: { "t" }, transport: transport)
+        _ = try await NorthAPI.call { try await api.getMe().ok.body.json }
+        #expect(transport.requestCount == 2)
+    }
+
+    // MARK: - Error mapping
+
+    @Test func aDroppedConnectionIsAnInterruption() {
+        #expect(APIError(URLError(.networkConnectionLost)).isInterruption)
+        #expect(APIError(URLError(.timedOut)).isInterruption)
+        #expect(APIError(URLError(.notConnectedToInternet)).isInterruption)
+        #expect(!APIError(URLError(.cannotFindHost)).isInterruption)
+        #expect(!APIError.server("busy").isInterruption)
+        #expect(APIError(URLError(.cancelled)).urlErrorCode == .cancelled)
+    }
+
     private func client(
         _ transport: CannedTransport,
         token: @escaping @Sendable () async throws -> String? = { "session-token" },
@@ -143,6 +209,7 @@ struct MiddlewareTests {
                 ErrorMappingMiddleware(),
                 LanguageMiddleware(preferred: { ["pt-PT", "en-GB"] }),
                 BearerAuthMiddleware(token: token, onUnauthorized: { onUnauthorized() }),
+                RetryMiddleware(delay: .milliseconds(1)),
             ]
         )
     }
