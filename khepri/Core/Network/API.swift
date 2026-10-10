@@ -4,12 +4,14 @@ import NorthAPI
 /// The one generated client the app talks to the server through.
 ///
 /// Built once, from the build's base URL and the signed-in session. A 401 on
-/// any authenticated call ends the session, which sends the app back to sign
-/// in wherever the call was made from.
+/// any call that carried the token ends the session, which sends the app back
+/// to sign in wherever the call was made from. A token the Keychain will not
+/// hand over (the phone is locked) fails the call with `APIError.locked` and
+/// keeps the session.
 enum API {
     static let shared: Client = NorthAPI.client(
         baseURL: AppEnvironment.apiBaseURL,
-        token: { try? await AuthSessionManager.shared.validAccessToken() },
+        token: { try await AuthSessionManager.shared.validAccessToken() },
         onUnauthorized: { await AuthSessionManager.shared.invalidateSession() }
     )
 
@@ -19,7 +21,7 @@ enum API {
     /// other call keeps it, so a dead connection still fails fast.
     static let generation: Client = NorthAPI.client(
         baseURL: AppEnvironment.apiBaseURL,
-        token: { try? await AuthSessionManager.shared.validAccessToken() },
+        token: { try await AuthSessionManager.shared.validAccessToken() },
         onUnauthorized: { await AuthSessionManager.shared.invalidateSession() },
         session: URLSession(configuration: {
             let configuration = URLSessionConfiguration.default

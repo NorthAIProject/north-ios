@@ -14,12 +14,14 @@ public enum NorthAPI {
     ///
     /// - Parameter token: returns the current session token, or nil when
     ///   signed out. Called before every request so a refreshed or cleared
-    ///   session takes effect immediately.
+    ///   session takes effect immediately. Throwing means the token exists
+    ///   but cannot be read right now (a locked phone): the request fails
+    ///   with `APIError.locked` and is not sent.
     /// - Parameter onUnauthorized: called when the server rejects the token,
     ///   so the app can sign out.
     public static func client(
         baseURL: URL,
-        token: @escaping @Sendable () async -> String?,
+        token: @escaping @Sendable () async throws -> String?,
         onUnauthorized: @escaping @Sendable () async -> Void = {},
         session: URLSession = .shared
     ) -> Client {
@@ -34,7 +36,7 @@ public enum NorthAPI {
     /// The same client over any transport; tests pass a canned one.
     public static func client(
         baseURL: URL,
-        token: @escaping @Sendable () async -> String?,
+        token: @escaping @Sendable () async throws -> String?,
         onUnauthorized: @escaping @Sendable () async -> Void = {},
         transport: any ClientTransport
     ) -> Client {
@@ -95,8 +97,13 @@ struct LanguageMiddleware: ClientMiddleware {
 /// Sign-in operations carry `security: []` in the spec; sending a stale token
 /// to them would be harmless, but leaving it off keeps the rule simple: the
 /// token goes wherever the spec asks for it.
+///
+/// Only a 401 for a token that was actually sent reports the session as
+/// rejected. A token that cannot be read (the Keychain refuses while the
+/// phone is locked) stops the request with `APIError.locked` instead of
+/// sending it bare and signing the person out over the 401 that follows.
 struct BearerAuthMiddleware: ClientMiddleware {
-    let token: @Sendable () async -> String?
+    let token: @Sendable () async throws -> String?
     let onUnauthorized: @Sendable () async -> Void
 
     func intercept(
@@ -107,9 +114,18 @@ struct BearerAuthMiddleware: ClientMiddleware {
         next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var request = request
-        let sentToken = !Self.publicOperations.contains(operationID)
-        if sentToken, let token = await token() {
-            request.headerFields[.authorization] = "Bearer \(token)"
+        var sentToken = false
+        if !Self.publicOperations.contains(operationID) {
+            let current: String?
+            do {
+                current = try await token()
+            } catch {
+                throw APIError.locked
+            }
+            if let current {
+                request.headerFields[.authorization] = "Bearer \(current)"
+                sentToken = true
+            }
         }
         let (response, responseBody) = try await next(request, body, baseURL)
         if sentToken, response.status == .unauthorized {

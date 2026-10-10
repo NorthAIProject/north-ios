@@ -16,6 +16,9 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case fieldValidation(message: String, fields: [String: String])
     case server(String)
     case network(String)
+    /// The session token could not be read, as while the phone is locked.
+    /// Nothing was sent, and the session is intact.
+    case locked
 
     public var errorDescription: String? {
         switch self {
@@ -29,6 +32,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             message ?? "That could not be found."
         case .fieldValidation(let message, _), .server(let message), .network(let message):
             message
+        case .locked:
+            "Unlock your phone to continue."
         }
     }
 
