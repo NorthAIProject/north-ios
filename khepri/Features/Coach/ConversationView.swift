@@ -9,6 +9,8 @@ struct ConversationView: View {
     @State private var draft = ""
     @State private var openExercise: String?
     @State private var dictating = false
+    /// Asking where the next message's file comes from.
+    @State private var attaching = false
     /// The moment after a reply ends, while the header says so.
     @State private var flash: CoachActivity.Flash?
     /// Whether the person stopped the reply, which earns no "is done".
@@ -78,9 +80,10 @@ struct ConversationView: View {
                 Composer(
                     text: $draft,
                     isReplying: store.phase == .replying,
-                    canSend: store.canSend,
+                    canSend: store.canSendMessage(draft),
                     focused: $composing,
-                    onListeningChange: { dictating = $0 }
+                    onListeningChange: { dictating = $0 },
+                    onAttach: { attaching = true }
                 ) {
                     stopped = false
                     store.send(draft)
@@ -88,6 +91,15 @@ struct ConversationView: View {
                 } onStop: {
                     stopped = true
                     store.stop()
+                } attachments: {
+                    if store.isUploading || store.attachment != nil || store.attachmentError != nil {
+                        PendingAttachmentBar(
+                            attachment: store.attachment,
+                            uploadingName: store.uploadingName,
+                            error: store.attachmentError,
+                            onRemove: store.removeAttachment
+                        )
+                    }
                 }
             } else {
                 Text("This reflection has ended.")
@@ -128,6 +140,13 @@ struct ConversationView: View {
         // crowd the composer.
         .toolbar(.hidden, for: .tabBar)
         .task { await store.load() }
+        .importSourcePicker(
+            "Attach to your message",
+            message: "A photo, or a PDF, Word, Excel (.xlsx), CSV, text or JSON file. Up to 8 MB.",
+            isPresented: $attaching,
+            onPick: { store.attach($0) },
+            onError: { store.attachmentFailed($0) }
+        )
         // An approved action may have written a check-in, a plan or a meal:
         // the screens showing them reload.
         .onChange(of: store.dataChanges) { router.dataChanged() }
@@ -143,8 +162,9 @@ private struct ExerciseSlug: Identifiable {
     let id: String
 }
 
-/// A user message as a tinted bubble on the right; a coach reply as plain
-/// text on the left, with its exercise cards and a way to say it helped.
+/// A user message as a tinted bubble on the right, under the files it
+/// carried; a coach reply as plain text on the left, with its exercise cards
+/// and a way to say it helped.
 private struct MessageRow: View {
     let message: DisplayMessage
     let onExercise: (String) -> Void
@@ -153,13 +173,21 @@ private struct MessageRow: View {
     var body: some View {
         switch message.role {
         case .user:
-            Text(message.text)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(NorthColor.signal.opacity(0.18), in: .rect(cornerRadius: 18, style: .continuous))
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.leading, 48)
-                .textSelection(.enabled)
+            VStack(alignment: .trailing, spacing: 6) {
+                ForEach(message.attachments, id: \.mediaId) { attachment in
+                    AttachmentChip(attachment: attachment)
+                }
+                // A message may be only a file.
+                if !message.text.isEmpty {
+                    Text(message.text)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(NorthColor.signal.opacity(0.18), in: .rect(cornerRadius: 18, style: .continuous))
+                        .textSelection(.enabled)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.leading, 48)
         case .coach:
             VStack(alignment: .leading, spacing: 12) {
                 if message.text.isEmpty && message.isStreaming {
@@ -262,46 +290,57 @@ private struct ApprovalCard: View {
     }
 }
 
-private struct Composer: View {
+private struct Composer<Attachments: View>: View {
     @Binding var text: String
     let isReplying: Bool
+    /// Whether the message as typed, with its file, can go now.
     let canSend: Bool
     var focused: FocusState<Bool>.Binding
     let onListeningChange: (Bool) -> Void
+    let onAttach: () -> Void
     let onSend: () -> Void
     let onStop: () -> Void
-
-    private var trimmedEmpty: Bool { text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    /// The file the next message carries, shown above the field.
+    @ViewBuilder let attachments: () -> Attachments
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            TextField("Message your coach", text: $text, axis: .vertical)
-                .lineLimit(1...6)
-                // The placeholder names the field only while it is empty.
-                .accessibilityIdentifier("composer")
-                .focused(focused)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20))
-
-            // The keyboard's microphone only appears once the keyboard is up
-            // and stops on a pause; this one is a tap away and keeps
-            // listening until tapped again.
-            if !isReplying {
-                DictationButton(text: $text, onListeningChange: onListeningChange)
-            }
-
-            if isReplying {
-                Button(action: onStop) {
-                    Image(systemName: "stop.circle.fill").font(.title)
+        VStack(spacing: 8) {
+            attachments()
+            HStack(alignment: .bottom, spacing: 8) {
+                Button(action: onAttach) {
+                    Image(systemName: "paperclip").font(.title3)
                 }
-                .accessibilityLabel("Stop")
-            } else {
-                Button(action: onSend) {
-                    Image(systemName: "arrow.up.circle.fill").font(.title)
+                .padding(.bottom, 6)
+                .accessibilityLabel("Attach a file or photo")
+
+                TextField("Message your coach", text: $text, axis: .vertical)
+                    .lineLimit(1...6)
+                    // The placeholder names the field only while it is empty.
+                    .accessibilityIdentifier("composer")
+                    .focused(focused)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20))
+
+                // The keyboard's microphone only appears once the keyboard is up
+                // and stops on a pause; this one is a tap away and keeps
+                // listening until tapped again.
+                if !isReplying {
+                    DictationButton(text: $text, onListeningChange: onListeningChange)
                 }
-                .disabled(!canSend || trimmedEmpty)
-                .accessibilityLabel("Send")
+
+                if isReplying {
+                    Button(action: onStop) {
+                        Image(systemName: "stop.circle.fill").font(.title)
+                    }
+                    .accessibilityLabel("Stop")
+                } else {
+                    Button(action: onSend) {
+                        Image(systemName: "arrow.up.circle.fill").font(.title)
+                    }
+                    .disabled(!canSend)
+                    .accessibilityLabel("Send")
+                }
             }
         }
         .padding(.horizontal, 12)

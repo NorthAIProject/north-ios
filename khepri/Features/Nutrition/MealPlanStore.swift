@@ -35,6 +35,12 @@ final class MealPlanStore {
     var isAdvanced: Bool { plan?.value1.mode == .advanced }
     var hasTarget: Bool { plan?.value2.target != nil }
 
+    /// The advice an imported plan carried beside its meals; nil when blank.
+    var notes: String? {
+        let notes = plan?.value2.notes?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return notes.isEmpty ? nil : notes
+    }
+
     func load() async {
         do { plan = try await service.plan(id); error = nil } catch { self.error = error.localizedDescription }
     }
@@ -146,7 +152,15 @@ final class MealPlanStore {
 
     func day(_ dayID: String) -> MealPlanDay? { days.first { $0.id == dayID } }
 
+    /// The day a meal counts toward. Nil for an alternative option: it is
+    /// eaten instead of its slot's first option, so it never moves the day.
     func day(holding mealID: String) -> MealPlanDay? { days.first { $0.meals.contains { $0.id == mealID } } }
+
+    /// True when the id is one of a slot's other options rather than a
+    /// slot's counted first option.
+    func isAlternative(_ mealID: String) -> Bool {
+        days.contains { $0.meals.contains { ($0.alternatives ?? []).contains { $0.id == mealID } } }
+    }
 
     /// What a day would have left after a portion still being chosen: the
     /// server's remaining, less the portion's share of its per-100 g macros.
@@ -167,4 +181,67 @@ final class MealPlanStore {
 extension MealPlanDay {
     /// The day's name in the person's language; 0 is Sunday on both sides.
     var name: String { Calendar.current.standaloneWeekdaySymbols[weekday] }
+}
+
+/// One option of a meal slot: the slot's first, the one its day counts, or
+/// one of the alternatives eaten instead of it. Each is its own meal on the
+/// server, so its id is what portions, removal and logging act on.
+struct PlanMealOption: Identifiable, Hashable {
+    let id: String
+    let label: String
+    let isCounted: Bool
+    let totalMacros: Macros
+    let ingredients: [MealPortion]
+}
+
+extension MealPlanMeal {
+    var hasAlternatives: Bool { !(alternatives ?? []).isEmpty }
+
+    /// The slot's options in order: itself first, then its alternatives. An
+    /// option without a label is named by its place, as the server names it.
+    var options: [PlanMealOption] {
+        let first = PlanMealOption(id: id, label: Self.label(optionLabel, place: 1), isCounted: true,
+                                   totalMacros: totalMacros, ingredients: ingredients)
+        let others = (alternatives ?? []).enumerated().map { index, option in
+            PlanMealOption(id: option.id, label: Self.label(option.optionLabel, place: index + 2), isCounted: false,
+                           totalMacros: option.totalMacros, ingredients: option.ingredients)
+        }
+        return [first] + others
+    }
+
+    private static func label(_ label: String?, place: Int) -> String {
+        let label = label?.trimmingCharacters(in: .whitespaces) ?? ""
+        return label.isEmpty ? "Option \(place)" : label
+    }
+}
+
+/// A plan meal the log sheet offers: one row per option, logged by its id.
+struct LoggableMeal: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let calories: Double
+}
+
+extension MealPlanDetail {
+    /// Every option of today's meals, in plan order, as the web offers them.
+    /// `today` counts as the API does, 0 for Sunday. A plan with no day for
+    /// today offers all its days, each title naming its weekday; otherwise
+    /// the weekday goes without saying. A slot with alternatives names each
+    /// option ("Lunch · Option 2"); one without stays "Lunch".
+    func loggableMeals(today: Int) -> [LoggableMeal] {
+        let todays = value2.days.filter { $0.weekday == today }
+        let days = todays.isEmpty ? value2.days : todays
+        return days.flatMap { day in
+            let prefix = todays.isEmpty ? "\(value1.name) · \(day.name)" : value1.name
+            return day.meals.flatMap { meal in
+                let title = "\(prefix) · \(meal.name)"
+                guard meal.hasAlternatives else {
+                    return [LoggableMeal(id: meal.id, title: title, calories: meal.totalMacros.calories)]
+                }
+                return meal.options.map {
+                    LoggableMeal(id: $0.id, title: "\(title) · \($0.label)", calories: $0.totalMacros.calories)
+                }
+            }
+        }
+    }
 }

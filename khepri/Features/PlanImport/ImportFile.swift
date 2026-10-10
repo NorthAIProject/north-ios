@@ -10,6 +10,14 @@ nonisolated struct ImportFile: Equatable, Sendable {
     var filename: String
     var data: Data
 
+    /// The media type the filename's extension stands for. Photos are always
+    /// sent as JPEG; Files hands over no type of its own, so a document's is
+    /// looked up from its extension.
+    var mimeType: String {
+        let pathExtension = (filename as NSString).pathExtension
+        return UTType(filenameExtension: pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+    }
+
     /// The largest upload the server takes.
     static let maxBytes = 10 * 1024 * 1024
 
