@@ -49,6 +49,10 @@ protocol NutritionServicing: Sendable {
     func removeMeal(_ id: String) async throws
     func addPortions(to mealID: String, _ portions: [(ingredientID: String, grams: Double)], confirm: Bool) async throws -> PlanWrite<Void>
     func removePortion(_ id: String) async throws
+    /// Adds an option to the meal's slot; a blank label is numbered by the server.
+    func addOption(to mealID: String, label: String?) async throws -> MealPlanDetail
+    /// Shows a food without counting it (optional) or counts it again.
+    func setPortionOptional(_ id: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail>
     func parseFoods(_ text: String) async throws -> FoodDraft
 }
 
@@ -134,5 +138,21 @@ struct NutritionService: NutritionServicing {
     }
     func parseFoods(_ text: String) async throws -> FoodDraft {
         try await NorthAPI.call { try await api.parseMealFoods(body: .json(.init(text: text))).ok.body.json }
+    }
+    func addOption(to mealID: String, label: String?) async throws -> MealPlanDetail {
+        try await NorthAPI.call {
+            try await api.addMealOption(path: .init(mealID: mealID), body: .json(.init(label: label))).created.body.json
+        }
+    }
+    func setPortionOptional(_ id: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail> {
+        try await NorthAPI.call {
+            switch try await api.setMealPortionOptional(
+                path: .init(mealIngredientID: id), body: .json(.init(optional: optional, confirmOverage: confirm))
+            ) {
+            case .ok(let ok): .saved(try ok.body.json)
+            case .conflict(let conflict): .over(try conflict.body.json)
+            default: throw APIError.invalidResponse
+            }
+        }
     }
 }
