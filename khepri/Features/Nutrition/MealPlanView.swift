@@ -12,6 +12,7 @@ struct MealPlanView: View {
     @State private var newMealDay: String?
     @State private var mealName = ""
     @State private var removingDay: MealPlanDay?
+    @State private var removingMeal: MealPlanMeal?
     @State private var choosingEasy = false
 
     enum Sheet: Identifiable {
@@ -35,6 +36,7 @@ struct MealPlanView: View {
             if let error = store.error { ErrorRow(error) }
             if let plan = store.plan {
                 planSection(plan)
+                if let notes = store.notes { PlanNotesSection(notes: notes) }
                 ForEach(store.days, id: \.id) { day in daySection(day) }
                 addDayRow
             } else if store.error == nil {
@@ -61,6 +63,16 @@ struct MealPlanView: View {
             Button("Remove Day", role: .destructive) { Task { await store.removeDay(day.id) } }
         } message: { day in
             Text(day.meals.count == 1 ? "Its meal goes with it." : "Its \(day.meals.count) meals go with it.")
+        }
+        .confirmationDialog(
+            "Remove \(removingMeal?.name ?? "")?",
+            isPresented: Binding(get: { removingMeal != nil }, set: { if !$0 { removingMeal = nil } }),
+            titleVisibility: .visible, presenting: removingMeal
+        ) { meal in
+            Button("Remove meal (all options)", role: .destructive) { Task { await store.removeMeal(meal.id) } }
+        } message: { meal in
+            let others = meal.options.count - 1
+            Text(others == 1 ? "Its other option goes with it." : "Its \(others) other options go with it.")
         }
         .confirmationDialog("Switch to Easy?", isPresented: $choosingEasy, titleVisibility: .visible) {
             ForEach(MealPlanType.presets, id: \.self) { type in
@@ -110,29 +122,7 @@ struct MealPlanView: View {
         Section {
             if let status = day.status { DayStatusRows(status: status) }
             ForEach(day.meals, id: \.id) { meal in
-                HStack {
-                    Text(meal.name).font(.headline)
-                    Spacer()
-                    Text("\(Int(meal.totalMacros.calories)) kcal").foregroundStyle(.secondary).monospacedDigit()
-                }
-                .swipeActions {
-                    Button("Remove", role: .destructive) { Task { await store.removeMeal(meal.id) } }
-                }
-                ForEach(meal.ingredients, id: \.id) { portion in
-                    LabeledContent("\(portion.name) · \(Int(portion.quantityGrams)) g", value: "\(Int(portion.macros.calories)) kcal")
-                        .padding(.leading, 12)
-                        .swipeActions {
-                            Button("Remove", role: .destructive) { Task { await store.removePortion(portion.id) } }
-                        }
-                }
-                if store.hasTarget {
-                    HStack(spacing: 16) {
-                        Button("Add Ingredient", systemImage: "plus") { sheet = .portion(mealID: meal.id) }
-                        Button("Say Ingredients", systemImage: "mic") { sheet = .speak(mealID: meal.id) }
-                    }
-                    .buttonStyle(.borderless)
-                    .padding(.leading, 12)
-                }
+                mealRows(meal)
             }
             Button("Add a Meal", systemImage: "plus") { newMealDay = day.id }
                 .disabled(!store.hasTarget)
@@ -153,6 +143,42 @@ struct MealPlanView: View {
                 }
                 .labelStyle(.iconOnly)
             }
+        }
+    }
+
+    /// A meal slot: its first option, which the day counts, then any
+    /// alternatives folded beneath it.
+    @ViewBuilder
+    private func mealRows(_ meal: MealPlanMeal) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(meal.name).font(.headline)
+                if meal.hasAlternatives, let first = meal.options.first {
+                    Text("\(first.label) · counted").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Text("\(Int(meal.totalMacros.calories)) kcal").foregroundStyle(.secondary).monospacedDigit()
+        }
+        .swipeActions {
+            Button("Remove", role: .destructive) {
+                if meal.hasAlternatives { removingMeal = meal } else { Task { await store.removeMeal(meal.id) } }
+            }
+        }
+        ForEach(meal.ingredients, id: \.id) { portion in
+            PlanPortionRow(portion: portion) { Task { await store.removePortion(portion.id) } }
+        }
+        if store.hasTarget {
+            MealActionsRow(onAdd: { sheet = .portion(mealID: meal.id) }, onSpeak: { sheet = .speak(mealID: meal.id) })
+        }
+        if meal.hasAlternatives {
+            MealAlternativesGroup(
+                meal: meal, canAdd: store.hasTarget,
+                onAdd: { sheet = .portion(mealID: $0) },
+                onSpeak: { sheet = .speak(mealID: $0) },
+                onRemoveOption: { id in Task { await store.removeMeal(id) } },
+                onRemovePortion: { id in Task { await store.removePortion(id) } }
+            )
         }
     }
 

@@ -90,6 +90,98 @@ struct MealPlanTests {
         #expect(fake.updates.last?.planType == .midCarb)
     }
 
+    // MARK: Meal options
+
+    private static let lunch = "44444444-0000-0000-0000-000000000000"
+    private static let lunchFish = "55555555-0000-0000-0000-000000000000"
+    private static let lunchTofu = "66666666-0000-0000-0000-000000000000"
+
+    /// A Monday with a plain breakfast and a lunch of three options, and the
+    /// notes an imported plan carries.
+    private static func planWithOptions(notes: String? = "  Beber 2 L de água.\n") -> MealPlanDetail {
+        let chicken = Macros(calories: 165, proteinG: 31, fatG: 3.6, carbG: 0)
+        let fish = Macros(calories: 206, proteinG: 44, fatG: 2, carbG: 0)
+        let cod = MealPortion(id: "77777777-0000-0000-0000-000000000000", ingredientId: "cod", name: "Cod",
+                              quantityGrams: 250, macros: fish, sourceText: "peixe branco à vontade", estimated: true)
+        var plan = plan(mode: .easy)
+        plan.value2.notes = notes
+        plan.value2.days[0].meals.append(.init(
+            id: lunch, mealNumber: 2, name: "Almoço", optionLabel: "Opção 1", totalMacros: chicken, ingredients: [],
+            alternatives: [
+                .init(id: lunchFish, optionLabel: "Opção 2", totalMacros: fish, ingredients: [cod]),
+                .init(id: lunchTofu, optionLabel: "", totalMacros: chicken, ingredients: [])
+            ]
+        ))
+        return plan
+    }
+
+    /// The options plan with a Tuesday copy of Monday, as an every-day
+    /// import saves the same meals on each weekday.
+    private static func twoDayPlanWithOptions() -> MealPlanDetail {
+        var plan = planWithOptions()
+        var tuesday = plan.value2.days[0]
+        tuesday.id = "88888888-0000-0000-0000-000000000000"
+        tuesday.weekday = 2
+        tuesday.meals = tuesday.meals.map { meal in
+            var meal = meal
+            meal.id = "t-" + meal.id
+            meal.alternatives = meal.alternatives?.map { var option = $0; option.id = "t-" + option.id; return option }
+            return meal
+        }
+        plan.value2.days.append(tuesday)
+        return plan
+    }
+
+    @Test func theLogListOffersOnlyTodaysOptionsEachByItsOwnID() {
+        let meals = Self.twoDayPlanWithOptions().loggableMeals(today: 1)
+
+        #expect(meals.map(\.id) == [Self.breakfast, Self.lunch, Self.lunchFish, Self.lunchTofu])
+        #expect(meals.map(\.title) == [
+            "Week · Breakfast",
+            "Week · Almoço · Opção 1",
+            "Week · Almoço · Opção 2",
+            "Week · Almoço · Option 3"
+        ])
+        #expect(meals[2].calories == 206)
+    }
+
+    @Test func aPlanWithNoDayForTodayOffersEveryDayByWeekday() {
+        let meals = Self.twoDayPlanWithOptions().loggableMeals(today: 0)
+        let weekdays = Calendar.current.standaloneWeekdaySymbols
+
+        #expect(meals.count == 8)
+        #expect(meals.map(\.id).prefix(4) == [Self.breakfast, Self.lunch, Self.lunchFish, Self.lunchTofu])
+        #expect(meals.map(\.id).suffix(4).allSatisfy { $0.hasPrefix("t-") })
+        #expect(meals[0].title == "Week · \(weekdays[1]) · Breakfast")
+        #expect(meals[7].title == "Week · \(weekdays[2]) · Almoço · Option 3")
+    }
+
+    @Test func anAlternativeIsFoundButNeverCountsTowardItsDay() async {
+        let store = await loadedStore(FakeNutrition(plan: Self.planWithOptions()))
+
+        #expect(store.day(holding: Self.lunch)?.id == Self.monday)
+        #expect(store.day(holding: Self.lunchFish) == nil)
+        #expect(store.isAlternative(Self.lunchFish))
+        #expect(!store.isAlternative(Self.lunch))
+        #expect(!store.isAlternative(Self.breakfast))
+    }
+
+    @Test func aMealsOptionsPutTheCountedFirstThenItsAlternatives() throws {
+        let lunch = try #require(Self.planWithOptions().value2.days[0].meals.last)
+
+        #expect(lunch.hasAlternatives)
+        #expect(lunch.options.map(\.label) == ["Opção 1", "Opção 2", "Option 3"])
+        #expect(lunch.options.map(\.isCounted) == [true, false, false])
+        #expect(lunch.options[1].ingredients.first?.estimated == true)
+        #expect(!(Self.plan(mode: .easy).value2.days[0].meals[0].hasAlternatives))
+    }
+
+    @Test func planNotesAreTrimmedAndBlankNotesAreNone() async {
+        #expect(await loadedStore(FakeNutrition(plan: Self.planWithOptions())).notes == "Beber 2 L de água.")
+        #expect(await loadedStore(FakeNutrition(plan: Self.planWithOptions(notes: " \n "))).notes == nil)
+        #expect(await loadedStore(FakeNutrition(plan: Self.planWithOptions(notes: nil))).notes == nil)
+    }
+
     @Test func aDayOverrideIsSentAsTheDayAsked() async {
         let fake = FakeNutrition(plan: Self.plan(mode: .advanced))
         let store = await loadedStore(fake)

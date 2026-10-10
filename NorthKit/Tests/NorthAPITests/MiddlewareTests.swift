@@ -83,6 +83,22 @@ struct MiddlewareTests {
         #expect(try conflict.body.json.name == "Base")
     }
 
+    /// A chat attachment goes up under its real media type and filename, and
+    /// still satisfies the operation's required `file` part.
+    @Test func uploadsAFileUnderItsOwnMediaType() async throws {
+        let stored = #"{"mediaId":"55555555-5555-5555-5555-555555555555","kind":"file","mimeType":"application/pdf","name":"dieta.pdf"}"#
+        let transport = CannedTransport(status: .created, json: stored)
+        let part = MultipartRawPart.file(filename: "dieta.pdf", contentType: "application/pdf", data: Data("%PDF-1.7".utf8))
+        let attachment = try await NorthAPI.call {
+            try await client(transport).uploadChatAttachment(path: .init(id: "c1"), body: .multipartForm([.undocumented(part)])).created.body.json
+        }
+        #expect(attachment.name == "dieta.pdf")
+        let body = String(decoding: try #require(transport.lastBody), as: UTF8.self)
+        #expect(body.contains(#"content-disposition: form-data; filename="dieta.pdf"; name="file""#))
+        #expect(body.contains("content-type: application/pdf"))
+        #expect(body.contains("%PDF-1.7"))
+    }
+
     private func client(_ transport: CannedTransport, onUnauthorized: @escaping @Sendable () -> Void = {}) -> Client {
         Client(
             serverURL: URL(string: "https://example.com/api/v1")!,
@@ -100,11 +116,13 @@ struct MiddlewareTests {
     static let authJSON = #"{"token":"t","expiresAt":"2026-10-24T09:30:00Z","user":{"id":"22222222-2222-2222-2222-222222222222","email":"ana@example.com","displayName":"Ana","timezone":"UTC","needsOnboarding":false}}"#
 }
 
-/// Answers every request with one status and body, and remembers the request.
+/// Answers every request with one status and body, and remembers the
+/// request and what it sent.
 final class CannedTransport: ClientTransport, Sendable {
     private let status: HTTPResponse.Status
     private let json: String?
     private let recorded = Mutex<HTTPRequest?>(nil)
+    private let recordedBody = Mutex<Data?>(nil)
 
     init(status: HTTPResponse.Status, json: String?) {
         self.status = status
@@ -112,9 +130,14 @@ final class CannedTransport: ClientTransport, Sendable {
     }
 
     var lastRequest: HTTPRequest? { recorded.withLock { $0 } }
+    var lastBody: Data? { recordedBody.withLock { $0 } }
 
     func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
         recorded.withLock { $0 = request }
+        if let body {
+            let bytes = try await Data(collecting: body, upTo: 1 << 20)
+            recordedBody.withLock { $0 = bytes }
+        }
         var response = HTTPResponse(status: status)
         guard let json else { return (response, nil) }
         response.headerFields[.contentType] = "application/json; charset=utf-8"

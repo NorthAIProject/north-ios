@@ -7,6 +7,7 @@ typealias WorkoutImportExercise = Components.Schemas.WorkoutImportExercise
 typealias MealImportDraft = Components.Schemas.MealImportDraft
 typealias MealImportDay = Components.Schemas.MealImportDay
 typealias MealImportMeal = Components.Schemas.MealImportMeal
+typealias MealImportOption = Components.Schemas.MealImportOption
 typealias MealImportFood = Components.Schemas.MealImportFood
 typealias ImportMacros = Components.Schemas.ImportMacros
 

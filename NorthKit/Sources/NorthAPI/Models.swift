@@ -57,5 +57,6 @@ public extension OpenAPIObjectContainer {
 public typealias ConversationSummary = Components.Schemas.ConversationSummary
 public typealias ConversationDetail = Components.Schemas.ConversationDetail
 public typealias ChatMessage = Components.Schemas.ChatMessage
+public typealias ChatAttachment = Components.Schemas.ChatAttachment
 public typealias ToolApproval = Components.Schemas.Approval
 public typealias ExerciseDetail = Components.Schemas.ExerciseDetail

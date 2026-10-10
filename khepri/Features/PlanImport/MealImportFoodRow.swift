@@ -12,6 +12,10 @@ struct MealImportFoodRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(food.food)
+            if let line = food.sourceText, !line.isEmpty, line != food.food {
+                Text("“\(line)”").font(.caption).foregroundStyle(.secondary)
+                    .accessibilityLabel("Your plan said \(line)")
+            }
             Text(source).font(.caption).foregroundStyle(.secondary)
             Picker("Ingredient", selection: ingredient) {
                 Text("Choose…").tag("")
@@ -29,6 +33,10 @@ struct MealImportFoodRow: View {
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .onChange(of: food.grams) { recompute() }
+            }
+            if food.estimated == true {
+                Text("≈ estimated").font(.caption).foregroundStyle(.secondary)
+                    .accessibilityLabel("estimated weight")
             }
             if let macros = food.macros {
                 Text(macros.summary)
