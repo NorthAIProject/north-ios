@@ -39,6 +39,7 @@ private struct FoodLogView: View {
     @State private var log: FoodLog?
     @State private var error: String?
     @State private var adding = false
+    @State private var importing = false
 
     var body: some View {
         List {
@@ -81,6 +82,8 @@ private struct FoodLogView: View {
                         }
                     }
                     Button("Log Food", systemImage: "plus") { adding = true }
+                    Button("Import Plan", systemImage: "doc.badge.plus") { importing = true }
+                        .accessibilityHint("Reads a meal plan from a file or photo")
                 }
             } else if error == nil {
                 ProgressView()
@@ -88,6 +91,9 @@ private struct FoodLogView: View {
         }
         .sheet(isPresented: $adding) {
             LogFoodSheet(service: service) { newLog in log = newLog }
+        }
+        .sheet(isPresented: $importing) {
+            MealImportSheet { _ in }
         }
         .task { await run { try await service.log() } }
         .refreshable { await run { try await service.log() } }
@@ -125,7 +131,7 @@ private struct LogFoodSheet: View {
 
     @State private var query = ""
     @State private var results: [Ingredient] = []
-    @State private var meals: [(plan: String, id: String, name: String, kcal: Double)] = []
+    @State private var meals: [LoggableMeal] = []
     @State private var picked: Ingredient?
     @State private var grams = 100.0
     @State private var error: String?
@@ -156,9 +162,9 @@ private struct LogFoodSheet: View {
                 }
                 if !meals.isEmpty, query.isEmpty {
                     Section("From Your Plans") {
-                        ForEach(meals, id: \.id) { meal in
+                        ForEach(meals) { meal in
                             Button { log { try await service.logMeal(meal.id) } } label: {
-                                LabeledContent("\(meal.plan) · \(meal.name)", value: "\(Int(meal.kcal)) kcal")
+                                LabeledContent(meal.title, value: "\(Int(meal.calories)) kcal")
                             }
                         }
                     }
@@ -189,12 +195,11 @@ private struct LogFoodSheet: View {
 
     private func loadMeals() async {
         do {
-            var out: [(plan: String, id: String, name: String, kcal: Double)] = []
+            // The API counts weekdays from 0 for Sunday; Calendar from 1.
+            let today = Calendar.current.component(.weekday, from: .now) - 1
+            var out: [LoggableMeal] = []
             for summary in try await service.plans() {
-                let plan = try await service.plan(summary.id)
-                for day in plan.value2.days {
-                    out += day.meals.map { ("\(plan.value1.name) · \(day.name)", $0.id, $0.name, $0.totalMacros.calories) }
-                }
+                out += try await service.plan(summary.id).loggableMeals(today: today)
             }
             meals = out
         } catch {

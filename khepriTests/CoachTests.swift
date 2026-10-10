@@ -1,4 +1,6 @@
 import Foundation
+import HTTPTypes
+import Synchronization
 import NorthAPI
 import OpenAPIRuntime
 import Testing
@@ -106,6 +108,114 @@ struct ConversationStoreTests {
         #expect(coach.ratings == [true, nil])
     }
 
+    @Test func aMessageCarriesTheAttachmentThenLetsItGo() async throws {
+        let coach = FakeCoach(reply: [.token("Got it."), .done(messageID: "stored-1")])
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+
+        store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
+        #expect(store.isUploading)
+        #expect(!store.canSendMessage("hello"), "nothing goes while the file is on its way")
+        store.send("hello")
+        #expect(coach.sent.isEmpty && store.messages.isEmpty, "sending during the upload sends nothing")
+        try await waitUntilUploaded(store)
+        #expect(store.attachment == coach.uploaded)
+        #expect(store.canSendMessage(""), "a file alone is a message")
+
+        store.send("")
+        try await waitUntilReady(store)
+        #expect(coach.sentMedia == ["55555555-5555-5555-5555-555555555555"])
+        #expect(coach.sent == [""])
+        #expect(store.attachment == nil, "the next message starts without it")
+        #expect(store.messages.first?.attachments == [coach.uploaded])
+
+        store.send("And one more thing")
+        try await waitUntilReady(store)
+        #expect(coach.sentMedia == ["55555555-5555-5555-5555-555555555555", nil])
+    }
+
+    @Test func aRemovedAttachmentIsNotSent() async throws {
+        let coach = FakeCoach(reply: [.token("Hi."), .done(messageID: "stored-1")])
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+        store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
+        try await waitUntilUploaded(store)
+
+        store.removeAttachment()
+        #expect(!store.canSendMessage(""))
+        store.send("Hello")
+        try await waitUntilReady(store)
+        #expect(coach.sentMedia == [nil])
+    }
+
+    @Test func removingAFileStillUploadingDropsIt() async throws {
+        let coach = FakeCoach()
+        coach.uploadDelay = .milliseconds(100)
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+
+        store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
+        store.removeAttachment()
+        #expect(!store.isUploading)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(store.attachment == nil && store.attachmentError == nil)
+    }
+
+    @Test func aRefusedFileSaysWhyAndSendsNothing() async throws {
+        let coach = FakeCoach()
+        let refusal = "That file type is not supported."
+        coach.uploadError = APIError.fieldValidation(message: "Invalid", fields: ["file": refusal])
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+
+        store.attach(ImportFile(filename: "notes.xls", data: Data("x".utf8)))
+        try await waitUntilUploaded(store)
+        #expect(store.attachment == nil)
+        #expect(store.attachmentError == refusal)
+        #expect(!store.canSendMessage(""))
+    }
+
+    @Test func anOldServerWithoutUploadsSaysSoInsteadOfNotFound() async throws {
+        for status in [404, 405] {
+            let transport = StatusTransport(status: status)
+            let client = NorthAPI.client(baseURL: URL(string: "https://example.com")!, token: { nil }, transport: transport)
+            let store = ConversationStore(
+                conversationID: "c1", title: "", coach: CoachService(api: client, generation: client)
+            )
+
+            store.attach(ImportFile(filename: "dieta.pdf", data: Data("%PDF".utf8)))
+            try await waitUntilUploaded(store)
+            #expect(transport.lastPath?.hasSuffix("/conversations/c1/attachments") == true)
+            #expect(store.attachment == nil)
+            #expect(store.attachmentError == "Attachments aren't available yet.", "status \(status)")
+        }
+    }
+
+    @Test func aFileOverTheLimitIsNotUploaded() async throws {
+        let coach = FakeCoach()
+        let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
+        await store.load()
+
+        store.attach(ImportFile(filename: "scan.pdf", data: Data(count: ConversationStore.maxAttachmentBytes + 1)))
+        #expect(coach.uploads.isEmpty)
+        #expect(store.attachmentError == "That file is larger than 8 MB.")
+    }
+
+    @Test func aDocumentGoesUpUnderItsExtensionsType() {
+        #expect(ImportFile(filename: "dieta.pdf", data: Data()).mimeType == "application/pdf")
+        let docx = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        #expect(ImportFile(filename: "plano.docx", data: Data()).mimeType == docx)
+        #expect(ImportFile(filename: "photo.jpg", data: Data()).mimeType == "image/jpeg")
+        #expect(ImportFile(filename: "mystery", data: Data()).mimeType == "application/octet-stream")
+    }
+
+    private func waitUntilUploaded(_ store: ConversationStore) async throws {
+        for _ in 0..<200 where store.isUploading {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(!store.isUploading)
+    }
+
     private func waitUntilReady(_ store: ConversationStore) async throws {
         for _ in 0..<200 where store.phase != .ready {
             try await Task.sleep(for: .milliseconds(5))
@@ -181,6 +291,15 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     private let replyEvents: [CoachEvent]
     private let resumeEvents: [CoachEvent]
     private(set) var sent: [String] = []
+    /// The attachment each reply carried, nil for none.
+    private(set) var sentMedia: [String?] = []
+    private(set) var uploads: [ImportFile] = []
+    var uploaded = ChatAttachment(
+        mediaId: "55555555-5555-5555-5555-555555555555", kind: "file", mimeType: "application/pdf", name: "dieta.pdf"
+    )
+    var uploadError: Error?
+    /// How long an upload takes.
+    var uploadDelay: Duration?
     private(set) var decisions: [Bool] = []
     private(set) var ratings: [Bool?] = []
     /// How long deciding takes, as a training plan does on the server.
@@ -201,8 +320,16 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
         )
     }
 
-    func reply(in id: String, text: String) -> AsyncThrowingStream<CoachEvent, Error> {
+    func uploadAttachment(in conversationID: String, file: ImportFile) async throws -> ChatAttachment {
+        uploads.append(file)
+        if let uploadDelay { try await Task.sleep(for: uploadDelay) }
+        if let uploadError { throw uploadError }
+        return uploaded
+    }
+
+    func reply(in id: String, text: String, mediaID: String?) -> AsyncThrowingStream<CoachEvent, Error> {
         sent.append(text)
+        sentMedia.append(mediaID)
         return Self.stream(replyEvents)
     }
 
@@ -229,5 +356,20 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
             for event in events { continuation.yield(event) }
             continuation.finish()
         }
+    }
+}
+
+/// Answers every request with one status and an empty body, and records the path.
+final class StatusTransport: ClientTransport, Sendable {
+    private let status: Int
+    private let path = Mutex<String?>(nil)
+
+    init(status: Int) { self.status = status }
+
+    var lastPath: String? { path.withLock { $0 } }
+
+    func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
+        path.withLock { $0 = baseURL.path() + (request.path ?? "") }
+        return (HTTPResponse(status: .init(code: status)), nil)
     }
 }

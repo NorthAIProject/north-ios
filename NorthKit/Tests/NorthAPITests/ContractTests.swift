@@ -141,6 +141,23 @@ struct ContractTests {
         #expect(detail.pendingApproval?.calls.first?.name == "log_check_in")
     }
 
+    @Test func chatAttachment() throws {
+        let attachment = try decode(Schemas.ChatAttachment.self, "chat_attachment")
+        #expect(attachment.kind == "file" && attachment.mimeType == "application/pdf")
+        #expect(attachment.name == "dieta.pdf")
+    }
+
+    @Test func mealPlanWithOptions() throws {
+        let plan = try decode(Schemas.MealPlanDetail.self, "nutrition-plan-with-options")
+        #expect(plan.value2.notes == "Beber 2 L de água por dia.")
+        let meal = try #require(plan.value2.days.first?.meals.first)
+        #expect(meal.optionLabel == "Opção 1" && meal.alternatives?.count == 1)
+        let alternative = try #require(meal.alternatives?.first)
+        #expect(alternative.optionLabel == "Opção 2" && alternative.totalMacros.calories == 206)
+        #expect(alternative.ingredients.first?.sourceText == "peixe branco à vontade")
+        #expect(alternative.ingredients.first?.estimated == true)
+    }
+
     @Test func conversations() throws {
         let list = try decode(Schemas.ConversationList.self, "conversations")
         #expect(list.conversations.map(\.kind) == [.chat, .reflection])
@@ -206,6 +223,9 @@ struct ContractTests {
         #expect(health.metrics.map(\.key) == ["steps", "vo2max"])
         #expect(health.metrics.first?.recent == [8800, 11200] && health.metrics.first?.usual?.z == 2)
         #expect(health.metrics.last?.usual == nil && health.metrics.last?.latest == "44.2")
+        let recovery = try decode(Schemas.InsightsRecovery.self, "insights-recovery")
+        #expect(recovery.hasData && recovery.points == 0 && recovery.verdict == "low")
+        #expect(recovery.signals.first?.key == "hrv" && recovery.signals.first?.latest == "38ms")
     }
 
     @Test func goalsAndCheckIns() throws {
@@ -409,15 +429,15 @@ struct ContractTests {
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
-                            "conversation", "conversations", "exercise",
+                            "conversation", "conversations", "chat_attachment", "exercise",
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "week", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health",
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health", "insights-recovery",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",
-                            "nutrition-plan-options", "nutrition-overage", "nutrition-portions",
+                            "nutrition-plan-options", "nutrition-plan-with-options", "nutrition-overage", "nutrition-portions",
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",

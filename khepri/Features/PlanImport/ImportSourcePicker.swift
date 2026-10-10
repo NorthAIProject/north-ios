@@ -8,6 +8,8 @@ import UIKit
 /// `onPick` receives the file ready to upload.
 struct ImportSourcePicker: ViewModifier {
     @Binding var isPresented: Bool
+    var title = "Import a plan from"
+    var message = "PDF, Word, text, CSV or Excel (.xlsx), JSON, or a photo of a printed plan. Up to 10 MB."
     let onPick: (ImportFile) -> Void
     let onError: (String) -> Void
 
@@ -18,14 +20,14 @@ struct ImportSourcePicker: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .confirmationDialog("Import a plan from", isPresented: $isPresented, titleVisibility: .visible) {
+            .confirmationDialog(title, isPresented: $isPresented, titleVisibility: .visible) {
                 Button("Files") { browsingFiles = true }
                 Button("Photo Library") { choosingPhoto = true }
                 if UIImagePickerController.isSourceTypeAvailable(.camera) {
                     Button("Take Photo") { takingPhoto = true }
                 }
             } message: {
-                Text("PDF, Word, text, CSV or Excel (.xlsx), JSON, or a photo of a printed plan. Up to 10 MB.")
+                Text(message)
             }
             .fileImporter(isPresented: $browsingFiles, allowedContentTypes: ImportFile.fileTypes) { result in
                 Task { await readFile(result) }
@@ -84,5 +86,19 @@ extension View {
         onError: @escaping (String) -> Void
     ) -> some View {
         modifier(ImportSourcePicker(isPresented: isPresented, onPick: onPick, onError: onError))
+    }
+
+    /// The same sources under the caller's own wording, for a picker that is
+    /// not importing a plan.
+    func importSourcePicker(
+        _ title: String,
+        message: String,
+        isPresented: Binding<Bool>,
+        onPick: @escaping (ImportFile) -> Void,
+        onError: @escaping (String) -> Void
+    ) -> some View {
+        modifier(ImportSourcePicker(
+            isPresented: isPresented, title: title, message: message, onPick: onPick, onError: onError
+        ))
     }
 }
