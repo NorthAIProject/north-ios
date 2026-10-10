@@ -11,6 +11,7 @@ struct WorkoutSessionView: View {
     @State private var enteringSet = false
     @State private var imperial = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     init(session: WorkoutSession) {
         _session = State(initialValue: session)
@@ -69,6 +70,10 @@ struct WorkoutSessionView: View {
         }
         .interactiveDismissDisabled(session.phase != .finished)
         .onAppear { session.start() }
+        // Back in the app: sets the server missed meanwhile go again now.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { session.retryFailedSets() }
+        }
         // Rest ends by itself; the Live Activity counts the same end down.
         .task(id: session.restEndsAt) {
             guard let end = session.restEndsAt else { return }
