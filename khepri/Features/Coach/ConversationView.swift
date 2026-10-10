@@ -17,6 +17,7 @@ struct ConversationView: View {
     @State private var stopped = false
     @FocusState private var composing: Bool
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(AppRouter.self) private var router
 
     /// Starts another conversation or reflection from the header.
@@ -40,10 +41,18 @@ struct ConversationView: View {
                         .id(message.id)
                     }
                     if let approval = store.pendingApproval {
-                        ApprovalCard(approval: approval, isBusy: store.isDeciding) { approve in
+                        ApprovalCard(approval: approval, isBusy: store.isDeciding || store.isAwaitingReply) { approve in
                             stopped = false
                             Task { await store.decide(approve: approve) }
                         }
+                    }
+                    if store.isAwaitingReply, store.phase == .ready {
+                        StillThinkingRow()
+                    }
+                    if let note = store.replyNote {
+                        Text(note)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
                     if let error = store.replyError {
                         Label(error, systemImage: "exclamationmark.bubble")
@@ -56,6 +65,7 @@ struct ConversationView: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .defaultScrollAnchor(.bottom)
+            .refreshable { await store.refresh() }
             .onChange(of: store.messages.last?.text) {
                 proxy.scrollTo(bottom, anchor: .bottom)
             }
@@ -125,7 +135,8 @@ struct ConversationView: View {
         .onChange(of: store.phase) { old, new in
             if let earned = CoachActivity.flash(
                 from: old, to: new,
-                replyFailed: store.replyError != nil,
+                // A reply cut off mid-way has not finished, whatever the phase says.
+                replyFailed: store.replyError != nil || store.isAwaitingReply,
                 awaitingApproval: store.pendingApproval != nil,
                 stopped: stopped
             ) {
@@ -140,6 +151,11 @@ struct ConversationView: View {
         // crowd the composer.
         .toolbar(.hidden, for: .tabBar)
         .task { await store.load() }
+        // Back from the background or the lock screen: collect a reply that
+        // was cut off. Leaving the foreground cancels the asking.
+        .task(id: scenePhase) {
+            if scenePhase == .active { await store.recoverIfNeeded() }
+        }
         .importSourcePicker(
             "Attach to your message",
             message: "A photo, or a PDF, Word, Excel (.xlsx), CSV, text or JSON file. Up to 8 MB.",
@@ -239,6 +255,20 @@ private struct HelpfulControl: View {
         .foregroundStyle(.secondary)
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: helpful)
+    }
+}
+
+/// The connection dropped mid-reply and the server is still writing it.
+private struct StillThinkingRow: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            TypingIndicator()
+            Text("Still thinking…")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Your coach is still thinking")
     }
 }
 

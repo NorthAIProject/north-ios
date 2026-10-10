@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Security
 
 public enum SecureStoreError: LocalizedError, Equatable {
@@ -27,7 +28,15 @@ public protocol SecureStringStoring: Sendable {
     func removeValue(for key: String) throws
 }
 
+/// Generic passwords for this app, readable once the phone has been unlocked
+/// after a restart, so the session survives the lock screen: HealthKit
+/// deliveries, App Intents and requests finishing in the background run
+/// while the phone is locked.
 public final class KeychainStringStore: SecureStringStoring, @unchecked Sendable {
+    static let accessibility = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+
+    private static let log = Logger(subsystem: "com.fernandocorreia.khepri", category: "keychain")
+
     private let service: String
 
     public init(service: String = Bundle.main.bundleIdentifier ?? "com.fernandocorreia.khepri") {
@@ -35,37 +44,33 @@ public final class KeychainStringStore: SecureStringStoring, @unchecked Sendable
     }
 
     public func string(for key: String) throws -> String? {
-        let query: [CFString: Any] = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: key,
-            kSecAttrSynchronizable: kCFBooleanFalse as Any,
-            kSecReturnData: true,
-            kSecMatchLimit: kSecMatchLimitOne
-        ]
+        var query = itemQuery(for: key)
+        query[kSecReturnData] = true
+        query[kSecReturnAttributes] = true
+        query[kSecMatchLimit] = kSecMatchLimitOne
 
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         guard status != errSecItemNotFound else { return nil }
         guard status == errSecSuccess else { throw SecureStoreError.readFailed(status) }
-        guard let data = result as? Data, let value = String(data: data, encoding: .utf8) else {
+        guard let item = result as? [String: Any],
+              let data = item[kSecValueData as String] as? Data,
+              let value = String(data: data, encoding: .utf8) else {
             throw SecureStoreError.invalidEncoding
+        }
+        if item[kSecAttrAccessible as String] as? String != Self.accessibility as String {
+            relaxAccessibility(for: key)
         }
         return value
     }
 
     public func setString(_ value: String, for key: String) throws {
         let data = Data(value.utf8)
-        let query: [CFString: Any] = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: key,
-            kSecAttrSynchronizable: kCFBooleanFalse as Any
-        ]
+        let query = itemQuery(for: key)
 
         let attributes: [CFString: Any] = [
             kSecValueData: data,
-            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecAttrAccessible: Self.accessibility
         ]
 
         let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
@@ -79,15 +84,32 @@ public final class KeychainStringStore: SecureStringStoring, @unchecked Sendable
     }
 
     public func removeValue(for key: String) throws {
-        let query: [CFString: Any] = [
+        let status = SecItemDelete(itemQuery(for: key) as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw SecureStoreError.deleteFailed(status)
+        }
+    }
+
+    private func itemQuery(for key: String) -> [CFString: Any] {
+        [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
             kSecAttrAccount: key,
             kSecAttrSynchronizable: kCFBooleanFalse as Any
         ]
-        let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw SecureStoreError.deleteFailed(status)
+    }
+
+    /// Items written by builds before the session had to survive the lock
+    /// screen were readable only while unlocked. Reading one proves the phone
+    /// is unlocked now, which is when it can be moved over. A failure leaves
+    /// it as it was, to try again on the next read.
+    private func relaxAccessibility(for key: String) {
+        let status = SecItemUpdate(
+            itemQuery(for: key) as CFDictionary,
+            [kSecAttrAccessible: Self.accessibility] as CFDictionary
+        )
+        if status != errSecSuccess {
+            Self.log.error("Could not move a Keychain item to after-first-unlock: \(status)")
         }
     }
 }

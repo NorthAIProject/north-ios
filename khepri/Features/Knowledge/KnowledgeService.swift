@@ -44,8 +44,10 @@ struct KnowledgeService: KnowledgeServicing {
             payload: Operations.UploadKnowledge.Input.Body.MultipartFormPayload.FilePayload(body: HTTPBody(data)),
             filename: filename
         )
-        try await NorthAPI.call {
-            _ = try await api.uploadKnowledge(body: .multipartForm([.file(part)])).created
+        try await BackgroundActivity.run("Knowledge upload") {
+            try await NorthAPI.call {
+                _ = try await api.uploadKnowledge(body: .multipartForm([.file(part)])).created
+            }
         }
     }
 

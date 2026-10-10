@@ -57,11 +57,13 @@ struct CoachService: CoachServicing {
 
     func uploadAttachment(in conversationID: String, file: ImportFile) async throws -> ChatAttachment {
         let part = MultipartRawPart.file(filename: file.filename, contentType: file.mimeType, data: file.data)
-        return try await NorthAPI.call {
-            try await generation.uploadChatAttachment(
-                path: .init(id: conversationID),
-                body: .multipartForm([.undocumented(part)])
-            ).created.body.json
+        return try await BackgroundActivity.run("Chat attachment") {
+            try await NorthAPI.call {
+                try await generation.uploadChatAttachment(
+                    path: .init(id: conversationID),
+                    body: .multipartForm([.undocumented(part)])
+                ).created.body.json
+            }
         }
     }
 
@@ -78,9 +80,15 @@ struct CoachService: CoachServicing {
         events { try await api.resumeConversation(path: .init(id: id)).ok.body.textEventStream }
     }
 
+    /// The approved tools run inside this request, for minutes on a new plan.
     func decide(in id: String, messageID: String, approve: Bool) async throws {
-        _ = try await NorthAPI.call {
-            try await generation.decideToolCalls(path: .init(id: id, messageID: messageID), body: .json(.init(approve: approve))).noContent
+        try await BackgroundActivity.run("Coach approval") {
+            _ = try await NorthAPI.call {
+                try await generation.decideToolCalls(
+                    path: .init(id: id, messageID: messageID),
+                    body: .json(.init(approve: approve))
+                ).noContent
+            }
         }
     }
 
@@ -97,20 +105,23 @@ struct CoachService: CoachServicing {
     }
 
     /// Opens the stream, then decodes each Server-Sent Event by its name.
-    /// Cancelling the consuming task cancels the request.
+    /// Cancelling the consuming task cancels the request. The stream keeps
+    /// background time while it runs, so a reply survives a glance away.
     private func events(_ open: @escaping @Sendable () async throws -> HTTPBody) -> AsyncThrowingStream<CoachEvent, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
-                do {
-                    let body = try await NorthAPI.call(open)
-                    for try await frame in body.asDecodedServerSentEvents() {
-                        if let event = try Self.decode(frame) {
-                            continuation.yield(event)
+                await BackgroundActivity.run("Coach reply") {
+                    do {
+                        let body = try await NorthAPI.call(open)
+                        for try await frame in body.asDecodedServerSentEvents() {
+                            if let event = try Self.decode(frame) {
+                                continuation.yield(event)
+                            }
                         }
+                        continuation.finish()
+                    } catch {
+                        continuation.finish(throwing: APIError(error))
                     }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: APIError(error))
                 }
             }
             continuation.onTermination = { _ in task.cancel() }

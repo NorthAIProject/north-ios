@@ -71,7 +71,7 @@ struct ConversationStoreTests {
     @Test func aFailedAllowKeepsTheQuestionToTryAgain() async throws {
         let approval = ToolApproval(messageId: "m9", calls: [.init(name: "create_workout_plan", summary: "Create a 4-day plan")])
         let coach = FakeCoach(reply: [.approval(approval), .done(messageID: nil)])
-        coach.decideError = URLError(.timedOut)
+        coach.decideError = APIError.server("The coach is busy right now.")
         let store = ConversationStore(conversationID: "c1", title: "", coach: coach)
         await store.load()
         store.send("Make me a plan")
@@ -305,6 +305,14 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     /// How long deciding takes, as a training plan does on the server.
     var decideDelay: Duration?
     var decideError: Error?
+    /// Thrown after the reply's events, as a dropped connection would.
+    var replyFailure: Error?
+    /// Holds the reply open, as a slow model does.
+    var replyDelay: Duration?
+    /// Each fetch returns the next of these, the last one repeating; empty, `history`.
+    var details: [ConversationDetail] = []
+    private(set) var fetches = 0
+    private(set) var resumes = 0
 
     init(history: [ChatMessage] = [], reply: [CoachEvent] = [], resume: [CoachEvent] = []) {
         self.history = history
@@ -313,7 +321,11 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     }
 
     func conversation(_ id: String) async throws -> ConversationDetail {
-        ConversationDetail(
+        fetches += 1
+        if !details.isEmpty {
+            return details.count > 1 ? details.removeFirst() : details[0]
+        }
+        return ConversationDetail(
             conversation: .init(id: id, title: "Test", kind: .chat, ended: false, updatedAt: .now),
             messages: history,
             awaitingResume: false
@@ -330,10 +342,13 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     func reply(in id: String, text: String, mediaID: String?) -> AsyncThrowingStream<CoachEvent, Error> {
         sent.append(text)
         sentMedia.append(mediaID)
-        return Self.stream(replyEvents)
+        return Self.stream(replyEvents, delay: replyDelay, failure: replyFailure)
     }
 
-    func resume(_ id: String) -> AsyncThrowingStream<CoachEvent, Error> { Self.stream(resumeEvents) }
+    func resume(_ id: String) -> AsyncThrowingStream<CoachEvent, Error> {
+        resumes += 1
+        return Self.stream(resumeEvents)
+    }
 
     func decide(in id: String, messageID: String, approve: Bool) async throws {
         decisions.append(approve)
@@ -351,10 +366,20 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     func delete(_ id: String) async throws {}
     func exercise(_ slug: String) async throws -> ExerciseDetail { throw APIError.invalidResponse }
 
-    private static func stream(_ events: [CoachEvent]) -> AsyncThrowingStream<CoachEvent, Error> {
+    private static func stream(
+        _ events: [CoachEvent], delay: Duration? = nil, failure: Error? = nil
+    ) -> AsyncThrowingStream<CoachEvent, Error> {
         AsyncThrowingStream { continuation in
             for event in events { continuation.yield(event) }
-            continuation.finish()
+            guard let delay else {
+                continuation.finish(throwing: failure)
+                return
+            }
+            let task = Task {
+                try? await Task.sleep(for: delay)
+                continuation.finish(throwing: failure)
+            }
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 }

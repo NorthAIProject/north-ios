@@ -37,8 +37,10 @@ struct FormCheckService: FormCheckServicing {
             payload: Operations.UploadFormCheck.Input.Body.MultipartFormPayload.VideoPayload(body: body),
             filename: video.lastPathComponent
         )
-        return try await NorthAPI.call {
-            try await api.uploadFormCheck(body: .multipartForm([.video(part)])).accepted.body.json
+        return try await BackgroundActivity.run("Form check upload") {
+            try await NorthAPI.call {
+                try await api.uploadFormCheck(body: .multipartForm([.video(part)])).accepted.body.json
+            }
         }
     }
 }

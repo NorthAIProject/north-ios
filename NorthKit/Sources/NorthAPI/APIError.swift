@@ -13,9 +13,15 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case unauthorized(String?)
     /// The thing asked for does not exist, or not for this account.
     case notFound(String?)
+    /// The server is already doing what was asked (409 with an error body).
+    case conflict(String?)
     case fieldValidation(message: String, fields: [String: String])
     case server(String)
-    case network(String)
+    /// The request never got an answer. `code` says why, when the system did.
+    case network(String, code: URLError.Code? = nil)
+    /// The session token could not be read, as while the phone is locked.
+    /// Nothing was sent, and the session is intact.
+    case locked
 
     public var errorDescription: String? {
         switch self {
@@ -27,8 +33,12 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             message ?? "Your session has expired. Please sign in again."
         case .notFound(let message):
             message ?? "That could not be found."
-        case .fieldValidation(let message, _), .server(let message), .network(let message):
+        case .conflict(let message):
+            message ?? "That is already in progress."
+        case .fieldValidation(let message, _), .server(let message), .network(let message, _):
             message
+        case .locked:
+            "Unlock your phone to continue."
         }
     }
 
@@ -44,6 +54,28 @@ public enum APIError: LocalizedError, Sendable, Equatable {
         return false
     }
 
+    public var isConflict: Bool {
+        if case .conflict = self { return true }
+        if case .invalidStatus(409) = self { return true }
+        return false
+    }
+
+    /// Why the system gave up on the request, when it was the network's doing.
+    public var urlErrorCode: URLError.Code? {
+        if case .network(_, let code) = self { return code }
+        return nil
+    }
+
+    /// The connection dropped or never came up: what suspending the app in
+    /// the background, or a moment without signal, does to a request. The
+    /// server may well have done the work; asking again is worth it.
+    public var isInterruption: Bool {
+        guard let code = urlErrorCode else { return false }
+        return Self.interruptionCodes.contains(code)
+    }
+
+    static let interruptionCodes: Set<URLError.Code> = [.networkConnectionLost, .timedOut, .notConnectedToInternet]
+
     /// Unwraps what the generated client throws. The runtime wraps every
     /// failure in `ClientError`; the cause is what callers care about.
     public init(_ error: any Error) {
@@ -53,7 +85,7 @@ public enum APIError: LocalizedError, Sendable, Equatable {
         case let error as ClientError:
             self = APIError(error.underlyingError)
         case let error as URLError:
-            self = .network(error.localizedDescription)
+            self = .network(error.localizedDescription, code: error.code)
         case is DecodingError:
             self = .invalidResponse
         default:
@@ -118,6 +150,8 @@ struct ErrorMappingMiddleware: ClientMiddleware {
             .unauthorized(detail?.message)
         case (404, _):
             .notFound(detail?.message)
+        case (409, _):
+            .conflict(detail?.message)
         case (_, let detail?) where !(detail.fields ?? [:]).isEmpty:
             .fieldValidation(message: detail.message, fields: detail.fields ?? [:])
         case (_, let detail?):

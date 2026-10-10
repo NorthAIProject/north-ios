@@ -14,12 +14,14 @@ public enum NorthAPI {
     ///
     /// - Parameter token: returns the current session token, or nil when
     ///   signed out. Called before every request so a refreshed or cleared
-    ///   session takes effect immediately.
+    ///   session takes effect immediately. Throwing means the token exists
+    ///   but cannot be read right now (a locked phone): the request fails
+    ///   with `APIError.locked` and is not sent.
     /// - Parameter onUnauthorized: called when the server rejects the token,
     ///   so the app can sign out.
     public static func client(
         baseURL: URL,
-        token: @escaping @Sendable () async -> String?,
+        token: @escaping @Sendable () async throws -> String?,
         onUnauthorized: @escaping @Sendable () async -> Void = {},
         session: URLSession = .shared
     ) -> Client {
@@ -34,7 +36,7 @@ public enum NorthAPI {
     /// The same client over any transport; tests pass a canned one.
     public static func client(
         baseURL: URL,
-        token: @escaping @Sendable () async -> String?,
+        token: @escaping @Sendable () async throws -> String?,
         onUnauthorized: @escaping @Sendable () async -> Void = {},
         transport: any ClientTransport
     ) -> Client {
@@ -44,10 +46,13 @@ public enum NorthAPI {
             transport: transport,
             // Outermost first. Error mapping wraps the bearer middleware so
             // the bearer middleware still sees a raw 401 and can sign out.
+            // Retry sits next to the transport, so a second attempt carries
+            // the same headers as the first.
             middlewares: [
                 ErrorMappingMiddleware(),
                 LanguageMiddleware(),
                 BearerAuthMiddleware(token: token, onUnauthorized: onUnauthorized),
+                RetryMiddleware(),
             ]
         )
     }
@@ -95,8 +100,13 @@ struct LanguageMiddleware: ClientMiddleware {
 /// Sign-in operations carry `security: []` in the spec; sending a stale token
 /// to them would be harmless, but leaving it off keeps the rule simple: the
 /// token goes wherever the spec asks for it.
+///
+/// Only a 401 for a token that was actually sent reports the session as
+/// rejected. A token that cannot be read (the Keychain refuses while the
+/// phone is locked) stops the request with `APIError.locked` instead of
+/// sending it bare and signing the person out over the 401 that follows.
 struct BearerAuthMiddleware: ClientMiddleware {
-    let token: @Sendable () async -> String?
+    let token: @Sendable () async throws -> String?
     let onUnauthorized: @Sendable () async -> Void
 
     func intercept(
@@ -107,9 +117,18 @@ struct BearerAuthMiddleware: ClientMiddleware {
         next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var request = request
-        let sentToken = !Self.publicOperations.contains(operationID)
-        if sentToken, let token = await token() {
-            request.headerFields[.authorization] = "Bearer \(token)"
+        var sentToken = false
+        if !Self.publicOperations.contains(operationID) {
+            let current: String?
+            do {
+                current = try await token()
+            } catch {
+                throw APIError.locked
+            }
+            if let current {
+                request.headerFields[.authorization] = "Bearer \(current)"
+                sentToken = true
+            }
         }
         let (response, responseBody) = try await next(request, body, baseURL)
         if sentToken, response.status == .unauthorized {
@@ -124,6 +143,49 @@ struct BearerAuthMiddleware: ClientMiddleware {
         "signUp", "logIn", "signInWithGoogle", "signInWithApple", "requestPasswordReset",
         "beginPasskeyRegistration", "finishPasskeyRegistration", "beginPasskeyLogin", "finishPasskeyLogin",
     ]
+}
+
+/// Asks again, once, when a read lost its connection.
+///
+/// Coming back from the background, the first requests often ride pooled
+/// connections the system closed while the app was suspended, and fail with
+/// "the network connection was lost" before reaching the server. Only GET and
+/// HEAD are retried: a write may have arrived before the drop, and sending it
+/// again could do it twice. Event streams are never retried here.
+struct RetryMiddleware: ClientMiddleware {
+    var delay: Duration = .milliseconds(500)
+
+    static let retriedMethods: Set<HTTPRequest.Method> = [.get, .head]
+
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        guard Self.retriedMethods.contains(request.method), !Self.isEventStream(request) else {
+            return try await next(request, body, baseURL)
+        }
+        do {
+            return try await next(request, body, baseURL)
+        } catch where Self.isTransient(error) {
+            try await Task.sleep(for: delay)
+            return try await next(request, body, baseURL)
+        }
+    }
+
+    /// A dropped, timed-out or not-yet-up connection, as the transport
+    /// reports it (wrapped in the runtime's `ClientError`).
+    static func isTransient(_ error: any Error) -> Bool {
+        let cause = (error as? ClientError)?.underlyingError ?? error
+        guard let urlError = cause as? URLError else { return false }
+        return APIError.interruptionCodes.contains(urlError.code)
+    }
+
+    private static func isEventStream(_ request: HTTPRequest) -> Bool {
+        request.headerFields[.accept]?.contains("text/event-stream") == true
+    }
 }
 
 /// Reads RFC 3339 timestamps with or without fractional seconds.
