@@ -206,6 +206,10 @@ struct ContractTests {
         #expect(health.metrics.map(\.key) == ["steps", "vo2max"])
         #expect(health.metrics.first?.recent == [8800, 11200] && health.metrics.first?.usual?.z == 2)
         #expect(health.metrics.last?.usual == nil && health.metrics.last?.latest == "44.2")
+        let recovery = try decode(Schemas.InsightsRecovery.self, "insights-recovery")
+        #expect(recovery.hasData && recovery.verdict == "low" && recovery.label == "Under your usual")
+        #expect(recovery.signals.map(\.key) == ["hrv", "resting-heart-rate", "sleep"])
+        #expect(recovery.signals.first?.usual.state == "below" && recovery.sentence.hasPrefix("Recovery today: "))
     }
 
     @Test func goalsAndCheckIns() throws {
@@ -374,6 +378,7 @@ struct ContractTests {
     @Test func lighterDay() throws {
         let day = try decode(Schemas.LighterDay.self, "today-lighter")
         #expect(day.offered && day.readiness.low && day.readiness.hrv == 38)
+        #expect(day.readiness.reason?.hasPrefix("Heart rate variability is below your usual") == true)
         #expect(day.session == "Lower body" && day.choice == nil)
     }
 
@@ -413,7 +418,7 @@ struct ContractTests {
                             "profile", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "week", "exercises", "activity-overview",
-                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health",
+                            "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health", "insights-recovery",
                             "goals", "goal", "check-ins", "reports", "report", "memories",
                             "knowledge", "knowledge-document", "knowledge-search", "form-checks", "form-check",
                             "care", "journal", "nutrition-ingredients", "nutrition-plans", "nutrition-plan", "nutrition-log",

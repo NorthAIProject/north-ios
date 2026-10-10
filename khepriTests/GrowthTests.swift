@@ -41,4 +41,31 @@ struct LighterDayTests {
     @Test func noReadingsNoLine() {
         #expect(LighterDay(offered: false, readiness: .init(low: false)).why == nil)
     }
+
+    @Test func theServersReasonWins() {
+        let reason = "Heart rate variability is below your usual: 38ms on Wed 7 Oct, usually 51ms–53ms."
+        let day = LighterDay(offered: true, readiness: .init(low: true, hrv: 38, hrvBaseline: 52, reason: reason))
+        #expect(day.why == reason)
+    }
+
+    // The offer loads before anything is shown: the store, not the card,
+    // fetches, so an empty card is never what decides whether it loads.
+    @MainActor
+    @Test func theStoreLoadsTheOfferAndRecordsTheAnswer() async {
+        let store = LighterDayStore(service: FakeLighter())
+        await store.load()
+        #expect(store.day?.offered == true)
+        await store.choose(lighter: true)
+        #expect(store.day?.tookItLighter == true && store.day?.offered == false && store.error == nil)
+    }
+}
+
+private struct FakeLighter: LighterDayServicing {
+    func today() async throws -> LighterDay {
+        LighterDay(offered: true, readiness: .init(low: true), session: "Lower body")
+    }
+
+    func choose(lighter: Bool) async throws -> LighterDay {
+        LighterDay(offered: false, readiness: .init(low: true), session: "Lower body", choice: lighter ? .lighter : .keep)
+    }
 }
