@@ -84,6 +84,30 @@ struct HealthPayloadTests {
         #expect(payload.indoor == nil && payload.avgHeartRate == nil)
     }
 
+    @Test func theNewerTypesAreSentUnderTheServersNames() {
+        var snapshot = HealthSnapshot()
+        snapshot.walkingRunningKm = [DailyValue(day: day(20), value: 6.4)]
+        snapshot.flightsClimbed = [DailyValue(day: day(20), value: 12)]
+        snapshot.mindfulMinutes = [DailyValue(day: day(20), value: 10)]
+        snapshot.walkingHeartRate = [DailyValue(day: day(20), value: 102)]
+        snapshot.respiratoryRate = [DailyValue(day: day(20), value: 14.2)]
+        snapshot.bloodOxygen = [DailyValue(day: day(20), value: 0.968)]
+        let readings = HealthPayload.requests(from: snapshot, calendar: utc).first?.readings ?? []
+        let byMetric = Dictionary(uniqueKeysWithValues: readings.map { ($0.metric, $0) })
+        #expect(byMetric["distance_walking_running"]?.value == 6.4 && byMetric["distance_walking_running"]?.unit == "km")
+        #expect(byMetric["flights_climbed"]?.value == 12 && byMetric["mindful_minutes"]?.value == 10)
+        #expect(byMetric["walking_hr_avg"]?.value == 102 && byMetric["respiratory_rate"]?.value == 14.2)
+        #expect(byMetric["spo2"]?.value == 96.8 && byMetric["spo2"]?.unit == "%", "a fraction sent as a percentage")
+    }
+
+    @Test func overlappingMindfulSessionsCountOnce() {
+        let sit = DateInterval(start: day(20, 7), duration: 600)
+        let sameSitFromAnotherApp = DateInterval(start: day(20, 7, 2), duration: 600)
+        let evening = DateInterval(start: day(20, 21), duration: 300)
+        let minutes = MindfulDays.minutes([sit, sameSitFromAnotherApp, evening], calendar: utc)
+        #expect(minutes == [DailyValue(day: day(20), value: 17)])
+    }
+
     @Test func aWorkoutNorthCannotNameIsLeftOut() {
         let fishing = HealthWorkoutRecord(id: UUID(), type: .fishing, start: day(20, 7), end: day(20, 9),
                                           kilocalories: nil, meters: nil, indoor: false)
