@@ -7,6 +7,7 @@ typealias StatsSleep = Components.Schemas.StatsSleep
 typealias StatsCardio = Components.Schemas.StatsCardio
 typealias StatsEating = Components.Schemas.StatsEating
 typealias StatsPatterns = Components.Schemas.StatsPatterns
+typealias StatsCardioKind = Components.Schemas.StatsCardioKind
 
 /// Sleep, cardio, eating and patterns: the same numbers as the web's
 /// insights pages, one endpoint each.
@@ -15,6 +16,7 @@ protocol StatsServicing: Sendable {
     func cardio(range: String?) async throws -> StatsCardio
     func eating(range: String?) async throws -> StatsEating
     func patterns(range: String?) async throws -> StatsPatterns
+    func cardioKind(name: String) async throws -> StatsCardioKind
 }
 
 struct StatsService: StatsServicing {
@@ -34,6 +36,10 @@ struct StatsService: StatsServicing {
 
     func patterns(range: String?) async throws -> StatsPatterns {
         try await NorthAPI.call { try await api.getPatterns(query: .init(range: range)).ok.body.json }
+    }
+
+    func cardioKind(name: String) async throws -> StatsCardioKind {
+        try await NorthAPI.call { try await api.getCardioKind(path: .init(name: name)).ok.body.json }
     }
 }
 
@@ -55,6 +61,24 @@ enum StatsFormat {
     }
 
     static func percent(_ share: Double) -> String { "\(Int((share * 100).rounded()))%" }
+
+    static func speed(_ kmh: Double) -> String {
+        kmh > 0 ? String(format: "%.1f km/h", kmh) : "–"
+    }
+
+    /// Pace or speed, whichever the activity is measured in.
+    static func rate(measure: String?, pace: Double?, speed: Double?) -> String? {
+        if measure == "speed", let speed, speed > 0 { return Self.speed(speed) }
+        if let pace, pace > 0 { return Self.pace(pace) }
+        return nil
+    }
+
+    /// "Sep 26" (month and year) from a "2026-09-01" date, for a monthly
+    /// axis: a year of months can hold the same month twice.
+    static func shortMonth(_ iso: String) -> String {
+        guard let date = CalendarDay.date(from: iso) else { return iso }
+        return date.formatted(.dateTime.month(.abbreviated).year(.twoDigits))
+    }
 
     /// "Sep 26" from a "2026-09-26" date.
     static func shortDate(_ iso: String) -> String {
@@ -223,6 +247,16 @@ private struct StageShare: Identifiable {
 struct CardioStatsPage: View {
     let model: StatsCardio
 
+    /// Time, distance, and pace or speed for one activity row.
+    static func summary(_ kind: Components.Schemas.StatsKind) -> String {
+        var parts = [StatsFormat.hm(kind.minutes)]
+        if kind.distanceKm > 0 { parts.append(String(format: "%.1f km", kind.distanceKm)) }
+        if let rate = StatsFormat.rate(measure: kind.measure, pace: kind.avgPaceSeconds, speed: kind.avgSpeedKmh) {
+            parts.append(rate)
+        }
+        return parts.joined(separator: " · ")
+    }
+
     var body: some View {
         List {
             if model.sessions == 0 && model.restingHeartRate.isEmpty {
@@ -257,12 +291,17 @@ struct CardioStatsPage: View {
                 }
                 if !model.byKind.isEmpty {
                     let most = Double(model.byKind.map(\.minutes).max() ?? 1)
-                    Section("By Activity") {
+                    Section {
                         ForEach(model.byKind, id: \.name) { kind in
-                            ShareBar(label: "\(kind.name) (\(kind.sessions))",
-                                     value: StatsFormat.hm(kind.minutes) + (kind.distanceKm > 0 ? String(format: " · %.1f km", kind.distanceKm) : ""),
-                                     fraction: Double(kind.minutes) / max(most, 1), color: NorthColor.Day.move)
+                            NavigationLink(value: CardioKindRoute(name: kind.name)) {
+                                ShareBar(label: "\(kind.name) (\(kind.sessions))", value: Self.summary(kind),
+                                         fraction: Double(kind.minutes) / max(most, 1), color: NorthColor.Day.move)
+                            }
                         }
+                    } header: {
+                        Text("By Activity")
+                    } footer: {
+                        Text("Open one for its trend, bests and heart-rate efficiency over the year.")
                     }
                 }
                 // swiftlint:disable:next empty_count - `count` is the number of runs the server counted, not a collection
@@ -310,6 +349,9 @@ struct CardioStatsPage: View {
                     }
                 }
             }
+        }
+        .navigationDestination(for: CardioKindRoute.self) { route in
+            ActivityKindPage(name: route.name)
         }
     }
 }

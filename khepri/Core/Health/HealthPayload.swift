@@ -70,6 +70,16 @@ struct HealthSnapshot {
     var vitaminC: [DailyValue] = []
     var vitaminD: [DailyValue] = []
     var bloodPressure: [BloodPressureReading] = []
+
+    // Progress: more of the body against its own usual. Daily totals for
+    // distance (km), flights and mindful minutes; daily averages for the
+    // rest. Blood oxygen is a fraction, as HealthKit keeps it.
+    var walkingRunningKm: [DailyValue] = []
+    var flightsClimbed: [DailyValue] = []
+    var mindfulMinutes: [DailyValue] = []
+    var walkingHeartRate: [DailyValue] = []
+    var respiratoryRate: [DailyValue] = []
+    var bloodOxygen: [DailyValue] = []
 }
 
 /// One cuff reading as Apple Health stores it: a correlation of two samples.
@@ -115,6 +125,13 @@ enum HealthPayload {
         daily(snapshot.vitaminA, "dietary_vitamin_a", "mcg")
         daily(snapshot.vitaminC, "dietary_vitamin_c", "mg")
         daily(snapshot.vitaminD, "dietary_vitamin_d", "mcg")
+        daily(snapshot.walkingRunningKm, "distance_walking_running", "km")
+        daily(snapshot.flightsClimbed, "flights_climbed", "count")
+        daily(snapshot.mindfulMinutes, "mindful_minutes", "min")
+        daily(snapshot.walkingHeartRate, "walking_hr_avg", "count/min")
+        daily(snapshot.respiratoryRate, "respiratory_rate", "count/min")
+        // Sent as a percentage, the way people read it.
+        daily(snapshot.bloodOxygen.map { DailyValue(day: $0.day, value: ($0.value * 1000).rounded() / 10) }, "spo2", "%")
         // Each reading is an instant, two metrics at the same moment.
         for bp in snapshot.bloodPressure where bp.systolic > 0 && bp.diastolic > 0 {
             readings.append(.init(metric: "bp_systolic", value: bp.systolic, unit: "mmHg", startedAt: bp.at))
@@ -245,5 +262,18 @@ enum SleepStages {
         case .awake: .awake
         default: nil
         }
+    }
+}
+
+/// Minutes of mindful sessions per day. Overlapping sessions (a watch and a
+/// meditation app logging the same sit) are merged first, so a ten-minute
+/// sit is ten minutes, not twenty.
+enum MindfulDays {
+    static func minutes(_ sessions: [DateInterval], calendar: Calendar) -> [DailyValue] {
+        var byDay: [Date: Double] = [:]
+        for interval in SleepNights.merge(sessions) {
+            byDay[calendar.startOfDay(for: interval.start), default: 0] += interval.duration / 60
+        }
+        return byDay.keys.sorted().map { DailyValue(day: $0, value: byDay[$0]!.rounded()) }
     }
 }

@@ -21,6 +21,12 @@ enum Permissions {
         HKQuantityType(.bodyMass),
         HKQuantityType(.vo2Max),
         HKQuantityType(.distanceWalkingRunning),
+        // Progress: more of the body against its own usual.
+        HKQuantityType(.flightsClimbed),
+        HKQuantityType(.walkingHeartRateAverage),
+        HKQuantityType(.respiratoryRate),
+        HKQuantityType(.oxygenSaturation),
+        HKCategoryType(.mindfulSession),
         HKQuantityType(.appleExerciseTime),
         HKCategoryType(.sleepAnalysis),
         // My Day: rings, daylight, and what other apps logged about food.
@@ -51,6 +57,15 @@ enum Permissions {
     static func requestHealth() async {
         guard HKHealthStore.isHealthDataAvailable() else { return }
         try? await HKHealthStore().requestAuthorization(toShare: healthShareTypes, read: healthReadTypes)
+    }
+
+    /// Whether the Health sheet has types it has never asked about: true
+    /// for someone who connected before Khepri read them. HealthKit still
+    /// never says whether reading was allowed, only whether it has asked.
+    static func healthHasNewTypes() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        let status = try? await HKHealthStore().statusForAuthorizationRequest(toShare: healthShareTypes, read: healthReadTypes)
+        return status == .shouldRequest
     }
 
     /// Shows the notification prompt. Returns whether alerts are allowed.
