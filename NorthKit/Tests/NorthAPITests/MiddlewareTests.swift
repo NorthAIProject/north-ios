@@ -226,6 +226,18 @@ struct MiddlewareTests {
         )
     }
 
+    /// Requests sent outside the generated client (a background upload)
+    /// read their answers the same way.
+    @Test func aResponseReadOutsideTheClientMapsTheSameWay() {
+        let validation = Data(#"{"error":{"message":"Choose a video under 200 MB.","fields":{"video":"Too big."}}}"#.utf8)
+        #expect(APIError(status: 422, body: validation) == .fieldValidation(
+            message: "Choose a video under 200 MB.", fields: ["video": "Too big."]
+        ))
+        #expect(APIError(status: 401, body: Data()) == .unauthorized(nil))
+        #expect(APIError(status: 429, body: Data(#"{"error":{"message":"Slow down."}}"#.utf8)) == .server("Slow down."))
+        #expect(APIError(status: 502, body: Data("<html>".utf8)) == .invalidStatus(502))
+    }
+
     static let meJSON = #"{"user":{"id":"22222222-2222-2222-2222-222222222222","email":"ana@example.com","displayName":"Ana","timezone":"UTC","needsOnboarding":false}}"#
     static let authJSON = #"{"token":"t","expiresAt":"2026-10-24T09:30:00Z","user":{"id":"22222222-2222-2222-2222-222222222222","email":"ana@example.com","displayName":"Ana","timezone":"UTC","needsOnboarding":false}}"#
 }

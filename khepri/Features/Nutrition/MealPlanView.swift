@@ -13,6 +13,8 @@ struct MealPlanView: View {
     @State private var mealName = ""
     @State private var removingDay: MealPlanDay?
     @State private var removingMeal: MealPlanMeal?
+    @State private var newOptionMeal: String?
+    @State private var optionLabel = ""
     @State private var choosingEasy = false
 
     enum Sheet: Identifiable {
@@ -55,6 +57,18 @@ struct MealPlanView: View {
                 Task { await store.addMeal(to: dayID, name: name) }
             }
             Button("Cancel", role: .cancel) { mealName = "" }
+        }
+        .alert("New Option", isPresented: Binding(get: { newOptionMeal != nil }, set: { if !$0 { newOptionMeal = nil } })) {
+            TextField("Label (optional), e.g. Peixe", text: $optionLabel)
+            Button("Add") {
+                guard let mealID = newOptionMeal else { return }
+                let label = optionLabel
+                optionLabel = ""
+                Task { await store.addOption(to: mealID, label: label) }
+            }
+            Button("Cancel", role: .cancel) { optionLabel = "" }
+        } message: {
+            Text("Another choice for this meal, eaten instead of the first. Only the first counts in the day.")
         }
         .confirmationDialog(
             "Remove \(removingDay?.name ?? "")?", isPresented: Binding(get: { removingDay != nil }, set: { if !$0 { removingDay = nil } }),
@@ -166,10 +180,20 @@ struct MealPlanView: View {
             }
         }
         ForEach(meal.ingredients, id: \.id) { portion in
-            PlanPortionRow(portion: portion) { Task { await store.removePortion(portion.id) } }
+            PlanPortionRow(
+                portion: portion,
+                onRemove: { Task { await store.removePortion(portion.id) } },
+                onToggleOptional: { Task { await store.setOptional(portion.id, optional: portion.optional != true) } }
+            )
         }
         if store.hasTarget {
             MealActionsRow(onAdd: { sheet = .portion(mealID: meal.id) }, onSpeak: { sheet = .speak(mealID: meal.id) })
+            Button("Add Option", systemImage: "square.on.square") { newOptionMeal = meal.id }
+                .buttonStyle(.borderless)
+                .frame(minHeight: 44)
+                .contentShape(.rect)
+                .padding(.leading, 12)
+                .accessibilityHint("Adds another choice for this meal")
         }
         if meal.hasAlternatives {
             MealAlternativesGroup(
@@ -177,7 +201,10 @@ struct MealPlanView: View {
                 onAdd: { sheet = .portion(mealID: $0) },
                 onSpeak: { sheet = .speak(mealID: $0) },
                 onRemoveOption: { id in Task { await store.removeMeal(id) } },
-                onRemovePortion: { id in Task { await store.removePortion(id) } }
+                onRemovePortion: { id in Task { await store.removePortion(id) } },
+                onToggleOptional: { portion in
+                    Task { await store.setOptional(portion.id, optional: portion.optional != true) }
+                }
             )
         }
     }

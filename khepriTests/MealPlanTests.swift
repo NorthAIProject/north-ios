@@ -193,6 +193,32 @@ struct MealPlanTests {
     }
 }
 
+extension MealPlanTests {
+    @Test func addingAnOptionSendsTheMealAndATrimmedLabel() async {
+        let fake = FakeNutrition(plan: Self.plan(mode: .easy))
+        let store = await loadedStore(fake)
+        await store.addOption(to: Self.breakfast, label: "  Peixe ")
+        await store.addOption(to: Self.breakfast, label: "   ")
+        #expect(fake.addedOptions.map(\.mealID) == [Self.breakfast, Self.breakfast])
+        #expect(fake.addedOptions.map(\.label) == ["Peixe", nil])
+        #expect(store.error == nil)
+    }
+
+    @Test func countingAnOptionalFoodAgainWaitsForTheOverageToBeConfirmed() async {
+        let fake = FakeNutrition(plan: Self.plan(mode: .advanced))
+        fake.optionalAnswers = [.over(Self.overage(canConfirm: true))]
+        let store = await loadedStore(fake)
+
+        await store.setOptional("portion-1", optional: false)
+        #expect(fake.optionalCalls.count == 1 && fake.optionalCalls[0].confirm == false)
+        #expect(store.pendingOverage != nil)
+
+        await store.pendingOverage?.resend()
+        #expect(fake.optionalCalls.count == 2 && fake.optionalCalls[1].confirm == true)
+        #expect(fake.optionalCalls.allSatisfy { $0.id == "portion-1" && !$0.optional })
+    }
+}
+
 /// A nutrition service that answers from memory.
 private final class FakeNutrition: NutritionServicing, @unchecked Sendable {
     var plan: MealPlanDetail
@@ -200,8 +226,20 @@ private final class FakeNutrition: NutritionServicing, @unchecked Sendable {
     var portionConfirms: [Bool] = []
     var updates: [MealPlanUpdate] = []
     var dayOverrides: [MealPlanDayOverride] = []
+    var addedOptions: [(mealID: String, label: String?)] = []
+    var optionalAnswers: [PlanWrite<MealPlanDetail>] = []
+    var optionalCalls: [(id: String, optional: Bool, confirm: Bool)] = []
 
     init(plan: MealPlanDetail) { self.plan = plan }
+
+    func addOption(to mealID: String, label: String?) async throws -> MealPlanDetail {
+        addedOptions.append((mealID, label))
+        return plan
+    }
+    func setPortionOptional(_ id: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail> {
+        optionalCalls.append((id, optional, confirm))
+        return optionalAnswers.isEmpty ? .saved(plan) : optionalAnswers.removeFirst()
+    }
 
     func plan(_ id: String) async throws -> MealPlanDetail { plan }
     func addPortions(to mealID: String, _ portions: [(ingredientID: String, grams: Double)], confirm: Bool) async throws -> PlanWrite<Void> {

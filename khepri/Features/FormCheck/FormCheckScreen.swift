@@ -10,24 +10,37 @@ import UniformTypeIdentifiers
 /// the moment in the clip, so you can check it yourself.
 struct FormCheckScreen: View {
     var service: FormCheckServicing = FormCheckService()
+    var uploader: FormCheckUploader = .shared
 
     @State private var checks: [FormCheck] = []
     @State private var loaded = false
     @State private var picked: PhotosPickerItem?
-    @State private var uploading = false
+    /// Writing the picked clip into an upload; the upload itself is listed.
+    @State private var preparing = false
     @State private var error: String?
 
     var body: some View {
         List {
             Section {
                 PhotosPicker(selection: $picked, matching: .videos) {
-                    Label(uploading ? "Uploading…" : "Choose a Clip", systemImage: "video.badge.plus")
+                    Label(preparing ? "Preparing…" : "Choose a Clip", systemImage: "video.badge.plus")
                 }
-                .disabled(uploading)
+                .disabled(preparing)
             } footer: {
                 Text("Side-on, whole body in frame, one set. Up to 200 MB.")
             }
             if let error { ErrorRow(error) }
+            if !uploader.uploads.isEmpty {
+                Section {
+                    ForEach(uploader.uploads) { upload in
+                        FormCheckUploadRow(
+                            upload: upload,
+                            retry: { Task { await uploader.retry(upload.id) } },
+                            dismiss: { uploader.dismiss(upload.id) }
+                        )
+                    }
+                }
+            }
             if !checks.isEmpty {
                 Section("Checks") {
                     ForEach(checks, id: \.id) { check in
@@ -51,6 +64,10 @@ struct FormCheckScreen: View {
             guard let item else { return }
             Task { await upload(item) }
         }
+        // The server took a clip: its check is now in the list, analysing.
+        .onChange(of: uploader.acceptedCount) {
+            Task { await load() }
+        }
         // While anything is being analysed, look again every few seconds.
         .task(id: checks.contains(where: \.inProgress)) {
             while checks.contains(where: \.inProgress), !Task.isCancelled {
@@ -65,17 +82,18 @@ struct FormCheckScreen: View {
         loaded = true
     }
 
+    /// Hands the clip to the background uploader, which copies it into a
+    /// body of its own, so the picked copy can go straight away.
     private func upload(_ item: PhotosPickerItem) async {
-        uploading = true
+        preparing = true
         defer {
-            uploading = false
+            preparing = false
             picked = nil
         }
         do {
             guard let movie = try await item.loadTransferable(type: PickedMovie.self) else { return }
             defer { try? FileManager.default.removeItem(at: movie.url) }
-            let check = try await service.upload(video: movie.url)
-            checks.insert(check, at: 0)
+            try await uploader.upload(video: movie.url)
             error = nil
         } catch {
             self.error = error.localizedDescription
@@ -103,6 +121,33 @@ struct PickedMovie: Transferable {
 
 extension FormCheck {
     var inProgress: Bool { status == .pending || status == .running }
+}
+
+/// A clip on its way up, or one that did not make it.
+private struct FormCheckUploadRow: View {
+    let upload: FormCheckUpload
+    let retry: () -> Void
+    let dismiss: () -> Void
+
+    var body: some View {
+        if let failure = upload.failure {
+            VStack(alignment: .leading, spacing: 8) {
+                ErrorRow(failure)
+                HStack {
+                    Button("Try Again", action: retry)
+                    Spacer()
+                    Button("Dismiss", role: .destructive, action: dismiss)
+                }
+                .buttonStyle(.borderless)
+            }
+        } else {
+            Label {
+                Text("Uploading… you can leave the app")
+            } icon: {
+                ProgressView()
+            }
+        }
+    }
 }
 
 private struct FormCheckRow: View {

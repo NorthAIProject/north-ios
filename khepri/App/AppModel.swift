@@ -1,6 +1,7 @@
 import Foundation
 import NorthAPI
 import Observation
+import UIKit
 
 /// Where the app is in its life: which root screen to show.
 ///
@@ -9,6 +10,9 @@ import Observation
 enum AppPhase: Equatable {
     /// Restoring a stored session; nothing to show yet.
     case launching
+    /// Launched before the first unlock after a restart: the session is in
+    /// the Keychain but cannot be read until the phone is unlocked.
+    case waitingForUnlock
     case signedOut
     /// Signed in, but the first-run questions are not answered.
     case onboarding(APIUser)
@@ -27,10 +31,26 @@ final class AppModel {
 
     private let auth: AuthServicing
     private let sessions: AuthSessionManaging
+    private let notifications: NotificationCenter
+    /// Watching for the phone to unlock; present only while waiting for it.
+    private var unlockObservers: [any NSObjectProtocol] = []
+    private var restoring = false
 
-    init(auth: AuthServicing = AuthService.shared, sessions: AuthSessionManaging = AuthSessionManager.shared) {
+    /// What may mean the Keychain can be read now: the phone was unlocked,
+    /// or the app came forward (in case the unlock went unnoticed).
+    static let unlockSignals: [Notification.Name] = [
+        UIApplication.protectedDataDidBecomeAvailableNotification,
+        UIApplication.didBecomeActiveNotification
+    ]
+
+    init(
+        auth: AuthServicing = AuthService.shared,
+        sessions: AuthSessionManaging = AuthSessionManager.shared,
+        notifications: NotificationCenter = .default
+    ) {
         self.auth = auth
         self.sessions = sessions
+        self.notifications = notifications
     }
 
     /// Called once at launch: restores a stored session if there is one.
@@ -50,11 +70,16 @@ final class AppModel {
             UserDefaults.standard.set(true, forKey: "guidedTour.finished")
         }
         #endif
-        if await sessions.restoreSessionIfNeeded() {
-            await loadUser()
-        } else {
-            phase = .signedOut
-        }
+        await restore()
+    }
+
+    /// The phone may have been unlocked: read the Keychain again. Does
+    /// nothing unless the app is waiting for exactly that.
+    func retryAfterUnlock() async {
+        guard phase == .waitingForUnlock, !restoring else { return }
+        restoring = true
+        defer { restoring = false }
+        await restore()
     }
 
     /// A sign-in screen finished; the session is already stored.
@@ -96,6 +121,36 @@ final class AppModel {
     func sessionEnded() {
         phase = .signedOut
         Task { await SpotlightIndex.clear() }
+    }
+
+    private func restore() async {
+        switch await sessions.restoreSessionIfNeeded() {
+        case .restored:
+            stopWaitingForUnlock()
+            phase = .launching
+            await loadUser()
+        case .none:
+            stopWaitingForUnlock()
+            phase = .signedOut
+        case .locked:
+            // Never sign out here: the session is intact, only unreadable.
+            waitForUnlock()
+        }
+    }
+
+    private func waitForUnlock() {
+        phase = .waitingForUnlock
+        guard unlockObservers.isEmpty else { return }
+        unlockObservers = Self.unlockSignals.map { name in
+            notifications.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in await self?.retryAfterUnlock() }
+            }
+        }
+    }
+
+    private func stopWaitingForUnlock() {
+        unlockObservers.forEach(notifications.removeObserver)
+        unlockObservers = []
     }
 
     private func loadUser() async {

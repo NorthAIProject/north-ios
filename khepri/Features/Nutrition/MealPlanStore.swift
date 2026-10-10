@@ -136,6 +136,21 @@ final class MealPlanStore {
         await run { self.plan = try await self.service.addMeal(to: dayID, name: name) }
     }
 
+    /// Adds another interchangeable option to a meal's slot. A blank label
+    /// is named "Option N" by the server.
+    func addOption(to mealID: String, label: String) async {
+        let trimmed = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        await run { self.plan = try await self.service.addOption(to: mealID, label: trimmed.isEmpty ? nil : trimmed) }
+    }
+
+    /// Shows a food without counting it, or counts it again. Counting it again
+    /// can take its day over the target, which the person confirms.
+    func setOptional(_ portionID: String, optional: Bool) async {
+        await write { confirm in
+            try await self.service.setPortionOptional(portionID, optional: optional, confirm: confirm)
+        }
+    }
+
     func removeMeal(_ mealID: String) async {
         await run { try await self.service.removeMeal(mealID); await self.load() }
     }

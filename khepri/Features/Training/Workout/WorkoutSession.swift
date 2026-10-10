@@ -61,6 +61,17 @@ final class WorkoutSession {
     private var connecting: Task<Void, Never>?
     /// Sets on their way to the server; tests wait on them.
     private(set) var saving: [Task<Void, Never>] = []
+    /// Sets being sent right now, so one is never sent twice at once.
+    private var uploading: Set<UUID> = []
+    /// Tries so far for each set the server has not taken.
+    private var attempts: [UUID: Int] = [:]
+    /// The next automatic try for failed sets, while one is waiting.
+    private(set) var retrying: Task<Void, Never>?
+    /// How long to wait before the next try; tests make it instant.
+    private let sleep: @Sendable (Duration) async -> Void
+    /// After this many tries a set waits for the app to come back or the
+    /// workout to finish rather than trying on its own.
+    static let maxAutomaticAttempts = 8
     /// Last time's numbers arriving; tests wait on it.
     private(set) var loadingLastTime: Task<Void, Never>?
     /// Set by `init(restoring:)`: `start()` then picks the workout up where
@@ -87,8 +98,10 @@ final class WorkoutSession {
     /// day finishing it completes; it defaults to the plan day's own weekday.
     init(title: String, day: TrainingDay, planWeekday: String? = nil, service: ActivityServicing, live: WorkoutLiveActivityControlling,
          health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
-         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init) {
+         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init,
+         sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }) {
         self.title = title
+        self.sleep = sleep
         // What this week asks for: the weekly review can make it a deload or
         // a build week without changing the plan.
         self.exercises = day.exercises.map(\.forThisWeek).filter { $0.sets > 0 }
@@ -105,8 +118,10 @@ final class WorkoutSession {
     /// The workout a killed run left behind, as it was. `start()` resumes it.
     init(restoring snapshot: WorkoutSnapshot, service: ActivityServicing, live: WorkoutLiveActivityControlling,
          health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
-         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init) {
+         restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init,
+         sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }) {
         title = snapshot.title
+        self.sleep = sleep
         exercises = snapshot.exercises
         planWeekday = snapshot.planWeekday
         self.service = service
@@ -168,7 +183,7 @@ final class WorkoutSession {
         if lastTime.isEmpty {
             loadingLastTime = Task { await loadLastTime() }
         }
-        for set in logged where set.upload == .pending {
+        for set in logged where set.upload == .pending || set.upload == .failed {
             upload(set)
         }
     }
@@ -252,24 +267,76 @@ final class WorkoutSession {
     }
 
     private func upload(_ set: LoggedSet) {
-        guard let lifts else { return }
+        guard let lifts, !uploading.contains(set.id) else { return }
+        uploading.insert(set.id)
+        attempts[set.id, default: 0] += 1
         saving.append(Task { [weak self] in
             await self?.connecting?.value
             let input = set.input(activitySessionID: self?.recorded?.id)
-            let upload: SetUpload
             do {
-                upload = .saved(id: try await lifts.log(input).id)
+                let saved = try await lifts.log(input)
+                self?.finishUpload(set.id, .saved(id: saved.id), retryable: false)
             } catch {
-                upload = .failed
+                self?.finishUpload(set.id, .failed, retryable: Self.isWorthRetrying(error))
             }
-            self?.mark(set.id, upload)
         })
+    }
+
+    private func finishUpload(_ setID: UUID, _ upload: SetUpload, retryable: Bool) {
+        uploading.remove(setID)
+        if case .saved = upload { attempts[setID] = nil }
+        if !retryable { attempts[setID] = attempts[setID].map { max($0, Self.maxAutomaticAttempts) } }
+        mark(setID, upload)
+        if upload == .failed, retryable { scheduleRetry() }
     }
 
     private func mark(_ setID: UUID, _ upload: SetUpload) {
         guard let index = logged.firstIndex(where: { $0.id == setID }) else { return }
         logged[index].upload = upload
         persist()
+    }
+
+    /// Sends every set the server has not taken again, now. Called when the
+    /// app comes back, by the backoff, and before the workout is finished.
+    /// A set the server refused for what it is (not for the connection) is
+    /// only sent again from here, never by the backoff.
+    func retryFailedSets() {
+        retrying?.cancel()
+        retrying = nil
+        for set in logged where set.upload == .failed {
+            upload(set)
+        }
+    }
+
+    /// Waits longer after each try — 2 s, 4 s, 8 s … up to a minute — then
+    /// sends the failed sets that still have automatic tries left.
+    private func scheduleRetry() {
+        guard retrying == nil, phase != .finished else { return }
+        let failed = logged.filter { $0.upload == .failed && attempts[$0.id, default: 0] < Self.maxAutomaticAttempts }
+        guard let fewest = failed.map({ attempts[$0.id, default: 1] }).min() else { return }
+        let delay = Duration.seconds(min(60, 2 << min(fewest - 1, 5)))
+        retrying = Task { [weak self, sleep] in
+            await sleep(delay)
+            guard !Task.isCancelled, let self else { return }
+            self.retrying = nil
+            for set in self.logged where set.upload == .failed && self.attempts[set.id, default: 0] < Self.maxAutomaticAttempts {
+                self.upload(set)
+            }
+        }
+    }
+
+    /// Whether a failed send is worth sending again by itself: the connection
+    /// or the server's own trouble, not a refusal of the set.
+    nonisolated static func isWorthRetrying(_ error: any Error) -> Bool {
+        guard let apiError = error as? APIError else { return true }
+        switch apiError {
+        case .fieldValidation, .notFound, .unauthorized, .conflict, .locked:
+            return false
+        case .invalidStatus(let code):
+            return code == 408 || code == 429 || code >= 500
+        default:
+            return true
+        }
     }
 
     /// Ends the workout and records it, sets done or not.
@@ -293,6 +360,9 @@ final class WorkoutSession {
             await health.saveStrengthWorkout(start: startedAt, end: now())
         }
         await connecting?.value
+        retryFailedSets()
+        retrying?.cancel()
+        retrying = nil
         for task in saving { await task.value }
         saving = []
         guard let recorded else { return }
