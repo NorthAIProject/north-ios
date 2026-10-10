@@ -12,13 +12,17 @@ struct PlanImportService: PlanImportServicing {
             payload: Operations.ParseWorkoutImport.Input.Body.MultipartFormPayload.FilePayload(body: HTTPBody(data)),
             filename: filename
         )
-        return try await NorthAPI.call {
-            try await generationAPI.parseWorkoutImport(body: .multipartForm([.file(part)])).ok.body.json
+        return try await BackgroundActivity.run("Workout import") {
+            try await NorthAPI.call {
+                try await generationAPI.parseWorkoutImport(body: .multipartForm([.file(part)])).ok.body.json
+            }
         }
     }
 
     func commitWorkout(_ draft: WorkoutImportDraft) async throws -> String {
-        try await NorthAPI.call { try await api.commitWorkoutImport(body: .json(draft)).created.body.json.planId }
+        try await BackgroundActivity.run("Workout import") {
+            try await NorthAPI.call { try await api.commitWorkoutImport(body: .json(draft)).created.body.json.planId }
+        }
     }
 
     func parseMeal(filename: String, data: Data) async throws -> MealImportDraft {
@@ -26,21 +30,27 @@ struct PlanImportService: PlanImportServicing {
             payload: Operations.ParseMealImport.Input.Body.MultipartFormPayload.FilePayload(body: HTTPBody(data)),
             filename: filename
         )
-        return try await NorthAPI.call {
-            try await generationAPI.parseMealImport(body: .multipartForm([.file(part)])).ok.body.json
+        return try await BackgroundActivity.run("Meal import") {
+            try await NorthAPI.call {
+                try await generationAPI.parseMealImport(body: .multipartForm([.file(part)])).ok.body.json
+            }
         }
     }
 
     func previewMeal(_ draft: MealImportDraft) async throws -> MealImportDraft {
-        try await NorthAPI.call { try await api.previewMealImport(body: .json(draft)).ok.body.json }
+        try await BackgroundActivity.run("Meal import") {
+            try await NorthAPI.call { try await api.previewMealImport(body: .json(draft)).ok.body.json }
+        }
     }
 
     func commitMeal(_ draft: MealImportDraft, confirm: Bool) async throws -> PlanWrite<String> {
-        try await NorthAPI.call {
-            switch try await api.commitMealImport(body: .json(.init(draft: draft, confirmOverage: confirm))) {
-            case .created(let created): .saved(try created.body.json.planId)
-            case .conflict(let conflict): .over(try conflict.body.json)
-            default: throw APIError.invalidResponse
+        try await BackgroundActivity.run("Meal import") {
+            try await NorthAPI.call {
+                switch try await api.commitMealImport(body: .json(.init(draft: draft, confirmOverage: confirm))) {
+                case .created(let created): .saved(try created.body.json.planId)
+                case .conflict(let conflict): .over(try conflict.body.json)
+                default: throw APIError.invalidResponse
+                }
             }
         }
     }

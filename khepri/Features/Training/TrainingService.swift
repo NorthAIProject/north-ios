@@ -73,7 +73,9 @@ struct TrainingService: TrainingServicing {
     }
 
     func createPlan(_ intake: TrainingIntake) async throws -> PlanDetail {
-        try await NorthAPI.call { try await generationAPI.createPlan(body: .json(intake)).created.body.json }
+        try await BackgroundActivity.run("Training plan") {
+            try await NorthAPI.call { try await generationAPI.createPlan(body: .json(intake)).created.body.json }
+        }
     }
 
     func setStartTime(plan: String, day: Int, to time: String?) async throws -> PlanEditResult {
