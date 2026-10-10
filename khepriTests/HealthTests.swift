@@ -66,6 +66,24 @@ struct HealthPayloadTests {
         #expect(payload.calories == 612)
     }
 
+    @Test func aWorkoutCarriesWhatTheWatchMeasured() throws {
+        var run = HealthWorkoutRecord(id: UUID(), type: .running, start: day(20, 7), end: day(20, 8),
+                                      kilocalories: 612, meters: 10_000, indoor: true)
+        run.averageHeartRate = 151
+        run.maximumHeartRate = 177
+        run.elevationAscended = 0 // nothing climbed: not measured, so not sent
+        let payload = try #require(HealthPayload.workout(run))
+        #expect(payload.distanceM == 10_000 && payload.avgHeartRate == 151 && payload.maxHeartRate == 177)
+        #expect(payload.elevationM == nil && payload.indoor == true)
+    }
+
+    @Test func aWorkoutThatDoesNotSayWhereSendsNoIndoorFlag() throws {
+        let run = HealthWorkoutRecord(id: UUID(), type: .running, start: day(20, 7), end: day(20, 8),
+                                      kilocalories: nil, meters: 10_000, indoor: nil)
+        let payload = try #require(HealthPayload.workout(run))
+        #expect(payload.indoor == nil && payload.avgHeartRate == nil)
+    }
+
     @Test func aWorkoutNorthCannotNameIsLeftOut() {
         let fishing = HealthWorkoutRecord(id: UUID(), type: .fishing, start: day(20, 7), end: day(20, 9),
                                           kilocalories: nil, meters: nil, indoor: false)
@@ -118,6 +136,23 @@ struct HealthSyncTests {
 
         _ = try await sync.syncIfEnabled(calendar: utc)
         #expect(await source.starts.last == day(18), "two days before the last sync, for late watch data")
+    }
+
+    // An install that synced before workouts carried heart rate re-reads 90
+    // days once, so those sessions get it; after that, the usual two days.
+    @Test func anOlderInstallBackfillsWorkoutsOnce() async throws {
+        let source = FakeHealthSource()
+        let defaults = UserDefaults.ephemeral()
+        let earlier = HealthSyncReport(at: day(19, 12), readings: 10, workouts: 1)
+        defaults.set(try JSONEncoder().encode(earlier), forKey: HealthSync.lastReportKey)
+        let sync = HealthSync(source: source, uploader: FakeUploader(), defaults: defaults, now: { day(20, 12) })
+        sync.setEnabled(true)
+
+        _ = try await sync.syncIfEnabled(calendar: utc)
+        #expect(await source.starts == [utc.date(byAdding: .day, value: -HealthSync.backfillDays, to: day(20))!])
+
+        _ = try await sync.syncIfEnabled(calendar: utc)
+        #expect(await source.starts.last == day(18))
     }
 
     @Test func offMeansNothingRuns() async throws {

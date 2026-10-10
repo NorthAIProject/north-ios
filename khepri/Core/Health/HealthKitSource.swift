@@ -133,6 +133,8 @@ struct HealthKitSource: HealthDataSource {
             sortDescriptors: [SortDescriptor(\.startDate)]
         )
         let own = HKSource.default()
+        let heartRate = HKQuantityType(.heartRate)
+        let bpm = HKUnit.count().unitDivided(by: .minute())
         return try await descriptor.result(for: store)
             // A workout this app wrote is already a session on the server.
             .filter { $0.sourceRevision.source != own }
@@ -141,7 +143,10 @@ struct HealthKitSource: HealthDataSource {
                     id: w.uuid, type: w.workoutActivityType, start: w.startDate, end: w.endDate,
                     kilocalories: w.statistics(for: HKQuantityType(.activeEnergyBurned))?.sumQuantity()?.doubleValue(for: .kilocalorie()),
                     meters: distance(of: w),
-                    indoor: w.metadata?[HKMetadataKeyIndoorWorkout] as? Bool ?? false
+                    indoor: w.metadata?[HKMetadataKeyIndoorWorkout] as? Bool,
+                    averageHeartRate: w.statistics(for: heartRate)?.averageQuantity()?.doubleValue(for: bpm),
+                    maximumHeartRate: w.statistics(for: heartRate)?.maximumQuantity()?.doubleValue(for: bpm),
+                    elevationAscended: (w.metadata?[HKMetadataKeyElevationAscended] as? HKQuantity)?.doubleValue(for: .meter())
                 )
             }
     }
