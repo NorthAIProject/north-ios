@@ -147,6 +147,7 @@ struct HealthSettings: View {
     @State private var working = false
     @State private var error: String?
     @State private var confirmingStop = false
+    @State private var hasNewTypes = false
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -176,6 +177,13 @@ struct HealthSettings: View {
                 } footer: {
                     Text("Workouts, steps, active energy, resting heart rate, HRV and sleep. Your coach sees them beside what you tell it. Workouts you finish in Khepri are saved to Apple Health.")
                 }
+                if hasNewTypes {
+                    Section {
+                        Button("Allow New Health Data") { Task { await allowNewTypes() } }
+                    } footer: {
+                        Text("Khepri can now also read walking and running distance, flights climbed, mindful minutes, walking heart rate, breathing rate and blood oxygen, to compare each with your usual.")
+                    }
+                }
                 Section {
                     Button("Choose What Khepri Reads") {
                         if let url = URL(string: "x-apple-health://") { openURL(url) }
@@ -188,6 +196,7 @@ struct HealthSettings: View {
             if let error { ErrorRow(error) }
         }
         .navigationTitle("Apple Health")
+        .task { hasNewTypes = enabled ? await Permissions.healthHasNewTypes() : false }
         .confirmationDialog("Stop syncing Apple Health?", isPresented: $confirmingStop, titleVisibility: .visible) {
             Button("Stop Syncing") {
                 HealthSync.shared.setEnabled(false)
@@ -206,6 +215,15 @@ struct HealthSettings: View {
         HealthSync.shared.setEnabled(true)
         enabled = true
         HealthBackgroundDelivery.register()
+        await syncNow()
+    }
+
+    /// The Health sheet for the types added since this person connected,
+    /// then a sync so they show up straight away. The sheet lists only what
+    /// it has not asked about before.
+    private func allowNewTypes() async {
+        await Permissions.requestHealth()
+        hasNewTypes = await Permissions.healthHasNewTypes()
         await syncNow()
     }
 
