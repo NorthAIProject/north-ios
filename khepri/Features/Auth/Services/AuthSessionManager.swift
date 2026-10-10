@@ -8,8 +8,19 @@ public extension Notification.Name {
     static let authSessionDidInvalidate = Notification.Name("khepri.authSessionDidInvalidate")
 }
 
+/// What a launch finds in the Keychain.
+nonisolated public enum SessionRestoreResult: Sendable, Equatable {
+    /// A session token was read.
+    case restored
+    /// There is no session: sign in.
+    case none
+    /// A session may be there, but the Keychain will not hand it over yet
+    /// (before the first unlock after a restart). Wait; never sign out.
+    case locked
+}
+
 public protocol AuthSessionManaging: Sendable {
-    func restoreSessionIfNeeded() async -> Bool
+    func restoreSessionIfNeeded() async -> SessionRestoreResult
     func validAccessToken() async throws -> String?
     func storeSession(token: String, user: APIUser?, expiresAt: Date?) async throws
     func logout() async
@@ -28,12 +39,14 @@ public final class AuthSessionManager: AuthSessionManaging, @unchecked Sendable 
         self.secureStore = secureStore
     }
 
-    public func restoreSessionIfNeeded() async -> Bool {
+    public func restoreSessionIfNeeded() async -> SessionRestoreResult {
         do {
             let token = try await validAccessToken()
-            return !(token?.isEmpty ?? true)
+            return (token?.isEmpty ?? true) ? .none : .restored
+        } catch let error as SecureStoreError where error.isLocked {
+            return .locked
         } catch {
-            return false
+            return .none
         }
     }
 

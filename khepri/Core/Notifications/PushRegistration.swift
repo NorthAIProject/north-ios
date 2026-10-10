@@ -48,7 +48,7 @@ enum PushRegistration {
     }
 
     private static func send(_ token: String) async {
-        guard await AuthSessionManager.shared.restoreSessionIfNeeded() else {
+        guard await AuthSessionManager.shared.restoreSessionIfNeeded() == .restored else {
             log.info("push: token held until sign-in")
             return
         }

@@ -83,3 +83,29 @@ struct LockedSessionTests {
         #expect(store.removed.isEmpty)
     }
 }
+
+@MainActor
+struct SessionRestoreTests {
+    /// Before the first unlock after a restart the Keychain refuses reads.
+    /// That is a session waiting, not a missing one, and nothing is deleted.
+    @Test func aLockedKeychainRestoresAsLocked() async {
+        let store = LockedStore()
+        let sessions = AuthSessionManager(secureStore: store)
+
+        #expect(await sessions.restoreSessionIfNeeded() == .locked)
+        #expect(store.removed.isEmpty)
+    }
+
+    @Test func noTokenRestoresAsNone() async {
+        let sessions = AuthSessionManager(secureStore: MemoryStore())
+
+        #expect(await sessions.restoreSessionIfNeeded() == SessionRestoreResult.none)
+    }
+
+    @Test func aStoredTokenRestores() async throws {
+        let sessions = AuthSessionManager(secureStore: MemoryStore())
+        try await sessions.storeSession(token: "kept", user: nil, expiresAt: nil)
+
+        #expect(await sessions.restoreSessionIfNeeded() == .restored)
+    }
+}
