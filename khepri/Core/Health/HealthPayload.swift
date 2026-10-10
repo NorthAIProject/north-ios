@@ -21,7 +21,13 @@ struct HealthWorkoutRecord: Equatable {
     var end: Date
     var kilocalories: Double?
     var meters: Double?
-    var indoor: Bool
+    /// Apple Health's indoor flag; nil when the workout does not say.
+    var indoor: Bool?
+    /// Beats per minute over the workout, when a watch or strap measured it.
+    var averageHeartRate: Double? = nil
+    var maximumHeartRate: Double? = nil
+    /// Metres climbed, when the workout recorded it.
+    var elevationAscended: Double? = nil
 }
 
 /// One stretch of a single sleep stage, as a watch or sleep app recorded it.
@@ -146,9 +152,18 @@ enum HealthPayload {
         let hours = w.end.timeIntervalSince(w.start) / 3600
         guard hours > 0 else { return nil }
         let kmh = w.meters.map { $0 / 1000 / hours }
-        guard let code = HealthActivityMapping.code(for: w.type, kmh: kmh, indoor: w.indoor) else { return nil }
+        guard let code = HealthActivityMapping.code(for: w.type, kmh: kmh, indoor: w.indoor ?? false) else { return nil }
         return .init(activityCode: code, externalId: w.id.uuidString, startedAt: w.start, endedAt: w.end,
-                     calories: (w.kilocalories ?? 0) > 0 ? w.kilocalories : nil)
+                     calories: measured(w.kilocalories), distanceM: measured(w.meters),
+                     avgHeartRate: measured(w.averageHeartRate), maxHeartRate: measured(w.maximumHeartRate),
+                     elevationM: measured(w.elevationAscended), indoor: w.indoor)
+    }
+
+    /// A figure the device measured, or nil: zero is "not measured", and the
+    /// server stores it as unknown rather than as a zero.
+    private static func measured(_ value: Double?) -> Double? {
+        guard let value, value > 0 else { return nil }
+        return value
     }
 }
 

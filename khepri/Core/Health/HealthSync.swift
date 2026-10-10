@@ -41,6 +41,10 @@ actor HealthSync {
     /// How far before the last sync each later one starts again: a watch
     /// hands its data to the phone late, and today's totals keep growing.
     static let overlapDays = 2
+    /// How far back a one-off re-read goes when the upload learns something
+    /// new about workouts (heart rate, climb, indoor), so sessions already
+    /// on the server get it too. The server only fills empty fields.
+    static let backfillDays = 90
 
     private let source: HealthDataSource
     private let uploader: HealthUploading
@@ -61,6 +65,9 @@ actor HealthSync {
 
     static let enabledKey = "health.sync.enabled"
     static let lastReportKey = "health.sync.lastReport"
+    /// Set once the workout-metadata backfill has run. A later backfill gets
+    /// a new key.
+    static let workoutMetadataBackfillKey = "health.sync.backfill.workoutMetadata"
 
     /// Set when the person connects Apple Health, in the wizard or Settings.
     nonisolated var isEnabled: Bool {
@@ -91,11 +98,18 @@ actor HealthSync {
 
     private func run(calendar: Calendar) async throws -> HealthSyncReport {
         let end = now()
-        let start: Date
+        var start: Date
         if let last = lastReport?.at {
             start = calendar.date(byAdding: .day, value: -Self.overlapDays, to: calendar.startOfDay(for: last)) ?? last
         } else {
             start = calendar.date(byAdding: .day, value: -Self.firstSyncDays, to: calendar.startOfDay(for: end)) ?? end
+        }
+
+        // Only an install that synced before this version backfills; a first
+        // sync already sends everything the upload knows.
+        let backfilling = lastReport != nil && !defaults.bool(forKey: Self.workoutMetadataBackfillKey)
+        if backfilling, let back = calendar.date(byAdding: .day, value: -Self.backfillDays, to: calendar.startOfDay(for: end)) {
+            start = min(start, back)
         }
 
         let snapshot = try await source.snapshot(from: start, to: end, calendar: calendar)
@@ -106,6 +120,7 @@ actor HealthSync {
             report.workouts += result.workouts
         }
         defaults.set(try? JSONEncoder().encode(report), forKey: Self.lastReportKey)
+        defaults.set(true, forKey: Self.workoutMetadataBackfillKey)
         log.info("synced \(report.readings) readings, \(report.workouts) workouts")
         return report
     }
