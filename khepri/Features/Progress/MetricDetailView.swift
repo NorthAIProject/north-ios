@@ -57,15 +57,25 @@ struct MetricDetailView: View {
 
             if metric.hasData {
                 Section {
-                    MetricChart(chart: metric.chart)
+                    MetricChart(chart: metric.chart, usual: metric.usual)
                         .frame(height: 200)
                         .padding(.vertical, 8)
                 }
             } else {
                 Section {
-                    Text(emptyText)
+                    Text(emptyText(metric))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+            }
+
+            if let usual = metric.usual {
+                Section {
+                    Text(usual.text).font(.subheadline)
+                } header: {
+                    Text("Against Your Usual")
+                } footer: {
+                    Text("Your usual is the shaded band: your last four weeks, give or take a typical day's swing.")
                 }
             }
 
@@ -86,8 +96,8 @@ struct MetricDetailView: View {
         }
     }
 
-    private var emptyText: String {
-        HealthMetric(rawValue: key) != nil
+    private func emptyText(_ metric: InsightMetric) -> String {
+        metric.health == true
             ? "Nothing from Apple Health for this window. Connect it in Settings → Connections, and allow this kind of data."
             : "Nothing logged for this window."
     }
@@ -95,13 +105,22 @@ struct MetricDetailView: View {
 
 private struct MetricChart: View {
     let chart: InsightsChart
+    let usual: InsightsUsualRange?
 
     var body: some View {
         let values = chart.series.first?.values ?? []
         let points = values.enumerated().map { (label: chart.labels.indices.contains($0.offset) ? chart.labels[$0.offset] : "\($0.offset)", value: $0.element) }
-        Chart(points, id: \.label) { point in
-            BarMark(x: .value("When", point.label), y: .value("Value", point.value))
-                .foregroundStyle(NorthColor.signal)
+        Chart {
+            if let usual {
+                // No x: the band spans the whole plot, behind the bars.
+                RectangleMark(yStart: .value("Usual low", max(usual.mean - usual.sd, 0)),
+                              yEnd: .value("Usual high", usual.mean + usual.sd))
+                    .foregroundStyle(NorthColor.signal.opacity(0.12))
+            }
+            ForEach(points, id: \.label) { point in
+                BarMark(x: .value("When", point.label), y: .value("Value", point.value))
+                    .foregroundStyle(NorthColor.signal)
+            }
         }
         .chartXAxis {
             // Every label on a thirty-day chart is a smear; a few are enough.

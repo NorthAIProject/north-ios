@@ -55,7 +55,7 @@ struct InsightsScreen: View {
             }
         case .ready:
             if let summary = store.summary {
-                SummaryList(summary: summary)
+                SummaryList(summary: summary, health: store.health)
             }
         }
     }
@@ -67,6 +67,7 @@ struct MetricRoute: Hashable {
 
 private struct SummaryList: View {
     let summary: InsightsSummary
+    let health: [InsightsHealthMetric]
 
     var body: some View {
         List {
@@ -112,15 +113,18 @@ private struct SummaryList: View {
             }
 
             Section {
-                ForEach(HealthMetric.allCases) { metric in
-                    NavigationLink(value: MetricRoute(key: metric.rawValue)) {
-                        Label(metric.label, systemImage: metric.systemImage)
-                    }
+                if health.isEmpty {
+                    Text("Nothing from Apple Health in the last two weeks.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(health, id: \.key) { metric in
+                    NavigationLink(value: MetricRoute(key: metric.key)) { HealthRow(metric: metric) }
                 }
             } header: {
                 Text("Health")
             } footer: {
-                Text("From Apple Health. Connect it in Settings → Connections.")
+                Text("From Apple Health, against your own last four weeks. Connect it in Settings → Connections.")
             }
 
             if !summary.highlights.isEmpty {
@@ -209,6 +213,79 @@ private struct PinnedRow: View {
     }
 }
 
+/// One health metric: its latest day, where that sits against the person's
+/// usual, and the last fortnight as a line.
+private struct HealthRow: View {
+    let metric: InsightsHealthMetric
+
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Label(metric.label, systemImage: HealthSymbol.name(for: metric.key))
+                    .font(.subheadline)
+                Text(metric.latest)
+                    .northDisplayNumber(.title3)
+                if let usual = metric.usual {
+                    UsualChip(state: usual.state)
+                }
+            }
+            Spacer(minLength: 0)
+            if metric.recent.count > 1 {
+                ValuesSparkline(values: metric.recent)
+                    .frame(width: 96, height: 36)
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+/// "Above your usual" and friends, quiet when usual. The state is an open
+/// string, so anything this build does not know reads as nothing at all.
+struct UsualChip: View {
+    let state: String
+
+    var body: some View {
+        switch state {
+        case "above":
+            Label("Above your usual", systemImage: "arrow.up").chipStyle()
+        case "below":
+            Label("Below your usual", systemImage: "arrow.down").chipStyle()
+        case "usual":
+            Text("Within your usual").font(.caption).foregroundStyle(.secondary)
+        default:
+            EmptyView()
+        }
+    }
+}
+
+private extension Label where Title == Text, Icon == Image {
+    func chipStyle() -> some View {
+        labelStyle(.titleAndIcon)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(NorthColor.signal)
+    }
+}
+
+/// SF Symbols for the health keys this build knows. A key added on the
+/// server later still gets a row, with the generic heart.
+enum HealthSymbol {
+    static func name(for key: String) -> String {
+        switch key {
+        case "steps": "figure.walk"
+        case "active-energy": "flame"
+        case "exercise-minutes": "figure.run"
+        case "stand-hours": "figure.stand"
+        case "daylight": "sun.max"
+        case "resting-heart-rate": "heart"
+        case "hrv": "waveform.path.ecg"
+        case "vo2max": "lungs"
+        case "weight": "scalemass"
+        default: "heart.text.square"
+        }
+    }
+}
+
 struct DeltaText: View {
     let direction: Int
     let pct: Double
@@ -229,7 +306,15 @@ struct Sparkline: View {
     let chart: InsightsChart
 
     var body: some View {
-        let values = chart.series.first?.values ?? []
+        ValuesSparkline(values: chart.series.first?.values ?? [])
+    }
+}
+
+/// A run of values as a quiet line.
+struct ValuesSparkline: View {
+    let values: [Double]
+
+    var body: some View {
         Chart(Array(values.enumerated()), id: \.offset) { index, value in
             LineMark(x: .value("Day", index), y: .value("Value", value))
                 .interpolationMethod(.monotone)
