@@ -196,6 +196,18 @@ struct MiddlewareTests {
         #expect(APIError(URLError(.cancelled)).urlErrorCode == .cancelled)
     }
 
+    @Test func aConflictWithAnErrorBodyIsAConflict() async throws {
+        let transport = CannedTransport(status: .conflict, json: #"{"error":{"message":"Those tools are already running."}}"#)
+        let error = await #expect(throws: APIError.self) {
+            try await NorthAPI.call {
+                try await client(transport).decideToolCalls(path: .init(id: "c1", messageID: "m1"), body: .json(.init(approve: true))).noContent
+            }
+        }
+        #expect(error == .conflict("Those tools are already running."))
+        #expect(error?.isConflict == true)
+        #expect(error?.errorDescription == "Those tools are already running.")
+    }
+
     private func client(
         _ transport: CannedTransport,
         token: @escaping @Sendable () async throws -> String? = { "session-token" },

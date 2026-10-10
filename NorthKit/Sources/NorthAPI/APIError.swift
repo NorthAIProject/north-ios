@@ -13,6 +13,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case unauthorized(String?)
     /// The thing asked for does not exist, or not for this account.
     case notFound(String?)
+    /// The server is already doing what was asked (409 with an error body).
+    case conflict(String?)
     case fieldValidation(message: String, fields: [String: String])
     case server(String)
     /// The request never got an answer. `code` says why, when the system did.
@@ -31,6 +33,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             message ?? "Your session has expired. Please sign in again."
         case .notFound(let message):
             message ?? "That could not be found."
+        case .conflict(let message):
+            message ?? "That is already in progress."
         case .fieldValidation(let message, _), .server(let message), .network(let message, _):
             message
         case .locked:
@@ -47,6 +51,12 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     public var isNotFound: Bool {
         if case .notFound = self { return true }
         if case .invalidStatus(404) = self { return true }
+        return false
+    }
+
+    public var isConflict: Bool {
+        if case .conflict = self { return true }
+        if case .invalidStatus(409) = self { return true }
         return false
     }
 
@@ -140,6 +150,8 @@ struct ErrorMappingMiddleware: ClientMiddleware {
             .unauthorized(detail?.message)
         case (404, _):
             .notFound(detail?.message)
+        case (409, _):
+            .conflict(detail?.message)
         case (_, let detail?) where !(detail.fields ?? [:]).isEmpty:
             .fieldValidation(message: detail.message, fields: detail.fields ?? [:])
         case (_, let detail?):

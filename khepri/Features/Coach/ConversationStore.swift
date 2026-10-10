@@ -80,24 +80,48 @@ final class ConversationStore {
     private(set) var uploadingName: String?
     /// Why the last file could not be attached.
     private(set) var attachmentError: String?
+    /// Said, not as an error, when a reply the app lost track of has not
+    /// reached the server's history after a minute of asking.
+    private(set) var replyNote: String?
+
+    /// The coach is still working on a reply or approved tools the app
+    /// stopped hearing about, as when the phone locked mid-reply.
+    var isAwaitingReply: Bool { owed != nil }
 
     /// The largest file the server keeps for a chat turn.
     static let maxAttachmentBytes = 8 * 1024 * 1024
 
+    /// What the server owes after the app stopped listening.
+    private enum Owed {
+        /// A reply, cut off or not yet written.
+        case reply
+        /// Approved tools still running, then their reply.
+        case decision
+    }
+
     private let coach: CoachServicing
+    private let recovery: ReplyRecovery
     private var replyTask: Task<Void, Never>?
     private var uploadTask: Task<Void, Never>?
     /// The reply being written. Its id changes once, from local to the
     /// server's, when `done` arrives.
     private var replyID: String?
+    private var owed: Owed?
+    private var isPolling = false
 
-    init(conversationID: String, title: String, coach: CoachServicing = CoachService()) {
+    init(
+        conversationID: String,
+        title: String,
+        coach: CoachServicing = CoachService(),
+        recovery: ReplyRecovery = .standard
+    ) {
         self.conversationID = conversationID
         self.title = title
         self.coach = coach
+        self.recovery = recovery
     }
 
-    var canSend: Bool { phase == .ready && pendingApproval == nil && !ended }
+    var canSend: Bool { phase == .ready && pendingApproval == nil && !ended && owed == nil }
 
     var isUploading: Bool { uploadingName != nil }
 
@@ -108,21 +132,86 @@ final class ConversationStore {
         return canSend && !isUploading && (hasText || attachment != nil)
     }
 
+    /// Opens the conversation. A reply still owed (answered elsewhere, or a
+    /// message sent moments ago that has no answer yet) is collected.
     func load() async {
         do {
             let detail = try await coach.conversation(conversationID)
-            title = detail.conversation.title
-            ended = detail.conversation.ended
-            messages = detail.messages.map(DisplayMessage.init)
-            pendingApproval = detail.pendingApproval
+            show(detail)
             phase = .ready
             // Answered on another device, reply still owed: collect it.
             if detail.awaitingResume {
                 stream(coach.resume(conversationID), changesData: true)
+                return
+            }
+            if owed == nil, replyTask == nil, ReplyRecovery.replyInFlight(detail) {
+                owed = .reply
             }
         } catch {
             if messages.isEmpty { phase = .failed(error.localizedDescription) }
         }
+        await recoverIfNeeded()
+    }
+
+    /// Pull to refresh: the stored conversation, once, without waiting on a
+    /// reply that is not there yet.
+    func refresh() async {
+        guard phase != .replying, !isPolling, !isDeciding else { return }
+        replyNote = nil
+        guard let detail = try? await coach.conversation(conversationID) else { return }
+        show(detail)
+        if detail.awaitingResume {
+            owed = nil
+            stream(coach.resume(conversationID), changesData: true)
+        } else if owed != nil, !ReplyRecovery.stillOwed(after: detail, waitingOnTools: owed == .decision) {
+            owed = nil
+        }
+    }
+
+    /// Collects a reply the app stopped hearing: asks the server for the
+    /// conversation every `pollInterval` until the reply is stored, resuming
+    /// it if the server is waiting for that, or gives up gently. Called when
+    /// a reply is cut off in the foreground and when the app comes back.
+    func recoverIfNeeded() async {
+        guard owed != nil, phase == .ready, !isPolling, !recovery.isInBackground() else { return }
+        isPolling = true
+        defer { isPolling = false }
+        for attempt in 0..<recovery.attempts {
+            // Cancelled: the screen or the foreground was left; owed stays for next time.
+            if attempt > 0, (try? await Task.sleep(for: recovery.pollInterval)) == nil { return }
+            guard let detail = try? await coach.conversation(conversationID), !Task.isCancelled else { continue }
+            show(detail)
+            if detail.awaitingResume {
+                owed = nil
+                stream(coach.resume(conversationID), changesData: true)
+                return
+            }
+            if !ReplyRecovery.stillOwed(after: detail, waitingOnTools: owed == .decision) {
+                owed = nil
+                return
+            }
+        }
+        guard !Task.isCancelled else { return }
+        owed = nil
+        replyNote = "Your coach's reply will appear here when it's ready — pull to refresh."
+    }
+
+    /// The conversation as the server stores it, replacing whatever the
+    /// screen pieced together from a stream.
+    private func show(_ detail: ConversationDetail) {
+        title = detail.conversation.title
+        ended = detail.conversation.ended
+        let stored = detail.messages.map(DisplayMessage.init)
+        if stored != messages { messages = stored }
+        pendingApproval = detail.pendingApproval
+    }
+
+    /// The connection was cut while the server still owed `what`: show the
+    /// coach as still thinking rather than failed.
+    private func markInterrupted(owing what: Owed) {
+        owed = what
+        replyError = nil
+        replyNote = nil
     }
 
     /// Sends a message, with the pending attachment if there is one, and
@@ -133,6 +222,7 @@ final class ConversationStore {
         let carried = attachment
         attachment = nil
         attachmentError = nil
+        replyNote = nil
         messages.append(DisplayMessage(role: .user, text: text, attachments: carried.map { [$0] } ?? []))
         stream(coach.reply(in: conversationID, text: text, mediaID: carried?.mediaId))
     }
@@ -192,16 +282,24 @@ final class ConversationStore {
     ///
     /// A write such as a new training plan runs for minutes before this
     /// returns, so a second tap in the meantime is ignored rather than sent.
+    /// The server runs the tools even if the app stops listening, and answers
+    /// 409 while they run, so a cut connection or a 409 waits for them.
     func decide(approve: Bool) async {
-        guard let approval = pendingApproval, !isDeciding else { return }
+        guard let approval = pendingApproval, !isDeciding, owed == nil else { return }
         isDeciding = true
         defer { isDeciding = false }
         replyError = nil
+        replyNote = nil
         do {
             try await coach.decide(in: conversationID, messageID: approval.messageId, approve: approve)
             pendingApproval = nil
             if approve { dataChanges += 1 }
             stream(coach.resume(conversationID), changesData: approve)
+        } catch where ReplyRecovery.isInterruption(error) || APIError(error).isConflict {
+            if approve { dataChanges += 1 }
+            markInterrupted(owing: .decision)
+            // In the background this waits for the app to come back.
+            await recoverIfNeeded()
         } catch {
             replyError = error.localizedDescription
         }
@@ -234,16 +332,23 @@ final class ConversationStore {
         replyID = reply.id
 
         replyTask = Task { [weak self] in
+            var cutOff = false
             do {
                 for try await event in events {
                     self?.apply(event)
                 }
             } catch is CancellationError {
+            } catch where ReplyRecovery.isInterruption(error) {
+                // Marked before the phase changes, so the end earns no "done".
+                self?.markInterrupted(owing: .reply)
+                cutOff = true
             } catch {
                 self?.replyError = error.localizedDescription
             }
             self?.finishReply()
             if changesData { self?.dataChanges += 1 }
+            // In the background this waits for the app to come back.
+            if cutOff { await self?.recoverIfNeeded() }
         }
     }
 

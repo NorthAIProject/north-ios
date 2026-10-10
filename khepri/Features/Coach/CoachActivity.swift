@@ -29,12 +29,14 @@ struct CoachActivity: Equatable {
     static let catchingUp = CoachActivity(mood: .working, status: "is catching up")
 
     /// Precedence: loading, a reply being written, an answered question still
-    /// running, a question for the person, a flash, the composer, a failed reply, an ended reflection, then Ready.
+    /// running, a reply the app lost track of, a question for the person, a
+    /// flash, the composer, a failed reply, an ended reflection, then Ready.
     static func resolve(
         phase: ConversationStore.Phase,
         hasReplyText: Bool = false,
         awaitingApproval: Bool = false,
         isDeciding: Bool = false,
+        isStillThinking: Bool = false,
         replyFailed: Bool = false,
         ended: Bool = false,
         flash: Flash? = nil,
@@ -52,6 +54,8 @@ struct CoachActivity: Equatable {
         }
         // Said yes: the write is running, so stop asking for the OK.
         if isDeciding { return CoachActivity(mood: .working, status: "is on it") }
+        // The connection dropped mid-reply; the server is still writing it.
+        if isStillThinking { return CoachActivity(mood: .working, status: "is still thinking") }
         if awaitingApproval { return CoachActivity(mood: .idle, status: "needs your OK") }
         if flash == .done { return CoachActivity(mood: .celebrating, status: "is done") }
         if isListening { return CoachActivity(mood: .listening, status: "is listening") }
@@ -68,6 +72,7 @@ struct CoachActivity: Equatable {
             hasReplyText: !(reply?.text.isEmpty ?? true),
             awaitingApproval: store.pendingApproval != nil,
             isDeciding: store.isDeciding,
+            isStillThinking: store.isAwaitingReply,
             replyFailed: store.replyError != nil,
             ended: store.ended,
             flash: flash,
