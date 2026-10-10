@@ -7,12 +7,14 @@ typealias InsightsChart = Components.Schemas.InsightsChart
 typealias InsightsHealthMetric = Components.Schemas.InsightsHealthMetric
 typealias InsightsUsualRange = Components.Schemas.InsightsUsualRange
 typealias InsightsRecovery = Components.Schemas.InsightsRecovery
+typealias InsightsConsistency = Components.Schemas.InsightsConsistency
 
 protocol InsightsServicing: Sendable {
     func summary(range: String?) async throws -> InsightsSummary
     func metric(_ key: String, range: String?) async throws -> InsightMetric
     func health() async throws -> [InsightsHealthMetric]
     func recovery() async throws -> InsightsRecovery
+    func consistency() async throws -> InsightsConsistency
 }
 
 struct InsightsService: InsightsServicing {
@@ -32,6 +34,10 @@ struct InsightsService: InsightsServicing {
 
     func recovery() async throws -> InsightsRecovery {
         try await NorthAPI.call { try await api.getInsightsRecovery().ok.body.json }
+    }
+
+    func consistency() async throws -> InsightsConsistency {
+        try await NorthAPI.call { try await api.getInsightsConsistency().ok.body.json }
     }
 }
 

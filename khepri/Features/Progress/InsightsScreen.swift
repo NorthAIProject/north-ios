@@ -32,6 +32,9 @@ struct InsightsScreen: View {
                 .navigationDestination(for: AreasRoute.self) { _ in
                     AreasScreen()
                 }
+                .navigationDestination(for: ConsistencyRoute.self) { _ in
+                    ConsistencyPage(service: store.service)
+                }
                 .refreshable { await store.load() }
         }
         .task(id: store.range) { await store.load() }
@@ -148,6 +151,9 @@ private struct SummaryList: View {
             }
 
             Section("More") {
+                NavigationLink(value: ConsistencyRoute()) {
+                    Label("Consistency", systemImage: "calendar")
+                }
                 ForEach([InsightsDomain.sleep, .cardio, .patterns, .timeline, .coach, .spend]) { domain in
                     NavigationLink(value: domain) {
                         Label(domain.title, systemImage: domain.systemImage)
