@@ -55,7 +55,7 @@ struct InsightsScreen: View {
             }
         case .ready:
             if let summary = store.summary {
-                SummaryList(summary: summary, health: store.health)
+                SummaryList(summary: summary, health: store.health, recovery: store.recovery)
             }
         }
     }
@@ -68,6 +68,7 @@ struct MetricRoute: Hashable {
 private struct SummaryList: View {
     let summary: InsightsSummary
     let health: [InsightsHealthMetric]
+    let recovery: InsightsRecovery?
 
     var body: some View {
         List {
@@ -82,6 +83,19 @@ private struct SummaryList: View {
                     Text("\(summary.onTrack) of \(summary.judged) on track")
                         .northDisplayNumber(.title)
                         .padding(.vertical, 4)
+                }
+            }
+
+            if let recovery {
+                Section {
+                    RecoveryHeadline(recovery: recovery)
+                    ForEach(recovery.signals, id: \.key) { signal in
+                        NavigationLink(value: MetricRoute(key: signal.key)) { RecoverySignalRow(signal: signal) }
+                    }
+                } header: {
+                    Text("Recovery Today")
+                } footer: {
+                    Text("HRV, resting heart rate and last night's sleep, each against your last four weeks.")
                 }
             }
 
@@ -281,6 +295,7 @@ enum HealthSymbol {
         case "hrv": "waveform.path.ecg"
         case "vo2max": "lungs"
         case "weight": "scalemass"
+        case "sleep": "bed.double"
         default: "heart.text.square"
         }
     }

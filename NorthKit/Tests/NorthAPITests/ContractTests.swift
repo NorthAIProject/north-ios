@@ -231,6 +231,9 @@ struct ContractTests {
         let recovery = try decode(Schemas.InsightsRecovery.self, "insights-recovery")
         #expect(recovery.hasData && recovery.points == 0 && recovery.verdict == "low")
         #expect(recovery.signals.first?.key == "hrv" && recovery.signals.first?.latest == "38ms")
+        #expect(recovery.hasData && recovery.verdict == "low" && recovery.label == "Under your usual")
+        #expect(recovery.signals.map(\.key) == ["hrv", "resting-heart-rate", "sleep"])
+        #expect(recovery.signals.first?.usual.state == "below" && recovery.sentence.hasPrefix("Recovery today: "))
     }
 
     @Test func goalsAndCheckIns() throws {
@@ -399,6 +402,7 @@ struct ContractTests {
     @Test func lighterDay() throws {
         let day = try decode(Schemas.LighterDay.self, "today-lighter")
         #expect(day.offered && day.readiness.low && day.readiness.hrv == 38)
+        #expect(day.readiness.reason?.hasPrefix("Heart rate variability is below your usual") == true)
         #expect(day.session == "Lower body" && day.choice == nil)
     }
 

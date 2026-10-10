@@ -15,6 +15,11 @@ private struct FakeInsights: InsightsServicing {
         throw URLError(.unsupportedURL)
     }
 
+    func recovery() async throws -> InsightsRecovery {
+        let json = #"{"hasData":false,"points":0,"verdict":"unknown","label":"","sentence":"","signals":[]}"#
+        return try JSONDecoder().decode(InsightsRecovery.self, from: Data(json.utf8))
+    }
+
     func health() async throws -> [InsightsHealthMetric] {
         if let healthError { throw healthError }
         return [
@@ -34,6 +39,8 @@ struct InsightsStoreTests {
         #expect(store.phase == .ready)
         #expect(store.health.map(\.key) == ["steps", "a-metric-from-a-later-server"])
         #expect(store.health.first?.usual?.state == "usual")
+        // No fresh readings: no recovery section rather than an empty one.
+        #expect(store.recovery == nil)
     }
 
     @Test func aHealthFailureLeavesTheRestOfTheScreen() async {
@@ -41,6 +48,12 @@ struct InsightsStoreTests {
         await store.load()
         #expect(store.phase == .ready)
         #expect(store.health.isEmpty)
+    }
+
+    @Test func noFreshReadingsMeansNoRecoveryCard() async {
+        let store = RecoveryStore(service: FakeInsights())
+        await store.load()
+        #expect(store.recovery == nil)
     }
 
     @Test func anUnknownKeyStillGetsASymbol() {

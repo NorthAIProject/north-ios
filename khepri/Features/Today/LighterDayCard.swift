@@ -24,7 +24,10 @@ struct LighterDayService: LighterDayServicing {
 
 extension LighterDay {
     /// The readings behind a low morning in a line, or nil without any.
+    /// The server words it in the Progress screen's terms; a server from
+    /// before recovery sends only the numbers, worded here.
     var why: String? {
+        if let reason = readiness.reason, !reason.isEmpty { return reason }
         let r = readiness
         func change(_ value: Double, _ base: Double) -> String {
             guard base > 0 else { return "" }
@@ -48,28 +51,54 @@ private extension String {
     var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
 
-/// On a low-readiness morning with a session still to do: take it lighter
+/// Today's lighter-day state, loaded by the Today screen.
+///
+/// The screen loads it rather than the card: a card that renders nothing
+/// until it has loaded never appears, so a `.task` on it never runs.
+@MainActor
+@Observable
+final class LighterDayStore {
+    private(set) var day: LighterDay?
+    private(set) var saving = false
+    private(set) var error: String?
+    private let service: LighterDayServicing
+
+    init(service: LighterDayServicing = LighterDayService()) {
+        self.service = service
+    }
+
+    func load() async {
+        if let latest = try? await service.today() { day = latest }
+    }
+
+    func choose(lighter: Bool) async {
+        saving = true
+        defer { saving = false }
+        do {
+            day = try await service.choose(lighter: lighter)
+            error = nil
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+}
+
+/// On a low-recovery morning with a session still to do: take it lighter
 /// (about 60% of today's sets, today only) or keep the plan. Shows nothing
 /// on any other morning.
 struct LighterDayCard: View {
-    var service: LighterDayServicing = LighterDayService()
-    @State private var day: LighterDay?
-    @State private var saving = false
-    @State private var error: String?
+    let store: LighterDayStore
 
     var body: some View {
-        Group {
-            if let day, day.offered {
-                offer(day)
-            } else if let day, day.tookItLighter {
-                Label("Lighter day: today's sets are cut to about 60%. Tomorrow is back to the plan.", systemImage: "leaf")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .northSurfaceCard(padding: 16)
-            }
+        if let day = store.day, day.offered {
+            offer(day)
+        } else if let day = store.day, day.tookItLighter {
+            Label("Lighter day: today's sets are cut to about 60%. Tomorrow is back to the plan.", systemImage: "leaf")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .northSurfaceCard(padding: 16)
         }
-        .task { await load() }
     }
 
     private func offer(_ day: LighterDay) -> some View {
@@ -80,33 +109,18 @@ struct LighterDayCard: View {
             if let why = day.why {
                 Text(why).font(.caption).foregroundStyle(.secondary)
             }
-            if let error {
+            if let error = store.error {
                 Text(error).font(.caption).foregroundStyle(.red)
             }
             HStack {
-                Button("Take It Lighter") { Task { await choose(lighter: true) } }
+                Button("Take It Lighter") { Task { await store.choose(lighter: true) } }
                     .northProminentButton()
-                Button("Keep the Plan") { Task { await choose(lighter: false) } }
+                Button("Keep the Plan") { Task { await store.choose(lighter: false) } }
                     .buttonStyle(.bordered)
             }
-            .disabled(saving)
+            .disabled(store.saving)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .northSurfaceCard(padding: 16)
-    }
-
-    private func load() async {
-        day = try? await service.today()
-    }
-
-    private func choose(lighter: Bool) async {
-        saving = true
-        defer { saving = false }
-        do {
-            day = try await service.choose(lighter: lighter)
-            error = nil
-        } catch {
-            self.error = error.localizedDescription
-        }
     }
 }
