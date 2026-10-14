@@ -1,3 +1,4 @@
+import NorthKit
 import SwiftUI
 
 /// Markdown with structure: headings, lists and paragraphs, for the coach's
@@ -44,33 +45,92 @@ enum MarkdownBlock: Equatable {
     }
 }
 
+/// A report split the way it is read: the opening the coach leads with, then
+/// one section per heading.
+///
+/// Grouping goes by position, never by heading text: reports are written in
+/// the reader's language, so "What moved" may arrive as "O que avançou".
+struct MarkdownDocument: Equatable {
+    struct Section: Equatable {
+        var heading: String?
+        var blocks: [MarkdownBlock]
+    }
+
+    var lead: [MarkdownBlock] = []
+    var sections: [Section] = []
+
+    /// A leading level-1 heading is the report's title, which the screen
+    /// already shows above the body, so it is dropped.
+    init(_ blocks: [MarkdownBlock]) {
+        var blocks = blocks[...]
+        if case .heading(1, _) = blocks.first { blocks = blocks.dropFirst() }
+        for block in blocks {
+            if case .heading(_, let text) = block {
+                sections.append(Section(heading: text, blocks: []))
+            } else if sections.isEmpty {
+                lead.append(block)
+            } else {
+                sections[sections.count - 1].blocks.append(block)
+            }
+        }
+    }
+
+    init(markdown: String) {
+        self.init(MarkdownBlock.parse(markdown))
+    }
+}
+
 struct MarkdownBlocksView: View {
-    let markdown: String
+    let blocks: [MarkdownBlock]
+
+    init(blocks: [MarkdownBlock]) {
+        self.blocks = blocks
+    }
+
+    init(markdown: String) {
+        self.init(blocks: MarkdownBlock.parse(markdown))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(Array(MarkdownBlock.parse(markdown).enumerated()), id: \.offset) { _, block in
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 switch block {
                 case .heading(let level, let text):
                     Text(Markdown.render(text))
-                        .font(level <= 2 ? .title3.weight(.semibold) : .headline)
+                        .font(level <= 2 ? .north(.title3).weight(.semibold) : .north(.headline))
                         .padding(.top, 4)
                         .accessibilityAddTraits(.isHeader)
                 case .bullet(let text):
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("•").foregroundStyle(.secondary)
-                        Text(Markdown.render(text))
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Circle()
+                            .fill(NorthColor.signal)
+                            .frame(width: 6, height: 6)
+                            .alignmentGuide(.firstTextBaseline) { $0[.bottom] + 1 }
+                            .accessibilityHidden(true)
+                        prose(text)
                     }
                 case .numbered(let number, let text):
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("\(number).").monospacedDigit().foregroundStyle(.secondary)
-                        Text(Markdown.render(text))
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(number)
+                            .font(.northMono(.caption).weight(.medium))
+                            .foregroundStyle(NorthColor.signal)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(NorthColor.signal.opacity(0.12), in: .capsule)
+                        prose(text)
                     }
                 case .paragraph(let text):
-                    Text(Markdown.render(text))
+                    prose(text)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func prose(_ text: String) -> some View {
+        Text(Markdown.render(text))
+            .font(.north(.body))
+            .lineSpacing(4)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
