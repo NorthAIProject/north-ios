@@ -29,6 +29,52 @@ struct MarkdownBlockTests {
     }
 }
 
+struct MarkdownDocumentTests {
+    @Test func aWeeklyReportLeadsWithItsOpeningAndCardsEachSection() {
+        let document = MarkdownDocument(markdown: """
+        # A steady week
+
+        Four sessions.
+
+        ## What moved
+
+        - Squat up
+
+        ## What stalled
+
+        Sleep.
+
+        ## Next week
+
+        1. Rest
+        """)
+        #expect(document.lead == [.paragraph("Four sessions.")])
+        #expect(document.sections == [
+            .init(heading: "What moved", blocks: [.bullet("Squat up")]),
+            .init(heading: "What stalled", blocks: [.paragraph("Sleep.")]),
+            .init(heading: "Next week", blocks: [.numbered(number: "1", text: "Rest")]),
+        ])
+    }
+
+    @Test func aBriefingIsAllOpening() {
+        let document = MarkdownDocument(markdown: "Recovery is low.\n\nLast check-in was yesterday.")
+        #expect(document.lead == [.paragraph("Recovery is low."), .paragraph("Last check-in was yesterday.")])
+        #expect(document.sections.isEmpty)
+    }
+
+    @Test func groupsByPositionNotHeadingText() {
+        let document = MarkdownDocument(markdown: "# Semana\n\nAbertura.\n\n## O que avançou\n\n- Agachamento")
+        #expect(document.lead == [.paragraph("Abertura.")])
+        #expect(document.sections == [.init(heading: "O que avançou", blocks: [.bullet("Agachamento")])])
+    }
+
+    @Test func keepsATitleHeadingThatIsNotFirst() {
+        let document = MarkdownDocument(markdown: "Opening.\n\n# Later")
+        #expect(document.lead == [.paragraph("Opening.")])
+        #expect(document.sections == [.init(heading: "Later", blocks: [])])
+    }
+}
+
 struct MemoryUseTests {
     private func memory(pinned: Bool, excluded: Bool) -> Memory {
         Memory(id: UUID().uuidString, category: "general", content: "x", status: .approved,

@@ -84,33 +84,55 @@ struct ReportsScreen: View {
     }
 }
 
+private extension ReportSummary {
+    var kindLabel: String { kind == .weekly ? "Weekly report" : "Morning briefing" }
+    var kindSymbol: String { kind == .weekly ? "calendar" : "sun.horizon" }
+}
+
 private struct ReportRow: View {
     let report: ReportSummary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(report.kind == .weekly ? "WEEKLY" : "BRIEFING")
-                    .font(.caption2.weight(.medium))
-                    .tracking(1.5)
-                    .foregroundStyle(.secondary)
-                if report.archived {
-                    Image(systemName: "archivebox").font(.caption).foregroundStyle(.secondary)
+        HStack(spacing: 12) {
+            Image(systemName: report.kindSymbol)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(NorthColor.agent)
+                .frame(width: 36, height: 36)
+                .background(NorthColor.agent.opacity(0.12), in: .rect(cornerRadius: NorthRadius.medium, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(report.kindLabel).northEyebrow()
+                    if report.archived {
+                        Image(systemName: "archivebox").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
+                Text(report.title)
+                    .font(.north(.headline))
+                    .lineLimit(2)
+                status
             }
-            Text(report.title).font(.headline)
-            Text(status)
-                .font(.caption)
-                .foregroundStyle(report.status == .failed ? NorthColor.ember : .secondary)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
     }
 
-    private var status: String {
+    @ViewBuilder private var status: some View {
         switch report.status {
-        case .pending: "Being written…"
-        case .failed: "Could not be written"
-        case .ready: report.generatedAt.map { $0.formatted(.relative(presentation: .named)) } ?? ""
+        case .pending:
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.mini)
+                Text("Being written…")
+            }
+            .font(.north(.caption))
+            .foregroundStyle(.secondary)
+        case .failed:
+            Text("Could not be written")
+                .font(.north(.caption))
+                .foregroundStyle(NorthColor.ember)
+        case .ready:
+            Text(report.generatedAt.map { $0.formatted(.relative(presentation: .named)) } ?? "")
+                .font(.north(.caption))
+                .foregroundStyle(.secondary)
         }
     }
 }
@@ -128,20 +150,13 @@ struct ReportDetailView: View {
     var body: some View {
         ScrollView {
             if let report {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(report.value1.title).font(.title2.weight(.semibold))
-                        Text(period(report.value1))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    MarkdownBlocksView(markdown: report.value2.body)
-                    Divider()
-                    HStack(spacing: 16) {
-                        Text("Was this useful?").foregroundStyle(.secondary)
-                        Spacer()
-                        rateButton(true, report.value1.helpful)
-                        rateButton(false, report.value1.helpful)
+                VStack(alignment: .leading, spacing: 20) {
+                    ReportHeader(summary: report.value1, period: period(report.value1))
+                    ReportBody(document: MarkdownDocument(markdown: report.value2.body))
+                    ReportRating(helpful: report.value1.helpful) { helpful in
+                        Task {
+                            do { self.report = try await service.rate(id, helpful: helpful) } catch { self.error = error.localizedDescription }
+                        }
                     }
                     if let error { Text(error).font(.footnote).foregroundStyle(.secondary) }
                 }
@@ -169,23 +184,171 @@ struct ReportDetailView: View {
         }
     }
 
-    private func rateButton(_ value: Bool, _ current: Bool?) -> some View {
-        let selected = current == value
-        return Button {
-            Task {
-                // Tapping the chosen answer again clears it.
-                do { report = try await service.rate(id, helpful: selected ? nil : value) } catch { self.error = error.localizedDescription }
-            }
-        } label: {
-            Image(systemName: (value ? "hand.thumbsup" : "hand.thumbsdown") + (selected ? ".fill" : ""))
-        }
-        .accessibilityLabel(value ? "Useful" : "Not useful")
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
     private func period(_ report: ReportSummary) -> String {
         guard let start = CalendarDay.date(from: report.periodStart), let end = CalendarDay.date(from: report.periodEnd) else { return "" }
         if report.periodStart == report.periodEnd { return start.formatted(date: .complete, time: .omitted) }
         return (start..<end.addingTimeInterval(1)).formatted(.interval.day().month())
     }
 }
+
+private struct ReportHeader: View {
+    let summary: ReportSummary
+    let period: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(summary.kindLabel).northEyebrow(NorthColor.agent)
+            Text(summary.title)
+                .font(.north(.title).weight(.bold))
+                .accessibilityAddTraits(.isHeader)
+            if !period.isEmpty {
+                Text(period)
+                    .font(.north(.subheadline))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+/// The opening as the coach's voice, set apart by a bar in the agent colour,
+/// then each section on its own card. A briefing has no headings, so it is
+/// all opening.
+private struct ReportBody: View {
+    let document: MarkdownDocument
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if !document.lead.isEmpty {
+                ReportLead(blocks: document.lead)
+            }
+            ForEach(Array(document.sections.enumerated()), id: \.offset) { _, section in
+                VStack(alignment: .leading, spacing: 12) {
+                    if let heading = section.heading {
+                        NorthCardHeader(heading)
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                    MarkdownBlocksView(blocks: section.blocks)
+                }
+                .northSurfaceCard()
+            }
+        }
+    }
+}
+
+private struct ReportLead: View {
+    let blocks: [MarkdownBlock]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                if case .paragraph(let text) = block {
+                    Text(Markdown.render(text))
+                        .font(.north(.title3).weight(.light))
+                        .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    MarkdownBlocksView(blocks: [block])
+                }
+            }
+        }
+        .padding(.leading, 16)
+        .overlay(alignment: .leading) {
+            Capsule()
+                .fill(NorthColor.agent)
+                .frame(width: 3)
+        }
+    }
+}
+
+private struct ReportRating: View {
+    let helpful: Bool?
+    let onRate: (Bool?) -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text("Was this useful?")
+                .font(.north(.subheadline))
+                .foregroundStyle(.secondary)
+            Spacer()
+            button(true)
+            button(false)
+        }
+        .northCard()
+        .sensoryFeedback(.selection, trigger: helpful)
+    }
+
+    private func button(_ value: Bool) -> some View {
+        let selected = helpful == value
+        return Button {
+            // Tapping the chosen answer again clears it.
+            onRate(selected ? nil : value)
+        } label: {
+            Image(systemName: (value ? "hand.thumbsup" : "hand.thumbsdown") + (selected ? ".fill" : ""))
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
+        .tint(selected ? NorthColor.signal : .secondary)
+        .accessibilityLabel(value ? "Useful" : "Not useful")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+#if DEBUG
+private struct PreviewReports: ReportsServicing {
+    static let weekly = ReportDetail(
+        value1: .init(id: "w", kind: .weekly, title: "A steady week, short on sleep", periodStart: "2026-10-05",
+                      periodEnd: "2026-10-11", status: .ready, generatedAt: .now, archived: false, helpful: true),
+        value2: .init(body: """
+        # A steady week, short on sleep
+
+        Ana, you trained four times and checked in five days out of seven.
+        Sleep averaged **6.4 h**, the lowest in a month.
+
+        ## What moved
+
+        - Squat top set went from 80 to **85 kg**.
+        - You wrote "finally felt strong on the Thursday run".
+
+        ## What stalled
+
+        Wednesday and Friday check-ins both said energy 2/5, each after a night under six hours.
+
+        ## Next week
+
+        1. Keep Monday's lower-body session as planned.
+        2. Lights out by 23:00 on the three nights before training.
+        """))
+
+    static let briefing = ReportDetail(
+        value1: .init(id: "b", kind: .daily, title: "Bom dia, Ana", periodStart: "2026-10-14",
+                      periodEnd: "2026-10-14", status: .ready, generatedAt: .now, archived: false, helpful: nil),
+        value2: .init(body: """
+        Hoje a recuperação está **baixa** e tens treino de pernas marcado.
+        Se quiseres, usa "Take it lighter" no cartão de treino.
+
+        O último check-in foi ontem à noite: energia 3/5.
+        """))
+
+    func reports(archived: Bool) async throws -> [ReportSummary] {
+        [Self.briefing.value1, Self.weekly.value1,
+         .init(id: "p", kind: .weekly, title: "This week", periodStart: "2026-10-12", periodEnd: "2026-10-18",
+               status: .pending, archived: false)]
+    }
+
+    func report(_ id: String) async throws -> ReportDetail { id == "b" ? Self.briefing : Self.weekly }
+    func rate(_ id: String, helpful: Bool?) async throws -> ReportDetail { try await report(id) }
+    func archive(_ id: String) async throws {}
+}
+
+#Preview("Reports") {
+    NavigationStack { ReportsScreen(service: PreviewReports()) }
+}
+
+#Preview("Weekly") {
+    NavigationStack { ReportDetailView(id: "w", service: PreviewReports()) {} }
+}
+
+#Preview("Briefing") {
+    NavigationStack { ReportDetailView(id: "b", service: PreviewReports()) {} }
+}
+#endif
