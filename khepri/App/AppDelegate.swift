@@ -2,8 +2,9 @@ import os
 import UIKit
 import UserNotifications
 
-/// What only a UIKit app delegate can do: receive notification taps and
-/// decide how notifications appear while the app is open.
+/// What only a UIKit app delegate can do: receive notification taps, decide
+/// how notifications appear while the app is open, and be woken for
+/// background uploads.
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     /// Links from notification taps, handed to the router once it exists.
     @MainActor var onOpenURL: ((URL) -> Void)?
@@ -18,7 +19,25 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         // now, unless that workout is about to be resumed.
         WorkoutLiveActivityController.endOrphans()
         Task { @MainActor in await PushRegistration.registerIfAllowed() }
+        // Reconnects to form-check uploads from before a kill or relaunch.
+        Task { @MainActor in await FormCheckUploader.shared.reconcile() }
         return true
+    }
+
+    /// iOS woke the app to deliver what happened to background uploads.
+    /// Using the uploader recreates its session with the same identifier,
+    /// which is what lets the events arrive; the handler is called once they
+    /// all have.
+    func application(
+        _ application: UIApplication,
+        handleEventsForBackgroundURLSession identifier: String,
+        completionHandler: @escaping () -> Void
+    ) {
+        guard identifier == BackgroundUploadSession.identifier else {
+            completionHandler()
+            return
+        }
+        FormCheckUploader.shared.backgroundEventsCompletion = completionHandler
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {

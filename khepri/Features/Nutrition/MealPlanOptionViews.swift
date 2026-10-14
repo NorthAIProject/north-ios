@@ -11,6 +11,7 @@ struct MealAlternativesGroup: View {
     let onSpeak: (String) -> Void
     let onRemoveOption: (String) -> Void
     let onRemovePortion: (String) -> Void
+    let onToggleOptional: (MealPortion) -> Void
 
     var body: some View {
         let alternatives = meal.options.dropFirst()
@@ -27,7 +28,11 @@ struct MealAlternativesGroup: View {
                     Button("Remove Option", role: .destructive) { onRemoveOption(option.id) }
                 }
                 ForEach(option.ingredients, id: \.id) { portion in
-                    PlanPortionRow(portion: portion) { onRemovePortion(portion.id) }
+                    PlanPortionRow(
+                        portion: portion,
+                        onRemove: { onRemovePortion(portion.id) },
+                        onToggleOptional: { onToggleOptional(portion) }
+                    )
                 }
                 if canAdd {
                     MealActionsRow(onAdd: { onAdd(option.id) }, onSpeak: { onSpeak(option.id) })
@@ -38,10 +43,14 @@ struct MealAlternativesGroup: View {
 }
 
 /// One portion of a plan meal: its weight and calories, what an imported plan
-/// said for it, and whether that weight was a guess.
+/// said for it, whether that weight was a guess, and whether the plan only
+/// offers it (optional: shown, not counted in the meal or day).
 struct PlanPortionRow: View {
     let portion: MealPortion
     let onRemove: () -> Void
+    let onToggleOptional: () -> Void
+
+    private var isOptional: Bool { portion.optional == true }
 
     var body: some View {
         LabeledContent {
@@ -54,11 +63,21 @@ struct PlanPortionRow: View {
                     .font(.caption)
                     .accessibilityLabel("estimated weight")
             }
+            if isOptional {
+                Text("Optional · not counted")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.leading, 12)
         .swipeActions {
             Button("Remove", role: .destructive, action: onRemove)
         }
+        .swipeActions(edge: .leading) {
+            Button(isOptional ? "Count It" : "Optional", action: onToggleOptional)
+                .tint(.indigo)
+        }
+        .accessibilityAction(named: isOptional ? "Count it" : "Make optional", onToggleOptional)
     }
 }
 

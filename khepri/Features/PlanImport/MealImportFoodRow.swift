@@ -38,6 +38,9 @@ struct MealImportFoodRow: View {
                 Text("≈ estimated").font(.caption).foregroundStyle(.secondary)
                     .accessibilityLabel("estimated weight")
             }
+            if food.optional == true {
+                Text("Optional · not counted").font(.caption).foregroundStyle(.secondary)
+            }
             if let macros = food.macros {
                 Text(macros.summary)
                     .font(.caption.monospacedDigit())

@@ -33,7 +33,10 @@ extension WorkoutSession {
             Components.Schemas.LiftSetInput(
                 exerciseName: exerciseName, exerciseSlug: exerciseSlug, setNumber: setNumber,
                 weightKg: weightKg, reps: reps, performedAt: performedAt, activitySessionId: activitySessionID,
-                kind: kind == .work ? nil : kind.payload, rir: rir)
+                kind: kind == .work ? nil : kind.payload, rir: rir,
+                // The set's own id, the same on every attempt: a retry after
+                // a lost answer finds the set already logged, not a second one.
+                clientId: id.uuidString)
         }
     }
 }

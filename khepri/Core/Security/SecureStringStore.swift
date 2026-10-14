@@ -20,6 +20,12 @@ public enum SecureStoreError: LocalizedError, Equatable {
             return "Data in Keychain could not be encoded as a UTF-8 string."
         }
     }
+
+    /// The Keychain refused to hand an item over because the phone has not
+    /// been unlocked since it restarted. The item is still there.
+    public var isLocked: Bool {
+        self == .readFailed(errSecInteractionNotAllowed)
+    }
 }
 
 public protocol SecureStringStoring: Sendable {

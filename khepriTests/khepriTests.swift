@@ -9,6 +9,7 @@ import Foundation
 import HTTPTypes
 import NorthAPI
 import OpenAPIRuntime
+import Security
 import Synchronization
 import Testing
 @testable import khepri
@@ -73,7 +74,12 @@ struct AuthTests {
 
 final class MemoryStore: SecureStringStoring, @unchecked Sendable {
     var storage: [String: String] = [:]
-    func string(for key: String) throws -> String? { storage[key] }
+    /// Refuses reads as the Keychain does before the first unlock.
+    var locked = false
+    func string(for key: String) throws -> String? {
+        if locked { throw SecureStoreError.readFailed(errSecInteractionNotAllowed) }
+        return storage[key]
+    }
     func setString(_ value: String, for key: String) throws { storage[key] = value }
     func removeValue(for key: String) throws { storage.removeValue(forKey: key) }
 }

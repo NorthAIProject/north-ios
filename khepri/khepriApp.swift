@@ -50,6 +50,8 @@ struct RootView: View {
             case .launching:
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .waitingForUnlock:
+                UnlockWaitingView()
             case .signedOut:
                 LoginScreen(onAuthenticated: {
                     Task { await app.didSignIn() }
