@@ -3,13 +3,15 @@ import NorthAPI
 import OpenAPIRuntime
 
 typealias KnowledgeDocument = Components.Schemas.KnowledgeDocument
+typealias KnowledgeDocumentDetail = Components.Schemas.KnowledgeDocumentDetail
 typealias KnowledgeList = Components.Schemas.KnowledgeList
 typealias KnowledgeHit = Components.Schemas.KnowledgeSearchResults.HitsPayloadPayload
 
 protocol KnowledgeServicing: Sendable {
     func library() async throws -> KnowledgeList
     func search(_ query: String) async throws -> [KnowledgeHit]
-    func text(_ id: String) async throws -> String
+    /// A document as the coach reads it: its record and its parsed text.
+    func document(_ id: String) async throws -> KnowledgeDocumentDetail
     func createNote(title: String, body: String) async throws
     /// The server reads the kind from the filename's extension and the bytes,
     /// not a declared type, so the name is what matters.
@@ -31,8 +33,8 @@ struct KnowledgeService: KnowledgeServicing {
         try await NorthAPI.call { try await api.searchKnowledge(query: .init(q: query, limit: 20)).ok.body.json.hits }
     }
 
-    func text(_ id: String) async throws -> String {
-        try await NorthAPI.call { try await api.getKnowledgeDocument(path: .init(documentID: id)).ok.body.json.value2.text }
+    func document(_ id: String) async throws -> KnowledgeDocumentDetail {
+        try await NorthAPI.call { try await api.getKnowledgeDocument(path: .init(documentID: id)).ok.body.json }
     }
 
     func createNote(title: String, body: String) async throws {
