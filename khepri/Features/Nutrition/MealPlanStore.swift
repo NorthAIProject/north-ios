@@ -151,6 +151,14 @@ final class MealPlanStore {
         }
     }
 
+    /// Shows a whole meal without counting it toward its day, or counts it
+    /// again; counting it again can take its day over, which the person confirms.
+    func setMealOptional(_ mealID: String, optional: Bool) async {
+        await write { confirm in
+            try await self.service.setMealOptional(mealID, optional: optional, confirm: confirm)
+        }
+    }
+
     func removeMeal(_ mealID: String) async {
         await run { try await self.service.removeMeal(mealID); await self.load() }
     }

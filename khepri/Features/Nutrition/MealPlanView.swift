@@ -160,14 +160,18 @@ struct MealPlanView: View {
         }
     }
 
-    /// A meal slot: its first option, which the day counts, then any
-    /// alternatives folded beneath it.
+    /// A meal slot: its first option, which the day counts unless the meal
+    /// is optional, then any alternatives folded beneath it.
     @ViewBuilder
     private func mealRows(_ meal: MealPlanMeal) -> some View {
+        let isOptional = meal.optional == true
+        let toggleOptional: () -> Void = { Task { await store.setMealOptional(meal.id, optional: !isOptional) } }
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(meal.name).font(.headline)
-                if meal.hasAlternatives, let first = meal.options.first {
+                if isOptional {
+                    Text("Optional meal · not counted").font(.caption).foregroundStyle(.secondary)
+                } else if meal.hasAlternatives, let first = meal.options.first {
                     Text("\(first.label) · counted").font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -179,6 +183,11 @@ struct MealPlanView: View {
                 if meal.hasAlternatives { removingMeal = meal } else { Task { await store.removeMeal(meal.id) } }
             }
         }
+        .swipeActions(edge: .leading) {
+            Button(isOptional ? String(localized: "Count Meal") : String(localized: "Optional", comment: "Make a meal optional"), action: toggleOptional)
+                .tint(.indigo)
+        }
+        .accessibilityAction(named: isOptional ? String(localized: "Count meal") : String(localized: "Make meal optional"), toggleOptional)
         ForEach(meal.ingredients, id: \.id) { portion in
             PlanPortionRow(
                 portion: portion,

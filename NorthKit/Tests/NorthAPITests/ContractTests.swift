@@ -160,6 +160,7 @@ struct ContractTests {
         #expect(plan.value2.notes == "Beber 2 L de água por dia.")
         let meal = try #require(plan.value2.days.first?.meals.first)
         #expect(meal.optionLabel == "Opção 1" && meal.alternatives?.count == 1)
+        #expect(meal.optional == false)
         let alternative = try #require(meal.alternatives?.first)
         #expect(alternative.optionLabel == "Opção 2" && alternative.totalMacros.calories == 206)
         #expect(alternative.ingredients.first?.sourceText == "peixe branco à vontade")
