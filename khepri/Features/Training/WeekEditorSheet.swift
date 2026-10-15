@@ -240,7 +240,7 @@ private struct WeekdayChips: View {
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 36)
                     .background(on ? NorthColor.signal : Color.secondary.opacity(0.15), in: .circle)
-                    .foregroundStyle(on ? Color.white : Color.primary)
+                    .foregroundStyle(on ? NorthColor.primaryForeground : Color.primary)
                     .buttonStyle(.plain)
                     .disabled(completed.contains(weekday))
                     .accessibilityLabel(WeekdayName.display(weekday))

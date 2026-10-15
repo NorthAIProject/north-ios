@@ -1,4 +1,5 @@
 import NorthAPI
+import NorthKit
 import SwiftUI
 
 /// The weekly review: the week that happened, then up to three priorities,
@@ -71,14 +72,14 @@ struct WeeklyReviewFlow: View {
                 Spacer()
                 if saved {
                     Button("Done") { dismiss() }
-                        .buttonStyle(.borderedProminent)
+                        .northProminentButton()
                 } else if step == .training {
                     Button("Save the Week") { Task { await save() } }
-                        .buttonStyle(.borderedProminent)
+                        .northProminentButton()
                         .disabled(saving)
                 } else {
                     Button("Next") { move(1) }
-                        .buttonStyle(.borderedProminent)
+                        .northProminentButton()
                         .disabled(review == nil)
                 }
             }

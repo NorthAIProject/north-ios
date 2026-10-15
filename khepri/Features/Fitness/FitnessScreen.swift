@@ -268,7 +268,7 @@ private struct StepsCard: View {
                 }
             }
 
-            TrendChart(series: steps, tint: .cyan)
+            TrendChart(series: steps, tint: NorthColor.Day.move)
                 .frame(height: 120)
 
             NorthInsetList(recent, id: \.id) { day in
@@ -285,7 +285,8 @@ private struct StepsCard: View {
                         Text(FitnessFormat.signed(delta))
                             .font(.north(.subheadline).weight(.medium))
                             .monospacedDigit()
-                            .foregroundStyle(delta > 0 ? Color.green : delta < 0 ? Color.red : Color.secondary)
+                            .foregroundStyle(delta > 0 ? NorthColor.signal
+                                             : delta < 0 ? NorthColor.destructive : Color.secondary)
                     }
                 }
                 .accessibilityElement(children: .combine)
@@ -328,7 +329,7 @@ private struct Vo2MaxCard: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            TrendChart(series: series, tint: .indigo, fromZero: false)
+            TrendChart(series: series, tint: NorthColor.ember, fromZero: false)
                 .frame(height: 100)
         }
         .northSurfaceCard()
@@ -338,10 +339,10 @@ private struct Vo2MaxCard: View {
 extension VO2Rating {
     var tint: Color {
         switch self {
-        case .poor: .red
-        case .fair: .yellow
-        case .good: .green
-        case .excellent: .mint
+        case .poor: NorthColor.destructive
+        case .fair: NorthColor.ember
+        case .good: NorthColor.signal
+        case .excellent: NorthColor.signal
         }
     }
 }

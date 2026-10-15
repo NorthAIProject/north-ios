@@ -1,3 +1,4 @@
+import NorthKit
 import SwiftUI
 
 public struct SignUpView: View {
@@ -52,7 +53,7 @@ public struct SignUpView: View {
                 HStack {
                     Text("Passwords do not match")
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundStyle(NorthColor.destructive)
                     Spacer()
                 }
                 .padding(.top, -8)
@@ -66,21 +67,19 @@ public struct SignUpView: View {
             } label: {
                 HStack {
                     if viewModel.isLoading {
+                        // The button is disabled while loading; the spinner takes its colour
+                        // from tint, so it is set to match the disabled label.
                         ProgressView()
-                            .tint(.white)
+                            .tint(.secondary)
                     } else {
                         Text("Create Account")
                             .font(.headline)
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(viewModel.canSubmitSignUp ? Color.accentColor : Color.secondary.opacity(0.3))
-                )
-                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, minHeight: 24)
             }
+            .northProminentButton()
+            .controlSize(.large)
             .disabled(!viewModel.canSubmitSignUp || viewModel.isLoading)
             .padding(.top, 4)
 

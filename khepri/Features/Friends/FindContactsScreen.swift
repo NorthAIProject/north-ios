@@ -70,7 +70,7 @@ struct FindContactsScreen: View {
                     await begin()
                 }
             }
-            .buttonStyle(.borderedProminent)
+            .northProminentButton()
         }
     }
 

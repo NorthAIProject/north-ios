@@ -130,7 +130,7 @@ struct MemoriesScreen: View {
                             MemoryText(memory: memory)
                             HStack(spacing: 12) {
                                 Button("Keep") { act { try await service.approve(memory.id) } }
-                                    .buttonStyle(.borderedProminent)
+                                    .northProminentButton()
                                 Button("Discard") { act { try await service.reject(memory.id) } }
                                     .buttonStyle(.bordered)
                             }

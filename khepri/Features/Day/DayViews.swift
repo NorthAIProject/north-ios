@@ -527,7 +527,7 @@ private struct MuscleCallout: View {
             Text(BodyMapText.name(id)).font(.headline)
             Text(BodyMapText.lastTrained(lastTrainedOn)).font(.subheadline).foregroundStyle(.secondary)
             Button("Open in Training", action: openInTraining)
-                .buttonStyle(.borderedProminent)
+                .northProminentButton()
                 .accessibilityIdentifier("body-open-training")
         }
         .padding(16)

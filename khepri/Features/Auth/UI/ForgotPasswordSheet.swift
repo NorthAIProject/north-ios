@@ -1,3 +1,4 @@
+import NorthKit
 import SwiftUI
 
 public struct ForgotPasswordSheet: View {
@@ -49,21 +50,19 @@ public struct ForgotPasswordSheet: View {
                 } label: {
                     HStack {
                         if isSubmitting {
+                            // The button is disabled while loading; the spinner takes its colour
+                            // from tint, so it is set to match the disabled label.
                             ProgressView()
-                                .tint(.white)
+                                .tint(.secondary)
                         } else {
                             Text("Send Reset Link")
                                 .font(.headline)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(AuthValidation.isValidEmail(resetEmail) ? Color.accentColor : Color.secondary.opacity(0.3))
-                    )
-                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, minHeight: 24)
                 }
+                .northProminentButton()
+                .controlSize(.large)
                 .disabled(!AuthValidation.isValidEmail(resetEmail) || isSubmitting)
 
                 Spacer()

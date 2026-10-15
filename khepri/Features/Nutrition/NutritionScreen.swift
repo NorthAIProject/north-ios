@@ -154,7 +154,7 @@ private struct LogFoodSheet: View {
                         Stepper("\(Int(grams)) g", value: $grams, in: 5...2000, step: 5)
                         LabeledContent("Calories", value: String(localized: "\(Int(picked.per100g.calories * grams / 100)) kcal"))
                         Button("Log It") { log { try await service.logFood(picked.id, grams: grams) } }
-                            .buttonStyle(.borderedProminent)
+                            .northProminentButton()
                     }
                 }
                 if picked == nil, query.isEmpty {

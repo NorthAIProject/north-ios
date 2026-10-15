@@ -185,7 +185,7 @@ struct MealPlanView: View {
         }
         .swipeActions(edge: .leading) {
             Button(isOptional ? String(localized: "Count Meal") : String(localized: "Optional", comment: "Make a meal optional"), action: toggleOptional)
-                .tint(.indigo)
+                .tint(NorthColor.agent)
         }
         .accessibilityAction(named: isOptional ? String(localized: "Count meal") : String(localized: "Make meal optional"), toggleOptional)
         ForEach(meal.ingredients, id: \.id) { portion in

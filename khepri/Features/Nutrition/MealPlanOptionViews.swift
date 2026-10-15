@@ -1,4 +1,5 @@
 import NorthAPI
+import NorthKit
 import SwiftUI
 
 /// A slot's alternatives under its counted first option, collapsed until
@@ -75,7 +76,7 @@ struct PlanPortionRow: View {
         }
         .swipeActions(edge: .leading) {
             Button(isOptional ? String(localized: "Count It") : String(localized: "Optional", comment: "Action: make this food optional"), action: onToggleOptional)
-                .tint(.indigo)
+                .tint(NorthColor.agent)
         }
         .accessibilityAction(named: isOptional ? String(localized: "Count it") : String(localized: "Make optional"), onToggleOptional)
     }

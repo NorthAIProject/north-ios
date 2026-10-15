@@ -1,4 +1,5 @@
 import NorthAPI
+import NorthKit
 import SwiftUI
 import WidgetKit
 
@@ -61,7 +62,7 @@ struct CaptureComposer: View {
                     onLogged()
                 }
             }
-            .buttonStyle(.borderedProminent)
+            .northProminentButton()
             .disabled(!draft.canLog)
         }
         if let result = draft.result {
