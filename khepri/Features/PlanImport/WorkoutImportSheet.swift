@@ -46,11 +46,11 @@ struct WorkoutImportSheet: View {
             .overlay {
                 if reading {
                     ImportProgressOverlay(
-                        title: "Reading your plan…",
-                        detail: "A document or photo can take up to a minute."
+                        title: String(localized: "Reading your plan…"),
+                        detail: String(localized: "A document or photo can take up to a minute.")
                     )
                 } else if saving {
-                    ImportProgressOverlay(title: "Saving…")
+                    ImportProgressOverlay(title: String(localized: "Saving…"))
                 }
             }
             .interactiveDismissDisabled(reading || saving || draft != nil)

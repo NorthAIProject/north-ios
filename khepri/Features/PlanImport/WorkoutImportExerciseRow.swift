@@ -9,10 +9,12 @@ struct WorkoutImportExerciseRow: View {
         VStack(alignment: .leading, spacing: 8) {
             TextField("Exercise", text: $exercise.name).font(.headline)
             HStack {
-                ImportLabeledField(label: "Sets", text: number($exercise.sets), keyboard: .numberPad)
-                ImportLabeledField(label: "Reps", text: $exercise.reps)
-                ImportLabeledField(label: "Load", text: $exercise.load)
-                ImportLabeledField(label: "Rest s", text: number($exercise.restSeconds), keyboard: .numberPad)
+                ImportLabeledField(label: String(localized: "Sets"), text: number($exercise.sets), keyboard: .numberPad)
+                ImportLabeledField(label: String(localized: "Reps"), text: $exercise.reps)
+                ImportLabeledField(label: String(localized: "Load"), text: $exercise.load)
+                ImportLabeledField(
+                    label: String(localized: "Rest s"), text: number($exercise.restSeconds), keyboard: .numberPad
+                )
             }
             TextField("Notes", text: $exercise.notes, axis: .vertical)
                 .font(.subheadline)

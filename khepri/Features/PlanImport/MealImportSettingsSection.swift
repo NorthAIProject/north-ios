@@ -32,9 +32,11 @@ struct MealImportSettingsSection: View {
                 if draft.isEveryDay {
                     Text("Your plan names no days, so it is saved as the same meals on all seven.")
                 } else {
-                    Text(draft.isAdvanced
-                         ? "Advanced: pick each day's weekday; a day over its target can be saved once you confirm."
-                         : "Easy: days run from Monday in order, and no day may go over its target.")
+                    if draft.isAdvanced {
+                        Text("Advanced: pick each day's weekday; a day over its target can be saved once you confirm.")
+                    } else {
+                        Text("Easy: days run from Monday in order, and no day may go over its target.")
+                    }
                 }
                 if !draft.settings.hasTarget {
                     Text("You have no macro target yet. Work it out in Body & Goal first; meal plans are built on it.")

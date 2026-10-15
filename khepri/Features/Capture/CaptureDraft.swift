@@ -94,8 +94,7 @@ final class CaptureDraft {
     }
 
     static func summary(_ outcome: CaptureOutcome) -> String {
-        let logged = String(localized: "Logged \(outcome.written)")
-        guard outcome.failed > 0 else { return logged }
-        return logged + String(localized: ", \(outcome.failed) could not be saved")
+        guard outcome.failed > 0 else { return String(localized: "Logged \(outcome.written)") }
+        return String(localized: "Logged \(outcome.written), \(outcome.failed) could not be saved")
     }
 }

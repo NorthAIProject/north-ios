@@ -62,7 +62,7 @@ struct DictationButton: View {
                 .frame(minWidth: 44, minHeight: 44)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(controller.isActive ? "Stop dictating" : "Dictate")
+        .accessibilityLabel(controller.isActive ? Text("Stop dictating") : Text("Dictate"))
         .accessibilityIdentifier("dictate")
         .sensoryFeedback(.start, trigger: controller.phase == .listening) { _, listening in listening }
         .alert("Speak instead of typing", isPresented: $explaining) {

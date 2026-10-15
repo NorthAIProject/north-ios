@@ -10,6 +10,14 @@ struct Glance: Equatable, Sendable {
         /// "07:30", when the day has a set time.
         var startTime: String?
         var isToday: Bool
+
+        /// The weekday in the reader's language; `weekday` stays the
+        /// server's English name.
+        var weekdayName: String {
+            let name = weekday.trimmingCharacters(in: .whitespaces).lowercased()
+            guard let index = Glance.weekdays.firstIndex(of: name) else { return weekday }
+            return Calendar.current.standaloneWeekdaySymbols[index]
+        }
     }
 
     var streak: Int
@@ -38,7 +46,7 @@ struct Glance: Equatable, Sendable {
 
     static let placeholder = Glance(
         streak: 6, checkedInToday: false, waterML: 1250, waterTargetML: 2500,
-        next: Session(focus: "Upper body", weekday: "Monday", startTime: "07:30", isToday: true)
+        next: Session(focus: String(localized: "Upper body"), weekday: "Monday", startTime: "07:30", isToday: true)
     )
 
     private static let weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]

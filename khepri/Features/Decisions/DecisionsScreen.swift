@@ -49,10 +49,10 @@ enum DecisionHeld: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .notYet: "Not yet"
-        case .yes: "Yes"
-        case .partly: "Partly"
-        case .no: "No"
+        case .notYet: String(localized: "Not yet", comment: "Whether a decision held up: not looked back on yet")
+        case .yes: String(localized: "Yes", comment: "Whether a decision held up")
+        case .partly: String(localized: "Partly", comment: "Whether a decision held up")
+        case .no: String(localized: "No", comment: "Whether a decision held up")
         }
     }
 }
@@ -61,7 +61,7 @@ extension DecisionCalibration {
     /// "7 looked back on: 4 held, 2 partly, 1 didn't", or nil before any.
     var summary: String? {
         guard revisited > 0 else { return nil }
-        return "\(revisited) looked back on: \(yes) held, \(partly) partly, \(no) didn't"
+        return String(localized: "\(revisited) looked back on: \(yes) held, \(partly) partly, \(no) didn't")
     }
 }
 
@@ -95,7 +95,7 @@ struct DecisionsScreen: View {
                 Button { editing = decision } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(decision.title).font(.headline).foregroundStyle(.primary)
-                        Text(decision.outcome.isEmpty ? "How did it turn out? Tap to add." : decision.outcome)
+                        (decision.outcome.isEmpty ? Text("How did it turn out? Tap to add.") : Text(decision.outcome))
                             .font(.subheadline)
                             .foregroundStyle(decision.outcome.isEmpty ? NorthColor.signal : .secondary)
                             .lineLimit(2)
@@ -154,7 +154,7 @@ struct DecisionsScreen: View {
 extension Decision: Identifiable {}
 
 private struct DecisionForm: View {
-    let title: String
+    let title: LocalizedStringKey
     @State var input: DecisionInput
     /// Only an existing decision can be looked back on.
     var asksHeld = false

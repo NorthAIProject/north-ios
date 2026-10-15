@@ -81,12 +81,12 @@ private struct LockScreenView: View {
     }
 
     private var label: String {
-        if isStale && state.phase != .finished { return "Idle" }
+        if isStale && state.phase != .finished { return String(localized: "Idle") }
         return switch state.phase {
-        case .working: "Working"
-        case .resting: "Rest"
-        case .paused: "Paused"
-        case .finished: "Finished"
+        case .working: String(localized: "Working")
+        case .resting: String(localized: "Rest")
+        case .paused: String(localized: "Paused")
+        case .finished: String(localized: "Finished")
         }
     }
 }

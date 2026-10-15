@@ -44,9 +44,9 @@ struct DocumentTextView: View {
                             }
                         }
                         if blocks.isEmpty {
-                            Text(document.status == .pending
-                                 ? "Still being read. The text appears here when it is done."
-                                 : "There is no text in this document.")
+                            (document.status == .pending
+                                 ? Text("Still being read. The text appears here when it is done.")
+                                 : Text("There is no text in this document."))
                                 .font(.north(.subheadline))
                                 .foregroundStyle(.secondary)
                         } else {
@@ -109,15 +109,16 @@ private struct DocumentHeader: View {
 
     private var read: String {
         switch document.status {
-        case .pending: "Being read…"
-        case .failed: "Failed"
-        case .ready: document.indexedAt.map { $0.formatted(.relative(presentation: .named)) } ?? "Ready"
+        case .pending: String(localized: "Being read…")
+        case .failed: String(localized: "Failed")
+        case .ready:
+            document.indexedAt.map { $0.formatted(.relative(presentation: .named)) } ?? String(localized: "Ready")
         }
     }
 }
 
 private struct Fact: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
 
     var body: some View {
@@ -139,7 +140,7 @@ private struct DocumentContents: View {
     var body: some View {
         let top = headings.map(\.level).min() ?? 1
         VStack(alignment: .leading, spacing: 10) {
-            NorthCardHeader("Contents")
+            NorthCardHeader(String(localized: "Contents"))
             ForEach(headings, id: \.index) { heading in
                 Button { onSelect(heading) } label: {
                     Text(Markdown.render(heading.text))
@@ -166,11 +167,11 @@ extension KnowledgeDocument {
     /// The same names the web shows.
     var kindLabel: String {
         let mime = mime.lowercased()
-        if kind == "note" { return "Note" }
+        if kind == "note" { return String(localized: "Note") }
         if mime.contains("pdf") { return "PDF" }
-        if mime.contains("markdown") { return "Markdown" }
+        if mime.contains("markdown") { return String(localized: "Markdown") }
         if mime.contains("csv") { return "CSV" }
-        return "Text"
+        return String(localized: "Text", comment: "Kind of document: plain text")
     }
 
     var size: String {
@@ -178,6 +179,6 @@ extension KnowledgeDocument {
     }
 
     var failureReason: String {
-        parseError.map { "Could not be read: \($0)" } ?? "Could not be read"
+        parseError.map { String(localized: "Could not be read: \($0)") } ?? String(localized: "Could not be read")
     }
 }

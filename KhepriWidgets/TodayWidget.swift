@@ -110,9 +110,9 @@ private struct SessionLabel: View {
     }
 
     private var eyebrow: String {
-        if glance.completedSummary != nil { return "TODAY · DONE" }
-        guard let session = glance.next else { return "TRAINING" }
-        let day = session.isToday ? "TODAY" : session.weekday.uppercased()
+        if glance.completedSummary != nil { return String(localized: "TODAY · DONE") }
+        guard let session = glance.next else { return String(localized: "TRAINING") }
+        let day = session.isToday ? String(localized: "TODAY") : session.weekdayName.localizedUppercase
         return [day, session.startTime].compactMap { $0 }.joined(separator: " · ")
     }
 }
@@ -127,7 +127,11 @@ struct SessionHeadline: View {
             Text("\(Image(systemName: "checkmark")) \(done)")
                 .accessibilityLabel("Done today, \(done)")
         } else {
-            Text(glance.next?.focus ?? "No plan yet")
+            if let focus = glance.next?.focus {
+                Text(focus)
+            } else {
+                Text("No plan yet")
+            }
         }
     }
 }
@@ -137,7 +141,7 @@ private struct StreakLine: View {
 
     var body: some View {
         Label {
-            Text(glance.streak == 1 ? "1 day" : "\(glance.streak) days")
+            (glance.streak == 1 ? Text("1 day") : Text("\(glance.streak) days"))
                 .monospacedDigit()
         } icon: {
             Image(systemName: glance.checkedInToday ? "checkmark.circle.fill" : "circle.dashed")
@@ -145,7 +149,9 @@ private struct StreakLine: View {
         }
         .font(.subheadline)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Check-in streak, \(glance.streak) days\(glance.checkedInToday ? ", done today" : "")")
+        .accessibilityLabel(glance.checkedInToday
+            ? Text("Check-in streak, \(glance.streak) days, done today")
+            : Text("Check-in streak, \(glance.streak) days"))
     }
 }
 
@@ -164,7 +170,7 @@ struct WidgetMessage: View {
     let signedIn: Bool
 
     var body: some View {
-        Text(signedIn ? "Khepri could not be reached." : "Open Khepri to sign in.")
+        (signedIn ? Text("Khepri could not be reached.") : Text("Open Khepri to sign in."))
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

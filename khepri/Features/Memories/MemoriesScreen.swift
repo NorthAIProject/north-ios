@@ -27,9 +27,9 @@ enum MemoryUse: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .normally: "When Relevant"
-        case .always: "Always"
-        case .never: "Never"
+        case .normally: String(localized: "When Relevant")
+        case .always: String(localized: "Always")
+        case .never: String(localized: "Never")
         }
     }
 }
@@ -213,7 +213,7 @@ private struct MemoryText: View {
 }
 
 private struct MemoryForm: View {
-    let title: String
+    let title: LocalizedStringKey
     let categories: [String]
     @State var category: String
     @State var content: String

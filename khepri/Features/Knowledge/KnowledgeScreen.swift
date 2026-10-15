@@ -110,8 +110,7 @@ struct KnowledgeScreen: View {
                     }
                 } footer: {
                     let counts = library.counts
-                    Text("\(counts.ready) ready" + (counts.pending > 0 ? ", \(counts.pending) being read" : "")
-                         + (counts.failed > 0 ? ", \(counts.failed) could not be read" : ""))
+                    Text(countsLine(ready: counts.ready, pending: counts.pending, failed: counts.failed))
                         .font(.north(.footnote))
                 }
             }
@@ -163,6 +162,15 @@ struct KnowledgeScreen: View {
         } catch {
             self.error = error.localizedDescription
         }
+    }
+
+    /// "3 ready, 1 being read, 1 could not be read", leaving out the zeros
+    /// after the first.
+    private func countsLine(ready: Int, pending: Int, failed: Int) -> String {
+        var parts = [String(localized: "\(ready) ready")]
+        if pending > 0 { parts.append(String(localized: "\(pending) being read")) }
+        if failed > 0 { parts.append(String(localized: "\(failed) could not be read")) }
+        return parts.joined(separator: ", ")
     }
 }
 
