@@ -63,7 +63,7 @@ struct EditableMealDraft {
 
         private static func title(_ label: String?, place: Int) -> String {
             let label = label?.trimmingCharacters(in: .whitespaces) ?? ""
-            return label.isEmpty ? "Option \(place)" : label
+            return label.isEmpty ? String(localized: "Option \(place)") : label
         }
     }
 
@@ -157,6 +157,9 @@ private extension Array {
 extension ImportMacros {
     /// "30 P · 54 C · 6 F", rounded to whole grams.
     var summary: String {
-        "\(Int(proteinG.rounded())) P · \(Int(carbG.rounded())) C · \(Int(fatG.rounded())) F"
+        String(
+            localized: "\(Int(proteinG.rounded())) P · \(Int(carbG.rounded())) C · \(Int(fatG.rounded())) F",
+            comment: "Grams of protein, carbs and fat"
+        )
     }
 }

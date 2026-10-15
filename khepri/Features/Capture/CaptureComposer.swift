@@ -36,7 +36,7 @@ struct CaptureComposer: View {
             if draft.isBusy, !draft.hasReading {
                 ProgressView()
             } else {
-                Text(draft.hasReading ? "Read again" : "Review")
+                if draft.hasReading { Text("Read again") } else { Text("Review") }
             }
         }
         .disabled(!draft.canReview)
@@ -83,7 +83,7 @@ private struct CaptureItemRow: View {
         Toggle(isOn: $isOn) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.source)
-                Text(item.kind.rawValue.replacingOccurrences(of: "_", with: " ").capitalized)
+                Text(kindLabel)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if let problem = item.problem {
@@ -96,5 +96,18 @@ private struct CaptureItemRow: View {
             }
         }
         .opacity(item.problem == nil ? 1 : 0.5)
+    }
+
+    /// What kind of entry the model read, in the reader's language.
+    private var kindLabel: String {
+        switch item.kind.rawValue {
+        case "water": String(localized: "Water")
+        case "sleep": String(localized: "Sleep")
+        case "habit": String(localized: "Habit")
+        case "weight": String(localized: "Weight")
+        case "check_in": String(localized: "Check In")
+        case "food": String(localized: "Food")
+        default: item.kind.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
+        }
     }
 }

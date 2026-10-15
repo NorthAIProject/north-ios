@@ -64,9 +64,12 @@ struct MealImportFoodRow: View {
         var parts: [String] = []
         if let quantity = food.quantity { parts.append("\(quantity.formatted()) \(food.unit)") }
         if let protein = food.statedProteinG, let carbs = food.statedCarbG, let fat = food.statedFatG {
-            parts.append("file says \(Int(protein)) P · \(Int(carbs)) C · \(Int(fat)) F")
+            parts.append(String(
+                localized: "file says \(Int(protein)) P · \(Int(carbs)) C · \(Int(fat)) F",
+                comment: "Grams of protein, carbs and fat stated in the imported file"
+            ))
         }
-        return parts.isEmpty ? "From your file" : parts.joined(separator: " · ")
+        return parts.isEmpty ? String(localized: "From your file") : parts.joined(separator: " · ")
     }
 
     private var ingredient: Binding<String> {

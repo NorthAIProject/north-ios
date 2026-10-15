@@ -90,7 +90,7 @@ struct JournalScreen: View {
         do { journal = try await service.journal(); error = nil } catch { self.error = error.localizedDescription }
     }
 
-    private func stat(_ value: Double, _ label: String) -> some View {
+    private func stat(_ value: Double, _ label: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value.formatted(.number.precision(.fractionLength(1)))).font(.system(size: 24, weight: .light).monospacedDigit())
             Text(label).font(.caption.weight(.medium)).tracking(1.5).foregroundStyle(.secondary)

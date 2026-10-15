@@ -82,7 +82,7 @@ struct MealImportSheet: View {
     }
 
     private func read(_ file: ImportFile) async {
-        working = "Reading your plan…"
+        working = String(localized: "Reading your plan…")
         defer { working = nil }
         do {
             draft = EditableMealDraft(try await service.parseMeal(filename: file.filename, data: file.data))
@@ -122,7 +122,7 @@ struct MealImportSheet: View {
     private func save(confirm: Bool) async {
         guard let current = draft else { return }
         previewTask?.cancel()
-        working = "Saving…"
+        working = String(localized: "Saving…")
         defer { working = nil }
         do {
             switch try await service.commitMeal(current.draft, confirm: confirm) {

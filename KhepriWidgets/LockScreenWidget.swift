@@ -31,12 +31,12 @@ struct KhepriAccessoryView: View {
                 NextUpView(glance: glance)
             }
         } else {
-            Text(entry.signedIn ? "Offline" : "Sign in")
+            if entry.signedIn { Text("Offline") } else { Text("Sign in") }
         }
     }
 
     static func inline(_ glance: Glance) -> String {
-        let streak = "\(glance.streak)d"
+        let streak = String(localized: "\(glance.streak)d", comment: "Check-in streak in days, abbreviated")
         if let done = glance.completedSessionName { return "\(streak) · ✓ \(done)" }
         guard let next = glance.next, next.isToday else { return "\(streak) · \(glance.waterML) ml" }
         return "\(streak) · \(next.focus)"
@@ -82,10 +82,12 @@ struct NextUpView: View {
 
     /// When the session is, then the streak: "Today · 6-day streak".
     private var caption: String {
-        let streak = glance.streak == 1 ? "1-day streak" : "\(glance.streak)-day streak"
-        if glance.completedSessionName != nil { return "Done today · \(streak)" }
+        let streak = glance.streak == 1
+            ? String(localized: "1-day streak")
+            : String(localized: "\(glance.streak)-day streak")
+        if glance.completedSessionName != nil { return String(localized: "Done today · \(streak)") }
         guard let next = glance.next else { return streak }
-        return "\(next.isToday ? "Today" : next.weekday) · \(streak)"
+        return "\(next.isToday ? String(localized: "Today") : next.weekdayName) · \(streak)"
     }
 }
 
@@ -119,8 +121,8 @@ struct CheckInAccessoryView: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(glance.checkedInToday
-                    ? "Checked in today, \(glance.streak)-day streak"
-                    : "Check in, \(glance.streak)-day streak")
+                    ? Text("Checked in today, \(glance.streak)-day streak")
+                    : Text("Check in, \(glance.streak)-day streak"))
             } else {
                 Image(systemName: "circle.dashed")
             }

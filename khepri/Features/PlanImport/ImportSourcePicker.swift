@@ -8,8 +8,10 @@ import UIKit
 /// `onPick` receives the file ready to upload.
 struct ImportSourcePicker: ViewModifier {
     @Binding var isPresented: Bool
-    var title = "Import a plan from"
-    var message = "PDF, Word, text, CSV or Excel (.xlsx), JSON, or a photo of a printed plan. Up to 10 MB."
+    var title = String(localized: "Import a plan from")
+    var message = String(
+        localized: "PDF, Word, text, CSV or Excel (.xlsx), JSON, or a photo of a printed plan. Up to 10 MB."
+    )
     let onPick: (ImportFile) -> Void
     let onError: (String) -> Void
 
@@ -50,7 +52,7 @@ struct ImportSourcePicker: ViewModifier {
     private func readFile(_ result: Result<URL, any Error>) async {
         do {
             guard let file = try await ImportFile.picked(result.get()) else {
-                return onError("That file couldn't be read.")
+                return onError(String(localized: "That file couldn't be read."))
             }
             deliver(file)
         } catch {
@@ -62,18 +64,20 @@ struct ImportSourcePicker: ViewModifier {
         defer { photo = nil }
         guard let data = try? await item.loadTransferable(type: Data.self),
               let file = await ImportFile.photo(data: data)
-        else { return onError("That photo couldn't be read.") }
+        else { return onError(String(localized: "That photo couldn't be read.")) }
         deliver(file)
     }
 
     private func readCapture(_ image: UIImage) async {
-        guard let file = await ImportFile.photo(image) else { return onError("That photo couldn't be read.") }
+        guard let file = await ImportFile.photo(image) else {
+            return onError(String(localized: "That photo couldn't be read."))
+        }
         deliver(file)
     }
 
     private func deliver(_ file: ImportFile) {
         guard file.data.count <= ImportFile.maxBytes else {
-            return onError("That file is larger than 10 MB.")
+            return onError(String(localized: "That file is larger than 10 MB."))
         }
         onPick(file)
     }

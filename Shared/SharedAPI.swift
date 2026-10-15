@@ -10,7 +10,7 @@ enum SharedAPI {
     enum Failure: LocalizedError {
         case signedOut
 
-        var errorDescription: String? { "Open Khepri and sign in first." }
+        var errorDescription: String? { String(localized: "Open Khepri and sign in first.") }
     }
 
     static var baseURL: URL? {

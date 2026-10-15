@@ -21,6 +21,7 @@ struct LogWaterIntent: AppIntent {
         let client = try SharedAPI.requireClient()
         let page = try await NorthAPI.call { try await client.logWater(body: .json(.init(amountMl: amountML))).created.body.json }
         WidgetCenter.shared.reloadAllTimelines()
-        return .result(dialog: "Logged \(amountML) ml. \(page.water.totalMl) ml today.")
+        let message = LocalizedStringResource("Logged \(amountML) ml. \(page.water.totalMl) ml today.")
+        return .result(dialog: IntentDialog(message))
     }
 }

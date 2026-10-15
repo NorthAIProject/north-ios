@@ -30,7 +30,7 @@ struct MealImportDaySection: View {
             ForEach($day.meals) { $meal in
                 TextField("Meal name", text: $meal.name).font(.headline)
                 if !meal.alternatives.isEmpty {
-                    optionHeader("\(meal.firstOptionTitle) · counted")
+                    optionHeader(String(localized: "\(meal.firstOptionTitle) · counted"))
                 }
                 ForEach($meal.foods) { $food in
                     MealImportFoodRow(food: $food.value, recompute: recompute)
@@ -71,8 +71,8 @@ struct MealImportDaySection: View {
     }
 
     private var title: String {
-        if everyDay { return "Every day" }
-        let label = day.value.label.isEmpty ? "Day" : day.value.label
+        if everyDay { return String(localized: "Every day") }
+        let label = day.value.label.isEmpty ? String(localized: "Day") : day.value.label
         guard !advanced, let weekday = day.value.weekday else { return label }
         return "\(label) · \(calendar.standaloneWeekdaySymbols[weekday])"
     }
