@@ -29,7 +29,10 @@ struct MealImportDaySection: View {
             MealImportDayTotals(day: day.value)
             ForEach($day.meals) { $meal in
                 TextField("Meal name", text: $meal.name).font(.headline)
-                if !meal.alternatives.isEmpty {
+                Toggle("Optional meal · not counted", isOn: $meal.isOptional)
+                    .font(.subheadline)
+                    .onChange(of: meal.isOptional) { recompute() }
+                if !meal.alternatives.isEmpty, !meal.isOptional {
                     optionHeader("\(meal.firstOptionTitle) · counted")
                 }
                 ForEach($meal.foods) { $food in

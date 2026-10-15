@@ -217,6 +217,30 @@ extension MealPlanTests {
         #expect(fake.optionalCalls.count == 2 && fake.optionalCalls[1].confirm == true)
         #expect(fake.optionalCalls.allSatisfy { $0.id == "portion-1" && !$0.optional })
     }
+
+    @Test func makingAMealOptionalSavesWithoutAsking() async {
+        let fake = FakeNutrition(plan: Self.plan(mode: .advanced))
+        let store = await loadedStore(fake)
+
+        await store.setMealOptional(Self.breakfast, optional: true)
+        #expect(fake.mealOptionalCalls.count == 1)
+        #expect(fake.mealOptionalCalls[0].id == Self.breakfast && fake.mealOptionalCalls[0].optional && !fake.mealOptionalCalls[0].confirm)
+        #expect(store.pendingOverage == nil && store.error == nil)
+    }
+
+    @Test func countingAnOptionalMealAgainWaitsForTheOverageToBeConfirmed() async {
+        let fake = FakeNutrition(plan: Self.plan(mode: .advanced))
+        fake.optionalAnswers = [.over(Self.overage(canConfirm: true))]
+        let store = await loadedStore(fake)
+
+        await store.setMealOptional(Self.breakfast, optional: false)
+        #expect(fake.mealOptionalCalls.count == 1 && fake.mealOptionalCalls[0].confirm == false)
+        #expect(store.pendingOverage != nil)
+
+        await store.pendingOverage?.resend()
+        #expect(fake.mealOptionalCalls.count == 2 && fake.mealOptionalCalls[1].confirm == true)
+        #expect(fake.mealOptionalCalls.allSatisfy { $0.id == Self.breakfast && !$0.optional })
+    }
 }
 
 /// A nutrition service that answers from memory.
@@ -229,6 +253,7 @@ private final class FakeNutrition: NutritionServicing, @unchecked Sendable {
     var addedOptions: [(mealID: String, label: String?)] = []
     var optionalAnswers: [PlanWrite<MealPlanDetail>] = []
     var optionalCalls: [(id: String, optional: Bool, confirm: Bool)] = []
+    var mealOptionalCalls: [(id: String, optional: Bool, confirm: Bool)] = []
 
     init(plan: MealPlanDetail) { self.plan = plan }
 
@@ -238,6 +263,10 @@ private final class FakeNutrition: NutritionServicing, @unchecked Sendable {
     }
     func setPortionOptional(_ id: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail> {
         optionalCalls.append((id, optional, confirm))
+        return optionalAnswers.isEmpty ? .saved(plan) : optionalAnswers.removeFirst()
+    }
+    func setMealOptional(_ mealID: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail> {
+        mealOptionalCalls.append((mealID, optional, confirm))
         return optionalAnswers.isEmpty ? .saved(plan) : optionalAnswers.removeFirst()
     }
 

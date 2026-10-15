@@ -53,6 +53,9 @@ protocol NutritionServicing: Sendable {
     func addOption(to mealID: String, label: String?) async throws -> MealPlanDetail
     /// Shows a food without counting it (optional) or counts it again.
     func setPortionOptional(_ id: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail>
+    /// Shows a whole meal, every option of it, without counting it toward its
+    /// day (optional) or counts it again.
+    func setMealOptional(_ mealID: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail>
     func parseFoods(_ text: String) async throws -> FoodDraft
 }
 
@@ -148,6 +151,17 @@ struct NutritionService: NutritionServicing {
         try await NorthAPI.call {
             switch try await api.setMealPortionOptional(
                 path: .init(mealIngredientID: id), body: .json(.init(optional: optional, confirmOverage: confirm))
+            ) {
+            case .ok(let ok): .saved(try ok.body.json)
+            case .conflict(let conflict): .over(try conflict.body.json)
+            default: throw APIError.invalidResponse
+            }
+        }
+    }
+    func setMealOptional(_ mealID: String, optional: Bool, confirm: Bool) async throws -> PlanWrite<MealPlanDetail> {
+        try await NorthAPI.call {
+            switch try await api.setMealOptional(
+                path: .init(mealID: mealID), body: .json(.init(optional: optional, confirmOverage: confirm))
             ) {
             case .ok(let ok): .saved(try ok.body.json)
             case .conflict(let conflict): .over(try conflict.body.json)
