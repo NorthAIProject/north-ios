@@ -7232,13 +7232,13 @@
             "value" : "Espalda"
           }
         },
-        "pt-PT" : {
+        "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Costas"
           }
         },
-        "pt-BR" : {
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Costas"
@@ -7262,13 +7262,13 @@
             "value" : "Frente"
           }
         },
-        "pt-PT" : {
+        "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frente"
           }
         },
-        "pt-BR" : {
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frente"
@@ -10143,6 +10143,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Contar"
+          }
+        }
+      }
+    },
+    "Count meal" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar comida"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar refeição"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar refeição"
+          }
+        }
+      }
+    },
+    "Count Meal" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar comida"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar refeição"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contar refeição"
           }
         }
       }
@@ -18920,6 +18964,28 @@
         }
       }
     },
+    "Make meal optional" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer opcional la comida"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tornar refeição opcional"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tornar refeição opcional"
+          }
+        }
+      }
+    },
     "Make optional" : {
       "localizations" : {
         "es" : {
@@ -24007,7 +24073,7 @@
       }
     },
     "Optional" : {
-      "comment" : "Action: make this food optional",
+      "comment" : "Action: make this food optional\nMake a meal optional",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -24047,6 +24113,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opcional · não conta"
+          }
+        }
+      }
+    },
+    "Optional meal · not counted" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida opcional · no cuenta"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeição opcional · não conta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeição opcional · não conta"
           }
         }
       }
@@ -28873,13 +28961,13 @@
             "value" : "Esencial"
           }
         },
-        "pt-PT" : {
+        "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Essencial"
           }
         },
-        "pt-BR" : {
+        "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Essencial"
