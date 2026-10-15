@@ -151,7 +151,7 @@ private final class PasskeySessionHandler: NSObject, ASAuthorizationControllerDe
                 assertionContinuation = nil
             } else if let credential = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
                 guard let attestationObject = credential.rawAttestationObject else {
-                    registrationContinuation?.resume(throwing: APIError.server("Missing attestation object from passkey registration."))
+                    registrationContinuation?.resume(throwing: APIError.server(String(localized: "Missing attestation object from passkey registration.")))
                     registrationContinuation = nil
                     return
                 }
@@ -165,7 +165,7 @@ private final class PasskeySessionHandler: NSObject, ASAuthorizationControllerDe
                 registrationContinuation?.resume(returning: result)
                 registrationContinuation = nil
             } else {
-                let error = APIError.server("Unsupported credential type returned.")
+                let error = APIError.server(String(localized: "Unsupported credential type returned."))
                 assertionContinuation?.resume(throwing: error)
                 registrationContinuation?.resume(throwing: error)
                 assertionContinuation = nil

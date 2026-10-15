@@ -91,7 +91,7 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
     public func signInWithGoogle() async throws -> AuthSession {
         guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String,
               !clientID.isEmpty else {
-            throw APIError.server("Google sign-in is not configured for this build.")
+            throw APIError.server(String(localized: "Google sign-in is not configured for this build."))
         }
 
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
@@ -159,7 +159,7 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
         guard let userHandle = (options["user"] as? [String: Any])?["id"] as? String,
               let userID = Data(base64URLEncoded: userHandle)
         else {
-            throw APIError.server("Invalid user handle received for passkey registration.")
+            throw APIError.server(String(localized: "Invalid user handle received for passkey registration."))
         }
 
         let registration = try await passkeyCoordinator.registerPasskey(
@@ -193,7 +193,7 @@ public final class AuthService: AuthServicing, @unchecked Sendable {
 
     private static func challenge(in options: [String: Any]) throws -> Data {
         guard let encoded = options["challenge"] as? String, let challenge = Data(base64URLEncoded: encoded) else {
-            throw APIError.server("Invalid passkey challenge from the server.")
+            throw APIError.server(String(localized: "Invalid passkey challenge from the server."))
         }
         return challenge
     }

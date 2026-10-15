@@ -11,7 +11,7 @@ public struct SignInView: View {
         VStack(spacing: 16) {
             // Email Field
             VaultTextField(
-                title: "Email address",
+                title: String(localized: "Email address"),
                 systemImage: "envelope.fill",
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
@@ -20,7 +20,7 @@ public struct SignInView: View {
 
             // Password Field
             VaultTextField(
-                title: "Password",
+                title: String(localized: "Password"),
                 systemImage: "lock.fill",
                 text: $viewModel.password,
                 isSecure: true,

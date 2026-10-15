@@ -19,7 +19,7 @@ struct ExportRow: View {
                 Button {
                     Task { await export() }
                 } label: {
-                    Label(working ? "Preparing…" : "Export My Data", systemImage: "archivebox")
+                    Label(working ? String(localized: "Preparing…") : String(localized: "Export My Data"), systemImage: "archivebox")
                 }
                 .disabled(working)
             }

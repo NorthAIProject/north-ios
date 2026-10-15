@@ -21,7 +21,7 @@ struct SettingsScreen: View {
                         LabeledContent {
                             Text(user.email)
                         } label: {
-                            Label(user.displayName.isEmpty ? "Account" : user.displayName, systemImage: "person.crop.circle")
+                            Label(user.displayName.isEmpty ? String(localized: "Account") : user.displayName, systemImage: "person.crop.circle")
                         }
                     }
                 }
@@ -271,15 +271,15 @@ private struct CoachingSettings: View {
                 Section {
                     ForEach(CoachingStyle.allCases.filter { $0 != .custom }) { style in
                         Button {
-                            profile.value?.coachingStyle = style.detail
+                            profile.value?.coachingStyle = style.wireDetail
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(style.title).foregroundStyle(.primary)
-                                    Text(style.detail).font(.subheadline).foregroundStyle(.secondary)
+                                    Text(style.displayDetail).font(.subheadline).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if value.coachingStyle == style.detail {
+                                if value.coachingStyle == style.wireDetail {
                                     Image(systemName: "checkmark").foregroundStyle(.tint)
                                 }
                             }
@@ -288,7 +288,7 @@ private struct CoachingSettings: View {
                         // A Form button tints its whole label; these rows
                         // read as choices, so only the checkmark is tinted.
                         .buttonStyle(.plain)
-                        .accessibilityAddTraits(value.coachingStyle == style.detail ? .isSelected : [])
+                        .accessibilityAddTraits(value.coachingStyle == style.wireDetail ? .isSelected : [])
                     }
                 } header: {
                     Text("Style")
@@ -423,7 +423,7 @@ private struct NotificationSettings: View {
                 Section {
                     Toggle("Daily briefing", isOn: bind(\.dailyBriefingAuto))
                     if value.dailyBriefingAuto {
-                        HourPicker(title: "Arrives at", hour: int(\.briefingHour))
+                        HourPicker(title: String(localized: "Arrives at"), hour: int(\.briefingHour))
                     }
                     Toggle("Weekly report", isOn: bind(\.weeklyReportAuto))
                     Picker("Stats digest", selection: Binding(
@@ -444,7 +444,7 @@ private struct NotificationSettings: View {
                 Section {
                     Toggle("Evening reflection", isOn: bind(\.eveningReflection))
                     if value.eveningReflection {
-                        HourPicker(title: "At", hour: int(\.eveningHour))
+                        HourPicker(title: String(localized: "At", comment: "Time picker label: the hour a reminder arrives"), hour: int(\.eveningHour))
                     }
                 } footer: {
                     Text("Once an evening: a check-in if you haven't done one, otherwise a line in your journal.")

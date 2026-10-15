@@ -80,7 +80,7 @@ struct GoalEntity: IndexedEntity {
     init(_ goal: GoalSummary) {
         id = goal.id
         title = goal.title
-        detail = goal.category.capitalized
+        detail = FocusArea(rawValue: goal.category)?.title ?? goal.category.capitalized
     }
 }
 

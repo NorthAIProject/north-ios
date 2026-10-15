@@ -103,14 +103,14 @@ private struct AIKeySheet: View {
                     ForEach(settings.providers, id: \.name) { Text($0.label).tag($0.name) }
                 }
                 Section {
-                    SecureField(chosen?.keyHint ?? "API key", text: $apiKey)
+                    SecureField(chosen?.keyHint ?? String(localized: "API key"), text: $apiKey)
                         .textContentType(.password)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
-                    TextField(chosen?.defaultModel ?? "Model (optional)", text: $model)
+                    TextField(chosen?.defaultModel ?? String(localized: "Model (optional)"), text: $model)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
-                    TextField(chosen?.baseUrl ?? "Base URL (optional)", text: $baseURL)
+                    TextField(chosen?.baseUrl ?? String(localized: "Base URL (optional)"), text: $baseURL)
                         .keyboardType(.URL)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
@@ -202,9 +202,12 @@ struct AgentConnections: View {
     }
 
     private func detail(_ connection: SettingsModel.Connection) -> String {
-        let kind = connection.kind.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
-        guard let used = connection.lastUsedAt else { return "\(kind) · never used" }
-        return "\(kind) · used \(used.formatted(.relative(presentation: .named)))"
+        // Agent kinds are product names, except the catch-all.
+        let kind = connection.kind.rawValue == "other"
+            ? String(localized: "Other", comment: "Agent kind")
+            : connection.kind.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
+        guard let used = connection.lastUsedAt else { return String(localized: "\(kind) · never used") }
+        return String(localized: "\(kind) · used \(used.formatted(.relative(presentation: .named)))")
     }
 
     private func load() async {
@@ -282,7 +285,7 @@ private struct TokenSheet: View {
                     Text(created.token)
                         .font(.northMono(.footnote))
                         .textSelection(.enabled)
-                    Button(copied ? "Copied" : "Copy Token", systemImage: copied ? "checkmark" : "doc.on.doc") {
+                    Button(copied ? String(localized: "Copied") : String(localized: "Copy Token"), systemImage: copied ? "checkmark" : "doc.on.doc") {
                         UIPasteboard.general.string = created.token
                         copied = true
                     }
@@ -292,7 +295,7 @@ private struct TokenSheet: View {
                     Text("Shown once. If you lose it, revoke this connection and create another.")
                 }
                 if let config = created.setup.config {
-                    Section((created.setup.configLabel ?? "Setup").localizedCapitalized) {
+                    Section((created.setup.configLabel ?? String(localized: "Setup")).localizedCapitalized) {
                         Text(config)
                             .font(.northMono(.caption))
                             .textSelection(.enabled)
@@ -328,11 +331,11 @@ private struct ActivityList: View {
                         HStack {
                             Text(execution.tool.replacingOccurrences(of: "_", with: " ").capitalized)
                             Spacer()
-                            Text(execution.outcome.rawValue.capitalized)
+                            Text(Self.outcome(execution))
                                 .font(.caption)
                                 .foregroundStyle(execution.outcome == .executed ? AnyShapeStyle(.secondary) : AnyShapeStyle(.orange))
                         }
-                        Text("\(execution.surface == "mcp" ? "Agent" : "Coach") · \(execution.createdAt.formatted(date: .abbreviated, time: .shortened))")
+                        Text("\(execution.surface == "mcp" ? String(localized: "Agent") : String(localized: "Coach")) · \(execution.createdAt.formatted(date: .abbreviated, time: .shortened))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -346,6 +349,14 @@ private struct ActivityList: View {
         .navigationTitle("Activity")
         .task {
             do { executions = try await service.activity() } catch { self.error = error.localizedDescription }
+        }
+    }
+
+    private static func outcome(_ execution: SettingsModel.Execution) -> String {
+        switch execution.outcome {
+        case .executed: String(localized: "Executed", comment: "Agent tool call outcome")
+        case .failed: String(localized: "Failed", comment: "Agent tool call outcome")
+        case .declined: String(localized: "Declined", comment: "Agent tool call outcome")
         }
     }
 }
@@ -367,7 +378,7 @@ struct TelegramSettings: View {
                     Text("Telegram is not set up on this server.").foregroundStyle(.secondary)
                 } else if settings.linked {
                     Section {
-                        LabeledContent("Status", value: "Linked")
+                        LabeledContent("Status", value: String(localized: "Linked"))
                         if let bot = settings.botUsername { LabeledContent("Bot", value: "@\(bot)") }
                         if let seen = settings.lastSeenAt {
                             LabeledContent("Last message", value: seen.formatted(.relative(presentation: .named)))
@@ -461,7 +472,7 @@ struct CalendarSettings: View {
                     } footer: {
                         Text("A calendar you run behind an MCP server. Khepri reads it; it never writes to it.")
                     }
-                    Button(working ? "Connecting…" : "Connect") { Task { await connect() } }
+                    Button(working ? String(localized: "Connecting…") : String(localized: "Connect")) { Task { await connect() } }
                         .disabled(endpoint.isEmpty || working)
                 }
             } else if error == nil {

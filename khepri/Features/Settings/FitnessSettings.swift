@@ -53,9 +53,9 @@ enum StravaConnectResult: Equatable {
     var message: String? {
         switch self {
         case .connected: nil
-        case .cancelled: "Strava was not connected."
-        case .expired: "That took too long. Try connecting again."
-        case .failed: "Strava did not connect. Try again in a moment."
+        case .cancelled: String(localized: "Strava was not connected.")
+        case .expired: String(localized: "That took too long. Try connecting again.")
+        case .failed: String(localized: "Strava did not connect. Try again in a moment.")
         }
     }
 }
@@ -76,7 +76,7 @@ struct StravaSettings: View {
                     Text("Strava is not set up on this server.").foregroundStyle(.secondary)
                 } else if status.connected {
                     Section {
-                        LabeledContent("Status", value: status.syncPending ? "Syncing…" : "Connected")
+                        LabeledContent("Status", value: status.syncPending ? String(localized: "Syncing…") : String(localized: "Connected"))
                         if let synced = status.lastSyncedAt {
                             LabeledContent("Last sync", value: synced.formatted(.relative(presentation: .named)))
                         }

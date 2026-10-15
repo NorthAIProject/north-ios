@@ -15,11 +15,11 @@ public enum AuthValidation {
 
         public var title: String {
             switch self {
-            case .veryWeak: return "Very Weak"
-            case .weak: return "Weak"
-            case .medium: return "Fair"
-            case .strong: return "Good"
-            case .veryStrong: return "Strong"
+            case .veryWeak: return String(localized: "Very Weak", comment: "Password strength")
+            case .weak: return String(localized: "Weak", comment: "Password strength")
+            case .medium: return String(localized: "Fair", comment: "Password strength")
+            case .strong: return String(localized: "Good", comment: "Password strength")
+            case .veryStrong: return String(localized: "Strong", comment: "Password strength")
             }
         }
     }

@@ -27,8 +27,8 @@ public struct SocialAuthButton: View {
 
         var title: String {
             switch self {
-            case .google: return "Continue with Google"
-            case .passkey: return "Sign in with Passkey"
+            case .google: return String(localized: "Continue with Google")
+            case .passkey: return String(localized: "Sign in with Passkey")
             }
         }
 

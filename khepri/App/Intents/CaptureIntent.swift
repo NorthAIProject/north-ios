@@ -24,7 +24,7 @@ struct CaptureIntent: AppIntent {
         let parsed = try await service.parse(text)
         let writable = parsed.items.filter { $0.problem == nil }
         guard !writable.isEmpty else {
-            let reason = parsed.items.compactMap(\.problem).first ?? "Nothing in that could be logged."
+            let reason = parsed.items.compactMap(\.problem).first ?? String(localized: "Nothing in that could be logged.")
             return .result(dialog: "\(reason)")
         }
 
@@ -36,6 +36,6 @@ struct CaptureIntent: AppIntent {
         if result.failed > 0 {
             return .result(dialog: "Logged \(result.written), \(result.failed) could not be saved.")
         }
-        return .result(dialog: result.written == 1 ? "Logged." : "Logged \(result.written) things.")
+        return .result(dialog: result.written == 1 ? IntentDialog("Logged.") : IntentDialog("Logged \(result.written) things."))
     }
 }

@@ -8,9 +8,11 @@ struct WelcomeStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: model.user.displayName.isEmpty ? "Welcome to Khepri" : "Welcome, \(model.user.displayName)",
-            subhead: "A coach that remembers, across your goals, training, health and days. Four questions, then you are in.",
-            primary: "Get Started",
+            headline: model.user.displayName.isEmpty
+                ? String(localized: "Welcome to Khepri")
+                : String(localized: "Welcome, \(model.user.displayName)"),
+            subhead: String(localized: "A coach that remembers, across your goals, training, health and days. Four questions, then you are in."),
+            primary: String(localized: "Get Started"),
             onPrimary: next
         ) {
             NorthBrand.mark
@@ -30,9 +32,9 @@ struct FocusAreasStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: "What should your coach keep in view?",
-            subhead: "Pick any. You can change these later.",
-            primary: "Continue",
+            headline: String(localized: "What should your coach keep in view?"),
+            subhead: String(localized: "Pick any. You can change these later."),
+            primary: String(localized: "Continue"),
             primaryEnabled: model.canContinue,
             onPrimary: next
         ) {
@@ -80,8 +82,8 @@ struct CoachingStyleStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: "How should your coach talk to you?",
-            primary: "Continue",
+            headline: String(localized: "How should your coach talk to you?"),
+            primary: String(localized: "Continue"),
             primaryEnabled: model.canContinue,
             onPrimary: {
                 customFocused = false
@@ -99,7 +101,7 @@ struct CoachingStyleStep: View {
                         HStack(alignment: .firstTextBaseline) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(style.title).foregroundStyle(.primary)
-                                Text(style.detail)
+                                Text(style.displayDetail)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -149,9 +151,9 @@ struct FirstGoalStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: "Name one goal to start with.",
-            subhead: "Your coach opens your first conversation with it.",
-            primary: "Continue",
+            headline: String(localized: "Name one goal to start with."),
+            subhead: String(localized: "Your coach opens your first conversation with it."),
+            primary: String(localized: "Continue"),
             primaryEnabled: model.canContinue,
             isWorking: model.isSubmitting,
             onPrimary: submit
@@ -199,9 +201,9 @@ struct HealthStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: "Bring in Apple Health",
-            subhead: "Your coach sees workouts, sleep and heart rate next to what you tell it, so advice fits the day you actually had.",
-            primary: "Continue",
+            headline: String(localized: "Bring in Apple Health"),
+            subhead: String(localized: "Your coach sees workouts, sleep and heart rate next to what you tell it, so advice fits the day you actually had."),
+            primary: String(localized: "Continue"),
             isWorking: asking,
             onPrimary: {
                 Task {
@@ -218,9 +220,9 @@ struct HealthStep: View {
             }
         ) {
             PrimingList(items: [
-                ("figure.run", "Workouts and activity", "Steps, active energy and every workout you log."),
-                ("bed.double", "Sleep and recovery", "Resting heart rate and HRV, read only."),
-                ("lock", "Yours", "Choose exactly what to share on the next screen; change it any time in Settings."),
+                ("figure.run", String(localized: "Workouts and activity"), String(localized: "Steps, active energy and every workout you log.")),
+                ("bed.double", String(localized: "Sleep and recovery"), String(localized: "Resting heart rate and HRV, read only.")),
+                ("lock", String(localized: "Yours"), String(localized: "Choose exactly what to share on the next screen; change it any time in Settings.")),
             ])
         }
     }
@@ -232,9 +234,9 @@ struct NotificationsStep: View {
 
     var body: some View {
         WizardChrome(
-            headline: "A nudge before it matters",
-            subhead: "Only the reminders you set up. Nothing promotional.",
-            primary: "Continue",
+            headline: String(localized: "A nudge before it matters"),
+            subhead: String(localized: "Only the reminders you set up. Nothing promotional."),
+            primary: String(localized: "Continue"),
             isWorking: asking,
             onPrimary: {
                 Task {
@@ -246,8 +248,8 @@ struct NotificationsStep: View {
             }
         ) {
             PrimingList(items: [
-                ("figure.strengthtraining.traditional", "Before a workout", "At the time you plan it, with a button to start."),
-                ("drop", "Care reminders", "Water, meals and habits, at the times you choose."),
+                ("figure.strengthtraining.traditional", String(localized: "Before a workout"), String(localized: "At the time you plan it, with a button to start.")),
+                ("drop", String(localized: "Care reminders"), String(localized: "Water, meals and habits, at the times you choose.")),
             ])
         }
     }
