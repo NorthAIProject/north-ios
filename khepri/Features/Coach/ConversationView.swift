@@ -157,8 +157,8 @@ struct ConversationView: View {
             if scenePhase == .active { await store.recoverIfNeeded() }
         }
         .importSourcePicker(
-            "Attach to your message",
-            message: "A photo, or a PDF, Word, Excel (.xlsx), CSV, text or JSON file. Up to 8 MB.",
+            String(localized: "Attach to your message"),
+            message: String(localized: "A photo, or a PDF, Word, Excel (.xlsx), CSV, text or JSON file. Up to 8 MB."),
             isPresented: $attaching,
             onPick: { store.attach($0) },
             onError: { store.attachmentFailed($0) }

@@ -23,10 +23,10 @@ enum FacebookConnectResult: Equatable {
     var message: String? {
         switch self {
         case .connected: nil
-        case .cancelled: "Facebook was not connected."
-        case .expired: "That took too long. Try connecting again."
-        case .taken: "This Facebook account is already connected to another Khepri account."
-        case .failed: "Facebook did not connect. Try again in a moment."
+        case .cancelled: String(localized: "Facebook was not connected.")
+        case .expired: String(localized: "That took too long. Try connecting again.")
+        case .taken: String(localized: "This Facebook account is already connected to another Khepri account.")
+        case .failed: String(localized: "Facebook did not connect. Try again in a moment.")
         }
     }
 }
@@ -80,9 +80,9 @@ struct FacebookFriendsScreen: View {
         let people = facebook.people.map { ContactMatch(person: $0.value1, following: $0.value2.following) }
         if people.isEmpty {
             Section {
-                Text(facebook.importedAt == nil
-                     ? "Tap Find Again to see which of your Facebook friends are on Khepri."
-                     : "None of your Facebook friends have connected Khepri yet.")
+                (facebook.importedAt == nil
+                    ? Text("Tap Find Again to see which of your Facebook friends are on Khepri.")
+                    : Text("None of your Facebook friends have connected Khepri yet."))
                     .foregroundStyle(.secondary)
                 if let inviteURL {
                     ShareLink(item: inviteURL, message: Text("Join me on Khepri")) {

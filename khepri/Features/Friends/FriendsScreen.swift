@@ -81,9 +81,13 @@ struct FriendsScreen: View {
             } header: {
                 Text("Invite")
             } footer: {
-                Text(o.joined == 0
-                     ? "Anyone who joins through it follows you, and you follow them."
-                     : "\(o.joined) \(o.joined == 1 ? "person" : "people") joined through your links.")
+                if o.joined == 0 {
+                    Text("Anyone who joins through it follows you, and you follow them.")
+                } else if o.joined == 1 {
+                    Text("1 person joined through your links.")
+                } else {
+                    Text("\(o.joined) people joined through your links.")
+                }
             }
 
             Section {
@@ -105,7 +109,13 @@ struct FriendsScreen: View {
                         PhoneNumberScreen(service: service, status: $phone)
                     } label: {
                         LabeledContent {
-                            Text(phone.number.isEmpty ? (phone.pending.isEmpty ? "Add" : "Waiting for code") : phone.number)
+                            if !phone.number.isEmpty {
+                                Text(phone.number)
+                            } else if phone.pending.isEmpty {
+                                Text("Add")
+                            } else {
+                                Text("Waiting for code")
+                            }
                         } label: {
                             Label("Your Phone Number", systemImage: "phone")
                         }
@@ -170,7 +180,7 @@ struct FriendsScreen: View {
                         FacebookFriendsScreen(inviteURL: URL(string: o.invite.url), service: service, facebook: $facebook)
                     } label: {
                         LabeledContent {
-                            Text(facebook.connected ? "Connected" : "")
+                            facebook.connected ? Text("Connected") : Text(verbatim: "")
                         } label: {
                             Label("Facebook Friends", systemImage: "person.2.circle")
                         }
@@ -187,7 +197,10 @@ struct FriendsScreen: View {
                 ForEach(o.following, id: \.value1.id) { c in
                     PersonRow(person: c.value1, pending: c.value2.status == .pending)
                         .swipeActions {
-                            Button(c.value2.status == .pending ? "Withdraw" : "Unfollow", role: .destructive) {
+                            Button(
+                                c.value2.status == .pending ? String(localized: "Withdraw") : String(localized: "Unfollow"),
+                                role: .destructive
+                            ) {
                                 act { try await service.unfollow(c.value1.id) }
                             }
                             Button("Block") { act { try await service.block(c.value1.id) } }
@@ -295,7 +308,7 @@ struct PersonRow: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(person.displayName)
-                Text(person.handle.isEmpty ? "No handle" : "@\(person.handle)")
+                Text(person.handle.isEmpty ? String(localized: "No handle") : "@\(person.handle)")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
@@ -321,7 +334,7 @@ private struct FeedRow: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
-                    Text(item.mine ? "You" : item.displayName).font(.subheadline.weight(.medium))
+                    (item.mine ? Text("You") : Text(item.displayName)).font(.subheadline.weight(.medium))
                     Text("· \(item.occurredAt.formatted(.relative(presentation: .named)))")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -339,12 +352,12 @@ private struct FeedRow: View {
                 }
             } else {
                 Button(action: toggleKudos) {
-                    Label(item.kudos > 0 ? "\(item.kudos)" : "Kudos", systemImage: item.kudoed ? "hands.clap.fill" : "hands.clap")
+                    Label(item.kudos > 0 ? "\(item.kudos)" : String(localized: "Kudos"), systemImage: item.kudoed ? "hands.clap.fill" : "hands.clap")
                         .font(.caption.monospacedDigit())
                 }
                 .buttonStyle(.bordered)
                 .tint(item.kudoed ? NorthColor.signal : .secondary)
-                .accessibilityLabel(item.kudoed ? "Take back kudos" : "Give kudos")
+                .accessibilityLabel(item.kudoed ? Text("Take back kudos") : Text("Give kudos"))
                 .sensoryFeedback(.success, trigger: item.kudoed) { _, given in given }
             }
         }
