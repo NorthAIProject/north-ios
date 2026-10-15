@@ -78,7 +78,10 @@ def block(css: str, selector: str) -> dict[str, str]:
     match = re.search(re.escape(selector) + r"\s*\{(.*?)\n\}", css, re.S)
     if not match:
         sys.exit(f"selector {selector!r} not found")
-    return dict(re.findall(r"--([\w-]+):\s*([^;]+);", match.group(1)))
+    # Comments go first: one that mentions "--border:" would otherwise be read
+    # as a declaration and overwrite the real token with prose.
+    body = re.sub(r"/\*.*?\*/", "", match.group(1), flags=re.S)
+    return dict(re.findall(r"--([\w-]+):\s*([^;]+);", body))
 
 
 def resolve(name: str, tokens: dict[str, str]) -> str:
@@ -126,17 +129,33 @@ def main() -> None:
     css = css_path.read_text()
     light, dark = block(css, ":root"), block(css, ".dark")
 
+    # Convert everything before touching the catalog, so a value that does not
+    # parse stops the run with the old colours still in place.
+    sets = {}
+    for token, name in TOKENS.items():
+        if token in light and token in dark:
+            sets[name] = colour_contents(token, light, dark)
+            continue
+        # The web dropped this token but the app still draws with it (the web
+        # body map moved to its own palette): keep the colour iOS already has.
+        existing = OUT / f"{name}.colorset" / "Contents.json"
+        if not existing.exists():
+            sys.exit(f"--{token} is not in {css_path} and there is no {name} colour set to keep")
+        print(f"kept {name}: --{token} is no longer in the web CSS", file=sys.stderr)
+        sets[name] = json.loads(existing.read_text())
+    accent = colour_contents(ACCENT_TOKEN, light, dark)
+
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     (OUT / "Contents.json").write_text(json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2))
 
-    for token, name in TOKENS.items():
+    for name, contents in sets.items():
         colour_set = OUT / f"{name}.colorset"
         colour_set.mkdir()
-        (colour_set / "Contents.json").write_text(json.dumps(colour_contents(token, light, dark), indent=2))
+        (colour_set / "Contents.json").write_text(json.dumps(contents, indent=2))
 
-    ACCENT.write_text(json.dumps(colour_contents(ACCENT_TOKEN, light, dark), indent=2))
+    ACCENT.write_text(json.dumps(accent, indent=2))
     print(f"wrote {len(TOKENS)} colour sets from {css_path} to {OUT.relative_to(ROOT)}, accent = {ACCENT_TOKEN}")
 
 
