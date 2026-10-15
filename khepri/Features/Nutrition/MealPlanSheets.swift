@@ -66,15 +66,15 @@ struct RemainingRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            item("P", left.proteinG)
-            item("C", left.carbG)
-            item("F", left.fatG)
+            item(String(localized: "P", comment: "Protein, one-letter abbreviation"), left.proteinG)
+            item(String(localized: "C", comment: "Carbohydrates, one-letter abbreviation"), left.carbG)
+            item(String(localized: "F", comment: "Fat, one-letter abbreviation"), left.fatG)
         }
         .font(.caption.monospacedDigit())
     }
 
     private func item(_ name: String, _ grams: Double) -> some View {
-        Text(grams < -0.5 ? "\(name) \(Int((-grams).rounded())) g over" : "\(name) \(Int(max(grams, 0).rounded())) g left")
+        (grams < -0.5 ? Text("\(name) \(Int((-grams).rounded())) g over") : Text("\(name) \(Int(max(grams, 0).rounded())) g left"))
             .foregroundStyle(grams < -0.5 ? NorthColor.destructive : .secondary)
     }
 }
@@ -110,11 +110,11 @@ struct DayTargetSheet: View {
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
-                    if carbs == .grams { grams("Carbs", $carbG, limit: target?.carbG) }
+                    if carbs == .grams { grams(String(localized: "Carbs"), $carbG, limit: target?.carbG) }
                 }
                 Section {
-                    grams("Protein", $proteinG, limit: target?.proteinG)
-                    grams("Fat", $fatG, limit: target?.fatG)
+                    grams(String(localized: "Protein"), $proteinG, limit: target?.proteinG)
+                    grams(String(localized: "Fat", comment: "The macronutrient"), $fatG, limit: target?.fatG)
                 } footer: {
                     Text("Leave blank to follow the plan. Nothing can go above your daily target.")
                 }
@@ -154,7 +154,7 @@ struct DayTargetSheet: View {
 
     private func grams(_ name: String, _ value: Binding<Double?>, limit: Double?) -> some View {
         LabeledContent("\(name) (g)") {
-            TextField(limit.map { "up to \(Int($0))" } ?? "", value: value, format: .number)
+            TextField(limit.map { String(localized: "up to \(Int($0))") } ?? "", value: value, format: .number)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
         }

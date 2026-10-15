@@ -19,7 +19,7 @@ struct MealPlansView: View {
                 } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(plan.name)
-                        Text("\(plan.planType.title) · \(plan.dayCount == 1 ? "1 day" : "\(plan.dayCount) days") · \(plan.mode.title)")
+                        Text("\(plan.planType.title) · \(plan.dayCount == 1 ? String(localized: "1 day") : String(localized: "\(plan.dayCount) days")) · \(plan.mode.title)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -111,9 +111,9 @@ private struct NewPlanSheet: View {
             }
             .pickerStyle(.segmented)
         } footer: {
-            Text(mode == .easy
-                ? "Pick a carb level and a number of days. Every day gets the same target, and nothing can go over it."
-                : "Choose weekdays and a custom carb share; each day can get its own target, and you can go over once you confirm.")
+            mode == .easy
+                ? Text("Pick a carb level and a number of days. Every day gets the same target, and nothing can go over it.")
+                : Text("Choose weekdays and a custom carb share; each day can get its own target, and you can go over once you confirm.")
         }
         Section("Carbs") {
             Picker("Plan type", selection: $planType) {
@@ -134,7 +134,7 @@ private struct NewPlanSheet: View {
         .onChange(of: mode) { _, mode in if mode == .easy, planType == .custom { planType = .midCarb } }
         if mode == .easy {
             Section {
-                Stepper(dayCount == 1 ? "1 day" : "\(dayCount) days", value: $dayCount, in: 1...options.maxDays)
+                Stepper(dayCount == 1 ? String(localized: "1 day") : String(localized: "\(dayCount) days"), value: $dayCount, in: 1...options.maxDays)
             } footer: {
                 Text("Days start on Monday.")
             }
@@ -184,24 +184,23 @@ struct TargetRow: View {
 extension Components.Schemas.MealPlanTypeOption {
     /// "26–45% of your carbs · about 92 g a day".
     var detail: String {
-        var text = "\(Int(minPct))–\(Int(maxPct))% of your carbs"
-        if let grams = defaultCarbG { text += " · about \(Int(grams.rounded())) g a day" }
-        return text
+        guard let grams = defaultCarbG else { return String(localized: "\(Int(minPct))–\(Int(maxPct))% of your carbs") }
+        return String(localized: "\(Int(minPct))–\(Int(maxPct))% of your carbs · about \(Int(grams.rounded())) g a day")
     }
 }
 
 extension MealPlanType {
     var title: String {
         switch self {
-        case .noCarb: "No carb"
-        case .lowCarb: "Low carb"
-        case .midCarb: "Mid carb"
-        case .highCarb: "High carb"
-        case .custom: "Custom"
+        case .noCarb: String(localized: "No carb")
+        case .lowCarb: String(localized: "Low carb")
+        case .midCarb: String(localized: "Mid carb")
+        case .highCarb: String(localized: "High carb")
+        case .custom: String(localized: "Custom", comment: "Meal plan type with a custom carb share")
         }
     }
 }
 
 extension MealPlanMode {
-    var title: String { self == .easy ? "Easy" : "Advanced" }
+    var title: String { self == .easy ? String(localized: "Easy", comment: "Meal plan mode") : String(localized: "Advanced", comment: "Meal plan mode") }
 }

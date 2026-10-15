@@ -45,14 +45,14 @@ struct QuickAddSheet: View {
                             let key = preset.key
                             run { try await $0.logCaffeine(preset: key) }
                         } label: {
-                            LabeledContent(String(localized: preset.name), value: "\(preset.mg) mg")
+                            LabeledContent(String(localized: preset.name), value: String(localized: "\(preset.mg) mg"))
                         }
                     }
                     otherCaffeine
                 }
                 Section("Supplements") {
                     Picker("Supplement", selection: $supplement) {
-                        ForEach(DayMath.supplementPresets, id: \.key) { Text($0.name).tag($0.key) }
+                        ForEach(DayMath.supplementPresets, id: \.key) { Text(String(localized: $0.name)).tag($0.key) }
                     }
                     Stepper("How many: \(supplementCount)", value: $supplementCount, in: 1...20)
                     Button("Log supplement") {

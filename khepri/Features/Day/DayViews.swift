@@ -92,19 +92,19 @@ struct VitalsStrip: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            VitalTile(label: "Caffeine", value: String(day.caffeine.activeMg), unit: "mg",
+            VitalTile(label: "Caffeine", value: String(day.caffeine.activeMg), unit: String(localized: "mg", comment: "Milligrams, unit"),
                       fraction: DayMath.fraction(Double(day.caffeine.totalMg), Double(day.caffeine.limitMg)), color: NorthColor.Day.caffeine)
             VitalTile(label: "Energy", value: day.vitals.energyPercent.map(String.init), unit: "%",
                       fraction: Double(day.vitals.energyPercent ?? 0) / 100, color: NorthColor.Day.move)
-            VitalTile(label: "Sunlight", value: day.vitals.daylightMinutes.map(String.init), unit: "min",
+            VitalTile(label: "Sunlight", value: day.vitals.daylightMinutes.map(String.init), unit: String(localized: "min", comment: "Minutes, unit"),
                       fraction: Double(day.vitals.daylightMinutes ?? 0) / 60, color: NorthColor.Day.sun)
             VitalTile(label: "Screen", value: day.vitals.screenMinutes.map(DayMath.duration), unit: "",
                       fraction: Double(day.vitals.screenMinutes ?? 0) / 240, color: NorthColor.Day.screen)
             if let tracker = day.milestones.first {
-                VitalTile(label: LocalizedStringKey(tracker.name), value: String(tracker.monthsSince), unit: "mo",
+                VitalTile(label: LocalizedStringKey(tracker.name), value: String(tracker.monthsSince), unit: String(localized: "mo", comment: "Months, unit"),
                           fraction: tracker.fraction, color: tracker.due ? NorthColor.Day.move : NorthColor.Day.stand)
             } else {
-                VitalTile(label: "Streak", value: String(day.streak), unit: "d",
+                VitalTile(label: "Streak", value: String(day.streak), unit: String(localized: "d", comment: "Days, unit"),
                           fraction: Double(day.streak % 7) / 7, color: NorthColor.ember)
             }
         }
@@ -167,11 +167,11 @@ private struct DayCardView: View {
 
     private var meta: String {
         switch kind {
-        case .food: String(format: "%.0f kcal", day.food.calories)
+        case .food: String(localized: "\(Int(day.food.calories.rounded())) kcal")
         case .workouts: String(day.workouts.count)
         case .sleep: day.sleep?.quality.map { "\($0)/5" } ?? ""
         case .fast: day.fast.map { DayMath.phaseName($0.phase) } ?? ""
-        case .streak: "Level \(day.level)"
+        case .streak: String(localized: "Level \(day.level)")
         default: ""
         }
     }
@@ -204,9 +204,9 @@ private struct DayCardView: View {
                     .frame(width: 64, height: 64)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    MacroLine(letter: "P", grams: day.food.proteinG, color: NorthColor.Day.protein)
-                    MacroLine(letter: "C", grams: day.food.carbG, color: NorthColor.Day.carb)
-                    MacroLine(letter: "F", grams: day.food.fatG, color: NorthColor.Day.fat)
+                    MacroLine(letter: String(localized: "P", comment: "Protein, one-letter abbreviation"), grams: day.food.proteinG, color: NorthColor.Day.protein)
+                    MacroLine(letter: String(localized: "C", comment: "Carbohydrates, one-letter abbreviation"), grams: day.food.carbG, color: NorthColor.Day.carb)
+                    MacroLine(letter: String(localized: "F", comment: "Fat, one-letter abbreviation"), grams: day.food.fatG, color: NorthColor.Day.fat)
                 }
             }
         case .water:
@@ -326,10 +326,10 @@ private struct DayCardDetail: View {
                 }
             case .food:
                 Grid(alignment: .leading, verticalSpacing: 8) {
-                    FoodRow(label: "Energy", value: day.food.calories, goal: day.food.goal?.calories, unit: "kcal", color: .primary)
-                    FoodRow(label: "Protein", value: day.food.proteinG, goal: day.food.goal?.proteinG, unit: "g", color: NorthColor.Day.protein)
-                    FoodRow(label: "Carbs", value: day.food.carbG, goal: day.food.goal?.carbG, unit: "g", color: NorthColor.Day.carb)
-                    FoodRow(label: "Fat", value: day.food.fatG, goal: day.food.goal?.fatG, unit: "g", color: NorthColor.Day.fat)
+                    FoodRow(label: "Energy", value: day.food.calories, goal: day.food.goal?.calories, unit: String(localized: "kcal"), color: .primary)
+                    FoodRow(label: "Protein", value: day.food.proteinG, goal: day.food.goal?.proteinG, unit: String(localized: "g", comment: "Grams, unit"), color: NorthColor.Day.protein)
+                    FoodRow(label: "Carbs", value: day.food.carbG, goal: day.food.goal?.carbG, unit: String(localized: "g", comment: "Grams, unit"), color: NorthColor.Day.carb)
+                    FoodRow(label: "Fat", value: day.food.fatG, goal: day.food.goal?.fatG, unit: String(localized: "g", comment: "Grams, unit"), color: NorthColor.Day.fat)
                 }
                 if day.food.goal == nil {
                     Text("Set a calorie goal in Body and goal to see how today compares.").font(.subheadline).foregroundStyle(.secondary)
@@ -340,9 +340,9 @@ private struct DayCardDetail: View {
                 Text("of \(day.water.targetMl) ml").foregroundStyle(.secondary)
             case .activity:
                 Grid(alignment: .leading, verticalSpacing: 8) {
-                    RingRow(label: "Move", ring: day.activity.move, unit: "kcal", color: NorthColor.Day.move)
-                    RingRow(label: "Exercise", ring: day.activity.exercise, unit: "min", color: NorthColor.Day.exercise)
-                    RingRow(label: "Stand", ring: day.activity.stand, unit: "h", color: NorthColor.Day.stand)
+                    RingRow(label: "Move", ring: day.activity.move, unit: String(localized: "kcal"), color: NorthColor.Day.move)
+                    RingRow(label: "Exercise", ring: day.activity.exercise, unit: String(localized: "min", comment: "Minutes, unit"), color: NorthColor.Day.exercise)
+                    RingRow(label: "Stand", ring: day.activity.stand, unit: String(localized: "h", comment: "Hours, unit"), color: NorthColor.Day.stand)
                 }
             case .sleep:
                 if let sleep = day.sleep {
