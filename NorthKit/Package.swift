@@ -8,6 +8,7 @@ import PackageDescription
 //   NorthAPI  the /api/v1 client, generated at build time from openapi.yaml
 let package = Package(
     name: "NorthKit",
+    defaultLocalization: "en",
     platforms: [.iOS(.v26), .macOS(.v26), .watchOS(.v26)],
     products: [
         .library(name: "NorthKit", targets: ["NorthKit"]),
@@ -31,6 +32,7 @@ let package = Package(
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
                 .product(name: "HTTPTypes", package: "swift-http-types"),
             ],
+            resources: [.process("Resources")],
             plugins: [
                 .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator"),
             ]

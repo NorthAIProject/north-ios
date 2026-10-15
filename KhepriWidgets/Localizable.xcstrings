@@ -1,0 +1,144 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "--:--" : {
+
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld days" : {
+
+    },
+    "%lld ml" : {
+
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "1 day" : {
+
+    },
+    "250 ml" : {
+
+    },
+    "Adds water to today's total in Khepri." : {
+
+    },
+    "Amount (ml)" : {
+
+    },
+    "Check in" : {
+
+    },
+    "Check in, %lld-day streak" : {
+
+    },
+    "Check-in" : {
+
+    },
+    "Check-in streak, %lld days%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check-in streak, %1$lld days%2$@"
+          }
+        }
+      }
+    },
+    "Checked in today, %lld-day streak" : {
+
+    },
+    "Done" : {
+
+    },
+    "Done today, %@" : {
+
+    },
+    "Khepri" : {
+
+    },
+    "Khepri could not be reached." : {
+
+    },
+    "Log Water" : {
+
+    },
+    "Logged %lld ml. %lld ml today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Logged %1$lld ml. %2$lld ml today."
+          }
+        }
+      }
+    },
+    "Offline" : {
+
+    },
+    "Open Khepri to sign in." : {
+
+    },
+    "Paused" : {
+
+    },
+    "Set %lld of %lld · exercise %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Set %1$lld of %2$lld · exercise %3$lld of %4$lld"
+          }
+        }
+      }
+    },
+    "Sign in" : {
+
+    },
+    "Today" : {
+
+    },
+    "WATER" : {
+
+    },
+    "Water, %lld of %lld ml" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Water, %1$lld of %2$lld ml"
+          }
+        }
+      }
+    },
+    "Water, your streak and your next workout." : {
+
+    },
+    "Your next workout, your check-in streak and today's water." : {
+
+    },
+    "Your streak, and today's check-in in one tap." : {
+
+    }
+  },
+  "version" : "1.0"
+}

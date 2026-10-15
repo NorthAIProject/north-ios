@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Invalid server response." : {
+
+    },
+    "Request failed with status code %lld." : {
+
+    },
+    "That could not be found." : {
+
+    },
+    "That is already in progress." : {
+
+    },
+    "Unlock your phone to continue." : {
+
+    },
+    "Your session has expired. Please sign in again." : {
+
+    }
+  },
+  "version" : "1.0"
+}

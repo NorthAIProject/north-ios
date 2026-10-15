@@ -1,0 +1,3912 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    " %@" : {
+
+    },
+    " kg" : {
+
+    },
+    " L" : {
+
+    },
+    " min" : {
+
+    },
+    " mmHg" : {
+
+    },
+    "–" : {
+
+    },
+    "—" : {
+
+    },
+    ", %@ in reserve" : {
+
+    },
+    ", %lld could not be saved" : {
+
+    },
+    "· %@" : {
+
+    },
+    "“%@”" : {
+
+    },
+    "(you)" : {
+
+    },
+    "@" : {
+
+    },
+    "@%@" : {
+
+    },
+    "@their_handle" : {
+
+    },
+    "/%lld" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ – %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ – %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "%@ · %lld g" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld g"
+          }
+        }
+      }
+    },
+    "%@ · counted" : {
+
+    },
+    "%@ · Set %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · Set %2$lld"
+          }
+        }
+      }
+    },
+    "%@ · target %lldh" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · target %2$lldh"
+          }
+        }
+      }
+    },
+    "%@ · Warm-up" : {
+
+    },
+    "%@ (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$lld)"
+          }
+        }
+      }
+    },
+    "%@ (g)" : {
+
+    },
+    "%@ / %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@ %3$@"
+          }
+        }
+      }
+    },
+    "%@ / day" : {
+
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@%% in volume on the window before" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@%% in volume on the window before"
+          }
+        }
+      }
+    },
+    "%@ %lld g left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld g left"
+          }
+        }
+      }
+    },
+    "%@ %lld g over" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld g over"
+          }
+        }
+      }
+    },
+    "%@ %lld of %lld · %@ reps" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld of %3$lld · %4$@ reps"
+          }
+        }
+      }
+    },
+    "%@ +%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ +%2$@"
+          }
+        }
+      }
+    },
+    "%@ × %lld · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ × %2$lld · %3$@"
+          }
+        }
+      }
+    },
+    "%@ day" : {
+
+    },
+    "%@ demonstration" : {
+
+    },
+    "%@ kg" : {
+
+    },
+    "%@ kg to goal" : {
+
+    },
+    "%@ steps" : {
+
+    },
+    "%@, %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%@, %lld of 100, %@. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld of 100, %3$@. %4$@"
+          }
+        }
+      }
+    },
+    "%@, not enough data" : {
+
+    },
+    "%@h" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld %@ joined through your links." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@ joined through your links."
+          }
+        }
+      }
+    },
+    "%lld active days in the last twelve weeks" : {
+
+    },
+    "%lld days" : {
+
+    },
+    "%lld days a week" : {
+
+    },
+    "%lld days in a row" : {
+
+    },
+    "%lld days in a row with a check-in." : {
+
+    },
+    "%lld exercises" : {
+
+    },
+    "%lld g" : {
+
+    },
+    "%lld g %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld g %2$@"
+          }
+        }
+      }
+    },
+    "%lld generations · %@ tokens" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld generations · %2$@ tokens"
+          }
+        }
+      }
+    },
+    "%lld h" : {
+
+    },
+    "%lld kcal" : {
+
+    },
+    "%lld kcal · %lld g protein · %lld g carbs · %lld g fat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld kcal · %2$lld g protein · %3$lld g carbs · %4$lld g fat"
+          }
+        }
+      }
+    },
+    "%lld kcal · P %lld · F %lld · C %lld per 100 g" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld kcal · P %2$lld · F %3$lld · C %4$lld per 100 g"
+          }
+        }
+      }
+    },
+    "%lld kcal a day · %lld g protein" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld kcal a day · %2$lld g protein"
+          }
+        }
+      }
+    },
+    "%lld kudos" : {
+
+    },
+    "%lld min" : {
+
+    },
+    "%lld minutes a session" : {
+
+    },
+    "%lld minutes before" : {
+
+    },
+    "%lld ml" : {
+
+    },
+    "%lld of %lld · %lld-day streak" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld · %3$lld-day streak"
+          }
+        }
+      }
+    },
+    "%lld of %lld milestones done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld milestones done"
+          }
+        }
+      }
+    },
+    "%lld of %lld millilitres" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld millilitres"
+          }
+        }
+      }
+    },
+    "%lld of %lld on track" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld on track"
+          }
+        }
+      }
+    },
+    "%lld of %lld sets done." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld sets done."
+          }
+        }
+      }
+    },
+    "%lld of %lld tracked nutrients covered today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld tracked nutrients covered today."
+          }
+        }
+      }
+    },
+    "%lld of 7" : {
+
+    },
+    "%lld of up to 8. Anyone with the link can join." : {
+
+    },
+    "%lld of your sets could not be saved to your account." : {
+
+    },
+    "%lld other options" : {
+
+    },
+    "%lld people" : {
+
+    },
+    "%lld readings" : {
+
+    },
+    "%lld reps" : {
+
+    },
+    "%lld sets" : {
+
+    },
+    "%lld sets · best %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld sets · best %2$@"
+          }
+        }
+      }
+    },
+    "%lld things to fix" : {
+
+    },
+    "%lld this week" : {
+
+    },
+    "%lld times a week" : {
+
+    },
+    "%lld weeks · %lld days a week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld weeks · %2$lld days a week"
+          }
+        }
+      }
+    },
+    "%lld XP This Week" : {
+
+    },
+    "%lld-day check-in streak" : {
+
+    },
+    "%lld-day streak" : {
+
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "%lld/%lld g" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld g"
+          }
+        }
+      }
+    },
+    "%lld/%lld g · %lld g left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld g · %3$lld g left"
+          }
+        }
+      }
+    },
+    "%lld/%lld g · %lld g over" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld g · %3$lld g over"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+
+    },
+    "%lld%% of your carbs" : {
+
+    },
+    "%lldh" : {
+
+    },
+    "+%@" : {
+
+    },
+    "+%lld ml" : {
+
+    },
+    "+15s" : {
+
+    },
+    "×%lld · %lld kcal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "×%1$lld · %2$lld kcal"
+          }
+        }
+      }
+    },
+    "≈ estimated" : {
+
+    },
+    "1 day" : {
+
+    },
+    "1 day in a row" : {
+
+    },
+    "1 is drained, 5 is full." : {
+
+    },
+    "1 is low, 5 is great." : {
+
+    },
+    "1 is rough, 5 is great." : {
+
+    },
+    "1 other option" : {
+
+    },
+    "1 thing to fix" : {
+
+    },
+    "6-digit code" : {
+
+    },
+    "200 g chicken breast, 100 g rice and two eggs" : {
+
+    },
+    "A calendar you run behind an MCP server. Khepri reads it; it never writes to it." : {
+
+    },
+    "A crew is up to eight people who keep each other going. Two is an accountability partner." : {
+
+    },
+    "A day counts with a finished workout, lifted sets or a check-in. One column a week, Monday at the top." : {
+
+    },
+    "A day on average. Set a goal in Settings → Body & Goal to be judged against it." : {
+
+    },
+    "A day on average. Your goal is %@ and %@ protein." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A day on average. Your goal is %1$@ and %2$@ protein."
+          }
+        }
+      }
+    },
+    "A goal you are working toward" : {
+
+    },
+    "A Goal…" : {
+
+    },
+    "A race, getting stronger, feeling better. Your own words." : {
+
+    },
+    "A rest week — nothing is scheduled." : {
+
+    },
+    "A sentence your coach can remind you of" : {
+
+    },
+    "A spreadsheet needs a header row: day, exercise, sets, reps, load, rest, notes. Anything your file doesn't say is left blank for you, never guessed." : {
+
+    },
+    "A spreadsheet needs a header row: day, meal, food, quantity, unit, protein, carbs, fat. Foods are matched to ingredients and measured against your macro target, which doesn't change." : {
+
+    },
+    "A thought, a link, something that happened…" : {
+
+    },
+    "A win, however small" : {
+
+    },
+    "About a goal" : {
+
+    },
+    "About VO2 max" : {
+
+    },
+    "Above your usual" : {
+
+    },
+    "Abs" : {
+
+    },
+    "Accept" : {
+
+    },
+    "Account" : {
+
+    },
+    "Acknowledgements" : {
+
+    },
+    "Active" : {
+
+    },
+    "Activities already imported stay in your history." : {
+
+    },
+    "Activities import every few hours. A run that Apple Health also recorded is counted once." : {
+
+    },
+    "Activity" : {
+
+    },
+    "Activity History" : {
+
+    },
+    "Add" : {
+
+    },
+    "Add %@" : {
+
+    },
+    "Add %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "Add %lld" : {
+
+    },
+    "Add a Day" : {
+
+    },
+    "Add a File" : {
+
+    },
+    "Add a Goal" : {
+
+    },
+    "Add a Habit" : {
+
+    },
+    "Add a Meal" : {
+
+    },
+    "Add a milestone" : {
+
+    },
+    "Add a Note" : {
+
+    },
+    "Add a Reminder" : {
+
+    },
+    "Add Exercise" : {
+
+    },
+    "Add height" : {
+
+    },
+    "Add how you feel" : {
+
+    },
+    "Add Ingredient" : {
+
+    },
+    "Add Memory" : {
+
+    },
+    "Add notes and documents your coach should know: a physio's plan, a race guide, your own training log. It searches them when you ask." : {
+
+    },
+    "Add Option" : {
+
+    },
+    "Add to your day" : {
+
+    },
+    "Add tracker" : {
+
+    },
+    "Adding a phone number is not available right now." : {
+
+    },
+    "Adds another choice for this meal" : {
+
+    },
+    "Adds water to today's total in Khepri." : {
+
+    },
+    "Adductors" : {
+
+    },
+    "Advanced" : {
+
+    },
+    "Advanced: each day can have its own target, and going over asks you to confirm." : {
+
+    },
+    "Advanced: pick each day's weekday; a day over its target can be saved once you confirm." : {
+
+    },
+    "After this" : {
+
+    },
+    "Against Your Usual" : {
+
+    },
+    "Agent" : {
+
+    },
+    "Agents" : {
+
+    },
+    "Agents act on your behalf with the same tools the coach has. Revoke one to cut it off at once." : {
+
+    },
+    "AI Provider" : {
+
+    },
+    "All muscles" : {
+
+    },
+    "Allow" : {
+
+    },
+    "Allow Contacts for Khepri in Settings to see who is already here." : {
+
+    },
+    "Allow New Health Data" : {
+
+    },
+    "Allow the microphone and speech recognition for Khepri in Settings to dictate." : {
+
+    },
+    "Allowing" : {
+
+    },
+    "Always used" : {
+
+    },
+    "Amount (ml)" : {
+
+    },
+    "Amount estimated" : {
+
+    },
+    "Analysing the clip…" : {
+
+    },
+    "Analytical" : {
+
+    },
+    "Another choice for this meal, eaten instead of the first. Only the first counts in the day." : {
+
+    },
+    "Another day is also on %@. Give each day its own." : {
+
+    },
+    "Anyone who joins through it follows you, and you follow them." : {
+
+    },
+    "Anything else" : {
+
+    },
+    "Anything to work around?" : {
+
+    },
+    "App" : {
+
+    },
+    "Apple Health" : {
+
+    },
+    "Apple Health · not synced yet" : {
+
+    },
+    "Apple Health · synced %@" : {
+
+    },
+    "Apple Health is not available on this device." : {
+
+    },
+    "Apple keeps screen time on the phone. Enter it here, or run a Shortcut that sends it." : {
+
+    },
+    "Archive" : {
+
+    },
+    "Area" : {
+
+    },
+    "Areas" : {
+
+    },
+    "Areas by Week" : {
+
+    },
+    "Ask about training, a goal, or how your week went. The same coach answers on the web and in Telegram." : {
+
+    },
+    "Ask anything" : {
+
+    },
+    "Ask for progress photos" : {
+
+    },
+    "Ask me to rate Khepri" : {
+
+    },
+    "Ask to Follow" : {
+
+    },
+    "At" : {
+
+    },
+    "At the start time" : {
+
+    },
+    "Attach a file or photo" : {
+
+    },
+    "Average of your last %lld check-ins, out of 5." : {
+
+    },
+    "Average pace" : {
+
+    },
+    "Awake" : {
+
+    },
+    "Back" : {
+
+    },
+    "Back to Your Usual Week" : {
+
+    },
+    "Base" : {
+
+    },
+    "Bedtime" : {
+
+    },
+    "Before each workout" : {
+
+    },
+    "Being read…" : {
+
+    },
+    "Being written…" : {
+
+    },
+    "Below your usual" : {
+
+    },
+    "Best 5K" : {
+
+    },
+    "Best pace" : {
+
+    },
+    "Bests" : {
+
+    },
+    "Biceps" : {
+
+    },
+    "Block" : {
+
+    },
+    "Blocked" : {
+
+    },
+    "Blood pressure" : {
+
+    },
+    "BMI " : {
+
+    },
+    "Board" : {
+
+    },
+    "Body" : {
+
+    },
+    "Body & Goal" : {
+
+    },
+    "Body figure" : {
+
+    },
+    "Bodyweight" : {
+
+    },
+    "Born" : {
+
+    },
+    "Bot" : {
+
+    },
+    "Bring a key from a provider you already pay for. It is stored encrypted and never shown again." : {
+
+    },
+    "Building your plan…" : {
+
+    },
+    "BW × %lld" : {
+
+    },
+    "By" : {
+
+    },
+    "By %@" : {
+
+    },
+    "By Activity" : {
+
+    },
+    "By Week" : {
+
+    },
+    "Caffeine" : {
+
+    },
+    "Calcium" : {
+
+    },
+    "Calendar" : {
+
+    },
+    "Calendars are not available on this server." : {
+
+    },
+    "Calories" : {
+
+    },
+    "Calves" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Capture" : {
+
+    },
+    "Capture ${text}" : {
+
+    },
+    "Carb type" : {
+
+    },
+    "Carbs" : {
+
+    },
+    "Carbs, % of target" : {
+
+    },
+    "Care" : {
+
+    },
+    "Care did not load" : {
+
+    },
+    "CC BY-SA 4.0" : {
+
+    },
+    "Change" : {
+
+    },
+    "Change Key" : {
+
+    },
+    "Change Number" : {
+
+    },
+    "Change Sets & Reps" : {
+
+    },
+    "Change This Day's Target" : {
+
+    },
+    "Change This Week" : {
+
+    },
+    "Changed from your usual week. Next week goes back to it, carrying on from where this one stops." : {
+
+    },
+    "Changing the number of days suggests which ones. Tap a day to add or drop it." : {
+
+    },
+    "Check in" : {
+
+    },
+    "Check In" : {
+
+    },
+    "Check in with mood ${mood} and energy ${energy}" : {
+
+    },
+    "Check-in" : {
+
+    },
+    "Check-in at %@: mood %lld, energy %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check-in at %1$@: mood %2$lld, energy %3$lld"
+          }
+        }
+      }
+    },
+    "Check-in streaks" : {
+
+    },
+    "Check-ins" : {
+
+    },
+    "Check-ins did not load" : {
+
+    },
+    "Check-ins, reminders and reports follow this time zone." : {
+
+    },
+    "Checked in" : {
+
+    },
+    "Checked in for today." : {
+
+    },
+    "Checking your contacts" : {
+
+    },
+    "Checking…" : {
+
+    },
+    "Checks" : {
+
+    },
+    "Chest" : {
+
+    },
+    "Choose a Clip" : {
+
+    },
+    "Choose File or Photo" : {
+
+    },
+    "Choose weekdays and a custom carb share; each day can get its own target, and you can go over once you confirm." : {
+
+    },
+    "Choose What Khepri Reads" : {
+
+    },
+    "Choose which %@" : {
+
+    },
+    "Choose…" : {
+
+    },
+    "Claude Code" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Close" : {
+
+    },
+    "Closed" : {
+
+    },
+    "Coach" : {
+
+    },
+    "Coach activity" : {
+
+    },
+    "Coach is writing" : {
+
+    },
+    "Coach tools" : {
+
+    },
+    "Coach unavailable" : {
+
+    },
+    "Coaching Style" : {
+
+    },
+    "Code" : {
+
+    },
+    "Code sent to %@" : {
+
+    },
+    "Codex" : {
+
+    },
+    "Coffee" : {
+
+    },
+    "Cola" : {
+
+    },
+    "Come back and fill this in" : {
+
+    },
+    "Compared With Before" : {
+
+    },
+    "Completed" : {
+
+    },
+    "CONFIDENCE: %@" : {
+
+    },
+    "Connect" : {
+
+    },
+    "Connect an Agent" : {
+
+    },
+    "Connect Apple Health" : {
+
+    },
+    "Connect Facebook" : {
+
+    },
+    "Connect Strava" : {
+
+    },
+    "Connected" : {
+
+    },
+    "Connecting…" : {
+
+    },
+    "Connections" : {
+
+    },
+    "Consistency" : {
+
+    },
+    "Contacts Are Off" : {
+
+    },
+    "Contacts Are Restricted" : {
+
+    },
+    "Contacts Were Not Checked" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Copied" : {
+
+    },
+    "Copy Token" : {
+
+    },
+    "Core" : {
+
+    },
+    "Could not be analysed" : {
+
+    },
+    "Could not be written" : {
+
+    },
+    "Could not listen" : {
+
+    },
+    "Could not load" : {
+
+    },
+    "Could Not Load" : {
+
+    },
+    "Could not load your account" : {
+
+    },
+    "Could not open this conversation" : {
+
+    },
+    "Count" : {
+
+    },
+    "Count it" : {
+
+    },
+    "Count It" : {
+
+    },
+    "Counted from your most recent messages only." : {
+
+    },
+    "Country" : {
+
+    },
+    "Create" : {
+
+    },
+    "Create a Plan" : {
+
+    },
+    "Create Account" : {
+
+    },
+    "Crews" : {
+
+    },
+    "D" : {
+
+    },
+    "Daily" : {
+
+    },
+    "Daily briefing" : {
+
+    },
+    "Daily target" : {
+
+    },
+    "Date" : {
+
+    },
+    "Day" : {
+
+    },
+    "Day of the week" : {
+
+    },
+    "Days" : {
+
+    },
+    "Days start on Monday." : {
+
+    },
+    "Deadline" : {
+
+    },
+    "Decisions" : {
+
+    },
+    "Decline" : {
+
+    },
+    "Deep" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete Account" : {
+
+    },
+    "Delete Goal" : {
+
+    },
+    "Delete this goal?" : {
+
+    },
+    "Deleting removes the heart rate, sleep and step readings Khepri received. Workouts stay in your activity history." : {
+
+    },
+    "Dentist, haircut…" : {
+
+    },
+    "Describe what you ate" : {
+
+    },
+    "Diastolic: %lld" : {
+
+    },
+    "Dictate" : {
+
+    },
+    "Dictation is off" : {
+
+    },
+    "Did it hold?" : {
+
+    },
+    "Diets" : {
+
+    },
+    "Direct" : {
+
+    },
+    "Discard" : {
+
+    },
+    "Discard Workout" : {
+
+    },
+    "Disconnect" : {
+
+    },
+    "Disconnect Calendar" : {
+
+    },
+    "Disconnect Facebook" : {
+
+    },
+    "Disconnect Facebook?" : {
+
+    },
+    "Disconnect Strava" : {
+
+    },
+    "Disconnect Strava?" : {
+
+    },
+    "Disconnect Telegram" : {
+
+    },
+    "Dismiss" : {
+
+    },
+    "Distance" : {
+
+    },
+    "Distance (km, optional)" : {
+
+    },
+    "Distance per Heartbeat" : {
+
+    },
+    "Distance per Week" : {
+
+    },
+    "Done" : {
+
+    },
+    "DONE" : {
+
+    },
+    "Done · Set %lld" : {
+
+    },
+    "Done today" : {
+
+    },
+    "Double-tap to pause" : {
+
+    },
+    "Double-tap to play" : {
+
+    },
+    "Drag to put the most important first. Your goals list and coach follow this order." : {
+
+    },
+    "Drank 500 ml and slept 7 hours…" : {
+
+    },
+    "Drop" : {
+
+    },
+    "Drop set" : {
+
+    },
+    "Due %@" : {
+
+    },
+    "Due today" : {
+
+    },
+    "e.g. Breakfast" : {
+
+    },
+    "e.g. Finish under 2:10" : {
+
+    },
+    "e.g. Morning runners" : {
+
+    },
+    "e.g. Protein after training" : {
+
+    },
+    "e.g. Stretch 10 minutes" : {
+
+    },
+    "Each line is one week, Monday to Sunday; the last is this week so far." : {
+
+    },
+    "Each Night" : {
+
+    },
+    "Earlier" : {
+
+    },
+    "Easy" : {
+
+    },
+    "Easy: days run from Monday in order, and no day may go over its target." : {
+
+    },
+    "Easy: every day has the plan's target, and nothing can go over it." : {
+
+    },
+    "Eaten" : {
+
+    },
+    "Eaten instead of the first option; not counted in the day" : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit Check-in" : {
+
+    },
+    "Edit Milestone" : {
+
+    },
+    "Edit Today's Check-in" : {
+
+    },
+    "edited %@" : {
+
+    },
+    "Elsewhere" : {
+
+    },
+    "Email" : {
+
+    },
+    "End" : {
+
+    },
+    "End the fast" : {
+
+    },
+    "End this workout?" : {
+
+    },
+    "Energy" : {
+
+    },
+    "Energy drink" : {
+
+    },
+    "Enter your email address to receive password reset instructions." : {
+
+    },
+    "Equipment" : {
+
+    },
+    "Espresso" : {
+
+    },
+    "est. %@" : {
+
+    },
+    "est. 1RM" : {
+
+    },
+    "Est. 1RM" : {
+
+    },
+    "Estimated 1RM" : {
+
+    },
+    "estimated weight" : {
+
+    },
+    "Evening reflection" : {
+
+    },
+    "Every %lld days" : {
+
+    },
+    "Every day goes back to the plan's default target, and its own carbs, protein and fat are dropped. A day already over has to be trimmed first." : {
+
+    },
+    "Exact grams" : {
+
+    },
+    "Exercise" : {
+
+    },
+    "EXERCISE %lld OF %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "EXERCISE %1$lld OF %2$lld"
+          }
+        }
+      }
+    },
+    "Exercise Library" : {
+
+    },
+    "Exercise unavailable" : {
+
+    },
+    "Exercises" : {
+
+    },
+    "Exercises without a set count won't appear in a live workout until you add one." : {
+
+    },
+    "Experience" : {
+
+    },
+    "Export My Data" : {
+
+    },
+    "Facebook Friends" : {
+
+    },
+    "Fast ended" : {
+
+    },
+    "Fast started" : {
+
+    },
+    "Fast started · %@ so far" : {
+
+    },
+    "Fasting" : {
+
+    },
+    "Fat" : {
+
+    },
+    "Fat burning" : {
+
+    },
+    "Fed" : {
+
+    },
+    "Feet" : {
+
+    },
+    "Fell asleep" : {
+
+    },
+    "Female" : {
+
+    },
+    "Fibre" : {
+
+    },
+    "File" : {
+
+    },
+    "File as Suggested" : {
+
+    },
+    "Files" : {
+
+    },
+    "Files today's check-in with your mood and energy." : {
+
+    },
+    "Find Again" : {
+
+    },
+    "Find Friends from Contacts" : {
+
+    },
+    "Find Ingredients" : {
+
+    },
+    "Finish and Save" : {
+
+    },
+    "Finish Workout" : {
+
+    },
+    "Fitness" : {
+
+    },
+    "Folate" : {
+
+    },
+    "Follow Another Plan" : {
+
+    },
+    "Follow Somebody" : {
+
+    },
+    "Follow the plan" : {
+
+    },
+    "Followers" : {
+
+    },
+    "Following" : {
+
+    },
+    "Food" : {
+
+    },
+    "For example: blunt, but ask before you push" : {
+
+    },
+    "Forearms" : {
+
+    },
+    "Forget" : {
+
+    },
+    "Forgot password?" : {
+
+    },
+    "Form Check" : {
+
+    },
+    "Found %@." : {
+
+    },
+    "Friends" : {
+
+    },
+    "Friends did not load" : {
+
+    },
+    "Friends stop finding you by it. You can add it again any time." : {
+
+    },
+    "Friends who have your number in their contacts can find you. Your number is never shown to anyone." : {
+
+    },
+    "From" : {
+
+    },
+    "From %@. Follow that plan to edit its sessions." : {
+
+    },
+    "From Apple Health, against your own last four weeks. Connect it in Settings → Connections." : {
+
+    },
+    "From Contacts" : {
+
+    },
+    "From the start times on your training days. Scheduled on this iPhone, so they arrive even offline." : {
+
+    },
+    "From your plan" : {
+
+    },
+    "From Your Plans" : {
+
+    },
+    "Front" : {
+
+    },
+    "Give kudos" : {
+
+    },
+    "Glutes" : {
+
+    },
+    "Goal" : {
+
+    },
+    "Goal deadlines" : {
+
+    },
+    "Goal Options" : {
+
+    },
+    "Goals" : {
+
+    },
+    "Goals and milestones" : {
+
+    },
+    "Grams" : {
+
+    },
+    "Habit" : {
+
+    },
+    "Habits" : {
+
+    },
+    "Habits · %lld%% kept" : {
+
+    },
+    "Hamstrings" : {
+
+    },
+    "handle" : {
+
+    },
+    "Health" : {
+
+    },
+    "Healthy" : {
+
+    },
+    "Heart" : {
+
+    },
+    "Heaviest set" : {
+
+    },
+    "Height" : {
+
+    },
+    "Height (cm)" : {
+
+    },
+    "Height (in)" : {
+
+    },
+    "Helpful" : {
+
+    },
+    "Hermes" : {
+
+    },
+    "Higher is faster." : {
+
+    },
+    "Higher on the chart is faster." : {
+
+    },
+    "Highlights" : {
+
+    },
+    "Hips" : {
+
+    },
+    "Hours" : {
+
+    },
+    "Hours: %lld" : {
+
+    },
+    "How friends find you. Without one, only your invite link does." : {
+
+    },
+    "How it turned out" : {
+
+    },
+    "How many more you could have done. 0 is to failure." : {
+
+    },
+    "How many: %lld" : {
+
+    },
+    "How much bedtime and wake time vary matters about as much as how long you sleep." : {
+
+    },
+    "How the things you log move together over the last %lld days. Each compares two groups of days: it shows what went together, not what caused what." : {
+
+    },
+    "How to" : {
+
+    },
+    "How You Eat" : {
+
+    },
+    "How you'll know it's done" : {
+
+    },
+    "hpfrei/body-anatomy-3d-viewer" : {
+
+    },
+    "HRV, resting heart rate and last night's sleep, each against your last four weeks." : {
+
+    },
+    "Human Body Base Mesh Male" : {
+
+    },
+    "Ideas" : {
+
+    },
+    "If this provider refuses or runs out of credit, Khepri's providers answer instead, so the coach never goes silent." : {
+
+    },
+    "Imperial" : {
+
+    },
+    "Import a Plan" : {
+
+    },
+    "Import Meal Plan" : {
+
+    },
+    "Import Plan" : {
+
+    },
+    "In bed" : {
+
+    },
+    "In the Health app: Sharing → Apps → Khepri." : {
+
+    },
+    "Inbox" : {
+
+    },
+    "Inbox (%lld)" : {
+
+    },
+    "Ingredient" : {
+
+    },
+    "Ingredients" : {
+
+    },
+    "Injuries, limits, preferences" : {
+
+    },
+    "Invite" : {
+
+    },
+    "Invite to the Crew" : {
+
+    },
+    "Iodine" : {
+
+    },
+    "iPhone" : {
+
+    },
+    "Iron" : {
+
+    },
+    "Its %lld meals go with it." : {
+
+    },
+    "Its %lld other options go with it." : {
+
+    },
+    "Its meal goes with it." : {
+
+    },
+    "Its milestones and notes go with it." : {
+
+    },
+    "Its other option goes with it." : {
+
+    },
+    "Join %@ on Khepri" : {
+
+    },
+    "Join me on Khepri" : {
+
+    },
+    "Journal" : {
+
+    },
+    "kcal" : {
+
+    },
+    "Keep" : {
+
+    },
+    "Keep %@" : {
+
+    },
+    "Keep Going" : {
+
+    },
+    "Keep the Plan" : {
+
+    },
+    "Ketosis" : {
+
+    },
+    "Key" : {
+
+    },
+    "kg" : {
+
+    },
+    "Khepri can now also read walking and running distance, flights climbed, mindful minutes, walking heart rate, breathing rate and blood oxygen, to compare each with your usual." : {
+
+    },
+    "Khepri needs the microphone to hear you. Your words are turned into text on this iPhone and appear in the box for you to check before sending." : {
+
+    },
+    "Kind" : {
+
+    },
+    "km/h" : {
+
+    },
+    "Knees" : {
+
+    },
+    "Knowledge" : {
+
+    },
+    "Knowledge did not load" : {
+
+    },
+    "Kudos" : {
+
+    },
+    "Label" : {
+
+    },
+    "Label (optional), e.g. Peixe" : {
+
+    },
+    "Language" : {
+
+    },
+    "Last %lld days" : {
+
+    },
+    "Last done" : {
+
+    },
+    "Last message" : {
+
+    },
+    "Last Night" : {
+
+    },
+    "Last problem" : {
+
+    },
+    "Last sync" : {
+
+    },
+    "Last trained" : {
+
+    },
+    "Last trained %@" : {
+
+    },
+    "Lats" : {
+
+    },
+    "Leaderboard" : {
+
+    },
+    "Leave" : {
+
+    },
+    "Leave blank to follow the plan. Nothing can go above your daily target." : {
+
+    },
+    "Leave Crew" : {
+
+    },
+    "Leave everything off for bodyweight only. Nothing outside this list will appear in your plan." : {
+
+    },
+    "Leave this crew?" : {
+
+    },
+    "Left out of volume and records. Set %lld is still to come." : {
+
+    },
+    "Level %lld" : {
+
+    },
+    "Library" : {
+
+    },
+    "Lifting" : {
+
+    },
+    "Lifting stats did not load." : {
+
+    },
+    "Lighter day: today's sets are cut to about 60%. Tomorrow is back to the plan." : {
+
+    },
+    "Link Telegram" : {
+
+    },
+    "Loading…" : {
+
+    },
+    "Log %@?" : {
+
+    },
+    "Log %lld" : {
+
+    },
+    "Log Activity" : {
+
+    },
+    "Log anything" : {
+
+    },
+    "Log Check-In" : {
+
+    },
+    "Log Food" : {
+
+    },
+    "Log It" : {
+
+    },
+    "Log Last Night" : {
+
+    },
+    "Log Set" : {
+
+    },
+    "Log supplement" : {
+
+    },
+    "Log Water" : {
+
+    },
+    "Log weight" : {
+
+    },
+    "Logged %lld" : {
+
+    },
+    "Logged %lld ml. %lld ml today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Logged %1$lld ml. %2$lld ml today."
+          }
+        }
+      }
+    },
+    "Logged %lld things." : {
+
+    },
+    "Logged %lld, %lld could not be saved." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Logged %1$lld, %2$lld could not be saved."
+          }
+        }
+      }
+    },
+    "Logged." : {
+
+    },
+    "Logs water, sleep, habits, weight, check-ins or food from one sentence." : {
+
+    },
+    "Longest" : {
+
+    },
+    "Lower back" : {
+
+    },
+    "m per beat" : {
+
+    },
+    "Macro Goal" : {
+
+    },
+    "Magnesium" : {
+
+    },
+    "Maintenance is about %lld kcal a day." : {
+
+    },
+    "Make optional" : {
+
+    },
+    "Male" : {
+
+    },
+    "Mark Read" : {
+
+    },
+    "Matches" : {
+
+    },
+    "MCP endpoint" : {
+
+    },
+    "MCP server URL" : {
+
+    },
+    "Meal name" : {
+
+    },
+    "Meal plans are built on the daily target from Body & Goal." : {
+
+    },
+    "Meal suggestions and the coach's advice keep to these." : {
+
+    },
+    "Memories" : {
+
+    },
+    "Memories did not load" : {
+
+    },
+    "Message your coach" : {
+
+    },
+    "Metres covered for each beat of your heart. Rising means the same effort carries you further: fitter, whatever the pace." : {
+
+    },
+    "Metric" : {
+
+    },
+    "mg" : {
+
+    },
+    "Milestone" : {
+
+    },
+    "Milestones" : {
+
+    },
+    "Minutes: %lld" : {
+
+    },
+    "Missed check-in" : {
+
+    },
+    "ml" : {
+
+    },
+    "ml today" : {
+
+    },
+    "Mode" : {
+
+    },
+    "Model" : {
+
+    },
+    "Month" : {
+
+    },
+    "Monthly" : {
+
+    },
+    "Months since" : {
+
+    },
+    "Mood" : {
+
+    },
+    "Mood · Energy · %@" : {
+
+    },
+    "Mood %lld" : {
+
+    },
+    "Mood %lld · Energy %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mood %1$lld · Energy %2$lld"
+          }
+        }
+      }
+    },
+    "Mood and Energy" : {
+
+    },
+    "More" : {
+
+    },
+    "Most Logged" : {
+
+    },
+    "Move" : {
+
+    },
+    "Move Down" : {
+
+    },
+    "Move Up" : {
+
+    },
+    "Muscle" : {
+
+    },
+    "Muscles" : {
+
+    },
+    "Muscles This Week" : {
+
+    },
+    "My own food (file's macros)" : {
+
+    },
+    "Name" : {
+
+    },
+    "Name (optional)" : {
+
+    },
+    "Name one thing you want to get done. Your coach plans around it and asks how it is going." : {
+
+    },
+    "Name the crew" : {
+
+    },
+    "Name, e.g. Training weeks" : {
+
+    },
+    "Name, e.g. Work laptop" : {
+
+    },
+    "Neck" : {
+
+    },
+    "New chat" : {
+
+    },
+    "New Conversation" : {
+
+    },
+    "New Crew" : {
+
+    },
+    "New Decision" : {
+
+    },
+    "New Entry" : {
+
+    },
+    "New Goal" : {
+
+    },
+    "New Habit" : {
+
+    },
+    "New Ingredient" : {
+
+    },
+    "New Meal" : {
+
+    },
+    "New Meal Plan" : {
+
+    },
+    "New Note" : {
+
+    },
+    "New Option" : {
+
+    },
+    "New Plan" : {
+
+    },
+    "New Reflection" : {
+
+    },
+    "New Reminder" : {
+
+    },
+    "Next" : {
+
+    },
+    "Next day" : {
+
+    },
+    "Next set: %@, set %lld of %lld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Next set: %1$@, set %2$lld of %3$lld."
+          }
+        }
+      }
+    },
+    "Next Week" : {
+
+    },
+    "Next: %@" : {
+
+    },
+    "Next: set %lld" : {
+
+    },
+    "Night" : {
+
+    },
+    "No %@ in the last twelve months." : {
+
+    },
+    "No Active Goals" : {
+
+    },
+    "No active goals yet." : {
+
+    },
+    "No active weight goal." : {
+
+    },
+    "No agents connected." : {
+
+    },
+    "No cardio in this window" : {
+
+    },
+    "No challenge" : {
+
+    },
+    "No checks yet." : {
+
+    },
+    "No food found in that. Name each food and how much, like “150 g salmon”." : {
+
+    },
+    "No goals yet" : {
+
+    },
+    "No handle" : {
+
+    },
+    "No plan yet" : {
+
+    },
+    "No recent training" : {
+
+    },
+    "No reports yet" : {
+
+    },
+    "No session yet" : {
+
+    },
+    "No sets logged in this window. Enter the weight of each set during a workout and it shows up here." : {
+
+    },
+    "No sleep in this window" : {
+
+    },
+    "No sleep recorded for last night." : {
+
+    },
+    "No weight logged yet." : {
+
+    },
+    "No weight recorded yet." : {
+
+    },
+    "No workouts in the last month." : {
+
+    },
+    "No workouts on this day." : {
+
+    },
+    "Nobody follows you yet." : {
+
+    },
+    "Nobody yet." : {
+
+    },
+    "None" : {
+
+    },
+    "None of your contacts are on Khepri yet" : {
+
+    },
+    "None of your Facebook friends have connected Khepri yet." : {
+
+    },
+    "Not added" : {
+
+    },
+    "Not checked in yet" : {
+
+    },
+    "Not done" : {
+
+    },
+    "Not enough logged this week" : {
+
+    },
+    "Not fasting." : {
+
+    },
+    "Not helpful" : {
+
+    },
+    "Not imported" : {
+
+    },
+    "Not logged" : {
+
+    },
+    "Not Now" : {
+
+    },
+    "Not supported" : {
+
+    },
+    "Not sure, check this" : {
+
+    },
+    "Not today" : {
+
+    },
+    "Not trained yet" : {
+
+    },
+    "Not understood: %@" : {
+
+    },
+    "Not used" : {
+
+    },
+    "Not useful" : {
+
+    },
+    "Note" : {
+
+    },
+    "Notes" : {
+
+    },
+    "Notes are how your coach knows a goal is moving." : {
+
+    },
+    "Nothing from Apple Health in the last two weeks." : {
+
+    },
+    "Nothing from Apple Health yet. Allow Khepri to read steps, workouts and VO2 max to fill this in." : {
+
+    },
+    "Nothing in the last %lld days" : {
+
+    },
+    "Nothing is logged for this window yet. Check-ins, sleep, water and workouts fill this in, and so does Apple Health once it is connected." : {
+
+    },
+    "Nothing is sent during quiet hours, in your account's time zone." : {
+
+    },
+    "Nothing logged on this day yet." : {
+
+    },
+    "Nothing logged yet today." : {
+
+    },
+    "Nothing matches yet." : {
+
+    },
+    "Nothing needs you right now." : {
+
+    },
+    "Nothing stands out yet" : {
+
+    },
+    "Nothing this year" : {
+
+    },
+    "Nothing to fix" : {
+
+    },
+    "Nothing to put in order this week." : {
+
+    },
+    "Nothing waiting." : {
+
+    },
+    "Nothing written yet." : {
+
+    },
+    "Nothing yet." : {
+
+    },
+    "Nothing yet. Add something your coach should always know, like an old injury or when you train." : {
+
+    },
+    "Nothing yet. Finish a workout, keep a streak or complete a goal, and it shows here." : {
+
+    },
+    "Nothing yet. Workouts you time, and anything you log here, show up in this list." : {
+
+    },
+    "Notifications" : {
+
+    },
+    "Notifications, %lld unread" : {
+
+    },
+    "Now" : {
+
+    },
+    "Nudges" : {
+
+    },
+    "Nudges for things like protein after training. Your coach sends them where you read them." : {
+
+    },
+    "Number" : {
+
+    },
+    "Nutrients" : {
+
+    },
+    "Nutrition" : {
+
+    },
+    "Obese" : {
+
+    },
+    "of %lld kcal" : {
+
+    },
+    "of %lld ml" : {
+
+    },
+    "Of the %lld replies you rated." : {
+
+    },
+    "Off" : {
+
+    },
+    "Off until you turn it on. Your journal, decisions, food and health numbers are never shared." : {
+
+    },
+    "OK" : {
+
+    },
+    "Omega-3" : {
+
+    },
+    "On" : {
+
+    },
+    "On Khepri" : {
+
+    },
+    "On this iPhone" : {
+
+    },
+    "Once an evening: a check-in if you haven't done one, otherwise a line in your journal." : {
+
+    },
+    "Only for the week being planned. The week after goes back to your plan unless you choose again." : {
+
+    },
+    "Only hashed copies of your contacts' email addresses and phone numbers leave this iPhone, and nothing is kept." : {
+
+    },
+    "Only hashed email addresses and phone numbers left this iPhone, and nothing was kept." : {
+
+    },
+    "Only the contacts you chose for Khepri were checked, by hashed email and phone number." : {
+
+    },
+    "Only the contacts you chose for Khepri were checked." : {
+
+    },
+    "Only you so far. Friends appear here once they share this with followers." : {
+
+    },
+    "Open Goal" : {
+
+    },
+    "Open in Training" : {
+
+    },
+    "Open one for its trend, bests and heart-rate efficiency over the year." : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Opens an exercise with its steps and form cues." : {
+
+    },
+    "Opens Facebook to sign in. Friends who also connected Facebook to Khepri show here. Nothing is posted to Facebook." : {
+
+    },
+    "Opens Fitness" : {
+
+    },
+    "Opens one of your goals." : {
+
+    },
+    "Opens Strava to sign in. Your runs and rides then reach your coach and your progress." : {
+
+    },
+    "Opens Telegram with a one-time code. Come back here once the bot says hello." : {
+
+    },
+    "Opens your next training session and starts the workout." : {
+
+    },
+    "Optional" : {
+
+    },
+    "Optional · not counted" : {
+
+    },
+    "Optional. Stress: 1 is calm, 5 is overwhelmed. Sleep: 1 is poor, 5 is great." : {
+
+    },
+    "OR" : {
+
+    },
+    "Or create account with a Passkey" : {
+
+    },
+    "Or describe it in your own words" : {
+
+    },
+    "Or search for each ingredient below to log it by weight." : {
+
+    },
+    "Other" : {
+
+    },
+    "Other amount" : {
+
+    },
+    "Other: type the number with +" : {
+
+    },
+    "Over your target" : {
+
+    },
+    "Overdue · %@" : {
+
+    },
+    "Overweight" : {
+
+    },
+    "owner" : {
+
+    },
+    "Pace by Month" : {
+
+    },
+    "Paces are per kilometre, over runs of at least 1 km." : {
+
+    },
+    "Painful" : {
+
+    },
+    "Password Strength: " : {
+
+    },
+    "Passwords do not match" : {
+
+    },
+    "Patterns need at least three days on each side. Keep logging sleep, caffeine, meals and check-ins." : {
+
+    },
+    "Pause" : {
+
+    },
+    "Paused" : {
+
+    },
+    "People you follow stay followed." : {
+
+    },
+    "Per 100 g" : {
+
+    },
+    "Phone number" : {
+
+    },
+    "Phone Number" : {
+
+    },
+    "Photo Library" : {
+
+    },
+    "Pick a carb level and a number of days. Every day gets the same target, and nothing can go over it." : {
+
+    },
+    "Plan" : {
+
+    },
+    "Plan Days" : {
+
+    },
+    "Plan name" : {
+
+    },
+    "Plan Settings" : {
+
+    },
+    "Plan the Week" : {
+
+    },
+    "Plan This Week" : {
+
+    },
+    "Plan type" : {
+
+    },
+    "Plays the clip from this moment" : {
+
+    },
+    "Potassium" : {
+
+    },
+    "Preparing…" : {
+
+    },
+    "Previous day" : {
+
+    },
+    "Priority %lld" : {
+
+    },
+    "Progress" : {
+
+    },
+    "Progress did not load" : {
+
+    },
+    "Progress to the next level" : {
+
+    },
+    "Protein" : {
+
+    },
+    "Provider" : {
+
+    },
+    "Push-up, squat, row…" : {
+
+    },
+    "Quads" : {
+
+    },
+    "Quality" : {
+
+    },
+    "Quality is the average of the %lld nights you rated." : {
+
+    },
+    "Queued to Read Again" : {
+
+    },
+    "Quiet hours" : {
+
+    },
+    "Range" : {
+
+    },
+    "Rate Khepri on the App Store" : {
+
+    },
+    "Re-read Everything" : {
+
+    },
+    "Read again" : {
+
+    },
+    "Read Again" : {
+
+    },
+    "Reads a meal plan from a file or photo" : {
+
+    },
+    "Recent" : {
+
+    },
+    "Recent fasts" : {
+
+    },
+    "Records" : {
+
+    },
+    "Recovery %lld out of 100, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recovery %1$lld out of 100, %2$@"
+          }
+        }
+      }
+    },
+    "Recovery Today" : {
+
+    },
+    "Region" : {
+
+    },
+    "REM" : {
+
+    },
+    "Remembered" : {
+
+    },
+    "Remind after %lld days" : {
+
+    },
+    "Remind me" : {
+
+    },
+    "Reminders" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove %@?" : {
+
+    },
+    "Remove Day" : {
+
+    },
+    "Remove meal (all options)" : {
+
+    },
+    "Remove Number" : {
+
+    },
+    "Remove Option" : {
+
+    },
+    "Remove your phone number?" : {
+
+    },
+    "Reports" : {
+
+    },
+    "Reps" : {
+
+    },
+    "Reps in reserve" : {
+
+    },
+    "Reps, e.g. 8-12 or AMRAP" : {
+
+    },
+    "Reset Password" : {
+
+    },
+    "REST" : {
+
+    },
+    "Rest %llds" : {
+
+    },
+    "Rest over" : {
+
+    },
+    "Resume" : {
+
+    },
+    "Review" : {
+
+    },
+    "Revoke" : {
+
+    },
+    "RIR %@" : {
+
+    },
+    "Running" : {
+
+    },
+    "Runs" : {
+
+    },
+    "Runs, rides and walks from Apple Health, Strava or the app show up here." : {
+
+    },
+    "s/km" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save Anyway" : {
+
+    },
+    "Save Changes" : {
+
+    },
+    "Save Measurements" : {
+
+    },
+    "Save reading" : {
+
+    },
+    "Save screen time" : {
+
+    },
+    "Save target" : {
+
+    },
+    "Save the Week" : {
+
+    },
+    "Save to Inbox" : {
+
+    },
+    "Saved to your activity. Your coach will see it." : {
+
+    },
+    "Saved. Your goals, coach and training plan use this focus now." : {
+
+    },
+    "Say a Meal" : {
+
+    },
+    "Say each food and how much. You check everything before it's added." : {
+
+    },
+    "Say how far along" : {
+
+    },
+    "Say Ingredients" : {
+
+    },
+    "Schedule" : {
+
+    },
+    "Score" : {
+
+    },
+    "Screen" : {
+
+    },
+    "Screen time today" : {
+
+    },
+    "Search ingredients" : {
+
+    },
+    "Search the library" : {
+
+    },
+    "Search your library" : {
+
+    },
+    "Section" : {
+
+    },
+    "See all" : {
+
+    },
+    "See Progress" : {
+
+    },
+    "Send" : {
+
+    },
+    "Send /start %@ to the bot." : {
+
+    },
+    "Send a New Code" : {
+
+    },
+    "Send Code" : {
+
+    },
+    "Send Reset Link" : {
+
+    },
+    "Send them your invite link." : {
+
+    },
+    "Series" : {
+
+    },
+    "Server" : {
+
+    },
+    "Sessions" : {
+
+    },
+    "Sessions From" : {
+
+    },
+    "Set %lld" : {
+
+    },
+    "Set a calorie goal in Body and goal to see how today compares." : {
+
+    },
+    "Set a macro goal in Settings → Body & Goal to see how today compares." : {
+
+    },
+    "Set a start time" : {
+
+    },
+    "Set Challenge" : {
+
+    },
+    "Set goal" : {
+
+    },
+    "Set kind" : {
+
+    },
+    "Sets" : {
+
+    },
+    "Sets per Muscle" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Sex" : {
+
+    },
+    "Share Your Export" : {
+
+    },
+    "Share Your Invite Link" : {
+
+    },
+    "Shoulders" : {
+
+    },
+    "Show" : {
+
+    },
+    "Show Archived" : {
+
+    },
+    "Show Exercise" : {
+
+    },
+    "Show Me Around" : {
+
+    },
+    "Showing the most recent entries. Pick a shorter window to see the rest." : {
+
+    },
+    "Shown once. If you lose it, revoke this connection and create another." : {
+
+    },
+    "Side" : {
+
+    },
+    "Side-on, whole body in frame, one set. Up to 200 MB." : {
+
+    },
+    "Sign In" : {
+
+    },
+    "Sign Out" : {
+
+    },
+    "Sign out of Khepri?" : {
+
+    },
+    "Sign Up" : {
+
+    },
+    "Siri" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Skip Rest" : {
+
+    },
+    "Skip tour" : {
+
+    },
+    "Sleep" : {
+
+    },
+    "Sleep %lld" : {
+
+    },
+    "Sleep quality" : {
+
+    },
+    "Slept" : {
+
+    },
+    "Sore" : {
+
+    },
+    "Speak instead of typing" : {
+
+    },
+    "Speed by Month" : {
+
+    },
+    "Split" : {
+
+    },
+    "Stages" : {
+
+    },
+    "Stand" : {
+
+    },
+    "Start a Conversation" : {
+
+    },
+    "Start Today's Workout" : {
+
+    },
+    "Start Workout" : {
+
+    },
+    "Started" : {
+
+    },
+    "Starts at" : {
+
+    },
+    "Stats digest" : {
+
+    },
+    "Status" : {
+
+    },
+    "Steps" : {
+
+    },
+    "Stiff" : {
+
+    },
+    "Still being read. The text appears here when it is done." : {
+
+    },
+    "Still missing" : {
+
+    },
+    "Still thinking…" : {
+
+    },
+    "Stop" : {
+
+    },
+    "Stop and Delete Synced Data" : {
+
+    },
+    "Stop dictating" : {
+
+    },
+    "Stop Syncing" : {
+
+    },
+    "Stop syncing Apple Health?" : {
+
+    },
+    "Strava" : {
+
+    },
+    "Strava is not set up on this server." : {
+
+    },
+    "Streak" : {
+
+    },
+    "Stress" : {
+
+    },
+    "Stress %lld" : {
+
+    },
+    "Style" : {
+
+    },
+    "Suggested" : {
+
+    },
+    "Sunlight" : {
+
+    },
+    "Supplement" : {
+
+    },
+    "Supplements" : {
+
+    },
+    "Supported" : {
+
+    },
+    "Swap" : {
+
+    },
+    "Swap Exercise" : {
+
+    },
+    "Swipe right to file as suggested, touch and hold for other places" : {
+
+    },
+    "Swipe to swap or remove. Touch and hold for sets, reps and order." : {
+
+    },
+    "Switch to Advanced" : {
+
+    },
+    "Switch to Easy?" : {
+
+    },
+    "Switch to Easy…" : {
+
+    },
+    "Sync" : {
+
+    },
+    "Sync Apple Health" : {
+
+    },
+    "Sync Apple Health, or log a night on My Day." : {
+
+    },
+    "Sync Now" : {
+
+    },
+    "Systolic" : {
+
+    },
+    "Systolic: %lld" : {
+
+    },
+    "Tags, separated by commas" : {
+
+    },
+    "Tags: %@" : {
+
+    },
+    "Take back kudos" : {
+
+    },
+    "Take It Lighter" : {
+
+    },
+    "Take off %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Take off %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "Take Photo" : {
+
+    },
+    "Talk to your coach" : {
+
+    },
+    "Tap Find Again to see which of your Facebook friends are on Khepri." : {
+
+    },
+    "Target" : {
+
+    },
+    "Target %@ · left %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Target %1$@ · left %2$@"
+          }
+        }
+      }
+    },
+    "Target date" : {
+
+    },
+    "Target weight" : {
+
+    },
+    "Tea" : {
+
+    },
+    "Telegram" : {
+
+    },
+    "Telegram is not set up on this server." : {
+
+    },
+    "Tell your coach what you're training for, how often, and with what. You'll get a plan to follow and adjust." : {
+
+    },
+    "That would go over your target" : {
+
+    },
+    "The best set of each day, by Epley's formula: weight × (1 + reps ÷ 30)." : {
+
+    },
+    "The body figure is cut from anatomical data from Z-Anatomy, via hpfrei/body-anatomy-3d-viewer, licensed CC BY-SA 4.0, fitted to Human Body Base Mesh Male by ferrumiron6, licensed CC BY 4.0. The figure is licensed CC BY-SA 4.0." : {
+
+    },
+    "The briefing reads your sleep, heart rate and today's session, and suggests an easier day when you need one." : {
+
+    },
+    "The coach is still looking at this one." : {
+
+    },
+    "The coach suggests where each thing belongs. You decide." : {
+
+    },
+    "The coach, reports and reminders use this language." : {
+
+    },
+    "The code works for ten minutes." : {
+
+    },
+    "The journal did not load" : {
+
+    },
+    "The last twelve months." : {
+
+    },
+    "The leaderboard did not load" : {
+
+    },
+    "The options" : {
+
+    },
+    "The same coach, the same memory: what you say there appears here." : {
+
+    },
+    "There is no text in this document." : {
+
+    },
+    "These lines looked like part of the plan but couldn't be read as exercises." : {
+
+    },
+    "These lines looked like part of the plan but couldn't be read as foods." : {
+
+    },
+    "Things your coach noticed in conversation. It uses none of them until you keep them." : {
+
+    },
+    "This can take up to a minute." : {
+
+    },
+    "This day has left" : {
+
+    },
+    "This day is no longer in the plan" : {
+
+    },
+    "This did not load" : {
+
+    },
+    "This erases your goals, check-ins, conversations, memories and everything else, on every device. It cannot be undone." : {
+
+    },
+    "This goal did not load" : {
+
+    },
+    "This iPhone doesn't allow Khepri to read contacts." : {
+
+    },
+    "This is what was read from your file. Blank fields weren't in it. Give each day a day of the week, fix anything wrong, then save." : {
+
+    },
+    "This option is eaten instead of the meal's first, so it doesn't count toward the day." : {
+
+    },
+    "This reflection has ended." : {
+
+    },
+    "This report did not load" : {
+
+    },
+    "This server cannot store provider keys." : {
+
+    },
+    "This Week" : {
+
+    },
+    "This Week's Focus" : {
+
+    },
+    "Time per Week" : {
+
+    },
+    "Time Zone" : {
+
+    },
+    "Timeline" : {
+
+    },
+    "Title" : {
+
+    },
+    "Today" : {
+
+    },
+    "Today did not load" : {
+
+    },
+    "Token" : {
+
+    },
+    "Token (if the server needs one)" : {
+
+    },
+    "Tone" : {
+
+    },
+    "Total %@" : {
+
+    },
+    "Touch and hold to choose when your coach uses one, to edit it, or to forget it." : {
+
+    },
+    "Tough Love" : {
+
+    },
+    "Trained recently: %@" : {
+
+    },
+    "Trained today" : {
+
+    },
+    "Training" : {
+
+    },
+    "Training did not load" : {
+
+    },
+    "Training Options" : {
+
+    },
+    "Training reminders" : {
+
+    },
+    "Trends" : {
+
+    },
+    "Triceps" : {
+
+    },
+    "Try “How do I do a push-up?”" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Twelve Weeks" : {
+
+    },
+    "Two eggs and a slice of toast…" : {
+
+    },
+    "Type your email to confirm" : {
+
+    },
+    "Unblock" : {
+
+    },
+    "Underweight" : {
+
+    },
+    "Undo" : {
+
+    },
+    "Unfollow" : {
+
+    },
+    "Units" : {
+
+    },
+    "Unlock your iPhone to continue" : {
+
+    },
+    "Until" : {
+
+    },
+    "up to %lld" : {
+
+    },
+    "Up to three things this week is for. Your coach plans around them." : {
+
+    },
+    "Update body" : {
+
+    },
+    "Uploading…" : {
+
+    },
+    "Uploading… you can leave the app" : {
+
+    },
+    "Upper back" : {
+
+    },
+    "Use" : {
+
+    },
+    "Use %@ — built for %lld days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Use %1$@ — built for %2$lld days"
+          }
+        }
+      }
+    },
+    "Use a Different Number" : {
+
+    },
+    "Use Khepri's Providers" : {
+
+    },
+    "Use My Own Key" : {
+
+    },
+    "Use This iPhone's (%@)" : {
+
+    },
+    "Used for workout calories and your macro goal." : {
+
+    },
+    "Useful" : {
+
+    },
+    "Usual high" : {
+
+    },
+    "Usual low" : {
+
+    },
+    "Value" : {
+
+    },
+    "Verified" : {
+
+    },
+    "Verify" : {
+
+    },
+    "Version %@" : {
+
+    },
+    "Vitamin A" : {
+
+    },
+    "Vitamin B12" : {
+
+    },
+    "Vitamin C" : {
+
+    },
+    "Vitamin D" : {
+
+    },
+    "Vitamin E" : {
+
+    },
+    "Vitamin K" : {
+
+    },
+    "VO2 max is how much oxygen your body can use during hard exercise. Apple Watch estimates it from outdoor walks, runs and hikes." : {
+
+    },
+    "Volume" : {
+
+    },
+    "Volume (kg)" : {
+
+    },
+    "Volume per exercise, this session against last time" : {
+
+    },
+    "W" : {
+
+    },
+    "Waiting" : {
+
+    },
+    "Waiting for You" : {
+
+    },
+    "Waiting for Your Yes" : {
+
+    },
+    "Wake time" : {
+
+    },
+    "Warm" : {
+
+    },
+    "Warm-up" : {
+
+    },
+    "Was this useful?" : {
+
+    },
+    "Watch on YouTube" : {
+
+    },
+    "Water" : {
+
+    },
+    "Water, sleep, habits, weight, a check-in or food, in your own words. Check what was read before logging." : {
+
+    },
+    "Web" : {
+
+    },
+    "Week" : {
+
+    },
+    "Weekdays" : {
+
+    },
+    "Weekdays and Weekends" : {
+
+    },
+    "Weekends" : {
+
+    },
+    "Weekly" : {
+
+    },
+    "Weekly Challenge" : {
+
+    },
+    "Weekly report" : {
+
+    },
+    "Weekly Volume" : {
+
+    },
+    "Weight" : {
+
+    },
+    "Weight (kg)" : {
+
+    },
+    "Weight (lb)" : {
+
+    },
+    "Weight and height" : {
+
+    },
+    "Weight in %@" : {
+
+    },
+    "What" : {
+
+    },
+    "What are you deciding?" : {
+
+    },
+    "What are you training for?" : {
+
+    },
+    "What do you want to achieve?" : {
+
+    },
+    "What Followers See" : {
+
+    },
+    "What got in the way" : {
+
+    },
+    "What happened" : {
+
+    },
+    "What happened?" : {
+
+    },
+    "What should your coach know?" : {
+
+    },
+    "What tipped it" : {
+
+    },
+    "What to Fix" : {
+
+    },
+    "What would you like to log?" : {
+
+    },
+    "What you're choosing between" : {
+
+    },
+    "What's on your mind?" : {
+
+    },
+    "When" : {
+
+    },
+    "When the Calories Land" : {
+
+    },
+    "Where is it sore?" : {
+
+    },
+    "Where the plan no longer matches what you asked for. Edits are yours to make; nothing is changed for you." : {
+
+    },
+    "Which goal?" : {
+
+    },
+    "Why" : {
+
+    },
+    "Why it matters" : {
+
+    },
+    "With a start time, your iPhone reminds you shortly before." : {
+
+    },
+    "Withdraw" : {
+
+    },
+    "Within your usual" : {
+
+    },
+    "Woke up" : {
+
+    },
+    "Work" : {
+
+    },
+    "Work It Out Again" : {
+
+    },
+    "Work Out My Goal" : {
+
+    },
+    "Work out your macro target" : {
+
+    },
+    "Work out your macro target first" : {
+
+    },
+    "Workout" : {
+
+    },
+    "Workout done" : {
+
+    },
+    "Workout time" : {
+
+    },
+    "Workouts" : {
+
+    },
+    "Workouts you finish" : {
+
+    },
+    "Workouts, steps, active energy, resting heart rate, HRV and sleep. Your coach sees them beside what you tell it. Workouts you finish in Khepri are saved to Apple Health." : {
+
+    },
+    "Worth a look" : {
+
+    },
+    "Worth Watching" : {
+
+    },
+    "Write" : {
+
+    },
+    "Write a Note" : {
+
+    },
+    "Write down a decision as you make it. Coming back to how it turned out is where the learning is." : {
+
+    },
+    "Write it down" : {
+
+    },
+    "Written for you" : {
+
+    },
+    "XP comes only from things done: workouts, habits kept, streaks, weekly reviews, crew challenges, milestones and goals." : {
+
+    },
+    "You can change it any time under What Followers See on Friends." : {
+
+    },
+    "You Chose" : {
+
+    },
+    "You have no macro target yet. Work it out in Body & Goal first; meal plans are built on it." : {
+
+    },
+    "You'll get a reminder %lld minutes before, with a button to start. The web plan shows the same time." : {
+
+    },
+    "You're connected with the friend who invited you." : {
+
+    },
+    "Your body hasn't caught up this morning. Train about 60%% of today's sets%@, or keep the plan." : {
+
+    },
+    "Your coach follows this on the web, in Telegram and here." : {
+
+    },
+    "Your coach is still thinking" : {
+
+    },
+    "Your coach reads upcoming events to plan around them." : {
+
+    },
+    "Your coach runs on Khepri's providers." : {
+
+    },
+    "Your coach wants to" : {
+
+    },
+    "Your coach writes one at the end of each week, from your check-ins, training and goals." : {
+
+    },
+    "Your daily target" : {
+
+    },
+    "Your friends don't see you on this board." : {
+
+    },
+    "Your Handle" : {
+
+    },
+    "Your Key" : {
+
+    },
+    "Your library is empty" : {
+
+    },
+    "Your Phone Number" : {
+
+    },
+    "Your plan names no days, so it is saved as the same meals on all seven." : {
+
+    },
+    "Your plan said %@" : {
+
+    },
+    "Your usual is the shaded band: your last four weeks, give or take a typical day's swing." : {
+
+    },
+    "Your weekly report is being written. You can plan the week now and read it later in Reports." : {
+
+    },
+    "Your XP and level, on friends' leaderboards" : {
+
+    },
+    "YOURS" : {
+
+    },
+    "Z-Anatomy" : {
+
+    },
+    "Zinc" : {
+
+    }
+  },
+  "version" : "1.0"
+}

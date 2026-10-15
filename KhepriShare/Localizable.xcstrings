@@ -1,0 +1,79 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Adds water to today's total in Khepri." : {
+
+    },
+    "Amount (ml)" : {
+
+    },
+    "Back" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Done" : {
+
+    },
+    "Khepri" : {
+
+    },
+    "Khepri can save links and text." : {
+
+    },
+    "Log" : {
+
+    },
+    "Log It Instead" : {
+
+    },
+    "Log these?" : {
+
+    },
+    "Log Water" : {
+
+    },
+    "Logged %lld ml. %lld ml today." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Logged %1$lld ml. %2$lld ml today."
+          }
+        }
+      }
+    },
+    "Nothing to save" : {
+
+    },
+    "Open Khepri and sign in, then share again." : {
+
+    },
+    "Save to Inbox" : {
+
+    },
+    "Save to Knowledge" : {
+
+    },
+    "Save to Knowledge for your coach to draw on, or to the Inbox to decide later." : {
+
+    },
+    "Sign in first" : {
+
+    },
+    "That did not save" : {
+
+    },
+    "Title" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Why it matters (optional)" : {
+
+    }
+  },
+  "version" : "1.0"
+}

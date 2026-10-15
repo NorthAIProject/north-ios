@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1D83D5098045E89C8765322F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */; };
+		5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */; };
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
 		19BB542257EA3CACC0A4F9EA /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1D1045C44A55B7EAA0FDD331 /* NorthKit */; };
 		1D12AC00C8E230CDDC061BD3 /* TodayProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */; };
@@ -100,6 +102,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		021795DB2B753589DCE50E9C /* SharedAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedAPI.swift; sourceTree = "<group>"; };
 		0BF497DE36C073C2C594CD1D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D195AAC305DBA800055016F /* khepri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = khepri.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -247,6 +251,7 @@
 		88CD3A45E15CE9F1B28CA4EE /* KhepriShare */ = {
 			isa = PBXGroup;
 			children = (
+				05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */,
 				187D50BD3DEDCBC1CE86DD34 /* ShareViewController.swift */,
 				580BFA17945221E61C8F9ED9 /* ShareView.swift */,
 				1AD7082B9DD07297A6DD60F2 /* Info.plist */,
@@ -258,6 +263,7 @@
 		F8DE6502E3820C15E829201D /* KhepriWidgets */ = {
 			isa = PBXGroup;
 			children = (
+				C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */,
 				318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */,
 				3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */,
 				0BF497DE36C073C2C594CD1D /* Info.plist */,
@@ -414,6 +420,9 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
+				"pt-PT",
+				"pt-BR",
 			);
 			mainGroup = 0D195AA3305DBA800055016F;
 			minimizedProjectReferenceProxies = 1;
@@ -441,6 +450,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D83D5098045E89C8765322F /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,6 +479,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

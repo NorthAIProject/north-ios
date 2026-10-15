@@ -26,19 +26,19 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     public var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            "Invalid server response."
+            String(localized: "Invalid server response.", bundle: .module)
         case .invalidStatus(let code):
-            "Request failed with status code \(code)."
+            String(localized: "Request failed with status code \(code).", bundle: .module)
         case .unauthorized(let message):
-            message ?? "Your session has expired. Please sign in again."
+            message ?? String(localized: "Your session has expired. Please sign in again.", bundle: .module)
         case .notFound(let message):
-            message ?? "That could not be found."
+            message ?? String(localized: "That could not be found.", bundle: .module)
         case .conflict(let message):
-            message ?? "That is already in progress."
+            message ?? String(localized: "That is already in progress.", bundle: .module)
         case .fieldValidation(let message, _), .server(let message), .network(let message, _):
             message
         case .locked:
-            "Unlock your phone to continue."
+            String(localized: "Unlock your phone to continue.", bundle: .module)
         }
     }
 

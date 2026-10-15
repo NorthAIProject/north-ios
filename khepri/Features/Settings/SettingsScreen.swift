@@ -54,6 +54,9 @@ struct SettingsScreen: View {
                 }
 
                 Section("App") {
+                    NavigationLink { LanguageSettings(service: service) } label: {
+                        Label("Language", systemImage: "globe")
+                    }
                     NavigationLink { NotificationSettings(service: service) } label: {
                         Label("Notifications", systemImage: "bell.badge")
                     }
@@ -190,13 +193,6 @@ private struct ProfileSettings: View {
                     LabeledContent("Email", value: profile.value?.email ?? "")
                 }
                 Section {
-                    Picker("Language", selection: bind(\.locale)) {
-                        ForEach(Self.languages, id: \.tag) { Text($0.name).tag($0.tag) }
-                    }
-                } footer: {
-                    Text("The coach, reports and reminders use this language.")
-                }
-                Section {
                     LabeledContent("Time Zone", value: profile.value?.timezone ?? "")
                     if profile.value?.timezone != TimeZone.current.identifier {
                         Button("Use This iPhone's (\(TimeZone.current.identifier))") {
@@ -214,14 +210,50 @@ private struct ProfileSettings: View {
         .task { await profile.load(service.profile) }
     }
 
-    /// The server's languages, each named in itself. The two Portugueses stay
-    /// apart, as they do on the web.
-    static let languages: [(tag: String, name: String)] = [
-        ("en", "English"), ("pt-PT", "Português (Portugal)"), ("pt-BR", "Português (Brasil)"), ("es", "Español"),
-    ]
-
     private func bind(_ keyPath: WritableKeyPath<SettingsModel.Profile, String>) -> Binding<String> {
         Binding(get: { profile.value?[keyPath: keyPath] ?? "" }, set: { profile.value?[keyPath: keyPath] = $0 })
+    }
+}
+
+// MARK: - Language
+
+/// One choice for the whole product: the account's locale, which the coach,
+/// reports and reminders use at once, and the app's own language, which iOS
+/// applies the next time the app opens.
+private struct LanguageSettings: View {
+    let service: SettingsServicing
+    @State private var profile = Editable<SettingsModel.Profile>()
+
+    var body: some View {
+        Loaded(editable: profile) { value in
+            Form {
+                Section {
+                    Picker("Language", selection: locale) {
+                        ForEach(AppLanguage.all, id: \.tag) { Text(verbatim: $0.name).tag($0.tag) }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } footer: {
+                    if AppLanguage.needsRelaunch(for: value.locale), !profile.hasChanges {
+                        Text("Khepri switches to this language the next time you open it. The coach, reports and reminders already use it.")
+                    } else {
+                        Text("The coach, reports and reminders switch at once. The app switches the next time you open it.")
+                    }
+                }
+                if let error = profile.error { ErrorRow(error) }
+            }
+        }
+        .navigationTitle("Language")
+        .saveToolbar(profile) { draft in
+            let stored = try await service.save(draft)
+            AppLanguage.apply(stored.locale)
+            return stored
+        }
+        .task { await profile.load(service.profile) }
+    }
+
+    private var locale: Binding<String> {
+        Binding(get: { profile.value?.locale ?? "en" }, set: { profile.value?.locale = $0 })
     }
 }
 
