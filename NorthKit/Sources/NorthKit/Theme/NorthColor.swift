@@ -58,11 +58,13 @@ public enum NorthColor {
         public static let now = named("DayNow")
     }
 
-    /// The body figure: untrained muscle, skin with no muscle under it, and
-    /// the light end of the heat ramp that runs up to `ember`.
+    /// The body figure: untrained muscle, the translucent skin and the dark
+    /// inside of the body, and the low end of the heat ramp that runs up to
+    /// `ember`. Identical to the web's `--north-body-*` and `--north-heat-low`.
     public enum Body {
         public static let idle = named("BodyIdle")
-        public static let base = named("BodyBase")
+        public static let shell = named("BodyShell")
+        public static let core = named("BodyCore")
         public static let heatLow = named("HeatLow")
     }
 
