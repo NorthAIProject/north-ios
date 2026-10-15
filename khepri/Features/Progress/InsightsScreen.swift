@@ -192,14 +192,16 @@ private struct ScoreRow: View {
                             .northEyebrow()
                     }
                 }
-                Text(score.hasData ? score.reason : "Not enough logged to judge.")
+                (score.hasData ? Text(score.reason) : Text("Not enough logged to judge."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(score.hasData ? "\(score.label), \(score.points) of 100, \(score.verdict). \(score.reason)" : "\(score.label), not enough data")
+        .accessibilityLabel(score.hasData
+            ? Text("\(score.label), \(score.points) of 100, \(score.verdict). \(score.reason)")
+            : Text("\(score.label), not enough data"))
     }
 }
 

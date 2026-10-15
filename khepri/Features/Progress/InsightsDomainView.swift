@@ -163,7 +163,7 @@ private struct ProgressPage: View {
                                 ProgressView(value: Double(goal.progress), total: 100).tint(NorthColor.signal)
                             }
                             if !goal.deadline.isEmpty {
-                                Text(goal.overdue ? "Overdue · \(goal.deadline)" : "Due \(goal.deadline)")
+                                (goal.overdue ? Text("Overdue · \(goal.deadline)") : Text("Due \(goal.deadline)"))
                                     .font(.caption)
                                     .foregroundStyle(goal.overdue ? .red : .secondary)
                             }
@@ -243,9 +243,9 @@ private struct TrainingPage: View {
 
 private func recapTitle(_ recap: LiftRecap) -> String {
     switch (recap.planWeekday, recap.focus) {
-    case let (day?, focus?) where !focus.isEmpty: "Last Workout · \(day), \(focus)"
-    case let (day?, _): "Last Workout · \(day)"
-    default: "Last Workout"
+    case let (day?, focus?) where !focus.isEmpty: String(localized: "Last Workout · \(day), \(focus)")
+    case let (day?, _): String(localized: "Last Workout · \(day)")
+    default: String(localized: "Last Workout")
     }
 }
 
@@ -281,7 +281,9 @@ private struct PlanWeekStrip: View {
                     .padding(.vertical, 6)
                     .background(day.today ? Color(.tertiarySystemFill) : .clear, in: .rect(cornerRadius: 8))
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(day.weekday), \(day.focus), \(day.done ? "completed" : "not done")")
+                    .accessibilityLabel(day.done
+                        ? Text("\(day.weekday), \(day.focus), completed")
+                        : Text("\(day.weekday), \(day.focus), not done"))
                 }
             }
         }
@@ -435,7 +437,7 @@ private struct TimelinePage: View {
 
 /// A few headline numbers side by side.
 private struct StatGrid: View {
-    let stats: [(label: String, value: String)]
+    let stats: [(label: LocalizedStringKey, value: String)]
 
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
@@ -459,7 +461,7 @@ private struct StatGrid: View {
 private struct ChartSection: View {
     enum Style { case bar, line }
 
-    let title: String
+    let title: LocalizedStringKey
     let chart: InsightsChart
     let hasData: Bool
     var style: Style = .bar
@@ -513,8 +515,10 @@ private struct MoodEnergyChart: View {
     let energy: [Int]
 
     var body: some View {
+        let moodName = String(localized: "Mood")
+        let energyName = String(localized: "Energy")
         let points = labels.enumerated().flatMap { index, label in
-            [("Mood", label, mood[safe: index] ?? 0), ("Energy", label, energy[safe: index] ?? 0)]
+            [(moodName, label, mood[safe: index] ?? 0), (energyName, label, energy[safe: index] ?? 0)]
         }.filter { $0.2 > 0 }
         Chart(Array(points.enumerated()), id: \.offset) { _, point in
             LineMark(x: .value("When", point.1), y: .value("Score", point.2))
@@ -528,7 +532,7 @@ private struct MoodEnergyChart: View {
 }
 
 private struct SegmentSection: View {
-    let title: String
+    let title: LocalizedStringKey
     let segments: [InsightsSegment]
 
     var body: some View {
@@ -549,7 +553,7 @@ private struct SegmentSection: View {
 }
 
 private struct SpendSection: View {
-    let title: String
+    let title: LocalizedStringKey
     let lines: [Components.Schemas.InsightsSpendLine]
 
     var body: some View {
@@ -584,7 +588,7 @@ private struct HighlightsSection: View {
 }
 
 private struct EmptyRow: View {
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         Text(text).font(.subheadline).foregroundStyle(.secondary)

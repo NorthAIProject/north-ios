@@ -58,9 +58,9 @@ struct ActivityKindPage: View {
                             .frame(height: 180)
                             .padding(.vertical, 8)
                     } header: {
-                        Text(kind.measure == "speed" ? "Speed by Month" : "Pace by Month")
+                        kind.measure == "speed" ? Text("Speed by Month") : Text("Pace by Month")
                     } footer: {
-                        Text(kind.measure == "speed" ? "Higher is faster." : "Higher on the chart is faster.")
+                        kind.measure == "speed" ? Text("Higher is faster.") : Text("Higher on the chart is faster.")
                     }
                 }
                 if kind.efficiency.count > 1 {
@@ -112,11 +112,8 @@ struct ActivityKindPage: View {
     /// "Usually Tuesdays, around 7:00", once there are enough sessions.
     static func habit(_ kind: StatsCardioKind) -> String? {
         guard !kind.usualDay.isEmpty else { return nil }
-        var line = "Usually \(kind.usualDay)s"
-        if kind.usualHour >= 0 {
-            line += String(format: ", around %d:00", kind.usualHour)
-        }
-        return line + "."
+        guard kind.usualHour >= 0 else { return String(localized: "Usually \(kind.usualDay)s.") }
+        return String(localized: "Usually \(kind.usualDay)s, around \(kind.usualHour):00.")
     }
 }
 
@@ -154,7 +151,7 @@ private struct KindTotals: View {
         .padding(.vertical, 4)
     }
 
-    private func stat(_ label: String, _ value: String) -> some View {
+    private func stat(_ label: LocalizedStringKey, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Text(value).font(.title3.monospacedDigit())

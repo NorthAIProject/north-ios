@@ -71,7 +71,7 @@ struct ConsistencyPage: View {
                     }
                     GridRow {
                         stat("Longest Gap", Self.days(model.longestGap))
-                        stat("Best Week", "\(model.bestWeek.days) of 7")
+                        stat("Best Week", String(localized: "\(model.bestWeek.days) of 7"))
                     }
                     if model.checkInStreak > 0 {
                         GridRow {
@@ -84,7 +84,7 @@ struct ConsistencyPage: View {
         }
     }
 
-    private func stat(_ label: String, _ value: String) -> some View {
+    private func stat(_ label: LocalizedStringKey, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Text(value).font(.title3.monospacedDigit())
@@ -92,12 +92,13 @@ struct ConsistencyPage: View {
         .accessibilityElement(children: .combine)
     }
 
-    static func days(_ n: Int) -> String { n == 1 ? "1 day" : "\(n) days" }
+    static func days(_ n: Int) -> String { n == 1 ? String(localized: "1 day") : String(localized: "\(n) days") }
 
     /// "Usually 4.5 active days a week", or a first-week line.
     static func weekLine(_ model: InsightsConsistency) -> String {
-        guard model.usualPerWeek > 0 else { return "Active days so far this week." }
-        return String(format: "Active days so far. Usually %.1f a week.", model.usualPerWeek)
+        guard model.usualPerWeek > 0 else { return String(localized: "Active days so far this week.") }
+        let usual = model.usualPerWeek.formatted(.number.precision(.fractionLength(1)))
+        return String(localized: "Active days so far. Usually \(usual) a week.")
     }
 }
 
@@ -135,7 +136,7 @@ private struct DayGrid: View {
 
 private struct Legend: View {
     let color: Color
-    let label: String
+    let label: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 6) {

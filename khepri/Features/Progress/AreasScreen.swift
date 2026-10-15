@@ -78,7 +78,7 @@ private struct AreaRow: View {
                         Text(area.verdict).northEyebrow()
                     }
                 }
-                Text(area.hasData ? "\(area.points) this week" : "Not enough logged this week")
+                (area.hasData ? Text("\(area.points) this week") : Text("Not enough logged this week"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -104,7 +104,10 @@ private struct AreaRow: View {
 
     private var accessibilityText: String {
         let trend = points.map { "\($0.points)" }.joined(separator: ", ")
-        let now = area.hasData ? "\(area.points) this week, \(area.verdict)" : "not enough logged this week"
-        return "\(area.label), \(now). Weekly scores: \(trend.isEmpty ? "none yet" : trend)"
+        let now = area.hasData
+            ? String(localized: "\(area.points) this week, \(area.verdict)")
+            : String(localized: "not enough logged this week")
+        let scores = trend.isEmpty ? String(localized: "none yet", comment: "No weekly scores to read out") : trend
+        return String(localized: "\(area.label), \(now). Weekly scores: \(scores)")
     }
 }

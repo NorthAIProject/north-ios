@@ -65,7 +65,10 @@ struct LiftingSections: View {
             .padding(.vertical, 4)
             if stats.priorVolumeKg > 0 {
                 let pct = (stats.volumeKg - stats.priorVolumeKg) / stats.priorVolumeKg * 100
-                Text("\(pct >= 0 ? "Up" : "Down") \(abs(pct).formatted(.number.precision(.fractionLength(0))))% in volume on the window before")
+                let change = abs(pct).formatted(.number.precision(.fractionLength(0)))
+                (pct >= 0
+                    ? Text("Up \(change)% in volume on the window before")
+                    : Text("Down \(change)% in volume on the window before"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -145,9 +148,9 @@ struct LiftingSections: View {
         }
     }
 
-    private func stat(_ label: String, _ value: String) -> some View {
+    private func stat(_ label: LocalizedStringResource, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label.uppercased()).northEyebrow()
+            Text(String(localized: label).uppercased()).northEyebrow()
             Text(value).northDisplayNumber(.title2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

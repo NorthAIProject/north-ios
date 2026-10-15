@@ -67,17 +67,17 @@ enum InsightsDomain: String, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .body: "Body"
-        case .mind: "Mind"
-        case .progress: "Goals"
-        case .training: "Training"
-        case .nutrition: "Nutrition"
-        case .sleep: "Sleep"
-        case .cardio: "Cardio"
-        case .patterns: "Patterns"
-        case .timeline: "Timeline"
-        case .coach: "Coach"
-        case .spend: "AI Spend"
+        case .body: String(localized: "Body")
+        case .mind: String(localized: "Mind")
+        case .progress: String(localized: "Goals")
+        case .training: String(localized: "Training")
+        case .nutrition: String(localized: "Nutrition")
+        case .sleep: String(localized: "Sleep")
+        case .cardio: String(localized: "Cardio")
+        case .patterns: String(localized: "Patterns")
+        case .timeline: String(localized: "Timeline")
+        case .coach: String(localized: "Coach")
+        case .spend: String(localized: "AI Spend")
         }
     }
 
