@@ -418,6 +418,15 @@ struct ContractTests {
         #expect(focus.volume == .deload && focus.priorities.count == 2)
     }
 
+    @Test func recap() throws {
+        let recap = try decode(Schemas.Recap.self, "recap")
+        #expect(recap.range == "week" && recap.since == "2026-10-09" && recap.until == "2026-10-15")
+        #expect(recap.totals.activeDays == 3 && recap.prior.workouts == 1 && recap.checkInStreak == 4)
+        #expect(recap.days.count == 7 && recap.days.last?.checkIns == 1)
+        #expect(recap.highlights.first?.kind == "workout_completed")
+        let shared = try decode(Schemas.RecapShared.self, "recap-shared")
+        #expect(shared.trainingShared)
+    }
 
     @Test func xp() throws {
         let summary = try decode(Schemas.XPSummary.self, "summary")
@@ -456,7 +465,7 @@ struct ContractTests {
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
-                            "weekly-review", "weekly-focus",
+                            "weekly-review", "weekly-focus", "recap", "recap-shared",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
