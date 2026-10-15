@@ -57,6 +57,7 @@ struct SettingsScreen: View {
                     NavigationLink { LanguageSettings(service: service) } label: {
                         Label("Language", systemImage: "globe")
                     }
+                    AppearancePicker()
                     NavigationLink { NotificationSettings(service: service) } label: {
                         Label("Notifications", systemImage: "bell.badge")
                     }

@@ -182,6 +182,8 @@ struct ContractTests {
 
     @Test func settings() throws {
         #expect(try decode(Schemas.Profile.self, "profile").coachingTone == .direct)
+        #expect(try decode(Schemas.Profile.self, "profile").appearance == nil)
+        #expect(try decode(Schemas.Profile.self, "profile-appearance").appearance == "light")
         let notifications = try decode(Schemas.NotificationSettings.self, "notifications")
         #expect(notifications.statsDigestCadence == .weekly)
         #expect(notifications.briefingHour == 7 && notifications.eveningReflection && notifications.eveningHour == 21)
@@ -443,7 +445,7 @@ struct ContractTests {
     @Test func everyGoldenFileIsDecoded() throws {
         let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_cardio_kind", "insights-consistency", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "chat_attachment", "exercise",
-                            "profile", "notifications", "ai-settings", "connections", "connection-created",
+                            "profile", "profile-appearance", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",
                             "plan", "plans", "week", "exercises", "activity-overview",
                             "health-sync", "strava-status", "strava-connect", "insights-summary", "insights-metric", "insights-metric-health", "insights-health", "insights-recovery",

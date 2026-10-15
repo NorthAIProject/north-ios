@@ -76,5 +76,9 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: app.phase)
+        // On the windows rather than `.preferredColorScheme`: it reaches
+        // UIKit-presented sheets too, and going back to System undoes cleanly.
+        .onAppear { app.appearance.apply() }
+        .onChange(of: app.appearance) { _, appearance in appearance.apply() }
     }
 }
