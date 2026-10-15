@@ -11,7 +11,7 @@ enum DayMath {
 
     static func duration(_ minutes: Int) -> String {
         let h = minutes / 60, m = minutes % 60
-        return h == 0 ? "\(m)m" : "\(h)h \(m)m"
+        return h == 0 ? String(localized: "\(m)m") : String(localized: "\(h)h \(m)m")
     }
 
     static func activityRings(_ a: Components.Schemas.DayActivity) -> [RingValue] {
@@ -238,7 +238,7 @@ enum DayMath {
         ("energy_drink", "Energy drink", 80), ("cola", "Cola", 35),
     ]
 
-    static let supplementPresets: [(key: String, name: String)] = [
+    static let supplementPresets: [(key: String, name: String.LocalizationValue)] = [
         ("omega3", "Omega-3 (EPA/DHA)"), ("vitamin_d3", "Vitamin D3"), ("multivitamin", "Multivitamin"),
         ("magnesium", "Magnesium"), ("vitamin_c", "Vitamin C"), ("b12", "Vitamin B12"), ("iron", "Iron"),
         ("zinc", "Zinc"), ("calcium", "Calcium"), ("psyllium", "Psyllium husk"), ("creatine", "Creatine"),

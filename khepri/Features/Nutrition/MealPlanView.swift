@@ -76,7 +76,7 @@ struct MealPlanView: View {
         ) { day in
             Button("Remove Day", role: .destructive) { Task { await store.removeDay(day.id) } }
         } message: { day in
-            Text(day.meals.count == 1 ? "Its meal goes with it." : "Its \(day.meals.count) meals go with it.")
+            day.meals.count == 1 ? Text("Its meal goes with it.") : Text("Its \(day.meals.count) meals go with it.")
         }
         .confirmationDialog(
             "Remove \(removingMeal?.name ?? "")?",
@@ -86,11 +86,11 @@ struct MealPlanView: View {
             Button("Remove meal (all options)", role: .destructive) { Task { await store.removeMeal(meal.id) } }
         } message: { meal in
             let others = meal.options.count - 1
-            Text(others == 1 ? "Its other option goes with it." : "Its \(others) other options go with it.")
+            others == 1 ? Text("Its other option goes with it.") : Text("Its \(others) other options go with it.")
         }
         .confirmationDialog("Switch to Easy?", isPresented: $choosingEasy, titleVisibility: .visible) {
             ForEach(MealPlanType.presets, id: \.self) { type in
-                Button(type == store.plan?.value1.planType ? "Keep \(type.title)" : type.title) {
+                Button(type == store.plan?.value1.planType ? String(localized: "Keep \(type.title)") : type.title) {
                     Task { await store.switchToEasy(planType: type) }
                 }
             }
@@ -125,9 +125,9 @@ struct MealPlanView: View {
                 Button("Switch to Advanced") { Task { await store.switchToAdvanced() } }
             }
         } footer: {
-            Text(store.isAdvanced
-                ? "Advanced: each day can have its own target, and going over asks you to confirm."
-                : "Easy: every day has the plan's target, and nothing can go over it.")
+            store.isAdvanced
+                ? Text("Advanced: each day can have its own target, and going over asks you to confirm.")
+                : Text("Easy: every day has the plan's target, and nothing can go over it.")
         }
         .disabled(!store.hasTarget)
     }
@@ -235,9 +235,9 @@ private struct DayStatusRows: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            row("Protein", \.proteinG, NorthColor.Day.protein)
-            row("Carbs", \.carbG, NorthColor.Day.carb)
-            row("Fat", \.fatG, NorthColor.Day.fat)
+            row(String(localized: "Protein"), \.proteinG, NorthColor.Day.protein)
+            row(String(localized: "Carbs"), \.carbG, NorthColor.Day.carb)
+            row(String(localized: "Fat", comment: "The macronutrient"), \.fatG, NorthColor.Day.fat)
         }
         .padding(.vertical, 4)
     }
@@ -250,8 +250,8 @@ private struct DayStatusRows: View {
             HStack {
                 Text(name).font(.subheadline)
                 Spacer()
-                Text(over >= 0.5 ? "\(Int(consumed.rounded()))/\(Int(target.rounded())) g · \(Int(over.rounded())) g over"
-                    : "\(Int(consumed.rounded()))/\(Int(target.rounded())) g · \(Int((target - consumed).rounded())) g left")
+                (over >= 0.5 ? Text("\(Int(consumed.rounded()))/\(Int(target.rounded())) g · \(Int(over.rounded())) g over")
+                    : Text("\(Int(consumed.rounded()))/\(Int(target.rounded())) g · \(Int((target - consumed).rounded())) g left"))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(over >= 0.5 ? NorthColor.destructive : .secondary)
             }
@@ -304,14 +304,20 @@ extension MacroOverage {
     /// to do about it.
     var explanation: String {
         let lines = days.map { day in
-            let parts = [("protein", \Macros.proteinG), ("carbs", \Macros.carbG), ("fat", \Macros.fatG)]
+            let parts = [
+                (String(localized: "protein", comment: "The macronutrient, mid-sentence"), \Macros.proteinG),
+                (String(localized: "carbs", comment: "The macronutrient, mid-sentence"), \Macros.carbG),
+                (String(localized: "fat", comment: "The macronutrient, mid-sentence"), \Macros.fatG),
+            ]
                 .filter { day.over[keyPath: $0.1] >= 0.5 }
                 .map { name, macro in
-                    "\(Int(day.over[keyPath: macro].rounded())) g over on \(name) (\(Int(day.consumed[keyPath: macro].rounded())) of \(Int(day.target[keyPath: macro].rounded())) g)"
+                    String(localized: "\(Int(day.over[keyPath: macro].rounded())) g over on \(name) (\(Int(day.consumed[keyPath: macro].rounded())) of \(Int(day.target[keyPath: macro].rounded())) g)")
                 }
-            return "\(Calendar.current.standaloneWeekdaySymbols[day.weekday]): \(parts.joined(separator: ", "))"
+            return String(localized: "\(Calendar.current.standaloneWeekdaySymbols[day.weekday]): \(parts.joined(separator: ", "))")
         }
-        let advice = canConfirm ? "Save it anyway?" : "Easy plans stay within your target: choose less, remove something, or switch the plan to advanced."
+        let advice = canConfirm
+            ? String(localized: "Save it anyway?")
+            : String(localized: "Easy plans stay within your target: choose less, remove something, or switch the plan to advanced.")
         return (lines + [advice]).joined(separator: "\n")
     }
 }
@@ -328,9 +334,13 @@ extension MealPlanDay {
     /// The day's own target in a few words, nil when it follows the plan.
     var overrideLabel: String? {
         var parts: [String] = []
-        if let carbType { parts.append("\(carbType.title) day") } else if let carbG { parts.append("\(Int(carbG)) g carbs") }
-        if let proteinG { parts.append("\(Int(proteinG)) g protein") }
-        if let fatG { parts.append("\(Int(fatG)) g fat") }
+        if let carbType {
+            parts.append(String(localized: "\(carbType.title) day"))
+        } else if let carbG {
+            parts.append(String(localized: "\(Int(carbG)) g carbs"))
+        }
+        if let proteinG { parts.append(String(localized: "\(Int(proteinG)) g protein")) }
+        if let fatG { parts.append(String(localized: "\(Int(fatG)) g fat")) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

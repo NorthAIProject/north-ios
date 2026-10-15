@@ -47,13 +47,17 @@ struct BodyAndGoalScreen: View {
         Form {
             if let error { ErrorRow(error) }
             Section {
-                LabeledContent(imperial ? "Weight (lb)" : "Weight (kg)") {
+                LabeledContent {
                     TextField("Weight", value: $weight, format: .number.precision(.fractionLength(0...1)))
                         .keyboardType(.decimalPad).multilineTextAlignment(.trailing)
+                } label: {
+                    imperial ? Text("Weight (lb)") : Text("Weight (kg)")
                 }
-                LabeledContent(imperial ? "Height (in)" : "Height (cm)") {
+                LabeledContent {
                     TextField("Height", value: $height, format: .number.precision(.fractionLength(0...1)))
                         .keyboardType(.decimalPad).multilineTextAlignment(.trailing)
+                } label: {
+                    imperial ? Text("Height (in)") : Text("Height (cm)")
                 }
                 DatePicker("Born", selection: $birth, displayedComponents: .date)
                 Picker("Sex", selection: $sex) {
@@ -73,17 +77,19 @@ struct BodyAndGoalScreen: View {
                     Picker("Activity", selection: $activity) { ForEach(options.activityLevels, id: \.self) { Text(label($0)).tag($0) } }
                     Picker("Goal", selection: $goal) { ForEach(options.goals, id: \.self) { Text(label($0)).tag($0) } }
                     Picker("Split", selection: $split) { ForEach(options.macroSplits, id: \.self) { Text(label($0)).tag($0) } }
-                    Button(calculator?.goal == nil ? "Work Out My Goal" : "Work It Out Again") { Task { await generate() } }
+                    Button { Task { await generate() } } label: {
+                        calculator?.goal == nil ? Text("Work Out My Goal") : Text("Work It Out Again")
+                    }
                         .disabled(saving)
                 } header: {
                     Text("Macro Goal")
                 }
                 if let current = calculator?.goal {
                     Section {
-                        LabeledContent("Calories", value: "\(Int(current.calorieGoal)) kcal")
-                        LabeledContent("Protein", value: "\(Int(current.proteinG)) g")
-                        LabeledContent("Fat", value: "\(Int(current.fatG)) g")
-                        LabeledContent("Carbs", value: "\(Int(current.carbG)) g")
+                        LabeledContent("Calories", value: String(localized: "\(Int(current.calorieGoal)) kcal"))
+                        LabeledContent("Protein", value: String(localized: "\(Int(current.proteinG)) g"))
+                        LabeledContent("Fat", value: String(localized: "\(Int(current.fatG)) g"))
+                        LabeledContent("Carbs", value: String(localized: "\(Int(current.carbG)) g"))
                     } footer: {
                         Text("Maintenance is about \(Int(current.tdee)) kcal a day.")
                     }
@@ -138,7 +144,22 @@ struct BodyAndGoalScreen: View {
         do { apply(try await service.generate(activityLevel: activity, goal: goal, split: split)); error = nil } catch { self.error = error.localizedDescription }
     }
 
+    /// The display name of a calculator option; the key is the server's. A
+    /// key this build does not know shows as itself, tidied.
     private func label(_ key: String) -> String {
-        key.replacingOccurrences(of: "_", with: " ").capitalized
+        switch key {
+        case "sedentary": String(localized: "Sedentary")
+        case "light": String(localized: "Light", comment: "Activity level")
+        case "moderate": String(localized: "Moderate", comment: "Activity level")
+        case "heavy": String(localized: "Heavy", comment: "Activity level")
+        case "extra_heavy": String(localized: "Extra Heavy", comment: "Activity level")
+        case "cutting": String(localized: "Cutting", comment: "Body goal: losing fat")
+        case "maintenance": String(localized: "Maintenance", comment: "Body goal: keeping weight")
+        case "bulking": String(localized: "Bulking", comment: "Body goal: gaining muscle")
+        case "high_carb": String(localized: "High Carb")
+        case "moderate_carb": String(localized: "Moderate Carb")
+        case "low_carb": String(localized: "Low Carb")
+        default: key.replacingOccurrences(of: "_", with: " ").capitalized
+        }
     }
 }

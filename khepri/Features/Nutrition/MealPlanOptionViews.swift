@@ -15,7 +15,7 @@ struct MealAlternativesGroup: View {
 
     var body: some View {
         let alternatives = meal.options.dropFirst()
-        DisclosureGroup(alternatives.count == 1 ? "1 other option" : "\(alternatives.count) other options") {
+        DisclosureGroup(alternatives.count == 1 ? String(localized: "1 other option") : String(localized: "\(alternatives.count) other options")) {
             ForEach(alternatives) { option in
                 HStack {
                     Text(option.label).font(.subheadline.weight(.semibold))
@@ -74,10 +74,10 @@ struct PlanPortionRow: View {
             Button("Remove", role: .destructive, action: onRemove)
         }
         .swipeActions(edge: .leading) {
-            Button(isOptional ? "Count It" : "Optional", action: onToggleOptional)
+            Button(isOptional ? String(localized: "Count It") : String(localized: "Optional", comment: "Action: make this food optional"), action: onToggleOptional)
                 .tint(.indigo)
         }
-        .accessibilityAction(named: isOptional ? "Count it" : "Make optional", onToggleOptional)
+        .accessibilityAction(named: isOptional ? String(localized: "Count it") : String(localized: "Make optional"), onToggleOptional)
     }
 }
 
