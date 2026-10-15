@@ -60,8 +60,8 @@ final class FormCheckUploader {
     @ObservationIgnored private let defaults: UserDefaults
 
     private static let storageKey = "formCheck.uploads"
-    static let interrupted = "The upload stopped before it finished."
-    static let missingBody = "The clip is no longer on this iPhone. Choose it again."
+    static let interrupted = String(localized: "The upload stopped before it finished.")
+    static let missingBody = String(localized: "The clip is no longer on this iPhone. Choose it again.")
 
     init(
         session: any FormCheckUploadSession,

@@ -76,8 +76,8 @@ private struct ConnectHealthCard: View {
                 .font(.north(.headline))
                 .foregroundStyle(.pink)
             Text(available
-                 ? "Nothing from Apple Health yet. Allow Khepri to read steps, workouts and VO2 max to fill this in."
-                 : "Apple Health is not available on this device.")
+                 ? String(localized: "Nothing from Apple Health yet. Allow Khepri to read steps, workouts and VO2 max to fill this in.")
+                 : String(localized: "Apple Health is not available on this device."))
                 .font(.north(.subheadline))
                 .foregroundStyle(.secondary)
             if available {
@@ -127,7 +127,7 @@ private struct RecentWorkouts: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            NorthCardHeader("Recent", detail: thisWeek > 0 ? "\(thisWeek) this week" : nil) {
+            NorthCardHeader(String(localized: "Recent"), detail: thisWeek > 0 ? String(localized: "\(thisWeek) this week") : nil) {
                 NavigationLink("See all") { ActivityHistoryScreen() }
                     .foregroundStyle(.primary)
             }
@@ -207,7 +207,7 @@ private struct WeightGoalCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            NorthCardHeader("Weight") {
+            NorthCardHeader(String(localized: "Weight")) {
                 NavigationLink("Log weight") { BodyAndGoalScreen() }
             }
             if let weightKg {
@@ -222,8 +222,8 @@ private struct WeightGoalCard: View {
 
             Divider()
 
-            NorthCardHeader("Goal") {
-                NavigationLink(calculator?.goal == nil ? "Set goal" : "Change") { BodyAndGoalScreen() }
+            NorthCardHeader(String(localized: "Goal")) {
+                NavigationLink(calculator?.goal == nil ? String(localized: "Set goal") : String(localized: "Change")) { BodyAndGoalScreen() }
             }
             if let goal = calculator?.goal {
                 VStack(alignment: .leading, spacing: 2) {
@@ -252,10 +252,10 @@ private struct StepsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            NorthCardHeader("Steps")
+            NorthCardHeader(String(localized: "Steps"))
             if let latest = steps.last {
                 HStack(alignment: .firstTextBaseline) {
-                    NorthBigValue(FitnessFormat.compact(latest.value), unit: "steps")
+                    NorthBigValue(FitnessFormat.compact(latest.value), unit: String(localized: "steps"))
                     Spacer()
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\(FitnessFormat.compact(average)) / day")
@@ -304,7 +304,7 @@ private struct Vo2MaxCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            NorthCardHeader("VO2 max") {
+            NorthCardHeader(String(localized: "VO2 max")) {
                 Menu {
                     Text("VO2 max is how much oxygen your body can use during hard exercise. Apple Watch estimates it from outdoor walks, runs and hikes.")
                 } label: {
@@ -315,11 +315,11 @@ private struct Vo2MaxCard: View {
                 .accessibilityLabel("About VO2 max")
             }
             HStack(alignment: .firstTextBaseline) {
-                NorthBigValue(latest.value.formatted(.number.precision(.fractionLength(1))), unit: "ml/kg/min")
+                NorthBigValue(latest.value.formatted(.number.precision(.fractionLength(1))), unit: String(localized: "ml/kg/min", comment: "VO2 max unit"))
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     if let rating {
-                        Text(rating.rawValue)
+                        Text(rating.label)
                             .font(.north(.title3).weight(.semibold))
                             .foregroundStyle(rating.tint)
                     }

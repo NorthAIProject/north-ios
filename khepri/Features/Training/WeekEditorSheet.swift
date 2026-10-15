@@ -37,7 +37,7 @@ struct WeekEditorSheet: View {
 
                 Section {
                     Stepper(value: dayCount, in: 0...7) {
-                        LabeledContent("Days", value: weekdays.isEmpty ? "Rest week" : "\(weekdays.count)")
+                        LabeledContent("Days", value: weekdays.isEmpty ? String(localized: "Rest week") : "\(weekdays.count)")
                     }
                     WeekdayChips(selected: weekdays, completed: completedWeekdays) { weekday in
                         if weekdays.contains(weekday) { weekdays.remove(weekday) } else { weekdays.insert(weekday) }
@@ -85,7 +85,7 @@ struct WeekEditorSheet: View {
                     }
                 }
             }
-            .navigationTitle(nextWeek ? "Next Week" : "This Week")
+            .navigationTitle(nextWeek ? String(localized: "Next Week") : String(localized: "This Week"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -146,7 +146,9 @@ struct WeekEditorSheet: View {
     /// The choice that leaves a day to the rotation. The preview names the
     /// session the rotation gives it, unless the day is pinned to another.
     private func rotationLabel(_ session: WeekSession) -> String {
-        pinned[session.weekday] == nil ? "Next in your plan · \(session.focus)" : "Next in your plan"
+        pinned[session.weekday] == nil
+            ? String(localized: "Next in your plan · \(session.focus)")
+            : String(localized: "Next in your plan")
     }
 
     // MARK: Server

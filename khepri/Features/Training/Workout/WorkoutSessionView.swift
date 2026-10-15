@@ -34,7 +34,7 @@ struct WorkoutSessionView: View {
                         Button("End") { confirmingEnd = true }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        Button(session.isPaused ? "Resume" : "Pause", systemImage: session.isPaused ? "play.fill" : "pause.fill") {
+                        Button(session.isPaused ? String(localized: "Resume") : String(localized: "Pause"), systemImage: session.isPaused ? "play.fill" : "pause.fill") {
                             Task { session.isPaused ? await session.resume() : await session.pause() }
                         }
                     }
@@ -108,7 +108,9 @@ struct WorkoutSessionView: View {
                 controls
 
                 if session.restEndsAt == nil, let next = session.next {
-                    Text(next.name == session.current?.name ? "Next: set \(session.setNumber + 1)" : "Next: \(next.name)")
+                    Text(next.name == session.current?.name
+                         ? String(localized: "Next: set \(session.setNumber + 1)")
+                         : String(localized: "Next: \(next.name)"))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -170,7 +172,7 @@ struct WorkoutSessionView: View {
                 // once it has been entered.
                 enteringSet = true
             } label: {
-                Text(session.isLastSet ? "Finish Workout" : "Done · Set \(session.setNumber)")
+                Text(session.isLastSet ? String(localized: "Finish Workout") : String(localized: "Done · Set \(session.setNumber)"))
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -215,7 +217,13 @@ private struct CurrentExercise: View {
                             .labelStyle(.iconOnly)
                     }
                 }
-                Text("\(isResting ? "Up next: set" : "Set") \(setNumber) of \(exercise.sets) · \(exercise.reps) reps")
+                Group {
+                    if isResting {
+                        Text("Up next: set \(setNumber) of \(exercise.sets) · \(exercise.reps) reps")
+                    } else {
+                        Text("Set \(setNumber) of \(exercise.sets) · \(exercise.reps) reps")
+                    }
+                }
                     .font(.headline.monospacedDigit())
                     .foregroundStyle(.secondary)
                 if let cue = exercise.formCues, !cue.isEmpty {
@@ -318,17 +326,19 @@ private struct WorkoutSummary: View {
     }
 
     private var headlineStats: [(value: String, label: String)] {
+        let time = Duration.seconds(session.movingTime).formatted(.time(pattern: .minuteSecond))
         var items: [(value: String, label: String)] = [
-            (value: Duration.seconds(session.movingTime).formatted(.time(pattern: .minuteSecond)), label: "TIME"),
-            (value: "\(session.completedSets)/\(session.totalSets)", label: "SETS")
+            (value: time, label: String(localized: "TIME", comment: "Workout summary stat: duration")),
+            (value: "\(session.completedSets)/\(session.totalSets)", label: String(localized: "SETS", comment: "Workout summary stat"))
         ]
         if session.volumeKg > 0 {
             let lifted = LiftMath.display(session.volumeKg, imperial: imperial)
                 .formatted(.number.precision(.fractionLength(0)).grouping(.automatic))
-            items.append((value: lifted, label: imperial ? "LB LIFTED" : "KG LIFTED"))
+            items.append((value: lifted, label: imperial ? String(localized: "LB LIFTED") : String(localized: "KG LIFTED")))
         }
         if let calories = session.recorded?.caloriesBurned {
-            items.append((value: calories.formatted(.number.precision(.fractionLength(0)).grouping(.automatic)), label: "KCAL"))
+            let kcal = calories.formatted(.number.precision(.fractionLength(0)).grouping(.automatic))
+            items.append((value: kcal, label: String(localized: "KCAL", comment: "Workout summary stat: calories")))
         }
         return items
     }

@@ -47,7 +47,7 @@ struct WeekSessionRow: View {
                             .labelStyle(.titleAndIcon)
                             .northEyebrow()
                     } else if session.isNext {
-                        Text("Next")
+                        Text("Next", comment: "Badge on the next session to train")
                             .northEyebrow(NorthColor.signal)
                     }
                 }

@@ -70,7 +70,7 @@ struct SetEntrySheet: View {
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.center)
                                 .font(.north(size: 44, relativeTo: .largeTitle).weight(.semibold).monospacedDigit())
-                                .accessibilityLabel("Weight in \(unit == "kg" ? "kilograms" : "pounds")")
+                                .accessibilityLabel(imperial ? String(localized: "Weight in pounds") : String(localized: "Weight in kilograms"))
                             stepButton("plus", step)
                         }
                         .overlay(alignment: .trailing) {
@@ -83,11 +83,12 @@ struct SetEntrySheet: View {
                     Text("Weight")
                 } footer: {
                     if !lastTime.isEmpty {
-                        Text("Last time: " + lastTime.map { set in
-                            let done = set.weightKg == 0 ? "BW × \(set.reps)"
+                        let sets = lastTime.map { set in
+                            let done = set.weightKg == 0 ? String(localized: "BW × \(set.reps)")
                                 : "\(LiftMath.display(set.weightKg, imperial: imperial).formatted()) × \(set.reps)"
-                            return set.setKind == .warmup ? "warm-up \(done)" : done
-                        }.joined(separator: ", "))
+                            return set.setKind == .warmup ? String(localized: "warm-up \(done)") : done
+                        }.joined(separator: ", ")
+                        Text("Last time: \(sets)")
                     }
                 }
 
@@ -112,7 +113,9 @@ struct SetEntrySheet: View {
                     Text("How many more you could have done. 0 is to failure.")
                 }
             }
-            .navigationTitle(kind == .warmup ? "\(exerciseName) · Warm-up" : "\(exerciseName) · Set \(setNumber)")
+            .navigationTitle(kind == .warmup
+                             ? String(localized: "\(exerciseName) · Warm-up")
+                             : String(localized: "\(exerciseName) · Set \(setNumber)"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -139,6 +142,8 @@ struct SetEntrySheet: View {
             Image(systemName: "\(symbol).circle.fill").font(.title)
         }
         .buttonStyle(.borderless)
-        .accessibilityLabel(delta > 0 ? "Add \(step.formatted()) \(unit)" : "Take off \(step.formatted()) \(unit)")
+        .accessibilityLabel(delta > 0
+                            ? String(localized: "Add \(step.formatted()) \(unit)")
+                            : String(localized: "Take off \(step.formatted()) \(unit)"))
     }
 }

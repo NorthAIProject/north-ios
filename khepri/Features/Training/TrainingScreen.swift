@@ -180,7 +180,7 @@ private struct PlanOverview: View {
                 .anchorGuidedTour(.training)
             }
 
-            Section(week == nil ? "Days" : "Plan Days") {
+            Section(week == nil ? String(localized: "Days") : String(localized: "Plan Days")) {
                 ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
                     NavigationLink(value: DayRoute.day(index)) {
                         DayRow(day: day)
@@ -218,7 +218,7 @@ private struct DayRow: View {
                             .labelStyle(.titleAndIcon)
                             .northEyebrow()
                     case .next:
-                        Text("Next")
+                        Text("Next", comment: "Badge on the next session to train")
                             .northEyebrow(NorthColor.signal)
                     case nil:
                         EmptyView()

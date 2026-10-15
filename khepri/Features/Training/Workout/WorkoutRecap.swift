@@ -50,6 +50,14 @@ struct WorkoutRecapModel: Equatable {
     enum Series: String, Plottable {
         case now = "This session"
         case before = "Last time"
+
+        /// The legend's words, in the person's language.
+        var label: String {
+            switch self {
+            case .now: String(localized: "This session")
+            case .before: String(localized: "Last time")
+            }
+        }
     }
 
     var sentence: String
@@ -140,14 +148,14 @@ struct WorkoutRecapModel: Equatable {
     private static func localSentence(_ session: WorkoutSession) -> String {
         var parts: [String] = []
         let minutes = Int((session.movingTime / 60).rounded())
-        if minutes >= 1 { parts.append(minutes == 1 ? "1 minute" : "\(minutes) minutes") }
+        if minutes >= 1 { parts.append(minutes == 1 ? String(localized: "1 minute") : String(localized: "\(minutes) minutes")) }
         if session.completedSets > 0 {
             parts.append(session.totalSets > 0
-                ? "\(session.completedSets) of \(session.totalSets) sets"
-                : "\(session.completedSets) sets")
+                ? String(localized: "\(session.completedSets) of \(session.totalSets) sets")
+                : String(localized: "\(session.completedSets) sets"))
         }
         if session.volumeKg > 0 {
-            parts.append(session.volumeKg.formatted(.number.precision(.fractionLength(0))) + " kg")
+            parts.append(String(localized: "\(session.volumeKg.formatted(.number.precision(.fractionLength(0)))) kg"))
         }
         return parts.isEmpty ? "" : parts.joined(separator: ", ") + "."
     }
@@ -164,12 +172,12 @@ struct WorkoutRecapChart: View {
                 x: .value("Exercise", bar.exercise),
                 y: .value("Volume (kg)", bar.kg)
             )
-            .foregroundStyle(by: .value("When", bar.series))
+            .foregroundStyle(by: .value("When", bar.series.label))
             .cornerRadius(3)
         }
         .chartForegroundStyleScale([
-            WorkoutRecapModel.Series.now: NorthColor.signal,
-            WorkoutRecapModel.Series.before: Color.secondary.opacity(0.35)
+            WorkoutRecapModel.Series.now.label: NorthColor.signal,
+            WorkoutRecapModel.Series.before.label: Color.secondary.opacity(0.35)
         ])
         .chartLegend(model.hasComparison ? .visible : .hidden)
         .chartXAxis {
@@ -231,7 +239,7 @@ struct WorkoutRecapCard: View {
                 }
                 HStack(spacing: 4) {
                     if exercise.e1rmKg > 0 {
-                        Text("est. \(weight(exercise.e1rmKg))")
+                        Text("est. \(weight(exercise.e1rmKg))", comment: "Estimated one-rep max")
                     }
                     if let change = exercise.changeKg, abs(change) >= 0.05 {
                         Text(changeText(change))

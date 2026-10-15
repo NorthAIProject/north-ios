@@ -18,14 +18,23 @@ struct IntakeSheet: View {
 
     /// The vocabulary the server's plan validator enforces.
     static let equipmentOptions: [(value: String, label: String)] = [
-        ("dumbbell", "Dumbbells"), ("barbell", "Barbell"), ("kettlebell", "Kettlebells"),
-        ("pull-up bar", "Pull-up bar"), ("bench", "Bench"), ("resistance band", "Resistance bands"),
-        ("machine", "Machines / cables"), ("treadmill", "Treadmill"), ("bike", "Bike"), ("rower", "Rower"),
+        ("dumbbell", String(localized: "Dumbbells")),
+        ("barbell", String(localized: "Barbell")),
+        ("kettlebell", String(localized: "Kettlebells")),
+        ("pull-up bar", String(localized: "Pull-up bar")),
+        ("bench", String(localized: "Bench", comment: "Training equipment")),
+        ("resistance band", String(localized: "Resistance bands")),
+        ("machine", String(localized: "Machines / cables")),
+        ("treadmill", String(localized: "Treadmill")),
+        ("bike", String(localized: "Bike", comment: "Training equipment")),
+        ("rower", String(localized: "Rower", comment: "Training equipment")),
     ]
 
     static let experienceOptions: [(value: String, label: String)] = [
-        ("beginner", "New to training"), ("returning", "Coming back after a break"),
-        ("intermediate", "Training regularly"), ("advanced", "Years of consistent training"),
+        ("beginner", String(localized: "New to training")),
+        ("returning", String(localized: "Coming back after a break")),
+        ("intermediate", String(localized: "Training regularly")),
+        ("advanced", String(localized: "Years of consistent training")),
     ]
 
     var body: some View {
