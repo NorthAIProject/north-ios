@@ -41,7 +41,7 @@ struct WeekSessionRow: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Text(session.weekday).font(.headline)
+                    Text(WeekdayName.display(session.weekday)).font(.headline)
                     if session.completed {
                         Label("Completed", systemImage: "checkmark.circle.fill")
                             .labelStyle(.titleAndIcon)

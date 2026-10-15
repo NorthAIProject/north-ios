@@ -100,11 +100,11 @@ struct WeekEditorSheet: View {
     @ViewBuilder
     private func sessionRow(_ session: WeekSession) -> some View {
         if session.completed {
-            LabeledContent(session.weekday) {
+            LabeledContent(WeekdayName.display(session.weekday)) {
                 Label(session.focus, systemImage: "checkmark.circle.fill")
             }
         } else {
-            Picker(session.weekday, selection: sessionBinding(session.weekday)) {
+            Picker(WeekdayName.display(session.weekday), selection: sessionBinding(session.weekday)) {
                 Text(rotationLabel(session)).tag(SessionChoice?.none)
                 ForEach(store.allPlans, id: \.id) { plan in
                     ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
@@ -236,14 +236,14 @@ private struct WeekdayChips: View {
         HStack(spacing: 6) {
             ForEach(WeekEditorSheet.allWeekdays, id: \.self) { weekday in
                 let on = selected.contains(weekday)
-                Button(String(weekday.prefix(1))) { toggle(weekday) }
+                Button(WeekdayName.initial(weekday)) { toggle(weekday) }
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 36)
                     .background(on ? NorthColor.signal : Color.secondary.opacity(0.15), in: .circle)
                     .foregroundStyle(on ? Color.white : Color.primary)
                     .buttonStyle(.plain)
                     .disabled(completed.contains(weekday))
-                    .accessibilityLabel(weekday)
+                    .accessibilityLabel(WeekdayName.display(weekday))
                     .accessibilityAddTraits(on ? .isSelected : [])
             }
         }

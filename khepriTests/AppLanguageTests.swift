@@ -32,3 +32,22 @@ struct AppLanguageTests {
         }
     }
 }
+
+struct WeekdayNameTests {
+    private func calendar(_ identifier: String) -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: identifier)
+        return calendar
+    }
+
+    @Test func showsTheServersEnglishDayInTheReadersLanguage() {
+        #expect(WeekdayName.display("Monday", calendar: calendar("en")) == "Monday")
+        #expect(WeekdayName.display("Monday", calendar: calendar("es")) == "Lunes")
+        #expect(WeekdayName.display("monday", calendar: calendar("pt-PT")).hasPrefix("Segunda"))
+        #expect(WeekdayName.initial("Saturday", calendar: calendar("es")) == "S")
+    }
+
+    @Test func leavesAnUnknownNameAsItCame() {
+        #expect(WeekdayName.display("Someday", calendar: calendar("es")) == "Someday")
+    }
+}
