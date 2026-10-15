@@ -12,18 +12,18 @@ struct FitnessWeekCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 16 : 20) {
             if compact {
-                NorthCardHeader("This week") {
+                NorthCardHeader(String(localized: "This week")) {
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(.tertiary)
                 }
             } else {
-                NorthCardHeader("This week")
+                NorthCardHeader(String(localized: "This week"))
             }
 
             HStack(alignment: .top, spacing: 0) {
                 Stat(value: FitnessFormat.compact(week.steps), caption: "steps",
-                     detail: week.stepsPerDay > 0 ? "\(FitnessFormat.compact(week.stepsPerDay)) / day" : nil,
+                     detail: week.stepsPerDay > 0 ? String(localized: "\(FitnessFormat.compact(week.stepsPerDay)) / day") : nil,
                      compact: compact)
                 Divider().frame(height: compact ? 36 : 48).padding(.top, 8)
                 Stat(value: week.exerciseMinutes.formatted(.number.precision(.fractionLength(0))),
@@ -41,7 +41,7 @@ struct FitnessWeekCard: View {
 
 private struct Stat: View {
     let value: String
-    let caption: String
+    let caption: LocalizedStringKey
     var detail: String?
     let compact: Bool
 
@@ -111,7 +111,12 @@ private struct WeekBars: View {
 
     private var accessibilitySummary: String {
         days.filter { !$0.isFuture }
-            .map { "\($0.label) \(FitnessFormat.compact($0.steps)) steps\($0.active ? ", workout" : "")" }
+            .map { day in
+                let steps = FitnessFormat.compact(day.steps)
+                return day.active
+                    ? String(localized: "\(day.label) \(steps) steps, workout")
+                    : String(localized: "\(day.label) \(steps) steps")
+            }
             .joined(separator: "; ")
     }
 }

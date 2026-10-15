@@ -249,13 +249,13 @@ extension DayExercise {
         let week = forThisWeek
         var parts: [String] = []
         switch (week.sets > 0, !reps.isEmpty) {
-        case (true, true): parts.append("\(week.sets) × \(reps)")
-        case (true, false): parts.append("\(week.sets) sets")
-        case (false, true): parts.append("\(reps) reps")
-        case (false, false): parts.append("Sets & reps not set")
+        case (true, true): parts.append(String(localized: "\(week.sets) × \(reps)", comment: "Sets × reps, e.g. 3 × 8-12"))
+        case (true, false): parts.append(String(localized: "\(week.sets) sets"))
+        case (false, true): parts.append(String(localized: "\(reps) reps"))
+        case (false, false): parts.append(String(localized: "Sets & reps not set"))
         }
         if let load, !load.isEmpty { parts.append(load) }
-        if restSeconds > 0 { parts.append("rest \(restSeconds)s") }
+        if restSeconds > 0 { parts.append(String(localized: "rest \(restSeconds)s", comment: "Rest between sets, in seconds")) }
         return parts.joined(separator: " · ")
     }
 

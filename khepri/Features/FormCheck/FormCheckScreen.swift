@@ -23,7 +23,7 @@ struct FormCheckScreen: View {
         List {
             Section {
                 PhotosPicker(selection: $picked, matching: .videos) {
-                    Label(preparing ? "Preparing…" : "Choose a Clip", systemImage: "video.badge.plus")
+                    Label(preparing ? String(localized: "Preparing…") : String(localized: "Choose a Clip"), systemImage: "video.badge.plus")
                 }
                 .disabled(preparing)
             } footer: {
@@ -155,7 +155,7 @@ private struct FormCheckRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(check.result?.exercise ?? (check.inProgress ? "Analysing…" : "Form check"))
+            Text(check.result?.exercise ?? (check.inProgress ? String(localized: "Analysing…") : String(localized: "Form check")))
                 .font(.headline)
             HStack(spacing: 8) {
                 Text(check.createdAt.formatted(.relative(presentation: .named)))
@@ -164,7 +164,9 @@ private struct FormCheckRow: View {
                 case .failed: Text("Could not be analysed").foregroundStyle(NorthColor.ember)
                 case .done:
                     let count = check.result?.issues.count ?? 0
-                    Text(count == 0 ? "Nothing to fix" : count == 1 ? "1 thing to fix" : "\(count) things to fix")
+                    Text(count == 0 ? String(localized: "Nothing to fix")
+                         : count == 1 ? String(localized: "1 thing to fix")
+                         : String(localized: "\(count) things to fix"))
                 }
             }
             .font(.caption)
@@ -227,14 +229,14 @@ private struct FormCheckDetail: View {
                                 }
                                 .buttonStyle(.plain)
                                 .disabled(player == nil)
-                                .accessibilityHint(player == nil ? "" : "Plays the clip from this moment")
+                                .accessibilityHint(player == nil ? "" : String(localized: "Plays the clip from this moment"))
                             }
                         }
                     }
                 } else if check.inProgress {
                     Section { Label("Analysing the clip…", systemImage: "hourglass") }
                 } else {
-                    Section { Text(check.error ?? "This clip could not be analysed.").foregroundStyle(.secondary) }
+                    Section { Text(check.error ?? String(localized: "This clip could not be analysed.")).foregroundStyle(.secondary) }
                 }
             } else if let error {
                 ErrorRow(error)

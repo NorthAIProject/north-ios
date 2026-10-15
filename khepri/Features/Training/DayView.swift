@@ -129,7 +129,7 @@ struct DayView: View {
             }
             .sheet(item: $picking) { purpose in
                 ExercisePicker(
-                    title: purpose == .add ? "Add Exercise" : "Swap Exercise",
+                    title: purpose == .add ? String(localized: "Add Exercise") : String(localized: "Swap Exercise"),
                     suggestions: {
                         guard let plan = store.plan else { return [] }
                         switch purpose {

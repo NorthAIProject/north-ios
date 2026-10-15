@@ -177,7 +177,7 @@ final class TrainingStore {
                 notice = nil
                 await show(updated)
             case .superseded(let newest):
-                notice = "This plan changed on another device. You're looking at the latest version; try that again if it still needs doing."
+                notice = String(localized: "This plan changed on another device. You're looking at the latest version; try that again if it still needs doing.")
                 await show(newest)
             }
         } catch {

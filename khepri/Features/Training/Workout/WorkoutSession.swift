@@ -369,7 +369,7 @@ final class WorkoutSession {
         do {
             self.recorded = try await service.stop(recorded.id)
         } catch {
-            notice = "The workout finished here, but the server did not record it: \(error.localizedDescription)"
+            notice = String(localized: "The workout finished here, but the server did not record it: \(error.localizedDescription)")
             self.recorded = nil
         }
     }
@@ -411,10 +411,10 @@ final class WorkoutSession {
         } catch {
             if let open = try? await service.openSession(), open.status == .active || open.status == .paused {
                 recorded = open
-                notice = "Continuing the \(open.activityName.lowercased()) session already running on your account."
+                notice = String(localized: "Continuing the \(open.activityName.lowercased()) session already running on your account.")
                 return
             }
-            notice = "This workout is not being recorded: \(error.localizedDescription)"
+            notice = String(localized: "This workout is not being recorded: \(error.localizedDescription)")
         }
     }
 
