@@ -31,6 +31,12 @@ struct EditableMealDraft {
             set { value.name = newValue }
         }
 
+        /// The whole meal is offered, not counted toward its day.
+        var isOptional: Bool {
+            get { value.optional == true }
+            set { value.optional = newValue ? true : nil }
+        }
+
         /// Nothing left in any option: the slot is gone.
         var isEmpty: Bool { foods.isEmpty && alternatives.isEmpty }
 
