@@ -25,8 +25,8 @@ struct CoachActivity: Equatable {
         var duration: Duration { .milliseconds(1200) }
     }
 
-    static let ready = CoachActivity(mood: .idle, status: "Ready")
-    static let catchingUp = CoachActivity(mood: .working, status: "is catching up")
+    static let ready = CoachActivity(mood: .idle, status: String(localized: "Ready", comment: "Coach status shown under the coach's name"))
+    static let catchingUp = CoachActivity(mood: .working, status: String(localized: "is catching up", comment: "Follows the coach's name: “Khepri is thinking”"))
 
     /// Precedence: loading, a reply being written, an answered question still
     /// running, a reply the app lost track of, a question for the person, a
@@ -46,21 +46,24 @@ struct CoachActivity: Equatable {
         case .loading:
             return .catchingUp
         case .failed:
-            return CoachActivity(mood: .idle, status: "hit a snag")
+            return CoachActivity(mood: .idle, status: String(localized: "hit a snag", comment: "Follows the coach's name: “Khepri is thinking”"))
         case .replying:
-            return CoachActivity(mood: .working, status: hasReplyText ? "is writing" : "is thinking")
+            let status = hasReplyText
+                ? String(localized: "is writing", comment: "Follows the coach's name: “Khepri is thinking”")
+                : String(localized: "is thinking", comment: "Follows the coach's name: “Khepri is thinking”")
+            return CoachActivity(mood: .working, status: status)
         case .ready:
             break
         }
         // Said yes: the write is running, so stop asking for the OK.
-        if isDeciding { return CoachActivity(mood: .working, status: "is on it") }
+        if isDeciding { return CoachActivity(mood: .working, status: String(localized: "is on it", comment: "Follows the coach's name: “Khepri is thinking”")) }
         // The connection dropped mid-reply; the server is still writing it.
-        if isStillThinking { return CoachActivity(mood: .working, status: "is still thinking") }
-        if awaitingApproval { return CoachActivity(mood: .idle, status: "needs your OK") }
-        if flash == .done { return CoachActivity(mood: .celebrating, status: "is done") }
-        if isListening { return CoachActivity(mood: .listening, status: "is listening") }
-        if replyFailed { return CoachActivity(mood: .idle, status: "hit a snag") }
-        if ended { return CoachActivity(mood: .idle, status: "finished this reflection") }
+        if isStillThinking { return CoachActivity(mood: .working, status: String(localized: "is still thinking", comment: "Follows the coach's name: “Khepri is thinking”")) }
+        if awaitingApproval { return CoachActivity(mood: .idle, status: String(localized: "needs your OK", comment: "Follows the coach's name: “Khepri is thinking”")) }
+        if flash == .done { return CoachActivity(mood: .celebrating, status: String(localized: "is done", comment: "Follows the coach's name: “Khepri is thinking”")) }
+        if isListening { return CoachActivity(mood: .listening, status: String(localized: "is listening", comment: "Follows the coach's name: “Khepri is thinking”")) }
+        if replyFailed { return CoachActivity(mood: .idle, status: String(localized: "hit a snag", comment: "Follows the coach's name: “Khepri is thinking”")) }
+        if ended { return CoachActivity(mood: .idle, status: String(localized: "finished this reflection", comment: "Follows the coach's name: “Khepri is thinking”")) }
         return .ready
     }
 

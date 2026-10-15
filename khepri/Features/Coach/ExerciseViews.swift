@@ -102,7 +102,7 @@ struct ExerciseSheet: View {
                         .contentShape(Rectangle())
                         .onTapGesture { isPlaying.toggle() }
                         .accessibilityLabel("\(detail.name) demonstration")
-                        .accessibilityHint(isPlaying ? "Double-tap to pause" : "Double-tap to play")
+                        .accessibilityHint(isPlaying ? Text("Double-tap to pause") : Text("Double-tap to play"))
                     Text(art.credit)
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
@@ -111,7 +111,7 @@ struct ExerciseSheet: View {
 
             HStack(spacing: 8) {
                 Tag(detail.difficulty.capitalized)
-                Tag(detail.equipment == "none" ? "No equipment" : detail.equipment.capitalized)
+                Tag(detail.equipment == "none" ? String(localized: "No equipment") : detail.equipment.capitalized)
                 Tag(detail.category.replacingOccurrences(of: "_", with: " ").capitalized)
             }
 
@@ -138,7 +138,7 @@ struct ExerciseSheet: View {
         .padding(16)
     }
 
-    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+    private func section(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .northEyebrow()
@@ -166,10 +166,10 @@ enum Muscles {
         let primary = detail.primaryMuscles.map(name).joined(separator: ", ")
         let secondary = detail.secondaryMuscles.map(name).joined(separator: ", ")
         switch (primary.isEmpty, secondary.isEmpty) {
-        case (false, false): return "\(primary) · also \(secondary)"
+        case (false, false): return String(localized: "\(primary) · also \(secondary)", comment: "Primary muscles, then secondary ones")
         case (false, true): return primary
         case (true, false): return secondary
-        case (true, true): return "Full body"
+        case (true, true): return String(localized: "Full body")
         }
     }
 

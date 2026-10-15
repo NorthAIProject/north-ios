@@ -12,9 +12,9 @@ enum InboxDestination: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .goalNote: "Goal Note"
-        case .knowledge: "Knowledge"
-        case .journal: "Journal"
+        case .goalNote: String(localized: "Goal Note")
+        case .knowledge: String(localized: "Knowledge")
+        case .journal: String(localized: "Journal")
         }
     }
 
@@ -68,9 +68,9 @@ extension InboxSuggestion {
     /// The suggestion in a few words: "A note on Run a half marathon".
     var label: String {
         switch home {
-        case .goalNote: "A note on \(goalTitle ?? "a goal")"
-        case .knowledge: title.map { "Knowledge: \($0)" } ?? "Knowledge"
-        case .journal, nil: "Journal"
+        case .goalNote: goalTitle.map { String(localized: "A note on \($0)") } ?? String(localized: "A note on a goal")
+        case .knowledge: title.map { String(localized: "Knowledge: \($0)") } ?? String(localized: "Knowledge")
+        case .journal, nil: String(localized: "Journal")
         }
     }
 }

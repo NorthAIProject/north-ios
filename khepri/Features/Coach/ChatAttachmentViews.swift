@@ -8,7 +8,9 @@ extension ChatAttachment {
 
     var systemImage: String { isPhoto ? "photo" : "doc" }
 
-    var accessibilityDescription: String { "\(isPhoto ? "Photo" : "Document"), \(name)" }
+    var accessibilityDescription: String {
+        isPhoto ? String(localized: "Photo, \(name)") : String(localized: "Document, \(name)")
+    }
 }
 
 /// A sent photo or document, by name, inside a message.
@@ -39,14 +41,18 @@ struct PendingAttachmentBar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if let uploadingName {
-                chip(uploadingName, accessibilityLabel: "Uploading \(uploadingName)", removeLabel: "Cancel upload") {
+                chip(
+                    uploadingName,
+                    accessibilityLabel: String(localized: "Uploading \(uploadingName)"),
+                    removeLabel: String(localized: "Cancel upload")
+                ) {
                     ProgressView().controlSize(.small)
                 }
             } else if let attachment {
                 chip(
                     attachment.name,
                     accessibilityLabel: attachment.accessibilityDescription,
-                    removeLabel: "Remove attachment"
+                    removeLabel: String(localized: "Remove attachment")
                 ) {
                     Image(systemName: attachment.systemImage)
                 }

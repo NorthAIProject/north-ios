@@ -193,7 +193,7 @@ final class ConversationStore {
         }
         guard !Task.isCancelled else { return }
         owed = nil
-        replyNote = "Your coach's reply will appear here when it's ready — pull to refresh."
+        replyNote = String(localized: "Your coach's reply will appear here when it's ready — pull to refresh.")
     }
 
     /// The conversation as the server stores it, replacing whatever the
@@ -232,7 +232,7 @@ final class ConversationStore {
     func attach(_ file: ImportFile) {
         removeAttachment()
         guard file.data.count <= Self.maxAttachmentBytes else {
-            attachmentError = "That file is larger than 8 MB."
+            attachmentError = String(localized: "That file is larger than 8 MB.")
             return
         }
         uploadingName = file.filename
@@ -257,8 +257,8 @@ final class ConversationStore {
     /// "could not be found" would read as the conversation being gone.
     private static func uploadMessage(for error: any Error) -> String {
         if let api = error as? APIError {
-            if api.isNotFound { return "Attachments aren't available yet." }
-            if case .invalidStatus(405) = api { return "Attachments aren't available yet." }
+            if api.isNotFound { return String(localized: "Attachments aren't available yet.") }
+            if case .invalidStatus(405) = api { return String(localized: "Attachments aren't available yet.") }
         }
         return error.importMessage
     }
