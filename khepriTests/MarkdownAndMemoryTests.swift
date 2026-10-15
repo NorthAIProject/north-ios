@@ -27,6 +27,51 @@ struct MarkdownBlockTests {
             .paragraph("#not a heading"),
         ])
     }
+
+    @Test func keepsAFencedBlockVerbatim() {
+        let blocks = MarkdownBlock.parse("""
+        Warm-up:
+
+        ```
+        # not a heading
+          - not a bullet
+        ```
+        After.
+        """)
+        #expect(blocks == [
+            .paragraph("Warm-up:"),
+            .code("# not a heading\n  - not a bullet"),
+            .paragraph("After."),
+        ])
+    }
+
+    @Test func anUnclosedFenceRunsToTheEnd() {
+        #expect(MarkdownBlock.parse("~~~\nsquat 5x5") == [.code("squat 5x5")])
+    }
+
+    @Test func joinsQuotedLinesIntoOneQuote() {
+        let blocks = MarkdownBlock.parse("> Keep the knee\n> over the toe.\n\n>Second")
+        #expect(blocks == [.quote("Keep the knee over the toe."), .quote("Second")])
+    }
+
+    @Test func readsThematicBreaks() {
+        let blocks = MarkdownBlock.parse("One\n\n---\n\n* * *\n\nTwo")
+        #expect(blocks == [.paragraph("One"), .rule, .rule, .paragraph("Two")])
+    }
+
+    @Test func joinsTheHardWrappedLinesOfAPDF() {
+        let blocks = MarkdownBlock.parse("Phase one runs for\nsix weeks, three\nsessions a week.\n\nPhase two")
+        #expect(blocks == [.paragraph("Phase one runs for six weeks, three sessions a week."), .paragraph("Phase two")])
+    }
+
+    @Test func outlinesHeadingsByTheirPosition() {
+        let blocks = MarkdownBlock.parse("# Plan\n\nIntro\n\n## Weeks 1–4\n\n- Base\n\n### Long run")
+        #expect(MarkdownBlock.outline(blocks) == [
+            .init(index: 0, level: 1, text: "Plan"),
+            .init(index: 2, level: 2, text: "Weeks 1–4"),
+            .init(index: 4, level: 3, text: "Long run"),
+        ])
+    }
 }
 
 struct MarkdownDocumentTests {

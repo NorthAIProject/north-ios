@@ -70,28 +70,29 @@ struct KnowledgeScreen: View {
             if !query.isEmpty {
                 Section("Matches") {
                     if hits.isEmpty {
-                        Text("Nothing matches yet.").foregroundStyle(.secondary)
+                        Text("Nothing matches yet.")
+                            .font(.north(.subheadline))
+                            .foregroundStyle(.secondary)
                     }
                     ForEach(Array(hits.enumerated()), id: \.offset) { _, hit in
                         NavigationLink {
                             DocumentTextView(id: hit.documentId, title: hit.title, service: service)
                         } label: {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 6) {
                                 Text(([hit.title] + hit.headingPath).joined(separator: " › "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(highlighted(hit)).lineLimit(3)
+                                    .font(.north(.caption).weight(.medium))
+                                    .foregroundStyle(NorthColor.signal)
+                                    .lineLimit(1)
+                                Text(highlighted(hit))
+                                    .font(.north(.subheadline))
+                                    .lineSpacing(2)
+                                    .lineLimit(3)
                             }
+                            .padding(.vertical, 2)
                         }
                     }
                 }
-            } else if library.documents.isEmpty {
-                Section {
-                    Text("Add notes and documents your coach should know: a physio's plan, a race guide, your own training log. It searches them when you ask.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
+            } else if !library.documents.isEmpty {
                 Section {
                     ForEach(library.documents, id: \.id) { doc in
                         NavigationLink {
@@ -111,7 +112,15 @@ struct KnowledgeScreen: View {
                     let counts = library.counts
                     Text("\(counts.ready) ready" + (counts.pending > 0 ? ", \(counts.pending) being read" : "")
                          + (counts.failed > 0 ? ", \(counts.failed) could not be read" : ""))
+                        .font(.north(.footnote))
                 }
+            }
+        }
+        // An overlay rather than a branch, so the empty library keeps its
+        // pull to refresh.
+        .overlay {
+            if query.isEmpty && library.documents.isEmpty && error == nil {
+                EmptyLibrary(onWrite: { writing = true }, onAdd: { importing = true })
             }
         }
     }
@@ -120,11 +129,15 @@ struct KnowledgeScreen: View {
         do { library = try await service.library(); error = nil } catch { self.error = error.localizedDescription }
     }
 
-    /// The words the search matched, in bold, as the web highlights them.
+    /// The words the search matched, in bold and the signal colour, as the web
+/// highlights them.
     private func highlighted(_ hit: KnowledgeHit) -> AttributedString {
         hit.segments.reduce(into: AttributedString()) { text, segment in
             var run = AttributedString(segment.text)
-            if segment.matched { run.inlinePresentationIntent = .stronglyEmphasized }
+            if segment.matched {
+                run.inlinePresentationIntent = .stronglyEmphasized
+                run.foregroundColor = NorthColor.signal
+            }
             text += run
         }
     }
@@ -153,67 +166,69 @@ struct KnowledgeScreen: View {
     }
 }
 
+private struct EmptyLibrary: View {
+    let onWrite: () -> Void
+    let onAdd: () -> Void
+
+    var body: some View {
+        ContentUnavailableView {
+            Label("Your library is empty", systemImage: "books.vertical")
+        } description: {
+            Text("Add notes and documents your coach should know: a physio's plan, a race guide, your own training log. It searches them when you ask.")
+        } actions: {
+            Button("Write a Note", systemImage: "square.and.pencil", action: onWrite)
+                .buttonStyle(.borderedProminent)
+            Button("Add a File", systemImage: "doc.badge.plus", action: onAdd)
+                .buttonStyle(.bordered)
+        }
+    }
+}
+
 private struct DocumentRow: View {
     let document: KnowledgeDocument
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: document.kind == "note" ? "note.text" : (document.mime.contains("pdf") ? "doc.richtext" : "doc.text"))
-                .foregroundStyle(NorthColor.signal)
-                .frame(width: 24)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(document.title).lineLimit(1)
-                Text(status).font(.caption).foregroundStyle(document.status == .failed ? NorthColor.ember : .secondary)
+            Image(systemName: document.symbol)
+                .font(.body)
+                .foregroundStyle(tint)
+                .frame(width: 36, height: 36)
+                .background(tint.opacity(0.12), in: .rect(cornerRadius: NorthRadius.small, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(document.title)
+                    .font(.north(.body).weight(.medium))
+                    .lineLimit(1)
+                status
             }
         }
+        .padding(.vertical, 2)
     }
 
-    private var status: String {
+    private var tint: Color {
+        document.status == .failed ? NorthColor.ember : NorthColor.signal
+    }
+
+    @ViewBuilder
+    private var status: some View {
         switch document.status {
-        case .pending: "Being read…"
-        case .failed: document.parseError.map { "Could not be read: \($0)" } ?? "Could not be read"
-        case .ready: ByteCountFormatter.string(fromByteCount: document.byteSize, countStyle: .file)
-        }
-    }
-}
-
-/// A document as the coach reads it.
-private struct DocumentTextView: View {
-    let id: String
-    let title: String
-    let service: KnowledgeServicing
-    var failed = false
-
-    @State private var text: String?
-    @State private var error: String?
-    @State private var queued = false
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if failed {
-                    Button(queued ? "Queued to Read Again" : "Read Again") {
-                        Task {
-                            do { try await service.reindex(id); queued = true } catch { self.error = error.localizedDescription }
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(queued)
-                }
-                if let text {
-                    Text(text).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-                } else if let error {
-                    Text(error).foregroundStyle(.secondary)
-                } else {
-                    ProgressView()
-                }
+        case .pending:
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.mini)
+                Text("Being read…")
             }
-            .padding(20)
-        }
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
-        .task {
-            do { text = try await service.text(id) } catch { self.error = error.localizedDescription }
+            .font(.north(.caption))
+            .foregroundStyle(.secondary)
+        case .failed:
+            Text(document.failureReason)
+                .font(.north(.caption))
+                .foregroundStyle(NorthColor.ember)
+                .lineLimit(2)
+        case .ready:
+            Text([document.kindLabel, document.size, document.createdAt.formatted(.relative(presentation: .named))]
+                .joined(separator: " · "))
+                .font(.north(.caption))
+                .foregroundStyle(.secondary)
         }
     }
 }
