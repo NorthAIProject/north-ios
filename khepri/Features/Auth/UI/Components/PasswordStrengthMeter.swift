@@ -1,3 +1,4 @@
+import NorthKit
 import SwiftUI
 
 public struct PasswordStrengthMeter: View {
@@ -15,13 +16,13 @@ public struct PasswordStrengthMeter: View {
         AuthValidation.passwordStrength(password)
     }
 
+    /// The bars carry the colour; the word stays in the label colour, since
+    /// ember is below text contrast on white.
     private var color: Color {
         switch score {
-        case 0: return .red
-        case 1: return .orange
-        case 2: return .yellow
-        case 3: return .blue
-        default: return .green
+        case 0, 1: NorthColor.destructive
+        case 2: NorthColor.ember
+        default: NorthColor.signal
         }
     }
 
@@ -40,10 +41,10 @@ public struct PasswordStrengthMeter: View {
                 HStack {
                     Text("Password Strength: ")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     Text(strength.title)
                         .font(.caption2.weight(.semibold))
-                        .foregroundColor(color)
+                        .foregroundStyle(.primary)
                     Spacer()
                 }
             }

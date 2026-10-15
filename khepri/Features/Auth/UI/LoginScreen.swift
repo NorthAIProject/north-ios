@@ -48,8 +48,11 @@ public struct LoginScreen: View {
                                     ZStack {
                                         if !viewModel.isSignup {
                                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(Color(uiColor: .systemBackground))
-                                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                                                .fill(Color(uiColor: .tertiarySystemBackground))
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                        .strokeBorder(NorthColor.hairline, lineWidth: 1)
+                                                }
                                                 .matchedGeometryEffect(id: "TabBackground", in: animationNamespace)
                                         }
                                     }
@@ -71,8 +74,11 @@ public struct LoginScreen: View {
                                     ZStack {
                                         if viewModel.isSignup {
                                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(Color(uiColor: .systemBackground))
-                                                .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                                                .fill(Color(uiColor: .tertiarySystemBackground))
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                        .strokeBorder(NorthColor.hairline, lineWidth: 1)
+                                                }
                                                 .matchedGeometryEffect(id: "TabBackground", in: animationNamespace)
                                         }
                                     }
@@ -89,16 +95,16 @@ public struct LoginScreen: View {
                     if let error = viewModel.errorMessage {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.red)
+                                .foregroundStyle(NorthColor.destructive)
                             Text(error)
                                 .font(.footnote)
-                                .foregroundColor(.red)
+                                .foregroundStyle(.primary)
                             Spacer()
                         }
                         .padding(12)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.red.opacity(0.1))
+                                .fill(NorthColor.destructive.opacity(0.1))
                         )
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
@@ -106,16 +112,16 @@ public struct LoginScreen: View {
                     if let info = viewModel.infoMessage {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundStyle(NorthColor.signal)
                             Text(info)
                                 .font(.footnote)
-                                .foregroundColor(.green)
+                                .foregroundStyle(.primary)
                             Spacer()
                         }
                         .padding(12)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color.green.opacity(0.1))
+                                .fill(NorthColor.signal.opacity(0.1))
                         )
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }

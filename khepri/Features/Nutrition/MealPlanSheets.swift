@@ -39,7 +39,7 @@ struct PortionSheet: View {
                         Button("Add") {
                             Task { if await store.addPortions(to: mealID, [(picked.id, grams)]) { dismiss() } }
                         }
-                        .buttonStyle(.borderedProminent)
+                        .northProminentButton()
                     }
                 }
                 ForEach(results, id: \.id) { ingredient in

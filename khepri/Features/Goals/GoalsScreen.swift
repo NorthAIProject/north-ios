@@ -62,7 +62,7 @@ struct GoalsScreen: View {
                 Text("Name one thing you want to get done. Your coach plans around it and asks how it is going.")
             } actions: {
                 Button("Add a Goal") { creating = true }
-                    .buttonStyle(.borderedProminent)
+                    .northProminentButton()
             }
         } else {
             List {

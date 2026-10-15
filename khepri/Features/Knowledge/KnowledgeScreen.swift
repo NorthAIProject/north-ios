@@ -185,7 +185,7 @@ private struct EmptyLibrary: View {
             Text("Add notes and documents your coach should know: a physio's plan, a race guide, your own training log. It searches them when you ask.")
         } actions: {
             Button("Write a Note", systemImage: "square.and.pencil", action: onWrite)
-                .buttonStyle(.borderedProminent)
+                .northProminentButton()
             Button("Add a File", systemImage: "doc.badge.plus", action: onAdd)
                 .buttonStyle(.bordered)
         }

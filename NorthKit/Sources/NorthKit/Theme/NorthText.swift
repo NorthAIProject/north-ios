@@ -23,11 +23,30 @@ public extension View {
 
     /// The one prominent button on a screen. The accent is light in dark
     /// mode, where the system's white label all but disappears on it.
+    /// Disabled, it keeps the system's grey fill under a secondary label, so
+    /// it reads as unavailable in both modes. Works before or after
+    /// `.disabled(_:)`.
     func northProminentButton() -> some View {
-        buttonStyle(.borderedProminent)
-            .foregroundStyle(NorthColor.primaryForeground)
+        buttonStyle(NorthProminentButtonStyle())
     }
+}
 
+/// `.borderedProminent` with a label colour that reads on the accent in both
+/// modes: `primaryForeground` when enabled, `.secondary` when disabled. A
+/// style rather than a modifier so it sees the button's own enabled state.
+public struct NorthProminentButtonStyle: PrimitiveButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    public init() {}
+
+    public func makeBody(configuration: Configuration) -> some View {
+        Button(configuration)
+            .buttonStyle(.borderedProminent)
+            .foregroundStyle(isEnabled ? AnyShapeStyle(NorthColor.primaryForeground) : AnyShapeStyle(.secondary))
+    }
+}
+
+public extension View {
     /// Padding and the grouped background of a standalone card.
     func northCard() -> some View {
         padding(16)

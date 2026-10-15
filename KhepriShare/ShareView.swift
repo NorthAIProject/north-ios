@@ -39,6 +39,9 @@ struct ShareView: View {
                     }
                 }
         }
+        // The extension has no AccentColor asset of its own; without this it
+        // falls back to system blue rather than the app's signal.
+        .tint(NorthColor.signal)
     }
 
     @ViewBuilder
@@ -107,7 +110,7 @@ struct ShareView: View {
         ContentUnavailableView {
             Label(message, systemImage: "checkmark.circle")
         } actions: {
-            Button("Done", action: done).buttonStyle(.borderedProminent)
+            Button("Done", action: done).northProminentButton()
         }
         .task {
             try? await Task.sleep(for: .seconds(1.2))
