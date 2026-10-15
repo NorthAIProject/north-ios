@@ -12,6 +12,7 @@ changes; the web file stays the single source of truth.
 
 import json
 import math
+import os
 import re
 import shutil
 import sys
@@ -23,6 +24,10 @@ OUT = ROOT / "NorthKit/Sources/NorthKit/Resources/Theme.xcassets"
 # The app's global tint (buttons, links, toggles) follows the web's signal colour.
 ACCENT = ROOT / "khepri/Assets.xcassets/AccentColor.colorset/Contents.json"
 ACCENT_TOKEN = "north-signal"
+# Tokens the app keeps as they are even though the web defines them: the web
+# body map moved to its own palette, and the iOS body map has not been checked
+# against the new values. Remove a token from here once it has.
+PINNED = {"north-body-idle", "north-heat-low"}
 
 # CSS token -> colour set name. Only tokens the native app uses; templUI's
 # sidebar and popover variants have no iOS counterpart.
@@ -133,29 +138,42 @@ def main() -> None:
     # parse stops the run with the old colours still in place.
     sets = {}
     for token, name in TOKENS.items():
-        if token in light and token in dark:
+        if token in light and token in dark and token not in PINNED:
             sets[name] = colour_contents(token, light, dark)
             continue
-        # The web dropped this token but the app still draws with it (the web
-        # body map moved to its own palette): keep the colour iOS already has.
+        # Either the web dropped this token while the app still draws with it,
+        # or it is pinned: keep the colour iOS already has.
         existing = OUT / f"{name}.colorset" / "Contents.json"
         if not existing.exists():
             sys.exit(f"--{token} is not in {css_path} and there is no {name} colour set to keep")
-        print(f"kept {name}: --{token} is no longer in the web CSS", file=sys.stderr)
+        reason = "pinned" if token in PINNED else "no longer in the web CSS"
+        print(f"kept {name}: --{token} is {reason}", file=sys.stderr)
         sets[name] = json.loads(existing.read_text())
     accent = colour_contents(ACCENT_TOKEN, light, dark)
 
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir(parents=True)
-    (OUT / "Contents.json").write_text(json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2))
-
+    # Build the whole catalog beside the real one and swap it in, so an
+    # interrupted run never leaves the app with half its colours.
+    staging = OUT.with_name(OUT.name + ".tmp")
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    (staging / "Contents.json").write_text(json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2))
     for name, contents in sets.items():
-        colour_set = OUT / f"{name}.colorset"
+        colour_set = staging / f"{name}.colorset"
         colour_set.mkdir()
         (colour_set / "Contents.json").write_text(json.dumps(contents, indent=2))
 
-    ACCENT.write_text(json.dumps(accent, indent=2))
+    accent_tmp = ACCENT.with_suffix(".json.tmp")
+    accent_tmp.write_text(json.dumps(accent, indent=2))
+    old = OUT.with_name(OUT.name + ".old")
+    if old.exists():
+        shutil.rmtree(old)
+    if OUT.exists():
+        OUT.rename(old)
+    staging.rename(OUT)
+    os.replace(accent_tmp, ACCENT)
+    if old.exists():
+        shutil.rmtree(old)
     print(f"wrote {len(TOKENS)} colour sets from {css_path} to {OUT.relative_to(ROOT)}, accent = {ACCENT_TOKEN}")
 
 

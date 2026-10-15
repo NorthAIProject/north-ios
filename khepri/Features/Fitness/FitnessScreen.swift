@@ -285,7 +285,7 @@ private struct StepsCard: View {
                         Text(FitnessFormat.signed(delta))
                             .font(.north(.subheadline).weight(.medium))
                             .monospacedDigit()
-                            .foregroundStyle(delta > 0 ? NorthColor.Day.food
+                            .foregroundStyle(delta > 0 ? NorthColor.signal
                                              : delta < 0 ? NorthColor.destructive : Color.secondary)
                     }
                 }
@@ -341,7 +341,7 @@ extension VO2Rating {
         switch self {
         case .poor: NorthColor.destructive
         case .fair: NorthColor.ember
-        case .good: NorthColor.Day.food
+        case .good: NorthColor.signal
         case .excellent: NorthColor.signal
         }
     }

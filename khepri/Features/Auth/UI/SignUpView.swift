@@ -67,9 +67,10 @@ public struct SignUpView: View {
             } label: {
                 HStack {
                     if viewModel.isLoading {
-                        // The button is disabled while loading, so the system
-                        // spinner's grey matches the disabled label.
+                        // The button is disabled while loading; the spinner takes its colour
+                        // from tint, so it is set to match the disabled label.
                         ProgressView()
+                            .tint(.secondary)
                     } else {
                         Text("Create Account")
                             .font(.headline)
