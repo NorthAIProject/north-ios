@@ -10,6 +10,24 @@
             "state" : "new",
             "value" : "Khepri"
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri"
+          }
         }
       }
     },
@@ -20,6 +38,24 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "khepri"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "khepri"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "khepri"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "khepri"
           }
         }
@@ -34,6 +70,24 @@
             "state" : "translated",
             "value" : "Khepri uses the camera only when you photograph a workout or meal plan to import."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri usa la cámara solo cuando fotografías un entreno o un plan de comidas para importarlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri usa a câmera apenas quando você fotografa um treino ou plano alimentar para importar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri usa a câmara apenas quando fotografas um treino ou plano alimentar para importar."
+          }
         }
       }
     },
@@ -45,6 +99,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Khepri turns your contacts' email addresses into hashes on this iPhone and sends only those, to show which of your contacts are already on Khepri. Nothing about your contacts is kept."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri convierte en hashes las direcciones de correo de tus contactos en este iPhone y solo envía esos hashes, para mostrarte cuáles de tus contactos ya están en Khepri. No se guarda nada de tus contactos."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri transforma os e-mails dos seus contatos em hashes neste iPhone e envia apenas esses hashes, para mostrar quais dos seus contatos já estão no Khepri. Nada sobre seus contatos é armazenado."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri converte os endereços de email dos teus contactos em hashes neste iPhone e envia apenas esses hashes, para mostrar quais dos teus contactos já estão no Khepri. Nada sobre os teus contactos é guardado."
           }
         }
       }
@@ -58,6 +130,24 @@
             "state" : "translated",
             "value" : "Khepri reads your workouts, activity, heart rate, breathing, blood oxygen, mindful minutes, sleep and weight so your coach can see how training and recovery are going."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri lee tus entrenamientos, actividad, frecuencia cardíaca, respiración, oxígeno en sangre, minutos de atención plena, sueño y peso para que tu entrenador vea cómo van el entrenamiento y la recuperación."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri lê seus treinos, atividade, frequência cardíaca, respiração, oxigênio no sangue, minutos de mindfulness, sono e peso para que seu treinador veja como estão indo o treino e a recuperação."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri lê os teus treinos, atividade, frequência cardíaca, respiração, oxigénio no sangue, minutos de mindfulness, sono e peso para que o teu treinador veja como estão a correr o treino e a recuperação."
+          }
         }
       }
     },
@@ -69,6 +159,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Khepri saves workouts you finish in the app to Apple Health."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri guarda en Apple Health los entrenamientos que terminas en la app."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri salva no Apple Health os treinos que você termina no app."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri guarda no Apple Health os treinos que terminas na app."
           }
         }
       }
@@ -82,6 +190,24 @@
             "state" : "translated",
             "value" : "Khepri listens only while the microphone button is on, to turn what you say into text."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri solo escucha mientras el botón del micrófono está activado, para convertir lo que dices en texto."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri só escuta enquanto o botão do microfone está ativado, para transformar o que você diz em texto."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri só ouve enquanto o botão do microfone está ligado, para converter o que dizes em texto."
+          }
         }
       }
     },
@@ -93,6 +219,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your words are turned into text on this iPhone so you can speak to your coach or say what you ate instead of typing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus palabras se convierten en texto en este iPhone para que puedas hablar con tu entrenador o decir lo que has comido en lugar de escribirlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas palavras são transformadas em texto neste iPhone para você falar com seu treinador ou dizer o que comeu em vez de digitar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As tuas palavras são convertidas em texto neste iPhone para poderes falar com o teu treinador ou dizer o que comeste em vez de escrever."
           }
         }
       }

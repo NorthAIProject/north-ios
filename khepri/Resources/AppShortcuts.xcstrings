@@ -1,0 +1,207 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Capture in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Capture in ${applicationName}",
+              "Log something in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Capturar en ${applicationName}",
+              "Registrar algo en ${applicationName}"
+            ]
+          }
+        },
+        "pt-BR" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Capturar no ${applicationName}",
+              "Registrar algo no ${applicationName}"
+            ]
+          }
+        },
+        "pt-PT" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Capturar no ${applicationName}",
+              "Registar algo no ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Check in with ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Check in with ${applicationName}",
+              "Log my check-in in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registrar el día en ${applicationName}",
+              "Hacer mi registro diario en ${applicationName}"
+            ]
+          }
+        },
+        "pt-BR" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registrar o dia no ${applicationName}",
+              "Fazer meu registro diário no ${applicationName}"
+            ]
+          }
+        },
+        "pt-PT" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registar o dia no ${applicationName}",
+              "Fazer o meu registo diário no ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Log water in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Log water in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registrar agua en ${applicationName}"
+            ]
+          }
+        },
+        "pt-BR" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registrar água no ${applicationName}"
+            ]
+          }
+        },
+        "pt-PT" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Registar água no ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Show ${target} in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Show ${target} in ${applicationName}",
+              "How do I do ${target} in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Mostrar ${target} en ${applicationName}",
+              "¿Cómo se hace ${target} en ${applicationName}?"
+            ]
+          }
+        },
+        "pt-BR" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Mostrar ${target} no ${applicationName}",
+              "Como fazer ${target} no ${applicationName}"
+            ]
+          }
+        },
+        "pt-PT" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Mostrar ${target} no ${applicationName}",
+              "Como se faz ${target} no ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Start today's workout in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Start today's workout in ${applicationName}",
+              "Start my ${applicationName} workout"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Empezar el entreno de hoy en ${applicationName}",
+              "Empezar mi entreno de ${applicationName}"
+            ]
+          }
+        },
+        "pt-BR" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Iniciar o treino de hoje no ${applicationName}",
+              "Iniciar meu treino do ${applicationName}"
+            ]
+          }
+        },
+        "pt-PT" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Iniciar o treino de hoje no ${applicationName}",
+              "Iniciar o meu treino do ${applicationName}"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

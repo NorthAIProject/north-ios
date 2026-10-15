@@ -21,11 +21,12 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1D83D5098045E89C8765322F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */; };
-		5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */; };
 		0D195AE0305DBA810055016F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0D195AE1305DBA810055016F /* GoogleSignIn */; };
+		0D31600E3080EC4B00760D2C /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0D31600D3080EC4B00760D2C /* InfoPlist.xcstrings */; };
+		0D3160103080EC4B00760D2C /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0D31600F3080EC4B00760D2C /* InfoPlist.xcstrings */; };
 		19BB542257EA3CACC0A4F9EA /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1D1045C44A55B7EAA0FDD331 /* NorthKit */; };
 		1D12AC00C8E230CDDC061BD3 /* TodayProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */; };
+		1D83D5098045E89C8765322F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */; };
 		22C957C2C2F6D089AEBD517E /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187D50BD3DEDCBC1CE86DD34 /* ShareViewController.swift */; };
 		243D15825794CC9E0B3F9902 /* KhepriWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2B741D60F4EA70696B3C1809 /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
@@ -34,6 +35,7 @@
 		4218A95EA0DFB7554AE0115D /* SharedAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021795DB2B753589DCE50E9C /* SharedAPI.swift */; };
 		4419BBFD07C263AC8986E6E0 /* SharedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */; };
 		54AFB43EF1527A8035BB00EA /* Glance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B94846B0426BEFB857146 /* Glance.swift */; };
+		5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */; };
 		5F68B48949F7122A7A3DC8B6 /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
 		61CE67C2C2500168835F9B1A /* SharedAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021795DB2B753589DCE50E9C /* SharedAPI.swift */; };
 		67B5F223672AE55BDB019C2B /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 3CF1BC5809BDBF2BC3586055 /* NorthAPI */; };
@@ -102,13 +104,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		021795DB2B753589DCE50E9C /* SharedAPI.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedAPI.swift; sourceTree = "<group>"; };
+		05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0BF497DE36C073C2C594CD1D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D195AAC305DBA800055016F /* khepri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = khepri.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195ABB305DBA810055016F /* khepriTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D195AC5305DBA810055016F /* khepriUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = khepriUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D31600D3080EC4B00760D2C /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		0D31600F3080EC4B00760D2C /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		14BC0A40399B94E0BFF670B8 /* KhepriShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KhepriShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		187D50BD3DEDCBC1CE86DD34 /* ShareViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		1AD7082B9DD07297A6DD60F2 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 		ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayProvider.swift; sourceTree = "<group>"; };
 		B74B94846B0426BEFB857146 /* Glance.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Glance.swift; sourceTree = "<group>"; };
 		C5B1241A3C69C8907F58C460 /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Base.xcconfig; path = Config/Base.xcconfig; sourceTree = "<group>"; };
+		C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KhepriWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LockScreenWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -252,6 +256,7 @@
 			isa = PBXGroup;
 			children = (
 				05686FEC1E36C33ACAFFCD32 /* Localizable.xcstrings */,
+				0D31600D3080EC4B00760D2C /* InfoPlist.xcstrings */,
 				187D50BD3DEDCBC1CE86DD34 /* ShareViewController.swift */,
 				580BFA17945221E61C8F9ED9 /* ShareView.swift */,
 				1AD7082B9DD07297A6DD60F2 /* Info.plist */,
@@ -264,6 +269,7 @@
 			isa = PBXGroup;
 			children = (
 				C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */,
+				0D31600F3080EC4B00760D2C /* InfoPlist.xcstrings */,
 				318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */,
 				3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */,
 				0BF497DE36C073C2C594CD1D /* Info.plist */,
@@ -450,6 +456,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D31600E3080EC4B00760D2C /* InfoPlist.xcstrings in Resources */,
 				1D83D5098045E89C8765322F /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -479,6 +486,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D3160103080EC4B00760D2C /* InfoPlist.xcstrings in Resources */,
 				5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

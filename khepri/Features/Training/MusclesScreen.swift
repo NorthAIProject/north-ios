@@ -17,7 +17,9 @@ struct MusclesScreen: View {
         List {
             Section {
                 Picker("Side", selection: $side) {
-                    ForEach(BodySide.allCases) { ($0 == .front ? Text("Front", comment: "Front of the body") : Text("Back", comment: "Back of the body")).tag($0) }
+                    ForEach(BodySide.allCases) { ($0 == .front
+                        ? Text(String(localized: "body.side.front", defaultValue: "Front", comment: "Front of the body"))
+                        : Text(String(localized: "body.side.back", defaultValue: "Back", comment: "Back of the body"))).tag($0) }
                 }
                 .pickerStyle(.segmented)
                 BodyMapView(heat: bodyMap?.heat ?? [:], side: side) { muscle = MuscleFilter(id: $0) }

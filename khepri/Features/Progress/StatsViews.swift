@@ -242,7 +242,7 @@ private struct StageShare: Identifiable {
         [
             ("deep", String(localized: "Deep", comment: "Sleep stage")),
             ("rem", String(localized: "REM", comment: "Sleep stage")),
-            ("core", String(localized: "Core", comment: "Sleep stage")),
+            ("core", String(localized: "sleep.stage.core", defaultValue: "Core", comment: "Sleep stage, as Apple Health names it")),
         ].compactMap { key, name in
             shares[key].map { StageShare(id: key, name: name, share: $0) }
         }
