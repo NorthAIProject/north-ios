@@ -28,10 +28,17 @@ enum AppPhase: Equatable {
 @Observable
 final class AppModel {
     private(set) var phase: AppPhase = .launching
+    /// How the app is drawn: this iPhone's copy, replaced by the account's
+    /// choice once the profile loads. `RootView` applies it to the windows.
+    private(set) var appearance: AppearanceSetting
+    @ObservationIgnored private var appearanceSave: Task<Void, Error>?
+    static let appearancePendingKey = "appearance.pendingUpload"
 
     private let auth: AuthServicing
     private let sessions: AuthSessionManaging
     private let notifications: NotificationCenter
+    private let settings: SettingsServicing
+    private let defaults: UserDefaults
     /// Watching for the phone to unlock; present only while waiting for it.
     private var unlockObservers: [any NSObjectProtocol] = []
     private var restoring = false
@@ -46,11 +53,16 @@ final class AppModel {
     init(
         auth: AuthServicing = AuthService.shared,
         sessions: AuthSessionManaging = AuthSessionManager.shared,
-        notifications: NotificationCenter = .default
+        notifications: NotificationCenter = .default,
+        settings: SettingsServicing? = nil,
+        defaults: UserDefaults = .standard
     ) {
         self.auth = auth
         self.sessions = sessions
         self.notifications = notifications
+        self.settings = settings ?? SettingsService()
+        self.defaults = defaults
+        appearance = .stored(in: defaults)
     }
 
     /// Called once at launch: restores a stored session if there is one.
@@ -64,6 +76,7 @@ final class AppModel {
             if let domain = Bundle.main.bundleIdentifier {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
+            appearance = .stored(in: defaults)
         }
         // Tests that are not about the tour mark it finished up front.
         if ProcessInfo.processInfo.arguments.contains("-uitest-skip-tour") {
@@ -104,6 +117,44 @@ final class AppModel {
 
     func retry() async {
         await loadUser()
+    }
+
+    /// Draws the app this way at once and keeps it on this iPhone.
+    func chooseAppearance(_ choice: AppearanceSetting) {
+        adopt(choice)
+    }
+
+    /// Saves the current appearance to the account. Signed out there is no
+    /// account and nothing is sent. A failure leaves this iPhone's copy in
+    /// place, marked to be sent at the next sync, and is thrown for the
+    /// caller to show.
+    ///
+    /// Saves run one after another and each sends the choice current when it
+    /// runs, so picking Dark then Light quickly cannot leave Dark on the
+    /// account. A save overtaken by a later one reports nothing.
+    func saveAppearanceToAccount() async throws {
+        switch phase {
+        case .signedIn, .onboarding:
+            break
+        case .launching, .waitingForUnlock, .signedOut, .failed:
+            return
+        }
+        let previous = appearanceSave
+        let save = Task { [settings] in
+            _ = try? await previous?.value
+            try await settings.saveAppearance(self.appearance)
+        }
+        appearanceSave = save
+        do {
+            try await save.value
+        } catch {
+            guard save == appearanceSave else { return }
+            defaults.set(true, forKey: Self.appearancePendingKey)
+            throw error
+        }
+        if save == appearanceSave {
+            defaults.removeObject(forKey: Self.appearancePendingKey)
+        }
     }
 
     func signOut() async {
@@ -153,11 +204,29 @@ final class AppModel {
         unlockObservers = []
     }
 
-    /// The account's language may have changed on the web; the next launch
-    /// should show it. Best effort: an offline launch keeps the current one.
-    private func syncLanguageFromAccount() async {
-        guard let profile = try? await SettingsService().profile() else { return }
-        AppLanguage.apply(profile.locale)
+    /// The account's language and appearance may have changed on the web.
+    /// The language shows from the next launch, the appearance at once. Best
+    /// effort: an offline launch keeps this iPhone's copies.
+    func syncFromAccount() async {
+        let before = appearance
+        guard let profile = try? await settings.profile() else { return }
+        AppLanguage.apply(profile.locale, defaults: defaults)
+        // A choice that never reached the account is sent now rather than
+        // replaced by the account's older one.
+        if defaults.bool(forKey: Self.appearancePendingKey) {
+            try? await saveAppearanceToAccount()
+            return
+        }
+        // An account that never chose keeps this iPhone's choice, and so does
+        // a choice made here while the profile was loading.
+        if let value = profile.appearance, appearance == before {
+            adopt(AppearanceSetting(profileValue: value))
+        }
+    }
+
+    private func adopt(_ choice: AppearanceSetting) {
+        appearance = choice
+        choice.store(in: defaults)
     }
 
     private func loadUser() async {
@@ -165,7 +234,7 @@ final class AppModel {
             let user = try await auth.currentUser()
             AppTimeZone.current = TimeZone(identifier: user.timezone) ?? .current
             phase = user.needsOnboarding ? .onboarding(user) : .signedIn(user)
-            Task { await syncLanguageFromAccount() }
+            Task { await syncFromAccount() }
         } catch let error as APIError where error.isUnauthorized {
             await sessions.invalidateSession()
             phase = .signedOut

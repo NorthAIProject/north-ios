@@ -8,7 +8,10 @@ typealias SettingsModel = Components.Schemas
 /// Settings, over the generated client. One call per card on the web page.
 protocol SettingsServicing: Sendable {
     func profile() async throws -> SettingsModel.Profile
+    /// Saves everything on the profile except the appearance, which only
+    /// `saveAppearance` sends.
     func save(_ profile: SettingsModel.Profile) async throws -> SettingsModel.Profile
+    func saveAppearance(_ appearance: AppearanceSetting) async throws
     func preferences() async throws -> SettingsModel.Preferences
     func save(_ preferences: SettingsModel.Preferences) async throws -> SettingsModel.Preferences
     func notifications() async throws -> SettingsModel.NotificationSettings
@@ -45,7 +48,17 @@ struct SettingsService: SettingsServicing {
     }
 
     func save(_ profile: SettingsModel.Profile) async throws -> SettingsModel.Profile {
-        try await NorthAPI.call { try await api.updateProfile(body: .json(profile)).ok.body.json }
+        // Left out means unchanged: a screen holding an older copy of the
+        // profile cannot undo a newer appearance choice.
+        var profile = profile
+        profile.appearance = nil
+        return try await NorthAPI.call { try await api.updateProfile(body: .json(profile)).ok.body.json }
+    }
+
+    func saveAppearance(_ appearance: AppearanceSetting) async throws {
+        var profile = try await profile()
+        profile.appearance = appearance.profileValue
+        _ = try await NorthAPI.call { try await api.updateProfile(body: .json(profile)).ok.body.json }
     }
 
     func preferences() async throws -> SettingsModel.Preferences {
