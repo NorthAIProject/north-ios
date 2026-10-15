@@ -89,6 +89,35 @@ struct AppModelAppearanceTests {
         #expect(AppearanceSetting.stored(in: defaults) == .dark)
     }
 
+    @Test func aChoiceThatFailedToSaveIsSentAtTheNextSync() async throws {
+        let (model, settings, defaults) = try await makeModel(signedIn: true)
+        await model.start()
+        settings.failSaves = true
+        model.chooseAppearance(.dark)
+        await #expect(throws: FakeProfileSettings.Offline.self) { try await model.saveAppearanceToAccount() }
+        #expect(defaults.bool(forKey: AppModel.appearancePendingKey))
+
+        settings.failSaves = false
+        settings.profileAppearance = "light"
+        await model.syncFromAccount()
+
+        #expect(model.appearance == .dark)
+        #expect(settings.savedAppearances.last == .dark)
+        #expect(!defaults.bool(forKey: AppModel.appearancePendingKey))
+    }
+
+    @Test func quickChoicesLeaveTheLastOneOnTheAccount() async throws {
+        let (model, settings, _) = try await makeModel(signedIn: true)
+        await model.start()
+        model.chooseAppearance(.dark)
+        async let first: Void = model.saveAppearanceToAccount()
+        model.chooseAppearance(.light)
+        async let second: Void = model.saveAppearanceToAccount()
+        _ = try await (first, second)
+
+        #expect(settings.savedAppearances.last == .light)
+    }
+
     private func makeModel(signedIn: Bool, stored: AppearanceSetting? = nil)
         async throws -> (AppModel, FakeProfileSettings, UserDefaults) {
         let defaults = try #require(UserDefaults(suiteName: "AppModelAppearanceTests.\(UUID().uuidString)"))
@@ -118,7 +147,11 @@ final class FakeProfileSettings: SettingsServicing, @unchecked Sendable {
         return try JSONDecoder().decode(SettingsModel.Profile.self, from: JSONSerialization.data(withJSONObject: json))
     }
 
+    var failSaves = false
+    struct Offline: Error {}
+
     func saveAppearance(_ appearance: AppearanceSetting) async throws {
+        if failSaves { throw Offline() }
         savedAppearances.append(appearance)
     }
 

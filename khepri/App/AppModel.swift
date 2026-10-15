@@ -31,6 +31,8 @@ final class AppModel {
     /// How the app is drawn: this iPhone's copy, replaced by the account's
     /// choice once the profile loads. `RootView` applies it to the windows.
     private(set) var appearance: AppearanceSetting
+    @ObservationIgnored private var appearanceSave: Task<Void, Error>?
+    static let appearancePendingKey = "appearance.pendingUpload"
 
     private let auth: AuthServicing
     private let sessions: AuthSessionManaging
@@ -124,13 +126,34 @@ final class AppModel {
 
     /// Saves the current appearance to the account. Signed out there is no
     /// account and nothing is sent. A failure leaves this iPhone's copy in
-    /// place and is thrown for the caller to show.
+    /// place, marked to be sent at the next sync, and is thrown for the
+    /// caller to show.
+    ///
+    /// Saves run one after another and each sends the choice current when it
+    /// runs, so picking Dark then Light quickly cannot leave Dark on the
+    /// account. A save overtaken by a later one reports nothing.
     func saveAppearanceToAccount() async throws {
         switch phase {
         case .signedIn, .onboarding:
-            try await settings.saveAppearance(appearance)
-        case .launching, .waitingForUnlock, .signedOut, .failed:
             break
+        case .launching, .waitingForUnlock, .signedOut, .failed:
+            return
+        }
+        let previous = appearanceSave
+        let save = Task { [settings] in
+            _ = try? await previous?.value
+            try await settings.saveAppearance(self.appearance)
+        }
+        appearanceSave = save
+        do {
+            try await save.value
+        } catch {
+            guard save == appearanceSave else { return }
+            defaults.set(true, forKey: Self.appearancePendingKey)
+            throw error
+        }
+        if save == appearanceSave {
+            defaults.removeObject(forKey: Self.appearancePendingKey)
         }
     }
 
@@ -188,6 +211,12 @@ final class AppModel {
         let before = appearance
         guard let profile = try? await settings.profile() else { return }
         AppLanguage.apply(profile.locale, defaults: defaults)
+        // A choice that never reached the account is sent now rather than
+        // replaced by the account's older one.
+        if defaults.bool(forKey: Self.appearancePendingKey) {
+            try? await saveAppearanceToAccount()
+            return
+        }
         // An account that never chose keeps this iPhone's choice, and so does
         // a choice made here while the profile was loading.
         if let value = profile.appearance, appearance == before {
