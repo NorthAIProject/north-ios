@@ -30,7 +30,7 @@ public struct ForgotPasswordSheet: View {
                 }
 
                 VaultTextField(
-                    title: "Email address",
+                    title: String(localized: "Email address"),
                     systemImage: "envelope.fill",
                     text: $resetEmail,
                     keyboardType: .emailAddress,

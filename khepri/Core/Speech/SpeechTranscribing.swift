@@ -28,8 +28,8 @@ nonisolated enum DictationError: LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .unsupportedLocale: "Dictation does not support your language on this iPhone yet."
-        case .noMicrophone: "No microphone is available."
+        case .unsupportedLocale: String(localized: "Dictation does not support your language on this iPhone yet.")
+        case .noMicrophone: String(localized: "No microphone is available.")
         }
     }
 }

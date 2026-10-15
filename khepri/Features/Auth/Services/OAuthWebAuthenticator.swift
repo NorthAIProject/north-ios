@@ -12,12 +12,12 @@ public enum OAuthWebAuthenticationError: LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .unableToStart: return "Could not start OAuth sign in."
-        case .cancelled: return "OAuth sign in was cancelled."
-        case .invalidCallback: return "OAuth callback was invalid."
-        case .missingCode: return "OAuth callback did not return an authorization code."
-        case .missingState: return "OAuth callback did not return state."
-        case .invalidAuthorizationURL: return "OAuth authorization URL is invalid."
+        case .unableToStart: return String(localized: "Could not start OAuth sign in.")
+        case .cancelled: return String(localized: "OAuth sign in was cancelled.")
+        case .invalidCallback: return String(localized: "OAuth callback was invalid.")
+        case .missingCode: return String(localized: "OAuth callback did not return an authorization code.")
+        case .missingState: return String(localized: "OAuth callback did not return state.")
+        case .invalidAuthorizationURL: return String(localized: "OAuth authorization URL is invalid.")
         }
     }
 }

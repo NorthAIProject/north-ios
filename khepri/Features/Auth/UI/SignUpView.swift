@@ -11,7 +11,7 @@ public struct SignUpView: View {
         VStack(spacing: 16) {
             // Display Name
             VaultTextField(
-                title: "Your name",
+                title: String(localized: "Your name"),
                 systemImage: "person.fill",
                 text: $viewModel.displayName,
                 autoCapitalization: .words
@@ -19,7 +19,7 @@ public struct SignUpView: View {
 
             // Email Field
             VaultTextField(
-                title: "Email address",
+                title: String(localized: "Email address"),
                 systemImage: "envelope.fill",
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
@@ -28,7 +28,7 @@ public struct SignUpView: View {
 
             // Password Field
             VaultTextField(
-                title: "Password (min 8 characters)",
+                title: String(localized: "Password (min 8 characters)"),
                 systemImage: "lock.fill",
                 text: $viewModel.password,
                 isSecure: true,
@@ -41,7 +41,7 @@ public struct SignUpView: View {
 
             // Confirm Password Field
             VaultTextField(
-                title: "Confirm password",
+                title: String(localized: "Confirm password"),
                 systemImage: "checkmark.shield.fill",
                 text: $viewModel.passwordConfirmation,
                 isSecure: true,

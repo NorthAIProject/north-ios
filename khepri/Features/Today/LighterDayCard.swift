@@ -35,13 +35,14 @@ extension LighterDay {
         }
         var parts: [String] = []
         if let hrv = r.hrv, let base = r.hrvBaseline {
-            parts.append("HRV \(Int(hrv.rounded())) ms (\(change(hrv, base)))")
+            parts.append(String(localized: "HRV \(Int(hrv.rounded())) ms (\(change(hrv, base)))"))
         }
         if let rhr = r.restingHeartRate, let base = r.restingHeartRateBaseline {
-            parts.append("resting heart rate \(Int(rhr.rounded())) bpm (\(change(rhr, base)))")
+            parts.append(String(localized: "resting heart rate \(Int(rhr.rounded())) bpm (\(change(rhr, base)))"))
         }
         guard !parts.isEmpty else { return nil }
-        return parts.joined(separator: ", ").capitalizedFirst + " against your two-week average."
+        let readings = parts.joined(separator: ", ").capitalizedFirst
+        return String(localized: "\(readings) against your two-week average.")
     }
 
     var tookItLighter: Bool { choice?.rawValue == "lighter" }
@@ -103,9 +104,15 @@ struct LighterDayCard: View {
 
     private func offer(_ day: LighterDay) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            NorthCardHeader("Lighter Day?")
-            Text("Your body hasn't caught up this morning. Train about 60% of today's sets\(day.session.map { " for \($0)" } ?? ""), or keep the plan.")
-                .font(.subheadline)
+            NorthCardHeader(String(localized: "Lighter Day?"))
+            Group {
+                if let session = day.session {
+                    Text("Your body hasn't caught up this morning. Train about 60% of today's sets for \(session), or keep the plan.")
+                } else {
+                    Text("Your body hasn't caught up this morning. Train about 60% of today's sets, or keep the plan.")
+                }
+            }
+            .font(.subheadline)
             if let why = day.why {
                 Text(why).font(.caption).foregroundStyle(.secondary)
             }
