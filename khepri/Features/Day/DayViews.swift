@@ -477,7 +477,7 @@ private struct BodyCard: View {
                 Spacer()
                 VStack(spacing: 4) {
                     BodyMapView(heat: bodyMap?.heat ?? [:]) { selected = $0 }
-                        .frame(width: 150, height: 220)
+                        .frame(width: 170, height: 250)
                         .popover(item: Binding(get: { selected.map(MuscleRoute.init(id:)) }, set: { selected = $0?.id })) { route in
                             MuscleCallout(id: route.id, lastTrainedOn: bodyMap?.muscle(route.id)?.lastTrainedOn) {
                                 selected = nil

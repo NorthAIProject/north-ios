@@ -3,16 +3,19 @@ import NorthKit
 import RealityKit
 import SwiftUI
 
-/// The body figure: the skin of a body cut into one region per muscle key,
-/// coloured by how much recent training heated each one. The same figure and
-/// the same payload (`GET /body/map`) as the web; this view only paints it.
+/// The body figure: the muscles of an anatomical atlas, one mesh per muscle
+/// key, inside the skin of a body, coloured by how much recent training heated
+/// each one. The same figure and the same payload (`GET /body/map`) as the
+/// web; this view only paints it.
 ///
-/// `BodyMap.usdz` is written by the web repo's `scripts/bodymap` with one mesh
-/// per region, named by its key (`quads`, `delts`…) plus `base` for skin with
-/// no muscle under it. Recolouring sets one material per region, and a tap
-/// resolves to a key by the entity's name.
+/// `BodyMap.usdz` is written by the web repo's `scripts/bodymap`: `shell`, the
+/// skin, and one mesh per muscle named by its key (`quads`, `delts`…). The skin
+/// is drawn twice from the one mesh — its back faces opaque and dark, the
+/// inside of the body, and its front faces translucent — so the muscles show
+/// through a body. Recolouring sets one material per muscle, and a tap
+/// resolves to a key by the entity's name; the skin is not a tap target.
 struct BodyMapView: View {
-    /// Region key → 0…1. Missing means untrained.
+    /// Muscle key → 0…1. Missing means untrained.
     let heat: [String: Double]
     /// Show the back instead of the front; nil lets the heat decide.
     var side: BodySide?
@@ -29,7 +32,7 @@ struct BodyMapView: View {
             RealityView { content in
                 guard let figure = await BodyFigure.load() else { return }
                 content.add(figure)
-                BodyFigure.addCameraAndLights(to: &content)
+                await BodyFigure.addCameraAndLights(to: &content, around: figure)
             } update: { content in
                 guard let figure = content.entities.first(where: { $0.name == BodyFigure.rootName }) else { return }
                 figure.orientation = simd_quatf(angle: yaw(at: context.date), axis: [0, 1, 0])
@@ -45,12 +48,10 @@ struct BodyMapView: View {
                 .onEnded { _ in dragStart = dragOffset }
         )
         .gesture(
+            // Only the muscles carry collision, so only they can be hit.
             SpatialTapGesture()
                 .targetedToAnyEntity()
-                .onEnded { value in
-                    let key = value.entity.name
-                    if key != BodyFigure.baseRegion { onSelect?(key) }
-                }
+                .onEnded { value in onSelect?(value.entity.name) }
         )
         .accessibilityElement()
         .accessibilityLabel("Body")
@@ -86,42 +87,73 @@ enum BodySide: String, CaseIterable, Identifiable {
 /// Loading, lighting and colouring the figure.
 enum BodyFigure {
     static let rootName = "body-map"
-    static let baseRegion = "base"
+    static let shellRegion = "shell"
+    static let coreName = "shell-core"
+    static let shellOpacity: Float = 0.3
     static let frontYaw: Float = 0.45
     static let sway: Float = 0.35
     static let swayPeriod = 8.0
     /// The figure's height in metres, soles at y = 0 (see scripts/bodymap).
     static let height: Float = 1.44
 
-    /// The figure, or nil if the bundle has no BodyMap.usdz, which leaves
-    /// the card without a figure rather than crashing it.
-    static func load() async -> Entity? {
+    /// Built once per process and cloned per view: Today and Training each
+    /// show a figure, and the collision meshes are the expensive part.
+    @MainActor private static var template: Task<Entity?, Never>?
+
+    /// A figure of its own, or nil if the bundle has no BodyMap.usdz, which
+    /// leaves the card without a figure rather than crashing it.
+    @MainActor static func load() async -> Entity? {
+        if template == nil { template = Task { await build() } }
+        return await template?.value?.clone(recursive: true)
+    }
+
+    @MainActor private static func build() async -> Entity? {
         guard let loaded = try? await Entity(named: "BodyMap") else { return nil }
         let root = Entity()
         root.name = rootName
         root.addChild(loaded)
-        for region in regions(in: root) {
-            region.components.set(InputTargetComponent())
-            if let mesh = region.model?.mesh, let shape = try? await ShapeResource.generateStaticMesh(from: mesh) {
-                region.components.set(CollisionComponent(shapes: [shape]))
+        // The inside of the body: the skin's back faces, drawn opaque and
+        // dark, always behind the muscles. Same mesh, second entity.
+        guard let shell = root.findEntity(named: shellRegion) as? ModelEntity, let skin = shell.model?.mesh else { return nil }
+        let core = ModelEntity(mesh: skin)
+        core.name = coreName
+        shell.parent?.addChild(core)
+        for muscle in muscles(in: root) {
+            muscle.components.set(InputTargetComponent())
+            if let mesh = muscle.model?.mesh, let shape = try? await ShapeResource.generateStaticMesh(from: mesh) {
+                muscle.components.set(CollisionComponent(shapes: [shape]))
             }
         }
         return root
     }
 
-    static func addCameraAndLights(to content: inout RealityViewCameraContent) {
+    @MainActor static func addCameraAndLights(to content: inout RealityViewCameraContent, around figure: Entity) async {
         let camera = PerspectiveCamera()
         camera.camera.fieldOfViewInDegrees = 30
         let distance = height * 1.04 / 2 / tan(Float.pi / 12)
         camera.look(at: [0, height * 0.5, 0], from: [0, height * 0.52, distance], relativeTo: nil)
         content.add(camera)
 
-        // A warm key, a cool fill and a back rim: soft studio light, so the
-        // figure has form without the colours washing out.
+        // The web viewer's studio rig, rendered by scripts/bodymap into
+        // BodyStudio.png: the same light on both platforms.
+        if let url = Bundle.main.url(forResource: "BodyStudio", withExtension: "png"),
+           let image = UIImage(contentsOfFile: url.path)?.cgImage,
+           let environment = try? await EnvironmentResource(equirectangular: image, withName: "BodyStudio") {
+            let light = Entity()
+            // The image stores radiance over the rig's brightest panel (6.5);
+            // the exponent brings it back to the web's level, environment
+            // intensity included.
+            light.components.set(ImageBasedLightComponent(source: .single(environment), intensityExponent: 2.0))
+            content.add(light)
+            for model in models(in: figure) {
+                model.components.set(ImageBasedLightReceiverComponent(imageBasedLight: light))
+            }
+        }
+
+        // Shaping only: a warm key and a cool rim; the environment does the rest.
         for (color, intensity, from) in [
-            (UIColor(red: 1, green: 0.95, blue: 0.88, alpha: 1), Float(2600), SIMD3<Float>(2, 3, 3)),
-            (UIColor(red: 0.86, green: 0.91, blue: 1, alpha: 1), Float(900), SIMD3<Float>(-3, 1.5, 2)),
-            (UIColor(red: 0.56, green: 0.78, blue: 1, alpha: 1), Float(1400), SIMD3<Float>(-1, 2, -3)),
+            (UIColor(red: 1, green: 0.95, blue: 0.88, alpha: 1), Float(1200), SIMD3<Float>(2, 3, 3)),
+            (UIColor(red: 0.56, green: 0.78, blue: 1, alpha: 1), Float(900), SIMD3<Float>(-2, 1, -3)),
         ] {
             let light = DirectionalLight()
             light.light.color = color
@@ -129,9 +161,35 @@ enum BodyFigure {
             light.look(at: [0, height * 0.5, 0], from: from, relativeTo: nil)
             content.add(light)
         }
+
+        if let shadow = await contactShadow() { content.add(shadow) }
     }
 
-    static func regions(in root: Entity) -> [ModelEntity] {
+    /// A soft disc under the feet, so the figure stands on something: a
+    /// black texture whose alpha fades out from the centre, drawn with the
+    /// texture's alpha as its opacity.
+    @MainActor private static func contactShadow() async -> ModelEntity? {
+        let size = 128
+        let image = UIGraphicsImageRenderer(size: CGSize(width: size, height: size)).image { context in
+            let centre = CGPoint(x: size / 2, y: size / 2)
+            let colors = [UIColor(white: 0, alpha: 0.5).cgColor, UIColor(white: 0, alpha: 0).cgColor] as CFArray
+            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 1]) {
+                context.cgContext.drawRadialGradient(gradient, startCenter: centre, startRadius: 0, endCenter: centre, endRadius: CGFloat(size) / 2, options: [])
+            }
+        }
+        guard let cgImage = image.cgImage, let texture = try? await TextureResource(image: cgImage, options: .init(semantic: .color)) else { return nil }
+        var material = UnlitMaterial()
+        material.color = .init(tint: .white, texture: .init(texture))
+        material.blending = .transparent(opacity: .init(floatLiteral: 1))
+        // Narrower than the web's disc: the Today card frames the figure
+        // tall and narrow, and a wider disc would be cut off at the sides.
+        let disc = ModelEntity(mesh: .generatePlane(width: height * 0.4, depth: height * 0.4), materials: [material])
+        disc.position.y = 0.001
+        return disc
+    }
+
+    /// Every mesh of the figure: the muscles, the skin and its inside.
+    static func models(in root: Entity) -> [ModelEntity] {
         var out: [ModelEntity] = []
         var stack = [root]
         while let entity = stack.popLast() {
@@ -139,6 +197,11 @@ enum BodyFigure {
             stack.append(contentsOf: entity.children)
         }
         return out
+    }
+
+    /// The muscles alone: the meshes named by a muscle key.
+    static func muscles(in root: Entity) -> [ModelEntity] {
+        models(in: root).filter { BodyMapText.names[$0.name] != nil }
     }
 
     /// What the figure was last painted with, so the per-frame update (the
@@ -150,7 +213,8 @@ enum BodyFigure {
 
     struct Palette {
         let idle: UIColor
-        let base: UIColor
+        let shell: UIColor
+        let core: UIColor
         let heatLow: UIColor
         let ember: UIColor
         let dark: Bool
@@ -158,18 +222,18 @@ enum BodyFigure {
         init(_ scheme: ColorScheme) {
             let traits = UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light)
             idle = UIColor(NorthColor.Body.idle).resolvedColor(with: traits)
-            base = UIColor(NorthColor.Body.base).resolvedColor(with: traits)
+            shell = UIColor(NorthColor.Body.shell).resolvedColor(with: traits)
+            core = UIColor(NorthColor.Body.core).resolvedColor(with: traits)
             heatLow = UIColor(NorthColor.Body.heatLow).resolvedColor(with: traits)
             ember = UIColor(NorthColor.ember).resolvedColor(with: traits)
             dark = scheme == .dark
         }
 
-        /// Untrained is idle; any heat starts a quarter of the way up the
-        /// ramp, so a light touch still reads as warm. Same ramp as the web.
-        func color(region: String, heat: Double) -> UIColor {
-            if region == BodyFigure.baseRegion { return base }
+        /// Untrained is idle; any heat starts a little way up the ramp, so a
+        /// light touch still reads as warm. Same ramp as the web.
+        func color(heat: Double) -> UIColor {
             guard heat > 0 else { return idle }
-            return mix(heatLow, ember, CGFloat(0.25 + 0.75 * min(heat, 1)))
+            return mix(heatLow, ember, CGFloat(0.15 + 0.85 * min(heat, 1)))
         }
 
         private func mix(_ from: UIColor, _ to: UIColor, _ fraction: CGFloat) -> UIColor {
@@ -188,19 +252,36 @@ enum BodyFigure {
     static func paint(_ root: Entity, heat: [String: Double], palette: Palette) {
         Painted.registerComponent()
         let painted = Painted(heat: heat, dark: palette.dark)
-        if root.components[Painted.self] == painted { return }
+        let before = root.components[Painted.self]
+        if before == painted { return }
         root.components.set(painted)
-        for region in regions(in: root) {
-            var material = PhysicallyBasedMaterial()
-            material.baseColor = .init(tint: palette.color(region: region.name, heat: heat[region.name] ?? 0))
-            material.roughness = 0.62
-            material.metallic = 0.0
-            region.model?.materials = [material]
+        for muscle in muscles(in: root) {
+            muscle.model?.materials = [material(tint: palette.color(heat: heat[muscle.name] ?? 0), roughness: 0.55)]
         }
+        guard before?.dark != palette.dark else { return }
+        if let shell = root.findEntity(named: shellRegion) as? ModelEntity {
+            var ghost = material(tint: palette.shell, roughness: 0.4)
+            ghost.blending = .transparent(opacity: .init(floatLiteral: shellOpacity))
+            ghost.faceCulling = .back
+            shell.model?.materials = [ghost]
+        }
+        if let core = root.findEntity(named: coreName) as? ModelEntity {
+            var inside = material(tint: palette.core, roughness: 0.85)
+            inside.faceCulling = .front
+            core.model?.materials = [inside]
+        }
+    }
+
+    private static func material(tint: UIColor, roughness: Float) -> PhysicallyBasedMaterial {
+        var material = PhysicallyBasedMaterial()
+        material.baseColor = .init(tint: tint)
+        material.roughness = .init(floatLiteral: roughness)
+        material.metallic = 0.0
+        return material
     }
 }
 
-/// The figure's words: region names, dates and the summary VoiceOver reads.
+/// The figure's words: muscle names, dates and the summary VoiceOver reads.
 enum BodyMapText {
     static let names: [String: String.LocalizationValue] = [
         "abs": "Abs", "adductors": "Adductors", "biceps": "Biceps", "calves": "Calves", "chest": "Chest",
@@ -209,7 +290,7 @@ enum BodyMapText {
         "triceps": "Triceps",
     ]
 
-    /// A region's name; an id this build does not know shows as itself.
+    /// A muscle's name; an id this build does not know shows as itself.
     static func name(_ id: String) -> String {
         names[id].map { String(localized: $0) } ?? id.replacingOccurrences(of: "_", with: " ").capitalized
     }
@@ -226,7 +307,7 @@ enum BodyMapText {
 }
 
 extension BodyMap {
-    /// Region key → intensity, the shape `BodyMapView` paints.
+    /// Muscle key → intensity, the shape `BodyMapView` paints.
     var heat: [String: Double] {
         Dictionary(muscles.map { ($0.id, $0.intensity) }, uniquingKeysWith: max)
     }

@@ -65,7 +65,8 @@ TOKENS = {
     "north-day-screen": "DayScreen",
     "north-day-now": "DayNow",
     "north-body-idle": "BodyIdle",
-    "north-body-base": "BodyBase",
+    "north-body-shell": "BodyShell",
+    "north-body-core": "BodyCore",
     "north-heat-low": "HeatLow",
 }
 
