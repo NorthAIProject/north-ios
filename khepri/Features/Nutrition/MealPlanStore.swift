@@ -234,7 +234,7 @@ extension MealPlanMeal {
 
     private static func label(_ label: String?, place: Int) -> String {
         let label = label?.trimmingCharacters(in: .whitespaces) ?? ""
-        return label.isEmpty ? "Option \(place)" : label
+        return label.isEmpty ? String(localized: "Option \(place)") : label
     }
 }
 

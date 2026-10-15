@@ -90,7 +90,7 @@ struct FindContactsScreen: View {
         ContentUnavailableView {
             Label("None of your contacts are on Khepri yet", systemImage: "person.2")
         } description: {
-            Text(limited ? "Only the contacts you chose for Khepri were checked." : "Send them your invite link.")
+            limited ? Text("Only the contacts you chose for Khepri were checked.") : Text("Send them your invite link.")
         } actions: {
             if let inviteURL {
                 ShareLink(item: inviteURL, message: Text("Join me on Khepri")) {
@@ -110,9 +110,9 @@ struct FindContactsScreen: View {
             } header: {
                 Text("On Khepri")
             } footer: {
-                Text(limited
-                     ? "Only the contacts you chose for Khepri were checked, by hashed email and phone number."
-                     : "Only hashed email addresses and phone numbers left this iPhone, and nothing was kept.")
+                limited
+                    ? Text("Only the contacts you chose for Khepri were checked, by hashed email and phone number.")
+                    : Text("Only hashed email addresses and phone numbers left this iPhone, and nothing was kept.")
             }
         }
         .refreshable { await check() }

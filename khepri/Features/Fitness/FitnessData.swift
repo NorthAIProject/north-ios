@@ -22,23 +22,23 @@ struct FitnessWorkout: Equatable, Identifiable {
 
     static func name(for type: HKWorkoutActivityType) -> String {
         switch type {
-        case .walking: "Walk"
-        case .running: "Run"
-        case .cycling: "Ride"
-        case .hiking: "Hike"
-        case .swimming: "Swim"
-        case .rowing: "Row"
-        case .elliptical: "Elliptical"
-        case .traditionalStrengthTraining, .functionalStrengthTraining: "Strength"
-        case .coreTraining: "Core"
-        case .highIntensityIntervalTraining: "HIIT"
-        case .yoga: "Yoga"
-        case .pilates: "Pilates"
-        case .flexibility, .cooldown: "Stretching"
-        case .dance, .socialDance, .cardioDance: "Dance"
-        case .stairClimbing, .stairs: "Stairs"
-        case .mixedCardio: "Cardio"
-        default: "Workout"
+        case .walking: String(localized: "Walk", comment: "Workout type")
+        case .running: String(localized: "Run", comment: "Workout type")
+        case .cycling: String(localized: "Ride", comment: "Workout type")
+        case .hiking: String(localized: "Hike", comment: "Workout type")
+        case .swimming: String(localized: "Swim", comment: "Workout type")
+        case .rowing: String(localized: "Row", comment: "Workout type")
+        case .elliptical: String(localized: "Elliptical")
+        case .traditionalStrengthTraining, .functionalStrengthTraining: String(localized: "Strength", comment: "Workout type")
+        case .coreTraining: String(localized: "Core", comment: "Workout type")
+        case .highIntensityIntervalTraining: String(localized: "HIIT")
+        case .yoga: String(localized: "Yoga")
+        case .pilates: String(localized: "Pilates")
+        case .flexibility, .cooldown: String(localized: "Stretching", comment: "Workout type")
+        case .dance, .socialDance, .cardioDance: String(localized: "Dance", comment: "Workout type")
+        case .stairClimbing, .stairs: String(localized: "Stairs", comment: "Workout type")
+        case .mixedCardio: String(localized: "Cardio")
+        default: String(localized: "Workout")
         }
     }
 
@@ -239,7 +239,8 @@ enum FitnessFormat {
     /// "51:51/km".
     static func pace(_ secondsPerKm: Double) -> String {
         let total = Int(secondsPerKm.rounded())
-        return String(format: "%d:%02d/km", total / 60, total % 60)
+        let clock = String(format: "%d:%02d", total / 60, total % 60)
+        return String(localized: "\(clock)/km", comment: "Pace: minutes and seconds per kilometre")
     }
 
     /// "1h 51m", "50m".
@@ -249,7 +250,7 @@ enum FitnessFormat {
 
     /// "2.2 km".
     static func km(_ km: Double) -> String {
-        km.formatted(.number.precision(.fractionLength(1))) + " km"
+        String(localized: "\(km.formatted(.number.precision(.fractionLength(1)))) km")
     }
 }
 
@@ -262,6 +263,16 @@ enum VO2Rating: String, Equatable {
     case fair = "Fair"
     case good = "Good"
     case excellent = "Excellent"
+
+    /// The rating as shown, in the person's language.
+    var label: String {
+        switch self {
+        case .poor: String(localized: "Poor", comment: "VO2 max rating")
+        case .fair: String(localized: "Fair", comment: "VO2 max rating")
+        case .good: String(localized: "Good", comment: "VO2 max rating")
+        case .excellent: String(localized: "Excellent", comment: "VO2 max rating")
+        }
+    }
 
     static func rating(for value: Double, age: Int?, sex: String?) -> VO2Rating {
         let (fair, good, excellent) = thresholds(age: age, sex: sex)

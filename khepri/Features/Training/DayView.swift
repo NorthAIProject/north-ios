@@ -122,14 +122,14 @@ struct DayView: View {
                     }
                 }
             }
-            .navigationTitle(scheduledWeekday ?? day.weekday)
+            .navigationTitle(WeekdayName.display(scheduledWeekday ?? day.weekday))
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
                 if store.isEditing { ProgressView().padding().background(.regularMaterial, in: .rect(cornerRadius: 10)) }
             }
             .sheet(item: $picking) { purpose in
                 ExercisePicker(
-                    title: purpose == .add ? "Add Exercise" : "Swap Exercise",
+                    title: purpose == .add ? String(localized: "Add Exercise") : String(localized: "Swap Exercise"),
                     suggestions: {
                         guard let plan = store.plan else { return [] }
                         switch purpose {
@@ -172,7 +172,7 @@ extension DayView {
     private func startWorkout(_ day: TrainingDay) {
         guard workout == nil, !day.exercises.isEmpty else { return }
         let weekday = scheduledWeekday ?? day.weekday
-        workout = .live(title: "\(weekday) · \(day.focus)", day: day, planWeekday: weekday)
+        workout = .live(title: "\(WeekdayName.display(weekday)) · \(day.focus)", day: day, planWeekday: weekday)
     }
 }
 

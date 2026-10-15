@@ -13,7 +13,7 @@ struct CoachHeader: View {
     /// The colour of the screen underneath, which the scrim fades from.
     var canvas: Color = Color(.systemBackground)
     var leadingSystemImage = "list.bullet"
-    var leadingLabel = "Conversations"
+    var leadingLabel: LocalizedStringKey = "Conversations"
     var newIdentifier = "new-conversation"
     /// Whether the guided tour's Coach step points at "New chat". Only the
     /// list's header does, so a pushed thread never offers a second anchor.

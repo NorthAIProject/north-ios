@@ -11,13 +11,13 @@ public enum SecureStoreError: LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .readFailed(let status):
-            return "Failed to read from Keychain (OSStatus: \(status))."
+            return String(localized: "Failed to read from Keychain (OSStatus: \(status)).")
         case .writeFailed(let status):
-            return "Failed to write to Keychain (OSStatus: \(status))."
+            return String(localized: "Failed to write to Keychain (OSStatus: \(status)).")
         case .deleteFailed(let status):
-            return "Failed to delete from Keychain (OSStatus: \(status))."
+            return String(localized: "Failed to delete from Keychain (OSStatus: \(status)).")
         case .invalidEncoding:
-            return "Data in Keychain could not be encoded as a UTF-8 string."
+            return String(localized: "Data in Keychain could not be encoded as a UTF-8 string.")
         }
     }
 

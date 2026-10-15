@@ -64,17 +64,17 @@ struct WeeklyDraft: Equatable {
 extension WeeklyVolume {
     var title: String {
         switch self {
-        case .hold: "Hold"
-        case .build: "Build"
-        case .deload: "Deload"
+        case .hold: String(localized: "Hold", comment: "Weekly training volume: keep the plan as written")
+        case .build: String(localized: "Build", comment: "Weekly training volume: add sets")
+        case .deload: String(localized: "Deload")
         }
     }
 
     var explanation: String {
         switch self {
-        case .hold: "Train the plan as written."
-        case .build: "One extra set on each day's first two exercises."
-        case .deload: "About 60% of the sets, to recover."
+        case .hold: String(localized: "Train the plan as written.")
+        case .build: String(localized: "One extra set on each day's first two exercises.")
+        case .deload: String(localized: "About 60% of the sets, to recover.")
         }
     }
 }

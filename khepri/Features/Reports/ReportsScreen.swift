@@ -85,7 +85,7 @@ struct ReportsScreen: View {
 }
 
 private extension ReportSummary {
-    var kindLabel: String { kind == .weekly ? "Weekly report" : "Morning briefing" }
+    var kindLabel: String { kind == .weekly ? String(localized: "Weekly report") : String(localized: "Morning briefing") }
     var kindSymbol: String { kind == .weekly ? "calendar" : "sun.horizon" }
 }
 
@@ -288,7 +288,7 @@ private struct ReportRating: View {
         .buttonStyle(.bordered)
         .buttonBorderShape(.capsule)
         .tint(selected ? NorthColor.signal : .secondary)
-        .accessibilityLabel(value ? "Useful" : "Not useful")
+        .accessibilityLabel(value ? Text("Useful") : Text("Not useful"))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }

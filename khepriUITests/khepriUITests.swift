@@ -12,7 +12,7 @@ final class FirstRunUITests: XCTestCase {
     @MainActor
     func testFirstRunThroughWizardToTabs() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-uitest-reset"]
+        app.launchArguments = ["-uitest-reset", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
 
         // A fresh account, created over the API: iOS's strong-password sheet

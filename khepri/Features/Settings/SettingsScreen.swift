@@ -21,7 +21,7 @@ struct SettingsScreen: View {
                         LabeledContent {
                             Text(user.email)
                         } label: {
-                            Label(user.displayName.isEmpty ? "Account" : user.displayName, systemImage: "person.crop.circle")
+                            Label(user.displayName.isEmpty ? String(localized: "Account") : user.displayName, systemImage: "person.crop.circle")
                         }
                     }
                 }
@@ -54,6 +54,9 @@ struct SettingsScreen: View {
                 }
 
                 Section("App") {
+                    NavigationLink { LanguageSettings(service: service) } label: {
+                        Label("Language", systemImage: "globe")
+                    }
                     NavigationLink { NotificationSettings(service: service) } label: {
                         Label("Notifications", systemImage: "bell.badge")
                     }
@@ -190,13 +193,6 @@ private struct ProfileSettings: View {
                     LabeledContent("Email", value: profile.value?.email ?? "")
                 }
                 Section {
-                    Picker("Language", selection: bind(\.locale)) {
-                        ForEach(Self.languages, id: \.tag) { Text($0.name).tag($0.tag) }
-                    }
-                } footer: {
-                    Text("The coach, reports and reminders use this language.")
-                }
-                Section {
                     LabeledContent("Time Zone", value: profile.value?.timezone ?? "")
                     if profile.value?.timezone != TimeZone.current.identifier {
                         Button("Use This iPhone's (\(TimeZone.current.identifier))") {
@@ -214,14 +210,50 @@ private struct ProfileSettings: View {
         .task { await profile.load(service.profile) }
     }
 
-    /// The server's languages, each named in itself. The two Portugueses stay
-    /// apart, as they do on the web.
-    static let languages: [(tag: String, name: String)] = [
-        ("en", "English"), ("pt-PT", "Português (Portugal)"), ("pt-BR", "Português (Brasil)"), ("es", "Español"),
-    ]
-
     private func bind(_ keyPath: WritableKeyPath<SettingsModel.Profile, String>) -> Binding<String> {
         Binding(get: { profile.value?[keyPath: keyPath] ?? "" }, set: { profile.value?[keyPath: keyPath] = $0 })
+    }
+}
+
+// MARK: - Language
+
+/// One choice for the whole product: the account's locale, which the coach,
+/// reports and reminders use at once, and the app's own language, which iOS
+/// applies the next time the app opens.
+private struct LanguageSettings: View {
+    let service: SettingsServicing
+    @State private var profile = Editable<SettingsModel.Profile>()
+
+    var body: some View {
+        Loaded(editable: profile) { value in
+            Form {
+                Section {
+                    Picker("Language", selection: locale) {
+                        ForEach(AppLanguage.all, id: \.tag) { Text(verbatim: $0.name).tag($0.tag) }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } footer: {
+                    if AppLanguage.needsRelaunch(for: value.locale), !profile.hasChanges {
+                        Text("Khepri switches to this language the next time you open it. The coach, reports and reminders already use it.")
+                    } else {
+                        Text("The coach, reports and reminders switch at once. The app switches the next time you open it.")
+                    }
+                }
+                if let error = profile.error { ErrorRow(error) }
+            }
+        }
+        .navigationTitle("Language")
+        .saveToolbar(profile) { draft in
+            let stored = try await service.save(draft)
+            AppLanguage.apply(stored.locale)
+            return stored
+        }
+        .task { await profile.load(service.profile) }
+    }
+
+    private var locale: Binding<String> {
+        Binding(get: { profile.value?.locale ?? "en" }, set: { profile.value?.locale = $0 })
     }
 }
 
@@ -239,15 +271,15 @@ private struct CoachingSettings: View {
                 Section {
                     ForEach(CoachingStyle.allCases.filter { $0 != .custom }) { style in
                         Button {
-                            profile.value?.coachingStyle = style.detail
+                            profile.value?.coachingStyle = style.wireDetail
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(style.title).foregroundStyle(.primary)
-                                    Text(style.detail).font(.subheadline).foregroundStyle(.secondary)
+                                    Text(style.displayDetail).font(.subheadline).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if value.coachingStyle == style.detail {
+                                if value.coachingStyle == style.wireDetail {
                                     Image(systemName: "checkmark").foregroundStyle(.tint)
                                 }
                             }
@@ -256,7 +288,7 @@ private struct CoachingSettings: View {
                         // A Form button tints its whole label; these rows
                         // read as choices, so only the checkmark is tinted.
                         .buttonStyle(.plain)
-                        .accessibilityAddTraits(value.coachingStyle == style.detail ? .isSelected : [])
+                        .accessibilityAddTraits(value.coachingStyle == style.wireDetail ? .isSelected : [])
                     }
                 } header: {
                     Text("Style")
@@ -391,7 +423,7 @@ private struct NotificationSettings: View {
                 Section {
                     Toggle("Daily briefing", isOn: bind(\.dailyBriefingAuto))
                     if value.dailyBriefingAuto {
-                        HourPicker(title: "Arrives at", hour: int(\.briefingHour))
+                        HourPicker(title: String(localized: "Arrives at"), hour: int(\.briefingHour))
                     }
                     Toggle("Weekly report", isOn: bind(\.weeklyReportAuto))
                     Picker("Stats digest", selection: Binding(
@@ -412,7 +444,7 @@ private struct NotificationSettings: View {
                 Section {
                     Toggle("Evening reflection", isOn: bind(\.eveningReflection))
                     if value.eveningReflection {
-                        HourPicker(title: "At", hour: int(\.eveningHour))
+                        HourPicker(title: String(localized: "At", comment: "Time picker label: the hour a reminder arrives"), hour: int(\.eveningHour))
                     }
                 } footer: {
                     Text("Once an evening: a check-in if you haven't done one, otherwise a line in your journal.")

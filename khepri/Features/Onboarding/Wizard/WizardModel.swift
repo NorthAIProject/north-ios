@@ -17,7 +17,15 @@ enum FocusArea: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String { rawValue.capitalized }
+    var title: String {
+        switch self {
+        case .fitness: String(localized: "Fitness")
+        case .health: String(localized: "Health")
+        case .work: String(localized: "Work", comment: "Focus area: work and career")
+        case .learning: String(localized: "Learning")
+        case .personal: String(localized: "Personal")
+        }
+    }
 
     var systemImage: String {
         switch self {
@@ -31,11 +39,11 @@ enum FocusArea: String, CaseIterable, Codable, Identifiable {
 
     var example: String {
         switch self {
-        case .fitness: "Run a half marathon"
-        case .health: "Sleep seven hours on weeknights"
-        case .work: "Ship the launch without burning out"
-        case .learning: "Read twelve books this year"
-        case .personal: "Call my parents every Sunday"
+        case .fitness: String(localized: "Run a half marathon")
+        case .health: String(localized: "Sleep seven hours on weeknights")
+        case .work: String(localized: "Ship the launch without burning out")
+        case .learning: String(localized: "Read twelve books this year")
+        case .personal: String(localized: "Call my parents every Sunday")
         }
     }
 }
@@ -45,16 +53,35 @@ enum CoachingStyle: String, CaseIterable, Codable, Identifiable {
     case direct, supportive, socratic, custom
 
     var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var title: String {
+        switch self {
+        case .direct: String(localized: "Direct", comment: "Coaching style")
+        case .supportive: String(localized: "Supportive", comment: "Coaching style")
+        case .socratic: String(localized: "Socratic", comment: "Coaching style")
+        case .custom: String(localized: "Custom", comment: "Coaching style")
+        }
+    }
 
     /// The server's wording for each preset, so the choice reads the same here
-    /// as in the coach's instructions.
-    var detail: String {
+    /// as in the coach's instructions. This is what the profile stores and is
+    /// compared against, so it stays English: never show it, show
+    /// `displayDetail`.
+    var wireDetail: String {
         switch self {
         case .direct: "Be direct. Skip pep talks. Challenge me."
         case .supportive: "Be warm and encouraging. Celebrate progress."
         case .socratic: "Ask questions. Help me think it through."
         case .custom: "Describe it in your own words."
+        }
+    }
+
+    /// `wireDetail` in the app's language, for display only.
+    var displayDetail: String {
+        switch self {
+        case .direct: String(localized: "Be direct. Skip pep talks. Challenge me.")
+        case .supportive: String(localized: "Be warm and encouraging. Celebrate progress.")
+        case .socratic: String(localized: "Ask questions. Help me think it through.")
+        case .custom: String(localized: "Describe it in your own words.")
         }
     }
 }

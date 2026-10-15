@@ -42,7 +42,7 @@ struct InboxScreen: View {
                     }
             }
         }
-        .navigationTitle(open > 0 ? "Inbox (\(open))" : "Inbox")
+        .navigationTitle(open > 0 ? Text("Inbox (\(open))") : Text("Inbox"))
         .task { await load() }
         .refreshable { await load() }
         .confirmationDialog("Which goal?", isPresented: Binding(get: { choosingGoal != nil }, set: { if !$0 { choosingGoal = nil } }),

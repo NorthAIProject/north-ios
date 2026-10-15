@@ -86,7 +86,10 @@ struct CheckInsScreen: View {
                     Button("Edit Today's Check-in") { editingToday = true }
                 }
             } else {
-                CheckInForm(title: "Today", existing: list.today, goals: activeGoals, startingMood: startingMood) { request in
+                CheckInForm(
+                    title: String(localized: "Today"), existing: list.today,
+                    goals: activeGoals, startingMood: startingMood
+                ) { request in
                     _ = try await service.saveToday(request)
                     editingToday = false
                     await didWrite()
@@ -203,7 +206,9 @@ private struct CheckInForm: View {
             }
         }
         Section {
-            Button(existing == nil ? "Check In" : "Save Changes") { Task { await save() } }
+            Button(existing == nil ? String(localized: "Check In") : String(localized: "Save Changes")) {
+                Task { await save() }
+            }
                 .disabled(saving)
             if let error { ErrorRow(error) }
         }
@@ -328,7 +333,8 @@ private struct CheckInSummary: View {
 
     private var day: String {
         guard let date = CalendarDay.date(from: checkIn.localDate) else { return checkIn.localDate }
-        return Calendar.current.isDateInToday(date) ? "Today" : date.formatted(.dateTime.weekday(.wide).day().month())
+        if Calendar.current.isDateInToday(date) { return String(localized: "Today") }
+        return date.formatted(.dateTime.weekday(.wide).day().month())
     }
 
     /// Stress and sleep, when the check-in has them.

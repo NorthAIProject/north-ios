@@ -17,17 +17,17 @@ enum TourStep: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .today: "Your day, at a glance"
-        case .coach: "Your coach"
-        case .training: "Training"
+        case .today: String(localized: "Your day, at a glance")
+        case .coach: String(localized: "Your coach")
+        case .training: String(localized: "Training")
         }
     }
 
     var message: String {
         switch self {
-        case .today: "One next step, your streak, and what moved. Pull down to refresh; the web and Telegram update the same day."
-        case .coach: "Ask anything, from how to do a push-up to how your week went. Same coach as Telegram, with more room."
-        case .training: "Your plan, each workout, and a reminder before it starts."
+        case .today: String(localized: "One next step, your streak, and what moved. Pull down to refresh; the web and Telegram update the same day.")
+        case .coach: String(localized: "Ask anything, from how to do a push-up to how your week went. Same coach as Telegram, with more room.")
+        case .training: String(localized: "Your plan, each workout, and a reminder before it starts.")
         }
     }
 }
@@ -82,7 +82,7 @@ final class GuidedTour {
     /// "2 of 3"
     var progressLabel: String? {
         guard let current else { return nil }
-        return "\(current.rawValue + 1) of \(TourStep.allCases.count)"
+        return String(localized: "\(current.rawValue + 1) of \(TourStep.allCases.count)", comment: "Tour progress, e.g. 1 of 3")
     }
 
     private func finish() {

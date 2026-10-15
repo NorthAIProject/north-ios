@@ -47,7 +47,7 @@ struct TodayScreen: View {
                     }
                 }
             }
-            .navigationTitle(dayStore.isToday ? "Today" : dayTitle)
+            .navigationTitle(dayStore.isToday ? String(localized: "Today") : dayTitle)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     Button { Task { await dayStore.step(-1) } } label: { Image(systemName: "chevron.left") }

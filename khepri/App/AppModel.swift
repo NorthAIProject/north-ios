@@ -153,11 +153,19 @@ final class AppModel {
         unlockObservers = []
     }
 
+    /// The account's language may have changed on the web; the next launch
+    /// should show it. Best effort: an offline launch keeps the current one.
+    private func syncLanguageFromAccount() async {
+        guard let profile = try? await SettingsService().profile() else { return }
+        AppLanguage.apply(profile.locale)
+    }
+
     private func loadUser() async {
         do {
             let user = try await auth.currentUser()
             AppTimeZone.current = TimeZone(identifier: user.timezone) ?? .current
             phase = user.needsOnboarding ? .onboarding(user) : .signedIn(user)
+            Task { await syncLanguageFromAccount() }
         } catch let error as APIError where error.isUnauthorized {
             await sessions.invalidateSession()
             phase = .signedOut

@@ -107,8 +107,8 @@ struct CareScreen: View {
             remindersSection(page.reminders)
             if page.waterWeek.contains(where: { $0.value > 0 }) || page.sleepWeek.contains(where: { $0.value > 0 }) {
                 Section("This Week") {
-                    WeekBars(title: "Water (ml)", points: page.waterWeek)
-                    WeekBars(title: "Sleep (h)", points: page.sleepWeek)
+                    WeekBars(title: String(localized: "Water (ml)"), points: page.waterWeek)
+                    WeekBars(title: String(localized: "Sleep (h)"), points: page.sleepWeek)
                 }
             }
         }
@@ -152,10 +152,10 @@ struct CareScreen: View {
         Section("Last Night") {
             if let night {
                 LabeledContent("Slept", value: Duration.seconds(night.durationMinutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated)))
-                if let quality = night.quality { LabeledContent("Quality", value: "\(quality) of 5") }
+                if let quality = night.quality { LabeledContent("Quality", value: String(localized: "\(quality) of 5")) }
                 if let bed = night.bedtime, let wake = night.wakeTime, !bed.isEmpty { LabeledContent("In bed", value: "\(bed) – \(wake)") }
             }
-            Button(night == nil ? "Log Last Night" : "Change") { loggingSleep = true }
+            Button { loggingSleep = true } label: { night == nil ? Text("Log Last Night") : Text("Change") }
         }
     }
 
@@ -170,7 +170,8 @@ struct CareScreen: View {
                             .foregroundStyle(NorthColor.signal)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(habit.name).foregroundStyle(.primary)
-                            Text(habit.streak > 0 ? "\(habit.streak)-day streak" : habit.scheduledToday ? "Due today" : "Not today")
+                            Text(habit.streak > 0 ? String(localized: "\(habit.streak)-day streak")
+                                : habit.scheduledToday ? String(localized: "Due today") : String(localized: "Not today"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -183,7 +184,7 @@ struct CareScreen: View {
                 }
                 // Plain, so the name reads as text rather than a link.
                 .buttonStyle(.plain)
-                .accessibilityValue(habit.doneToday ? "Done" : "Not done")
+                .accessibilityValue(habit.doneToday ? String(localized: "Done", comment: "Status: the habit is done today") : String(localized: "Not done"))
                 .swipeActions {
                     Button("Delete", role: .destructive) { Task { await run { try await service.deleteHabit(habit.id) } } }
                 }
@@ -203,7 +204,7 @@ struct CareScreen: View {
                 )) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(reminder.label)
-                        Text(reminder.due ? "\(reminder.timeOfDay) · due now" : reminder.timeOfDay)
+                        Text(reminder.due ? String(localized: "\(reminder.timeOfDay) · due now") : reminder.timeOfDay)
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(reminder.due ? NorthColor.ember : .secondary)
                     }
@@ -315,7 +316,7 @@ private struct HabitSheet: View {
             Form {
                 TextField("e.g. Stretch 10 minutes", text: $name)
                 Picker("Area", selection: $domain) {
-                    ForEach(["fitness", "health", "work", "learning", "personal", "other"], id: \.self) { Text($0.capitalized).tag($0) }
+                    ForEach(["fitness", "health", "work", "learning", "personal", "other"], id: \.self) { Text(Self.areaName($0)).tag($0) }
                 }
                 Section("On") { WeekdayPicker(days: $days) }
             }
@@ -330,6 +331,19 @@ private struct HabitSheet: View {
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || days.isEmpty)
                 }
             }
+        }
+    }
+
+    /// The display name of a habit area; the key is what the server stores.
+    private static func areaName(_ key: String) -> String {
+        switch key {
+        case "fitness": String(localized: "Fitness")
+        case "health": String(localized: "Health")
+        case "work": String(localized: "Work")
+        case "learning": String(localized: "Learning")
+        case "personal": String(localized: "Personal")
+        case "other": String(localized: "Other")
+        default: key.capitalized
         }
     }
 }

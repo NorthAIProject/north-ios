@@ -37,20 +37,20 @@ enum LeaderboardBoard: String, CaseIterable, Identifiable, Sendable {
     /// The board's name, as the web page words it.
     var label: String {
         switch self {
-        case .xpWeek: "XP this week"
-        case .xpAll: "XP all time"
-        case .streak: "Streak"
-        case .workouts: "Workouts this week"
+        case .xpWeek: String(localized: "XP this week")
+        case .xpAll: String(localized: "XP all time")
+        case .streak: String(localized: "Streak")
+        case .workouts: String(localized: "Workouts this week")
         }
     }
 
     /// Short enough for four segments side by side on a phone.
     var segment: String {
         switch self {
-        case .xpWeek: "Week"
-        case .xpAll: "All Time"
-        case .streak: "Streak"
-        case .workouts: "Workouts"
+        case .xpWeek: String(localized: "Week")
+        case .xpAll: String(localized: "All Time")
+        case .streak: String(localized: "Streak")
+        case .workouts: String(localized: "Workouts")
         }
     }
 
@@ -83,9 +83,9 @@ enum LeaderboardBoard: String, CaseIterable, Identifiable, Sendable {
     /// What the button that turns that switch on says.
     var shareAction: String {
         switch self {
-        case .xpWeek, .xpAll: "Share Your XP and Level"
-        case .streak: "Share Check-in Streaks"
-        case .workouts: "Share Workouts You Finish"
+        case .xpWeek, .xpAll: String(localized: "Share Your XP and Level")
+        case .streak: String(localized: "Share Check-in Streaks")
+        case .workouts: String(localized: "Share Workouts You Finish")
         }
     }
 }
@@ -118,16 +118,16 @@ enum XPFormat {
 
     /// "340 XP · 460 to the next level", or "6200 XP · the top level".
     static func levelCaption(total: Int, next: Int?) -> String {
-        guard let next else { return "\(total) XP · the top level" }
-        return "\(total) XP · \(max(next - total, 0)) to the next level"
+        guard let next else { return String(localized: "\(total) XP · the top level") }
+        return String(localized: "\(total) XP · \(max(next - total, 0)) to the next level")
     }
 
     /// "210 XP", "12 days", "3 workouts", by the board's metric.
     static func value(_ value: Int, metric: Leaderboard.MetricPayload) -> String {
         switch metric {
-        case .xp: "\(value) XP"
-        case .streak: value == 1 ? "1 day" : "\(value) days"
-        case .workouts: value == 1 ? "1 workout" : "\(value) workouts"
+        case .xp: String(localized: "\(value) XP")
+        case .streak: value == 1 ? String(localized: "1 day") : String(localized: "\(value) days")
+        case .workouts: value == 1 ? String(localized: "1 workout") : String(localized: "\(value) workouts")
         }
     }
 
@@ -135,14 +135,14 @@ enum XPFormat {
     /// before this build knows them; those read as their own name.
     static func kindLabel(_ kind: String) -> String {
         switch kind {
-        case "workout": "Workouts of 10 min or more (up to 2 a day)"
-        case "habit_kept": "Habits kept on their days"
-        case "streak_day": "Check-in streak days (from day 3)"
-        case "streak_mark": "Check-in streaks reaching 7, 30, 100 or 365 days"
-        case "week_reviewed": "Weekly reviews done"
-        case "challenge_met": "Crew challenges met"
-        case "milestone": "Milestones reached"
-        case "goal": "Goals achieved"
+        case "workout": String(localized: "Workouts of 10 min or more (up to 2 a day)")
+        case "habit_kept": String(localized: "Habits kept on their days")
+        case "streak_day": String(localized: "Check-in streak days (from day 3)")
+        case "streak_mark": String(localized: "Check-in streaks reaching 7, 30, 100 or 365 days")
+        case "week_reviewed": String(localized: "Weekly reviews done")
+        case "challenge_met": String(localized: "Crew challenges met")
+        case "milestone": String(localized: "Milestones reached")
+        case "goal": String(localized: "Goals achieved")
         default: sentence(kind)
         }
     }
@@ -155,6 +155,6 @@ enum XPFormat {
 
     /// "2 × · 40 XP"
     static func earned(count: Int, points: Int) -> String {
-        "\(count) × · \(points) XP"
+        String(localized: "\(count) × · \(points) XP", comment: "Times earned, then XP earned")
     }
 }

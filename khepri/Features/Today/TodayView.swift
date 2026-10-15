@@ -57,7 +57,7 @@ struct TodayView: View {
                 // My Day draws its own timeline; this is the fallback while it loads.
                 if dayStore?.day == nil, !snapshot.timeline.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        NorthCardHeader("Recently")
+                        NorthCardHeader(String(localized: "Recently"))
                         ForEach(Array(snapshot.timeline.enumerated()), id: \.offset) { index, entry in
                             if index > 0 { Divider().padding(.leading, 58) }
                             TimelineRow(entry: entry)
@@ -108,12 +108,15 @@ private struct StatGrid: View {
     var body: some View {
         Grid(horizontalSpacing: 12, verticalSpacing: 12) {
             GridRow {
-                StatTile(title: "Streak", systemImage: "flame.fill", tint: NorthColor.ember,
-                         value: snapshot.streak.formatted(), unit: snapshot.streak == 1 ? "day" : "days")
+                StatTile(title: String(localized: "Streak"), systemImage: "flame.fill", tint: NorthColor.ember,
+                         value: snapshot.streak.formatted(),
+                         unit: snapshot.streak == 1
+                            ? String(localized: "day", comment: "Streak unit, one day")
+                            : String(localized: "days", comment: "Streak unit, several days"))
                 if let today = snapshot.todayCheckIn {
                     // Tapping shows the check-in, where it can be edited.
                     Button(action: checkIn) {
-                        StatTile(title: "Check-in", systemImage: "checkmark.circle.fill", tint: .green,
+                        StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: .green,
                                  value: "\(today.mood) · \(today.energy)",
                                  caption: String(localized: "Mood · Energy · \(Self.time(today))"),
                                  showsChevron: true)
@@ -122,25 +125,32 @@ private struct StatGrid: View {
                     .buttonStyle(.plain)
                 } else if snapshot.checkedInToday {
                     // An older server says only that today is done.
-                    StatTile(title: "Check-in", systemImage: "checkmark.circle.fill", tint: .green, value: "Done")
+                    StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: .green,
+                             value: String(localized: "Done", comment: "Today's check-in is done"))
                 } else {
                     Button(action: checkIn) {
-                        StatTile(title: "Check-in", systemImage: "circle.dashed", tint: NorthColor.signal,
-                                 value: "Open", showsChevron: true)
+                        StatTile(title: String(localized: "Check-in"), systemImage: "circle.dashed", tint: NorthColor.signal,
+                                 value: String(localized: "Open", comment: "Today's check-in is still to do"), showsChevron: true)
                     }
                     .buttonStyle(.plain)
                 }
             }
             GridRow {
-                StatTile(title: "Water", systemImage: "drop.fill", tint: .cyan,
+                StatTile(title: String(localized: "Water"), systemImage: "drop.fill", tint: .cyan,
                          value: (Double(snapshot.hydration.todayML) / 1000).formatted(.number.precision(.fractionLength(1))),
-                         unit: "of \((Double(snapshot.hydration.targetML) / 1000).formatted(.number.precision(.fractionLength(0...1)))) L",
+                         unit: String(localized: "of \(waterTarget) L", comment: "Water drunk today out of the target, in litres"),
                          progress: snapshot.hydration.targetML > 0 ? Double(snapshot.hydration.todayML) / Double(snapshot.hydration.targetML) : nil)
-                StatTile(title: "Sleep", systemImage: "moon.fill", tint: .indigo,
+                StatTile(title: String(localized: "Sleep"), systemImage: "moon.fill", tint: .indigo,
                          value: snapshot.sleep.logged ? sleepHours : "–",
-                         unit: snapshot.sleep.logged ? "h" : "not logged")
+                         unit: snapshot.sleep.logged
+                            ? String(localized: "h", comment: "Unit: hours of sleep")
+                            : String(localized: "not logged", comment: "Sleep not logged today"))
             }
         }
+    }
+
+    private var waterTarget: String {
+        (Double(snapshot.hydration.targetML) / 1000).formatted(.number.precision(.fractionLength(0...1)))
     }
 
     private var sleepHours: String {
@@ -207,7 +217,7 @@ private struct GoalsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            NorthCardHeader("Goals", detail: goals.isEmpty ? nil : "\(goals.count) active")
+            NorthCardHeader(String(localized: "Goals"), detail: goals.isEmpty ? nil : String(localized: "\(goals.count) active"))
             if goals.isEmpty {
                 Text("No active goals yet.")
                     .font(.north(.subheadline))
@@ -260,7 +270,7 @@ private struct GoalRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(goal.title)
                     .font(.north(.body).weight(.medium))
-                Text(goal.category.capitalized)
+                Text(FocusArea(rawValue: goal.category)?.title ?? goal.category.capitalized)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

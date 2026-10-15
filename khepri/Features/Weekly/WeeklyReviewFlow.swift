@@ -19,10 +19,10 @@ struct WeeklyReviewFlow: View {
 
         var title: String {
             switch self {
-            case .week: "The Week"
-            case .priorities: "Priorities"
-            case .goals: "Goals in Order"
-            case .training: "Training"
+            case .week: String(localized: "The Week")
+            case .priorities: String(localized: "Priorities")
+            case .goals: String(localized: "Goals in Order")
+            case .training: String(localized: "Training")
             }
         }
     }

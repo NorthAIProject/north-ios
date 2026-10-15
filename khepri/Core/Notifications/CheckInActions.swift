@@ -12,7 +12,13 @@ enum CheckInActions {
     static let actionPrefix = "CHECKIN_MOOD_"
 
     /// Titles and the mood each sets, 1 is rough and 5 is great.
-    static let moods: [(title: String, mood: Int)] = [("Good", 4), ("Okay", 3), ("Low", 2)]
+    static var moods: [(title: String, mood: Int)] {
+        [
+            (String(localized: "Good", comment: "Mood button on a check-in notification"), 4),
+            (String(localized: "Okay", comment: "Mood button on a check-in notification"), 3),
+            (String(localized: "Low", comment: "Mood button on a check-in notification"), 2),
+        ]
+    }
 
     static var category: UNNotificationCategory {
         UNNotificationCategory(

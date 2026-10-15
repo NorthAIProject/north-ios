@@ -48,7 +48,7 @@ struct RecoveryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            NorthCardHeader("Recovery")
+            NorthCardHeader(String(localized: "Recovery"))
             RecoveryHeadline(recovery: recovery)
             ForEach(recovery.signals, id: \.key) { signal in
                 RecoverySignalRow(signal: signal)

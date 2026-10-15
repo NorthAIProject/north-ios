@@ -181,9 +181,10 @@ struct CrewBoardView: View {
     }
 
     private func challengeText(_ challenge: CrewChallenge?) -> String {
-        guard let challenge else { return "No challenge this week." }
-        let noun = challenge.kind == .workouts ? "workouts" : "check-ins"
-        return "\(challenge.target) \(noun) each, Monday to Sunday."
+        guard let challenge else { return String(localized: "No challenge this week.") }
+        return challenge.kind == .workouts
+            ? String(localized: "\(challenge.target) workouts each, Monday to Sunday.")
+            : String(localized: "\(challenge.target) check-ins each, Monday to Sunday.")
     }
 }
 
@@ -194,12 +195,12 @@ private struct MemberRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(member.me ? "You" : member.displayName).font(.subheadline.weight(.medium))
+                (member.me ? Text("You") : Text(member.displayName)).font(.subheadline.weight(.medium))
                 if member.owner { Text("owner").font(.caption).foregroundStyle(.secondary) }
                 Spacer()
                 Image(systemName: member.checkedIn ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(member.checkedIn ? NorthColor.signal : .secondary)
-                    .accessibilityLabel(member.checkedIn ? "Checked in" : "Not checked in yet")
+                    .accessibilityLabel(member.checkedIn ? Text("Checked in") : Text("Not checked in yet"))
                 if member.workedOut {
                     Image(systemName: "figure.run").foregroundStyle(NorthColor.signal)
                         .accessibilityLabel("Trained today")

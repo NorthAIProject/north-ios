@@ -67,21 +67,21 @@ private final class AppleSignInSessionHandler: NSObject, ASAuthorizationControll
     nonisolated func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         Task { @MainActor in
             guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-                continuation?.resume(throwing: APIError.server("Invalid Apple authorization credential."))
+                continuation?.resume(throwing: APIError.server(String(localized: "Invalid Apple authorization credential.")))
                 continuation = nil
                 return
             }
 
             guard let identityTokenData = appleIDCredential.identityToken,
                   let identityToken = String(data: identityTokenData, encoding: .utf8) else {
-                continuation?.resume(throwing: APIError.server("Apple identity token was missing or malformed."))
+                continuation?.resume(throwing: APIError.server(String(localized: "Apple identity token was missing or malformed.")))
                 continuation = nil
                 return
             }
 
             guard let authCodeData = appleIDCredential.authorizationCode,
                   let authorizationCode = String(data: authCodeData, encoding: .utf8) else {
-                continuation?.resume(throwing: APIError.server("Apple authorization code was missing."))
+                continuation?.resume(throwing: APIError.server(String(localized: "Apple authorization code was missing.")))
                 continuation = nil
                 return
             }

@@ -67,10 +67,8 @@ enum WorkoutReminders {
                 weekday: remindWeekday,
                 hour: total / 60,
                 minute: total % 60,
-                title: "\(day.focus) at \(start)",
-                body: leadMinutes > 0
-                    ? "Starts in \(leadMinutes) minutes\(exercise.map { ", opening with \($0)" } ?? "")."
-                    : "Starting now\(exercise.map { ", opening with \($0)" } ?? "").",
+                title: String(localized: "\(day.focus) at \(start)", comment: "Workout reminder title: session focus and start time"),
+                body: body(leadMinutes: leadMinutes, openingWith: exercise),
                 planID: plan.id,
                 dayIndex: index
             )
@@ -100,12 +98,23 @@ enum WorkoutReminders {
                 weekday: parts.weekday ?? 1,
                 hour: parts.hour ?? hour,
                 minute: parts.minute ?? minute,
-                title: "\(session.focus) at \(start)",
-                body: leadMinutes > 0 ? "Starts in \(leadMinutes) minutes." : "Starting now.",
+                title: String(localized: "\(session.focus) at \(start)", comment: "Workout reminder title: session focus and start time"),
+                body: body(leadMinutes: leadMinutes, openingWith: nil),
                 planID: session.planId,
                 dayIndex: session.dayIndex,
                 date: DateComponents(year: parts.year, month: parts.month, day: parts.day)
             )
+        }
+    }
+
+    /// The reminder's line under the title: how soon, and the first exercise
+    /// when the plan names one.
+    static func body(leadMinutes: Int, openingWith exercise: String?) -> String {
+        switch (leadMinutes > 0, exercise) {
+        case (true, let exercise?): String(localized: "Starts in \(leadMinutes) minutes, opening with \(exercise).")
+        case (true, nil): String(localized: "Starts in \(leadMinutes) minutes.")
+        case (false, let exercise?): String(localized: "Starting now, opening with \(exercise).")
+        case (false, nil): String(localized: "Starting now.")
         }
     }
 
@@ -162,7 +171,7 @@ enum WorkoutReminders {
     static var category: UNNotificationCategory {
         UNNotificationCategory(
             identifier: categoryIdentifier,
-            actions: [UNNotificationAction(identifier: startActionIdentifier, title: "Start Workout", options: [.foreground])],
+            actions: [UNNotificationAction(identifier: startActionIdentifier, title: String(localized: "Start Workout"), options: [.foreground])],
             intentIdentifiers: []
         )
     }

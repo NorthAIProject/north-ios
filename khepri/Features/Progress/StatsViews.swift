@@ -87,8 +87,11 @@ enum StatsFormat {
     }
 
     static let slotNames: [String: String] = [
-        "morning": "Morning (before 11)", "midday": "Midday (11–15)", "afternoon": "Afternoon (15–18)",
-        "evening": "Evening (18–21)", "late": "Late (after 21)",
+        "morning": String(localized: "Morning (before 11)"),
+        "midday": String(localized: "Midday (11–15)"),
+        "afternoon": String(localized: "Afternoon (15–18)"),
+        "evening": String(localized: "Evening (18–21)"),
+        "late": String(localized: "Late (after 21)"),
     ]
 }
 
@@ -126,13 +129,13 @@ struct StatsLoader<Model: Sendable, Page: View>: View {
 }
 
 private struct Tile: View {
-    let label: String
+    let label: LocalizedStringResource
     let value: String
-    var note: String?
+    var note: LocalizedStringResource?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label.uppercased()).northEyebrow()
+            Text(String(localized: label).uppercased()).northEyebrow()
             Text(value).northDisplayNumber(.title2)
             if let note { Text(note).font(.caption).foregroundStyle(.secondary) }
         }
@@ -236,7 +239,11 @@ private struct StageShare: Identifiable {
     let share: Double
 
     static func list(_ shares: [String: Double]) -> [StageShare] {
-        [("deep", "Deep"), ("rem", "REM"), ("core", "Core")].compactMap { key, name in
+        [
+            ("deep", String(localized: "Deep", comment: "Sleep stage")),
+            ("rem", String(localized: "REM", comment: "Sleep stage")),
+            ("core", String(localized: "sleep.stage.core", defaultValue: "Core", comment: "Sleep stage, as Apple Health names it")),
+        ].compactMap { key, name in
             shares[key].map { StageShare(id: key, name: name, share: $0) }
         }
     }
@@ -280,7 +287,7 @@ struct CardioStatsPage: View {
                 }
                 let weekly = model.distanceKm > 0 ? model.weeklyKm : model.weeklyMinutes
                 if weekly.count > 1 {
-                    Section(model.distanceKm > 0 ? "Distance per Week" : "Time per Week") {
+                    Section(model.distanceKm > 0 ? String(localized: "Distance per Week") : String(localized: "Time per Week")) {
                         Chart(weekly, id: \.date) { week in
                             BarMark(x: .value("Week", StatsFormat.shortDate(week.date)), y: .value("Value", week.value))
                                 .foregroundStyle(NorthColor.Day.move)
@@ -361,6 +368,7 @@ private struct HeartSection: View {
 
     private struct Metric: Identifiable {
         let id: String
+        let title: String
         let unit: String
         let values: [Components.Schemas.StatsDayValue]
         let decimals: Int
@@ -368,14 +376,14 @@ private struct HeartSection: View {
 
     var body: some View {
         let rows = [
-            Metric(id: "Resting heart rate", unit: "bpm", values: model.restingHeartRate, decimals: 0),
-            Metric(id: "HRV", unit: "ms", values: model.hrv, decimals: 0),
-            Metric(id: "VO2 max", unit: "", values: model.vo2Max, decimals: 1),
+            Metric(id: "resting", title: String(localized: "Resting heart rate"), unit: "bpm", values: model.restingHeartRate, decimals: 0),
+            Metric(id: "hrv", title: String(localized: "HRV"), unit: "ms", values: model.hrv, decimals: 0),
+            Metric(id: "vo2max", title: String(localized: "VO2 max"), unit: "", values: model.vo2Max, decimals: 1),
         ].filter { !$0.values.isEmpty }
         if !rows.isEmpty {
             Section("Heart") {
                 ForEach(rows) { metric in
-                    let label = metric.id
+                    let label = metric.title
                     let unit = metric.unit
                     let values = metric.values
                     let decimals = metric.decimals
@@ -427,7 +435,7 @@ struct EatingSections: View {
                             if model.proteinPerKg > 0 {
                                 Tile(label: "Protein per kg", value: String(format: "%.1f g", model.proteinPerKg))
                             }
-                            Tile(label: "Late eating", value: "\(model.lateDays) days", note: "after your kitchen closes")
+                            Tile(label: "Late eating", value: String(localized: "\(model.lateDays) days"), note: "after your kitchen closes")
                         }
                     }
                     .padding(.vertical, 4)

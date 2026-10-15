@@ -9,7 +9,9 @@ extension XCTestCase {
     func launchSignedIn(email: String, password: String, arguments: [String] = [],
                         file: StaticString = #filePath, line: UInt = #line) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour"] + arguments
+        // Pinned to English: the tests find controls by their English labels,
+        // and the simulator may be set to another language.
+        app.launchArguments = ["-uitest-reset", "-uitest-skip-tour", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"] + arguments
         app.launch()
         type(app.textFields["Email address"], email, file: file, line: line)
         type(app.secureTextFields["Password"], password, file: file, line: line)

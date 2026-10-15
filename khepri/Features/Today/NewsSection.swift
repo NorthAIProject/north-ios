@@ -12,7 +12,7 @@ struct NewsSection: View {
         Group {
             if !items.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    NorthCardHeader("News")
+                    NorthCardHeader(String(localized: "News"))
                         .padding(.bottom, 4)
                     ForEach(Array(items.prefix(4).enumerated()), id: \.element.url) { index, item in
                         if let url = URL(string: item.url) {

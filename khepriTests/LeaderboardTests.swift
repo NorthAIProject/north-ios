@@ -23,7 +23,7 @@ struct XPFormatTests {
 
     @Test func levelCaption() {
         #expect(XPFormat.levelCaption(total: 340, next: 800) == "340 XP · 460 to the next level")
-        #expect(XPFormat.levelCaption(total: 6200, next: nil) == "6200 XP · the top level")
+        #expect(XPFormat.levelCaption(total: 6200, next: nil) == "6,200 XP · the top level") // grouped by locale, as everywhere else
     }
 
     @Test(arguments: [

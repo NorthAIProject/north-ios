@@ -90,7 +90,7 @@ private struct TourCallout: View {
                 Button("Skip tour", action: onSkip)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button(step == TourStep.allCases.last ? "Done" : "Next", action: onNext)
+                Button(step == TourStep.allCases.last ? String(localized: "Done") : String(localized: "Next"), action: onNext)
                     .northProminentButton()
             }
             .padding(.top, 8)

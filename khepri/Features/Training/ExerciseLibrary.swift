@@ -124,7 +124,7 @@ struct ExerciseSummaryRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(exercise.name)
                 Text([exercise.primaryMuscles.map(\.capitalized).joined(separator: ", "),
-                      exercise.equipment == "none" ? "no equipment" : exercise.equipment]
+                      exercise.equipment == "none" ? String(localized: "no equipment") : exercise.equipment]
                     .filter { !$0.isEmpty }.joined(separator: " · "))
                     .font(.caption)
                     .foregroundStyle(.secondary)

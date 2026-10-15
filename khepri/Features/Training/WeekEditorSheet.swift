@@ -37,7 +37,7 @@ struct WeekEditorSheet: View {
 
                 Section {
                     Stepper(value: dayCount, in: 0...7) {
-                        LabeledContent("Days", value: weekdays.isEmpty ? "Rest week" : "\(weekdays.count)")
+                        LabeledContent("Days", value: weekdays.isEmpty ? String(localized: "Rest week") : "\(weekdays.count)")
                     }
                     WeekdayChips(selected: weekdays, completed: completedWeekdays) { weekday in
                         if weekdays.contains(weekday) { weekdays.remove(weekday) } else { weekdays.insert(weekday) }
@@ -85,7 +85,7 @@ struct WeekEditorSheet: View {
                     }
                 }
             }
-            .navigationTitle(nextWeek ? "Next Week" : "This Week")
+            .navigationTitle(nextWeek ? String(localized: "Next Week") : String(localized: "This Week"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -100,11 +100,11 @@ struct WeekEditorSheet: View {
     @ViewBuilder
     private func sessionRow(_ session: WeekSession) -> some View {
         if session.completed {
-            LabeledContent(session.weekday) {
+            LabeledContent(WeekdayName.display(session.weekday)) {
                 Label(session.focus, systemImage: "checkmark.circle.fill")
             }
         } else {
-            Picker(session.weekday, selection: sessionBinding(session.weekday)) {
+            Picker(WeekdayName.display(session.weekday), selection: sessionBinding(session.weekday)) {
                 Text(rotationLabel(session)).tag(SessionChoice?.none)
                 ForEach(store.allPlans, id: \.id) { plan in
                     ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
@@ -146,7 +146,9 @@ struct WeekEditorSheet: View {
     /// The choice that leaves a day to the rotation. The preview names the
     /// session the rotation gives it, unless the day is pinned to another.
     private func rotationLabel(_ session: WeekSession) -> String {
-        pinned[session.weekday] == nil ? "Next in your plan · \(session.focus)" : "Next in your plan"
+        pinned[session.weekday] == nil
+            ? String(localized: "Next in your plan · \(session.focus)")
+            : String(localized: "Next in your plan")
     }
 
     // MARK: Server
@@ -234,14 +236,14 @@ private struct WeekdayChips: View {
         HStack(spacing: 6) {
             ForEach(WeekEditorSheet.allWeekdays, id: \.self) { weekday in
                 let on = selected.contains(weekday)
-                Button(String(weekday.prefix(1))) { toggle(weekday) }
+                Button(WeekdayName.initial(weekday)) { toggle(weekday) }
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity, minHeight: 36)
                     .background(on ? NorthColor.signal : Color.secondary.opacity(0.15), in: .circle)
                     .foregroundStyle(on ? Color.white : Color.primary)
                     .buttonStyle(.plain)
                     .disabled(completed.contains(weekday))
-                    .accessibilityLabel(weekday)
+                    .accessibilityLabel(WeekdayName.display(weekday))
                     .accessibilityAddTraits(on ? .isSelected : [])
             }
         }

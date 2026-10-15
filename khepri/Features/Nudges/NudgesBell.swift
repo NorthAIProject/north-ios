@@ -36,7 +36,7 @@ struct NudgesBellButton: View {
             Image(systemName: unread > 0 ? "bell.badge" : "bell")
                 .symbolRenderingMode(.hierarchical)
         }
-        .accessibilityLabel(unread > 0 ? "Notifications, \(unread) unread" : "Notifications")
+        .accessibilityLabel(unread > 0 ? Text("Notifications, \(unread) unread") : Text("Notifications"))
         .sheet(isPresented: $showing, onDismiss: { Task { await refresh() } }) {
             NudgesList(service: service)
         }

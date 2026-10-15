@@ -10,7 +10,7 @@ struct MoreScreen: View {
 
     private struct Section: Identifiable {
         let id: String
-        let title: String
+        let title: LocalizedStringKey
         let systemImage: String
     }
 
@@ -94,7 +94,7 @@ struct MoreScreen: View {
         }
     }
 
-    private func sectionRows(_ header: String, _ sections: [Section]) -> some View {
+    private func sectionRows(_ header: LocalizedStringKey, _ sections: [Section]) -> some View {
         SwiftUI.Section(header) {
             ForEach(sections) { section in
                 NavigationLink(value: section.id) {

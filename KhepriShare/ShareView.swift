@@ -24,7 +24,8 @@ struct ShareView: View {
     init(item: SharedItem, done: @escaping () -> Void) {
         self.item = item
         self.done = done
-        _title = State(initialValue: item.title.isEmpty ? (item.url?.host() ?? "Shared note") : item.title)
+        let fallback = item.url?.host() ?? String(localized: "Shared note")
+        _title = State(initialValue: item.title.isEmpty ? fallback : item.title)
     }
 
     var body: some View {
@@ -128,7 +129,9 @@ struct ShareView: View {
     /// was quoted, then the person's own words about it.
     private var noteBody: String {
         [item.url?.absoluteString, item.text.isEmpty ? nil : item.text,
-         note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : "Why it matters: \(note)"]
+         note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? nil
+            : String(localized: "Why it matters: \(note)")]
             .compactMap { $0 }
             .joined(separator: "\n\n")
     }
@@ -140,7 +143,7 @@ struct ShareView: View {
             _ = try await NorthAPI.call {
                 try await api.createKnowledgeNote(body: .json(.init(title: title, body: noteBody))).created
             }
-            phase = .finished("Saved to Knowledge")
+            phase = .finished(String(localized: "Saved to Knowledge"))
         } catch {
             phase = .failed(error.localizedDescription)
         }
@@ -162,7 +165,7 @@ struct ShareView: View {
             _ = try await NorthAPI.call {
                 try await api.addToInbox(body: .json(.init(text: String(inboxText.prefix(4000)), source: .share))).created
             }
-            phase = .finished("Saved to Inbox")
+            phase = .finished(String(localized: "Saved to Inbox"))
         } catch {
             phase = .failed(error.localizedDescription)
         }
@@ -177,7 +180,8 @@ struct ShareView: View {
             }
             let writable = parsed.items.filter { $0.problem == nil }
             if writable.isEmpty {
-                phase = .failed(parsed.items.compactMap(\.problem).first ?? "Nothing in that could be logged.")
+                let problem = parsed.items.compactMap(\.problem).first
+                phase = .failed(problem ?? String(localized: "Nothing in that could be logged."))
             } else {
                 phase = .confirming(writable)
             }
@@ -193,7 +197,9 @@ struct ShareView: View {
             let result = try await NorthAPI.call {
                 try await api.commitCapture(body: .json(.init(items: items))).ok.body.json
             }
-            phase = .finished(result.written == 1 ? "Logged" : "Logged \(result.written) things")
+            phase = .finished(result.written == 1
+                ? String(localized: "Logged")
+                : String(localized: "Logged \(result.written) things"))
         } catch {
             phase = .failed(error.localizedDescription)
         }

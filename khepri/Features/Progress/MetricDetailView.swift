@@ -98,8 +98,8 @@ struct MetricDetailView: View {
 
     private func emptyText(_ metric: InsightMetric) -> String {
         metric.health == true
-            ? "Nothing from Apple Health for this window. Connect it in Settings → Connections, and allow this kind of data."
-            : "Nothing logged for this window."
+            ? String(localized: "Nothing from Apple Health for this window. Connect it in Settings → Connections, and allow this kind of data.")
+            : String(localized: "Nothing logged for this window.")
     }
 }
 

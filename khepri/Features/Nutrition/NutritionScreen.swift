@@ -10,6 +10,14 @@ struct NutritionScreen: View {
     enum Part: String, CaseIterable, Identifiable {
         case today = "Today", plans = "Plans", ingredients = "Ingredients"
         var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .today: String(localized: "Today")
+            case .plans: String(localized: "Plans")
+            case .ingredients: String(localized: "Ingredients")
+            }
+        }
     }
 
     @State private var part = Part.today
@@ -17,7 +25,7 @@ struct NutritionScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             Picker("Section", selection: $part) {
-                ForEach(Part.allCases) { Text($0.rawValue).tag($0) }
+                ForEach(Part.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
@@ -50,7 +58,7 @@ private struct FoodLogView: View {
                         HStack(alignment: .firstTextBaseline) {
                             Text(log.totals.calories.formatted(.number.precision(.fractionLength(0))))
                                 .font(.system(size: 36, weight: .light).monospacedDigit())
-                            Text(log.progress.map { "of \(Int($0.goal.calories)) kcal" } ?? "kcal").foregroundStyle(.secondary)
+                            Text(log.progress.map { String(localized: "of \(Int($0.goal.calories)) kcal") } ?? String(localized: "kcal")).foregroundStyle(.secondary)
                         }
                         if let goal = log.progress?.goal {
                             Gauge(value: min(log.totals.calories, goal.calories), in: 0...max(goal.calories, 1)) { EmptyView() }
@@ -110,15 +118,15 @@ private struct MacroRow: View {
 
     var body: some View {
         HStack(spacing: 24) {
-            item("PROTEIN", macros.proteinG, goal?.proteinG)
-            item("FAT", macros.fatG, goal?.fatG)
-            item("CARBS", macros.carbG, goal?.carbG)
+            item(String(localized: "PROTEIN"), macros.proteinG, goal?.proteinG)
+            item(String(localized: "FAT", comment: "The macronutrient, as a small caps label"), macros.fatG, goal?.fatG)
+            item(String(localized: "CARBS"), macros.carbG, goal?.carbG)
         }
     }
 
     private func item(_ label: String, _ value: Double, _ target: Double?) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(target.map { "\(Int(value))/\(Int($0)) g" } ?? "\(Int(value)) g").font(.subheadline.monospacedDigit())
+            Text(target.map { String(localized: "\(Int(value))/\(Int($0)) g") } ?? String(localized: "\(Int(value)) g")).font(.subheadline.monospacedDigit())
             Text(label).font(.caption2.weight(.medium)).tracking(1.5).foregroundStyle(.secondary)
         }
     }
@@ -144,7 +152,7 @@ private struct LogFoodSheet: View {
                 if let picked {
                     Section(picked.name) {
                         Stepper("\(Int(grams)) g", value: $grams, in: 5...2000, step: 5)
-                        LabeledContent("Calories", value: "\(Int(picked.per100g.calories * grams / 100)) kcal")
+                        LabeledContent("Calories", value: String(localized: "\(Int(picked.per100g.calories * grams / 100)) kcal"))
                         Button("Log It") { log { try await service.logFood(picked.id, grams: grams) } }
                             .buttonStyle(.borderedProminent)
                     }
@@ -164,7 +172,7 @@ private struct LogFoodSheet: View {
                     Section("From Your Plans") {
                         ForEach(meals) { meal in
                             Button { log { try await service.logMeal(meal.id) } } label: {
-                                LabeledContent(meal.title, value: "\(Int(meal.calories)) kcal")
+                                LabeledContent(meal.title, value: String(localized: "\(Int(meal.calories)) kcal"))
                             }
                         }
                     }
@@ -175,7 +183,7 @@ private struct LogFoodSheet: View {
                             picked = ingredient
                             grams = ingredient.servingSizeGrams > 0 ? ingredient.servingSizeGrams : 100
                         } label: {
-                            LabeledContent(ingredient.name, value: "\(Int(ingredient.per100g.calories)) kcal/100 g")
+                            LabeledContent(ingredient.name, value: String(localized: "\(Int(ingredient.per100g.calories)) kcal/100 g"))
                         }
                     }
                 }
@@ -287,10 +295,10 @@ private struct IngredientForm: View {
             Form {
                 TextField("Name", text: $name)
                 Section("Per 100 g") {
-                    number("Calories (kcal)", $calories)
-                    number("Protein (g)", $protein)
-                    number("Fat (g)", $fat)
-                    number("Carbs (g)", $carbs)
+                    number(String(localized: "Calories (kcal)"), $calories)
+                    number(String(localized: "Protein (g)"), $protein)
+                    number(String(localized: "Fat (g)"), $fat)
+                    number(String(localized: "Carbs (g)"), $carbs)
                 }
                 if let error { ErrorRow(error) }
             }

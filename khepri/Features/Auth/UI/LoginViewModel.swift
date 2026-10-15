@@ -129,7 +129,7 @@ public final class LoginViewModel: ObservableObject {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard AuthValidation.isValidEmail(trimmedEmail), !trimmedName.isEmpty, !isLoading else {
-            errorMessage = "Please enter a valid email and display name first."
+            errorMessage = String(localized: "Please enter a valid email and display name first.")
             return
         }
 
@@ -150,12 +150,12 @@ public final class LoginViewModel: ObservableObject {
 
     public func requestPasswordReset(for emailToReset: String) async -> Bool {
         guard AuthValidation.isValidEmail(emailToReset) else {
-            errorMessage = "Please enter a valid email address."
+            errorMessage = String(localized: "Please enter a valid email address.")
             return false
         }
         do {
             try await authService.forgotPassword(email: emailToReset)
-            infoMessage = "If that email is registered, password reset instructions have been sent."
+            infoMessage = String(localized: "If that email is registered, password reset instructions have been sent.")
             return true
         } catch {
             errorMessage = error.localizedDescription

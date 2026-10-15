@@ -130,9 +130,11 @@ private struct GoalRow: View {
 
     private var caption: String {
         var parts = [goal.category.capitalized]
-        if goal.milestoneTotal > 0 { parts.append("\(goal.milestoneDone)/\(goal.milestoneTotal) milestones") }
+        if goal.milestoneTotal > 0 {
+            parts.append(String(localized: "\(goal.milestoneDone)/\(goal.milestoneTotal) milestones"))
+        }
         if let due = goal.targetDate.flatMap(CalendarDay.date(from:)) {
-            parts.append("by " + due.formatted(.dateTime.day().month(.abbreviated).year()))
+            parts.append(String(localized: "by \(due.formatted(.dateTime.day().month(.abbreviated).year()))"))
         }
         return parts.joined(separator: " · ")
     }
@@ -141,10 +143,10 @@ private struct GoalRow: View {
 extension Components.Schemas.GoalSummary.StatusPayload {
     var label: String {
         switch self {
-        case .active: "Active"
-        case .achieved: "Achieved"
-        case .paused: "Paused"
-        case .abandoned: "Abandoned"
+        case .active: String(localized: "Active", comment: "Goal status")
+        case .achieved: String(localized: "Achieved", comment: "Goal status")
+        case .paused: String(localized: "Paused", comment: "Goal status")
+        case .abandoned: String(localized: "Abandoned", comment: "Goal status")
         }
     }
 }
@@ -223,7 +225,7 @@ struct GoalDetailView: View {
                                 .foregroundStyle(NorthColor.signal)
                         }
                     }
-                    .accessibilityValue(milestone.status == .completed ? "Done" : "Not done")
+                    .accessibilityValue(milestone.status == .completed ? Text("Done") : Text("Not done"))
                     .swipeActions {
                         Button("Delete", role: .destructive) {
                             Task { await act { try await service.deleteMilestone(id, milestone.id) } }
@@ -334,7 +336,7 @@ struct GoalDetailView: View {
 
 /// Create or edit a goal.
 struct GoalForm: View {
-    let title: String
+    let title: LocalizedStringKey
     @State var draft: GoalDraft
     let categories: [String]
     let onSave: (GoalDraft) async throws -> Void
