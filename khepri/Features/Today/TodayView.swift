@@ -11,6 +11,8 @@ struct TodayView: View {
     @State private var fitness = FitnessStore()
     @State private var recovery = RecoveryStore()
     @State private var lighter = LighterDayStore()
+    @State private var recap = RecapStore()
+    @State private var showingRecap = false
 
     var body: some View {
         ScrollView {
@@ -39,6 +41,10 @@ struct TodayView: View {
 
                 // Only on a low-recovery morning with a session still to do.
                 LighterDayCard(store: lighter)
+
+                if let week = recap.recaps[.week] {
+                    YourWeekCard(recap: week) { showingRecap = true }
+                }
 
                 if fitness.isHealthAvailable {
                     NavigationLink(value: FitnessRoute()) {
@@ -77,6 +83,10 @@ struct TodayView: View {
             Task { await fitness.loadActivity() }
             Task { await recovery.load() }
             Task { await lighter.load() }
+            Task { await recap.load(.week) }
+        }
+        .sheet(isPresented: $showingRecap) {
+            RecapScreen(store: recap)
         }
     }
 }

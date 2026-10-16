@@ -338,7 +338,12 @@ private struct FeedRow: View {
                     Text("· \(item.occurredAt.formatted(.relative(presentation: .named)))")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Text(item.title)
+                if item.kind == "recap_shared" {
+                    Label(item.title, systemImage: "chart.bar.fill")
+                        .labelStyle(.titleAndIcon)
+                } else {
+                    Text(item.title)
+                }
                 if !item.detail.isEmpty {
                     Text(item.detail).font(.caption).foregroundStyle(.secondary)
                 }
