@@ -227,7 +227,7 @@ struct SessionChoice: Hashable {
 }
 
 /// The seven days as toggles. A day already trained cannot be dropped.
-private struct WeekdayChips: View {
+struct WeekdayChips: View {
     let selected: Set<String>
     let completed: Set<String>
     let toggle: (String) -> Void

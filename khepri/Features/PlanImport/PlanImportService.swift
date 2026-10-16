@@ -54,4 +54,16 @@ struct PlanImportService: PlanImportServicing {
             }
         }
     }
+
+    func mealIntake() async throws -> MealPlanIntakeState {
+        try await NorthAPI.call { try await api.getMealPlanIntake().ok.body.json }
+    }
+
+    func generateMeal(_ intake: MealPlanIntake) async throws -> MealImportDraft {
+        try await BackgroundActivity.run("Meal plan") {
+            try await NorthAPI.call {
+                try await generationAPI.generateMealPlan(body: .json(intake)).ok.body.json
+            }
+        }
+    }
 }

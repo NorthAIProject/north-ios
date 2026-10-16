@@ -10,6 +10,8 @@ typealias MealImportMeal = Components.Schemas.MealImportMeal
 typealias MealImportOption = Components.Schemas.MealImportOption
 typealias MealImportFood = Components.Schemas.MealImportFood
 typealias ImportMacros = Components.Schemas.ImportMacros
+typealias MealPlanIntake = Components.Schemas.MealPlanIntake
+typealias MealPlanIntakeState = Components.Schemas.MealPlanIntakeState
 
 /// Reading a plan out of a file, and saving it once the person has checked it.
 ///
@@ -30,4 +32,11 @@ protocol PlanImportServicing: Sendable {
     /// Saves the reviewed draft as a new plan, or reports the days over their
     /// target exactly as any other meal plan change would.
     func commitMeal(_ draft: MealImportDraft, confirm: Bool) async throws -> PlanWrite<String>
+
+    /// The answers last given for building a meal plan, and whether there is
+    /// a macro target to build one to.
+    func mealIntake() async throws -> MealPlanIntakeState
+    /// Has the coach draft a meal plan from the answers. Returns a draft in
+    /// the same shape as `parseMeal`, reviewed and saved the same way.
+    func generateMeal(_ intake: MealPlanIntake) async throws -> MealImportDraft
 }

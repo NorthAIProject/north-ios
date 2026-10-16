@@ -267,6 +267,138 @@
         }
       }
     },
+    "Anything Else?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Algo más?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais alguma coisa?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais alguma coisa?"
+          }
+        }
+      }
+    },
+    "Build Meal Plan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear plan de comidas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar plano alimentar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar plano alimentar"
+          }
+        }
+      }
+    },
+    "Build muscle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganar músculo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganhar massa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganhar músculo"
+          }
+        }
+      }
+    },
+    "Build My Plan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear mi plan"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar meu plano"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar o meu plano"
+          }
+        }
+      }
+    },
+    "Build with AI" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear con IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar com IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar com IA"
+          }
+        }
+      }
+    },
+    "Cheap, quick breakfasts. Optional." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barato, desayunos rápidos. Opcional."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barato, café da manhã rápido. Opcional."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Barato, pequenos-almoços rápidos. Opcional."
+          }
+        }
+      }
+    },
     "Check-in streak" : {
       "localizations" : {
         "es" : {
@@ -311,6 +443,72 @@
         }
       }
     },
+    "dairy, peanuts, mushrooms" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lácteos, cacahuetes, setas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laticínios, amendoim, cogumelos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lacticínios, amendoins, cogumelos"
+          }
+        }
+      }
+    },
+    "Different days" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días distintos"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias diferentes"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias diferentes"
+          }
+        }
+      }
+    },
+    "Every day is built to your macro target and checked against your answers before you see it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada día se ajusta a tu objetivo de macros y se comprueba con tus respuestas antes de que lo veas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada dia é montado na sua meta de macros e conferido com suas respostas antes de você ver."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada dia é feito à medida da tua meta de macros e verificado com as tuas respostas antes de o veres."
+          }
+        }
+      }
+    },
     "Foods logged" : {
       "localizations" : {
         "es" : {
@@ -329,6 +527,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alimentos registados"
+          }
+        }
+      }
+    },
+    "Foods to Leave Out" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentos a evitar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentos a evitar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentos a evitar"
           }
         }
       }
@@ -399,6 +619,94 @@
         }
       }
     },
+    "Lose fat" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perder grasa"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perder gordura"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perder gordura"
+          }
+        }
+      }
+    },
+    "Maintain" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenerme"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter"
+          }
+        }
+      }
+    },
+    "Meal plans are built to your macro target, and you haven't worked one out yet. Use the calculator in Nutrition first." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los planes de comidas se basan en tu objetivo de macros, y aún no lo has calculado. Usa primero la calculadora en Nutrición."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os planos alimentares são montados na sua meta de macros, e você ainda não calculou a sua. Use primeiro a calculadora em Nutrição."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os planos alimentares são feitos à medida da tua meta de macros, e ainda não a calculaste. Usa primeiro a calculadora em Nutrição."
+          }
+        }
+      }
+    },
+    "Meals per day" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comidas al día"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeições por dia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeições por dia"
+          }
+        }
+      }
+    },
     "My last 30 days on Khepri — %@" : {
       "localizations" : {
         "es" : {
@@ -461,6 +769,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abre o teu resumo"
+          }
+        }
+      }
+    },
+    "Optional. The days you pick set how many a week; pick none and the plan spreads them across your week." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional. Los días que elijas fijan cuántos por semana; si no eliges ninguno, el plan los reparte en tu semana."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional. Os dias que você escolher definem quantos por semana; se não escolher nenhum, o plano distribui pela sua semana."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional. Os dias que escolheres definem quantos por semana; se não escolheres nenhum, o plano distribui-os pela tua semana."
           }
         }
       }
@@ -575,6 +905,28 @@
         }
       }
     },
+    "Separate them with commas. Khepri also keeps them in mind when you chat." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sepáralos con comas. Khepri también los tendrá en cuenta en el chat."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separe com vírgulas. O Khepri também leva isso em conta no chat."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separa-os com vírgulas. O Khepri também os tem em conta nas conversas."
+          }
+        }
+      }
+    },
     "Share recap" : {
       "localizations" : {
         "es" : {
@@ -637,6 +989,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partilhar…"
+          }
+        }
+      }
+    },
+    "This takes up to a minute. You'll review every meal before anything is saved." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarda hasta un minuto. Revisarás cada comida antes de guardar nada."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leva até um minuto. Você revisa cada refeição antes de salvar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demora até um minuto. Vais rever cada refeição antes de guardar."
+          }
+        }
+      }
+    },
+    "Which Days?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué días?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quais dias?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que dias?"
           }
         }
       }
