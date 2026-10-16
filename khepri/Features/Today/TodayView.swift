@@ -11,6 +11,7 @@ struct TodayView: View {
     @State private var fitness = FitnessStore()
     @State private var recovery = RecoveryStore()
     @State private var lighter = LighterDayStore()
+    @State private var outreach = OutreachStore()
     @State private var recap = RecapStore()
     @State private var showingRecap = false
 
@@ -39,8 +40,14 @@ struct TodayView: View {
                     RecoveryCard(recovery: today)
                 }
 
-                // Only on a low-recovery morning with a session still to do.
-                LighterDayCard(store: lighter)
+                // The coach's one unprompted message, on a day it spoke first.
+                OutreachCard(store: outreach)
+
+                // Only on a low-recovery morning with a session still to do,
+                // and only when the coach's message has not already covered it.
+                if outreach.message?.coversRecovery != true {
+                    LighterDayCard(store: lighter)
+                }
 
                 if let week = recap.recaps[.week] {
                     YourWeekCard(recap: week) { showingRecap = true }
@@ -83,6 +90,7 @@ struct TodayView: View {
             Task { await fitness.loadActivity() }
             Task { await recovery.load() }
             Task { await lighter.load() }
+            Task { await outreach.load() }
             Task { await recap.load(.week) }
         }
         .sheet(isPresented: $showingRecap) {

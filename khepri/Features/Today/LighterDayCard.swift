@@ -46,6 +46,9 @@ extension LighterDay {
     }
 
     var tookItLighter: Bool { choice?.rawValue == "lighter" }
+
+    /// The coach lightened it itself on a low morning; undo is keeping the plan.
+    var lightenedByCoach: Bool { tookItLighter && source == "coach" }
 }
 
 private extension String {
@@ -94,11 +97,25 @@ struct LighterDayCard: View {
         if let day = store.day, day.offered {
             offer(day)
         } else if let day = store.day, day.tookItLighter {
-            Label("Lighter day: today's sets are cut to about 60%. Tomorrow is back to the plan.", systemImage: "leaf")
+            HStack(alignment: .firstTextBaseline) {
+                Group {
+                    if day.lightenedByCoach {
+                        Label("Your coach made today lighter: your recovery is under your usual, so sets are cut to about 60%. Tomorrow is back to the plan.", systemImage: "leaf")
+                    } else {
+                        Label("Lighter day: today's sets are cut to about 60%. Tomorrow is back to the plan.", systemImage: "leaf")
+                    }
+                }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .northSurfaceCard(padding: 16)
+                Spacer(minLength: 8)
+                // Undo is keeping the plan: the same answer as declining.
+                Button("Undo") { Task { await store.choose(lighter: false) } }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(store.saving)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .northSurfaceCard(padding: 16)
         }
     }
 

@@ -234,3 +234,27 @@ struct CheckInActionsTests {
         #expect(CheckInActions.categoryIdentifier == "CHECKIN")
     }
 }
+
+@MainActor
+struct CoachActionsTests {
+    /// The names must match nudges.CategoryCoachLighter / CategoryCoachMissed
+    /// on the server, or the banner arrives without buttons.
+    @Test func categoriesMatchTheServer() {
+        let names = Set(CoachActions.categories.map(\.identifier))
+        #expect(names == ["COACH_LIGHTER", "COACH_MISSED"])
+    }
+
+    /// Each button answers with what POST /outreach/{id}/actions expects.
+    @Test func eachButtonCarriesItsAnswer() {
+        let answers = CoachActions.categories.flatMap(\.actions).map { CoachActions.answer(forAction: $0.identifier) }
+        #expect(answers == ["undo", "today", "tomorrow", "let_go"])
+        // Answered without opening the app.
+        #expect(CoachActions.categories.flatMap(\.actions).allSatisfy { !$0.options.contains(.foreground) })
+    }
+
+    @Test func aPlainTapIsNoAnswer() {
+        #expect(CoachActions.answer(forAction: "com.apple.UNNotificationDefaultActionIdentifier") == nil)
+        #expect(CoachActions.answer(forAction: "CHECKIN_MOOD_4") == nil)
+        #expect(CoachActions.answer(forAction: "COACH_ANSWER_") == nil)
+    }
+}
