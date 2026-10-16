@@ -12,7 +12,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        center.setNotificationCategories([WorkoutReminders.category, CheckInActions.category])
+        center.setNotificationCategories(Set([WorkoutReminders.category, CheckInActions.category] + CoachActions.categories))
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
         // A workout Live Activity from before a kill has nothing behind it
@@ -59,6 +59,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     /// A mood button on a check-in nudge opens today's check-in with that mood
     /// instead. The nudge is still opened first, so the server counts the tap.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        // A button under the coach's message answers it where it stands,
+        // without opening the app.
+        if let answer = CoachActions.answer(forAction: response.actionIdentifier) {
+            _ = try? await OutreachService().answer(id: "today", action: answer)
+            return
+        }
         // A nudge from the server carries the web's link in `href`.
         if let href = response.notification.request.content.userInfo["href"] as? String {
             let checkIn = CheckInActions.mood(forAction: response.actionIdentifier).map(CheckInActions.url(mood:))

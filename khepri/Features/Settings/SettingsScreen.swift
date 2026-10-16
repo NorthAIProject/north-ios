@@ -422,6 +422,16 @@ private struct NotificationSettings: View {
                 }
 
                 Section {
+                    Toggle("Let my coach message me first", isOn: optionalBind(\.coachCheckIns))
+                    Toggle("Let my coach lighten a session when recovery is low", isOn: optionalBind(\.coachAdjustsTraining))
+                        .disabled(value.coachCheckIns == false)
+                } header: {
+                    Text("Your Coach")
+                } footer: {
+                    Text("At most once a day, when it notices something: a low-recovery morning, a missed session. When it lightens a session it tells you why, and you can undo it.")
+                }
+
+                Section {
                     Toggle("Daily briefing", isOn: bind(\.dailyBriefingAuto))
                     if value.dailyBriefingAuto {
                         HourPicker(title: String(localized: "Arrives at"), hour: int(\.briefingHour))
@@ -476,6 +486,15 @@ private struct NotificationSettings: View {
         .navigationTitle("Notifications")
         .saveToolbar(settings) { try await service.save($0) }
         .task { await settings.load(service.notifications) }
+    }
+
+    /// A setting a server from before it existed does not send: shown as its
+    /// default, on, and sent back once changed.
+    private func optionalBind(_ keyPath: WritableKeyPath<SettingsModel.NotificationSettings, Bool?>) -> Binding<Bool> {
+        Binding(
+            get: { settings.value?[keyPath: keyPath] ?? true },
+            set: { settings.value?[keyPath: keyPath] = $0 }
+        )
     }
 
     private func bind(_ keyPath: WritableKeyPath<SettingsModel.NotificationSettings, Bool>) -> Binding<Bool> {

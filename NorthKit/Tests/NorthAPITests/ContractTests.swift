@@ -412,6 +412,28 @@ struct ContractTests {
         #expect(day.session == "Lower body" && day.choice == nil)
     }
 
+    @Test func outreach() throws {
+        let today = try decode(Schemas.OutreachToday.self, "outreach_open")
+        let open = try #require(today.outreach)
+        #expect(open.trigger == "missed_session" && open.session == "Upper B")
+        #expect(open.actions == ["today", "let_go"] && open.action == nil)
+        let answered = try decode(Schemas.Outreach.self, "outreach_answered")
+        #expect(answered.actions.isEmpty && answered.action == "today" && answered.actedAt != nil)
+        #expect(answered.outcome?.isEmpty == false)
+    }
+
+    @Test func progressChecks() throws {
+        let list = try decode(Schemas.ProgressChecks.self, "progress_checks")
+        #expect(!list.checks.isEmpty && list.canCompare == false)
+        _ = try decode(Schemas.BodyCurrent.self, "body_current")
+        let comparison = try decode(Schemas.ProgressComparison.self, "progress_comparison")
+        #expect(comparison.stale && comparison.confidence == "medium")
+        let estimate = try decode(Schemas.ProgressEstimateResult.self, "progress_estimate")
+        #expect(estimate.estimate.waistCm == 95.2 && estimate.estimate.chestCm == nil)
+        let assist = try decode(Schemas.ProgressAssist.self, "progress_assist")
+        #expect(assist.available && assist.ownProvider)
+    }
+
     @Test func weekly() throws {
         let review = try decode(Schemas.WeeklyReview.self, "weekly-review")
         #expect(review.planning == "2026-10-05" && review.report?.ready == true)
@@ -468,7 +490,9 @@ struct ContractTests {
                             "form-check-playback", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
                             "weekly-review", "weekly-focus", "recap", "recap-shared",
-                            "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter"]
+                            "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
+                            "outreach_open", "outreach_answered", "progress_checks", "body_current",
+                            "progress_comparison", "progress_estimate", "progress_assist"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

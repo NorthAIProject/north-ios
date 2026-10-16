@@ -144,6 +144,9 @@ enum HealthBackgroundDelivery {
         HKObjectType.workoutType(),
         HKQuantityType(.stepCount),
         HKQuantityType(.restingHeartRate),
+        // HRV too: the coach reads the morning's recovery before training, and
+        // without its own observer this morning's HRV waits for another sync.
+        HKQuantityType(.heartRateVariabilitySDNN),
         HKCategoryType(.sleepAnalysis),
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.dietaryWater),
