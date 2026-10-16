@@ -1,13 +1,23 @@
 import NorthAPI
 import SwiftUI
 
-/// Import a meal plan: pick a file or photo, check foods against what's left
-/// of the macro target, save.
+/// Import a meal plan: pick a file or photo — or have the coach build one —
+/// check foods against what's left of the macro target, save.
+///
+/// A built plan arrives as the same draft a file does, so it is reviewed and
+/// saved by the same screen.
 ///
 /// The target is only read. A day over it is refused on save exactly as it is
 /// when building a plan by hand: always on an easy plan, until confirmed on an
 /// advanced one.
 struct MealImportSheet: View {
+    /// Where the draft comes from.
+    enum Source {
+        case file
+        case coach
+    }
+
+    var source = Source.file
     var service: PlanImportServicing = PlanImportService()
     let onSaved: (String) -> Void
 
@@ -28,7 +38,7 @@ struct MealImportSheet: View {
                     start
                 }
             }
-            .navigationTitle("Import Meal Plan")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -66,7 +76,22 @@ struct MealImportSheet: View {
         }
     }
 
-    private var start: some View {
+    private var title: String {
+        source == .coach ? String(localized: "Build Meal Plan") : String(localized: "Import Meal Plan")
+    }
+
+    @ViewBuilder private var start: some View {
+        switch source {
+        case .file:
+            fileStart
+        case .coach:
+            MealGenerateForm(service: service, disabled: working != nil, buildError: error) { intake in
+                Task { await build(intake) }
+            }
+        }
+    }
+
+    private var fileStart: some View {
         Form {
             Section {
                 Button("Choose File or Photo", systemImage: "doc.badge.plus") { picking = true }
@@ -86,6 +111,17 @@ struct MealImportSheet: View {
         defer { working = nil }
         do {
             draft = EditableMealDraft(try await service.parseMeal(filename: file.filename, data: file.data))
+            error = nil
+        } catch {
+            self.error = error.importMessage
+        }
+    }
+
+    private func build(_ intake: MealPlanIntake) async {
+        working = String(localized: "Building your plan…")
+        defer { working = nil }
+        do {
+            draft = EditableMealDraft(try await service.generateMeal(intake))
             error = nil
         } catch {
             self.error = error.importMessage

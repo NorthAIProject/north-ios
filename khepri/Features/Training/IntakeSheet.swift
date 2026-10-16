@@ -11,6 +11,7 @@ struct IntakeSheet: View {
     @State private var daysPerWeek = 3
     @State private var sessionMinutes = 45
     @State private var equipment: Set<String> = []
+    @State private var weekdays: Set<String> = []
     @State private var limitations = ""
     @State private var creating = false
     @State private var error: String?
@@ -54,8 +55,22 @@ struct IntakeSheet: View {
                     Picker("Experience", selection: $experience) {
                         ForEach(Self.experienceOptions, id: \.value) { Text($0.label).tag($0.value) }
                     }
-                    Stepper("\(daysPerWeek) days a week", value: $daysPerWeek, in: 1...7)
+                    Stepper("\(trainingDays) days a week", value: $daysPerWeek, in: 1...7)
+                        .disabled(!weekdays.isEmpty)
                     Stepper("\(sessionMinutes) minutes a session", value: $sessionMinutes, in: 10...240, step: 5)
+                }
+
+                Section {
+                    WeekdayChips(selected: weekdays, completed: []) { weekday in
+                        if weekdays.contains(weekday) { weekdays.remove(weekday) } else { weekdays.insert(weekday) }
+                    }
+                } header: {
+                    Text("Which Days?")
+                } footer: {
+                    Text("""
+                        Optional. The days you pick set how many a week; \
+                        pick none and the plan spreads them across your week.
+                        """)
                 }
 
                 Section {
@@ -106,6 +121,9 @@ struct IntakeSheet: View {
         }
     }
 
+    /// The days a week the plan is built for: the days picked, when any are.
+    private var trainingDays: Int { weekdays.isEmpty ? daysPerWeek : weekdays.count }
+
     private func prefill() async {
         guard let last = try? await service.latestIntake() else { return }
         goal = last.goal
@@ -113,6 +131,7 @@ struct IntakeSheet: View {
         daysPerWeek = last.daysPerWeek
         sessionMinutes = last.sessionMinutes
         equipment = Set(last.equipment)
+        weekdays = Set(last.weekdays ?? [])
         limitations = last.limitations ?? ""
     }
 
@@ -121,8 +140,9 @@ struct IntakeSheet: View {
         defer { creating = false }
         do {
             let plan = try await service.createPlan(TrainingIntake(
-                goal: goal, experience: experience, daysPerWeek: daysPerWeek, sessionMinutes: sessionMinutes,
-                equipment: Array(equipment), limitations: limitations.isEmpty ? nil : limitations
+                goal: goal, experience: experience, daysPerWeek: trainingDays, sessionMinutes: sessionMinutes,
+                equipment: Array(equipment), limitations: limitations.isEmpty ? nil : limitations,
+                weekdays: weekdays.isEmpty ? nil : WeekEditorSheet.allWeekdays.filter(weekdays.contains)
             ))
             onCreated(plan)
             dismiss()

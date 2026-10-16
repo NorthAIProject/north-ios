@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Seeds a local account with a training plan, recorded biometrics and a few
-# days of synced steps, for TrainingUITests, WorkoutUITests and ProgressUITests.
+# days of synced steps and a macro target, for TrainingUITests,
+# WorkoutUITests, ProgressUITests and MealPlanUITests.
 #
 # The fake model cannot generate a plan (it answers in prose, not the plan
 # schema), so the intake and plan rows are inserted as the repository would
@@ -64,5 +65,7 @@ for back in range(1, 6):
                      "startedAt": start.isoformat().replace("+00:00", "Z"),
                      "endedAt": (start + datetime.timedelta(days=1)).isoformat().replace("+00:00", "Z")})
 call("POST", "/health/samples", token, {"readings": readings})
+# A macro target, so meal plans can be built (MealPlanUITests).
+call("POST", "/calculator/plan", token, {"activityLevel": "moderate", "goal": "maintenance", "macroSplit": "moderate_carb"})
 print(f"export TEST_RUNNER_TRAINING_EMAIL='{email}' TEST_RUNNER_TRAINING_PASSWORD='{password}'")
 PY
