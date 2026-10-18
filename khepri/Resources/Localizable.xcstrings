@@ -289,6 +289,28 @@
         }
       }
     },
+    "At most once a day, when it notices something: a low-recovery morning, a missed session. When it lightens a session it tells you why, and you can undo it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como mucho una vez al día, cuando nota algo: una mañana de recuperación baja, una sesión que no se hizo. Cuando aligera una sesión te dice por qué y puedes deshacerlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No máximo uma vez por dia, quando percebe algo: uma manhã de recuperação baixa, uma sessão que ficou para trás. Quando alivia uma sessão, ele diz o porquê e você pode desfazer."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No máximo uma vez por dia, quando repara em algo: uma manhã de recuperação baixa, uma sessão que ficou por fazer. Quando alivia uma sessão diz-te porquê e podes desfazer."
+          }
+        }
+      }
+    },
     "Build Meal Plan" : {
       "localizations" : {
         "es" : {
@@ -487,6 +509,29 @@
         }
       }
     },
+    "Do It Today" : {
+      "comment" : "Button on the coach's notification about a missed session",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacerla hoy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer hoje"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer hoje"
+          }
+        }
+      }
+    },
     "Every day is built to your macro target and checked against your answers before you see it." : {
       "localizations" : {
         "es" : {
@@ -575,6 +620,28 @@
         }
       }
     },
+    "From Your Coach" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De tu coach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do seu coach"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do teu coach"
+          }
+        }
+      }
+    },
     "Last 30 days" : {
       "localizations" : {
         "es" : {
@@ -615,6 +682,73 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Últimos 7 dias"
+          }
+        }
+      }
+    },
+    "Let It Go" : {
+      "comment" : "Button on the coach's notification about a missed session",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejarla pasar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar passar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar passar"
+          }
+        }
+      }
+    },
+    "Let my coach lighten a session when recovery is low" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que mi coach aligere una sesión cuando la recuperación es baja"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar meu coach aliviar uma sessão quando a recuperação está baixa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar o meu coach aliviar uma sessão quando a recuperação está baixa"
+          }
+        }
+      }
+    },
+    "Let my coach message me first" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que mi coach me escriba primero"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar meu coach me escrever primeiro"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deixar o meu coach escrever-me primeiro"
           }
         }
       }
@@ -1015,6 +1149,29 @@
         }
       }
     },
+    "Tomorrow" : {
+      "comment" : "Button on the coach's notification about a missed session",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mañana"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amanhã"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amanhã"
+          }
+        }
+      }
+    },
     "Which Days?" : {
       "localizations" : {
         "es" : {
@@ -1033,6 +1190,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Que dias?"
+          }
+        }
+      }
+    },
+    "Your Coach" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu coach"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu coach"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O teu coach"
+          }
+        }
+      }
+    },
+    "Your coach made today lighter: your recovery is under your usual, so sets are cut to about 60%. Tomorrow is back to the plan." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu coach ha hecho el día de hoy más suave: tu recuperación está por debajo de lo habitual, así que las series se reducen a cerca del 60%. Mañana vuelves al plan."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu coach deixou o dia de hoje mais leve: sua recuperação está abaixo do normal, então as séries caem para cerca de 60%. Amanhã você volta ao plano."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O teu coach tornou o dia de hoje mais leve: a tua recuperação está abaixo do habitual, por isso as séries passam para cerca de 60%. Amanhã voltas ao plano."
           }
         }
       }
