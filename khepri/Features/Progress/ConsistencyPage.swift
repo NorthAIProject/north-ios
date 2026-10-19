@@ -1,3 +1,4 @@
+import Algorithms
 import NorthAPI
 import NorthKit
 import SwiftUI
@@ -107,7 +108,7 @@ private struct DayGrid: View {
     let days: [Components.Schemas.InsightsConsistencyDay]
 
     var body: some View {
-        let columns = stride(from: 0, to: days.count, by: 7).map { Array(days[$0..<min($0 + 7, days.count)]) }
+        let columns = days.chunks(ofCount: 7)
         HStack(alignment: .top, spacing: 4) {
             ForEach(Array(columns.enumerated()), id: \.offset) { _, week in
                 VStack(spacing: 4) {

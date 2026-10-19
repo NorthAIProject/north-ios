@@ -1,3 +1,4 @@
+import Algorithms
 import Foundation
 import HealthKit
 import NorthAPI
@@ -151,18 +152,13 @@ enum HealthPayload {
 
         let workouts = snapshot.workouts.compactMap(workout)
 
-        var out: [HealthSyncRequest] = []
-        var start = 0
-        repeat {
-            let slice = Array(readings[start..<min(start + batchSize, readings.count)])
-            // Workouts ride with the first batch; later batches are readings only.
-            let batchWorkouts = start == 0 ? workouts : []
-            if !slice.isEmpty || !batchWorkouts.isEmpty {
-                out.append(.init(readings: slice, workouts: batchWorkouts))
-            }
-            start += batchSize
-        } while start < readings.count
-        return out
+        // Workouts ride with the first batch; later batches are readings only.
+        // With no readings at all, the workouts still go in a request of their own.
+        let batches = readings.chunks(ofCount: batchSize)
+        guard !batches.isEmpty else { return workouts.isEmpty ? [] : [.init(readings: [], workouts: workouts)] }
+        return batches.enumerated().map { index, slice in
+            .init(readings: Array(slice), workouts: index == 0 ? workouts : [])
+        }
     }
 
     static func workout(_ w: HealthWorkoutRecord) -> HealthWorkoutPayload? {
@@ -230,8 +226,7 @@ enum SleepStages {
     }
 
     static func blocks(from samples: [Sample], calendar: Calendar) -> [SleepStageBlock] {
-        var byNight: [Date: [Sample]] = [:]
-        for s in samples { byNight[calendar.startOfDay(for: s.end), default: []].append(s) }
+        let byNight = samples.grouped { calendar.startOfDay(for: $0.end) }
 
         var out: [SleepStageBlock] = []
         for night in byNight.keys.sorted() {

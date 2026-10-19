@@ -1,3 +1,4 @@
+import Algorithms
 import Contacts
 import CryptoKit
 import Foundation
@@ -43,17 +44,16 @@ nonisolated enum ContactMatching {
 
     /// One digest per distinct address, in the order first seen.
     static func hashes(of emails: [String]) -> [String] {
-        var seen = Set<String>()
-        return emails.compactMap(normalize).filter { seen.insert($0).inserted }.map(hash)
+        emails.compactMap(normalize).uniqued().map(hash)
     }
 
     /// Requests of at most `size` digests each: emails first, then phones,
     /// with one request holding both where they meet.
     static func chunks(_ hashes: ContactHashes, size: Int = chunkSize) -> [ContactHashes] {
         let tagged = hashes.emails.map { (isEmail: true, hash: $0) } + hashes.phones.map { (isEmail: false, hash: $0) }
-        return stride(from: 0, to: tagged.count, by: size).map { start in
-            let slice = tagged[start..<min(start + size, tagged.count)]
-            return ContactHashes(emails: slice.filter(\.isEmail).map(\.hash), phones: slice.filter { !$0.isEmail }.map(\.hash))
+        return tagged.chunks(ofCount: size).map { slice in
+            let (phones, emails) = slice.partitioned(by: \.isEmail)
+            return ContactHashes(emails: emails.map(\.hash), phones: phones.map(\.hash))
         }
     }
 

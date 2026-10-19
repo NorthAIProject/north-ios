@@ -1,3 +1,4 @@
+import Algorithms
 import NorthAPI
 import NorthKit
 import SwiftUI
@@ -132,9 +133,7 @@ private struct LogActivitySheet: View {
     }
 
     private var categories: [String] {
-        var seen: [String] = []
-        for kind in kinds where !seen.contains(kind.category) { seen.append(kind.category) }
-        return seen
+        Array(kinds.map(\.category).uniqued())
     }
 
     private enum ParsedDistance: Equatable { case none, km(Double), invalid }

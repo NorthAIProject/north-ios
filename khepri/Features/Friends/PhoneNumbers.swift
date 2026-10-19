@@ -1,3 +1,4 @@
+import Algorithms
 import Foundation
 
 /// A country's calling code, and whether its national numbers are written
@@ -110,7 +111,6 @@ nonisolated enum PhoneNumbers {
     /// One digest per distinct number, in the order first seen, of the E.164
     /// form including the plus. What cannot be read is left out.
     static func hashes(of numbers: [String], home: CallingCode?) -> [String] {
-        var seen = Set<String>()
-        return numbers.compactMap { e164($0, home: home) }.filter { seen.insert($0).inserted }.map(ContactMatching.hash)
+        numbers.compactMap { e164($0, home: home) }.uniqued().map(ContactMatching.hash)
     }
 }
