@@ -241,6 +241,9 @@ final class CrewChatStore {
         try? await service.markRead(crewID, channel: channelID, seq: seq)
     }
 
+    /// The person has read the error.
+    func clearError() { error = nil }
+
     // MARK: Helpers
 
     /// Replaces by id, then orders by `seq`.

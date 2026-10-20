@@ -3,7 +3,8 @@ import NorthKit
 import SwiftUI
 
 /// Crews: a few people keeping each other going. Crewmates see who checked in
-/// and trained today, streaks and the week's challenge, and nothing else.
+/// and trained today, streaks and the week's challenge, and chat in the crew's
+/// channels.
 struct CrewsScreen: View {
     var service: CrewsServicing = CrewsService()
 
@@ -14,19 +15,20 @@ struct CrewsScreen: View {
     @State private var newName = ""
     @State private var opened: Crew?
     @Environment(AppRouter.self) private var router
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         List {
             if let error { ErrorRow(error) }
             if loaded, crews.isEmpty {
-                Text("A crew is up to eight people who keep each other going. Two is an accountability partner.")
+                Text("A crew is a small group who keep each other going.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             // Destination links, not value links: Crews is itself pushed with
             // one from More, and mixing the two in one stack misplaces screens.
             ForEach(crews, id: \.id) { crew in
                 NavigationLink {
-                    CrewBoardView(crewID: crew.id, service: service) { Task { await load() } }
+                    CrewSpaceScreen(crew: crew, meID: meID, crews: service) { Task { await load() } }
                 } label: {
                     HStack {
                         Text(crew.name)
@@ -50,7 +52,7 @@ struct CrewsScreen: View {
         // A crew just made or joined opens over the list.
         .sheet(item: $opened) { crew in
             NavigationStack {
-                CrewBoardView(crewID: crew.id, service: service) { Task { await load() } }
+                CrewSpaceScreen(crew: crew, meID: meID, crews: service) { Task { await load() } }
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Done") { opened = nil }
@@ -68,6 +70,12 @@ struct CrewsScreen: View {
             }
         }
         .refreshable { await load() }
+    }
+
+    /// The signed-in person, whose messages are "mine".
+    private var meID: String {
+        if case .signedIn(let user) = app.phase { return user.id }
+        return ""
     }
 
     private func load() async {
@@ -93,15 +101,18 @@ extension Crew: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-/// One crew: everybody's day, streak and week.
+/// One crew's challenge: everybody's day, streak and week.
 struct CrewBoardView: View {
     let crewID: String
     let service: CrewsServicing
+    /// Blocks a member; the friends slice owns blocking.
+    var chat: CrewChatServicing = CrewChatService()
     let onChange: () -> Void
 
     @State private var board: CrewBoard?
     @State private var error: String?
     @State private var confirmingLeave = false
+    @State private var blocking: CrewMember?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -115,6 +126,19 @@ struct CrewBoardView: View {
                                 if board.value2.isOwner && !member.me {
                                     Button("Remove", role: .destructive) {
                                         act { try await service.remove(crewID, member: member.id) }
+                                    }
+                                }
+                                if !member.me {
+                                    Button("Block") { blocking = member }
+                                        .tint(.orange)
+                                }
+                            }
+                            .contextMenu {
+                                if !member.me {
+                                    Button(
+                                        "Block \(member.displayName)", systemImage: "hand.raised", role: .destructive
+                                    ) {
+                                        blocking = member
                                     }
                                 }
                             }
@@ -132,7 +156,7 @@ struct CrewBoardView: View {
                         }
                     }
                 } footer: {
-                    Text("\(board.value2.members.count) of up to 8. Anyone with the link can join.")
+                    Text("Anyone with the link can join.")
                 }
 
                 if board.value2.isOwner {
@@ -162,6 +186,16 @@ struct CrewBoardView: View {
                         self.error = error.localizedDescription
                     }
                 }
+            }
+        }
+        .confirmationDialog(
+            Text("Block \(blocking?.displayName ?? "")? You won't see each other's messages."),
+            isPresented: Binding(get: { blocking != nil }, set: { if !$0 { blocking = nil } }),
+            titleVisibility: .visible,
+            presenting: blocking
+        ) { member in
+            Button("Block", role: .destructive) {
+                act { try await chat.block(member.id) }
             }
         }
         .task { await load() }

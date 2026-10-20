@@ -66,7 +66,8 @@ struct CrewMessageRowTests {
 
     @Test func noActionsOnDeletedSystemOrUnknownMessages() {
         #expect(CrewMessageActions.available(for: message(deleted: true), meID: "me", role: .owner).isEmpty)
-        #expect(CrewMessageActions.available(for: message(author: nil, kind: "system"), meID: "me", role: .owner).isEmpty)
+        let system = message(author: nil, kind: "system")
+        #expect(CrewMessageActions.available(for: system, meID: "me", role: .owner).isEmpty)
         #expect(CrewMessageActions.available(for: message(kind: "poll"), meID: "me", role: .owner).isEmpty)
     }
 

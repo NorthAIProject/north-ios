@@ -8,7 +8,7 @@ nonisolated enum CrewEmoji {
 
     private static let glyphs: [String: String] = [
         "fire": "🔥", "muscle": "💪", "clap": "👏", "heart": "❤️",
-        "laugh": "😂", "hundred": "💯", "trophy": "🏆", "eyes": "👀",
+        "laugh": "😂", "hundred": "💯", "trophy": "🏆", "eyes": "👀"
     ]
 
     static func glyph(_ key: String) -> String? { glyphs[key] }
