@@ -125,6 +125,13 @@ struct RouterTests {
         ("khepri://check-ins?mood=9", .section("check-ins")),
         ("/app/daily", .section("daily")),
         ("khepri://daily", .section("daily")),
+        // The web's /app/progress is the progress check, where its reminder
+        // leads; khepri://progress is still the Progress tab.
+        ("/app/progress", .section("progress-check")),
+        ("https://kheprios.com/app/progress", .section("progress-check")),
+        ("khepri://progress", .tab(.progress)),
+        ("khepri://progress-check", .section("progress-check")),
+        ("/app/insights", .tab(.progress)),
     ])
     func mapsLinksToDestinations(_ link: String, _ expected: AppDestination) throws {
         #expect(AppRouter.destination(for: try #require(URL(string: link))) == expected)

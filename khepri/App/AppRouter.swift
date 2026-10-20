@@ -124,8 +124,8 @@ final class AppRouter {
 
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
-        "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews", "inbox",
-        "daily",
+        "goals", "check-ins", "progress-check", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
+        "friends", "crews", "inbox", "daily",
     ]
 
     func open(_ destination: AppDestination) {
@@ -204,12 +204,16 @@ final class AppRouter {
     ///     khepri://goals/<id>      → More → Goals → that goal
     ///     khepri://weekly          → the weekly review, as a sheet
     ///     /app/chat/…              → Coach tab (a web path from the server)
+    ///     /app/progress            → More → Progress check
     static func destination(for url: URL) -> AppDestination? {
         let parts: [String]
         if url.scheme == "khepri" {
             parts = ([url.host()].compactMap { $0 } + url.pathComponents).filter { $0 != "/" }
         } else if url.scheme == nil || url.host() == "kheprios.com" {
             parts = url.pathComponents.filter { $0 != "/" }.drop { $0 == "app" }.map { $0 }
+            // The web's /app/progress is the progress-check page, where its
+            // reminder leads; the Progress tab is the web's /app/insights.
+            if parts.first == "progress" { return .section("progress-check") }
         } else {
             return nil
         }

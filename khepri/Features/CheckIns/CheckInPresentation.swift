@@ -86,7 +86,7 @@ struct CheckInTagChips: View {
 
 /// Lays its children out left to right, starting a new line when the next
 /// one does not fit.
-private struct WrappingStack: Layout {
+struct WrappingStack: Layout {
     var spacing: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {

@@ -134,9 +134,9 @@ enum Server {
     }
 
     @discardableResult
-    static func post(_ path: String, token: String?, body: [String: Any]) throws -> [String: Any] {
+    static func post(_ path: String, token: String?, body: [String: Any], method: String = "POST") throws -> [String: Any] {
         var request = URLRequest(url: base.appending(path: path))
-        request.httpMethod = "POST"
+        request.httpMethod = method
         request.timeoutInterval = 120
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }

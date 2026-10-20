@@ -18,6 +18,7 @@ struct MoreScreen: View {
         .init(id: "daily", title: "Daily Post", systemImage: "newspaper"),
         .init(id: "goals", title: "Goals", systemImage: "target"),
         .init(id: "check-ins", title: "Check-ins", systemImage: "checkmark.circle"),
+        .init(id: "progress-check", title: "Progress check", systemImage: "ruler"),
         .init(id: "reports", title: "Reports", systemImage: "doc.text"),
         .init(id: "memories", title: "Memories", systemImage: "brain"),
         .init(id: "knowledge", title: "Knowledge", systemImage: "books.vertical"),
@@ -81,6 +82,7 @@ struct MoreScreen: View {
         switch section.id {
         case "goals": GoalsScreen()
         case "check-ins": CheckInsScreen()
+        case "progress-check": ProgressCheckScreen()
         case "reports": ReportsScreen()
         case "memories": MemoriesScreen()
         case "knowledge": KnowledgeScreen()

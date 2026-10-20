@@ -33,13 +33,17 @@ nonisolated struct ImportFile: Equatable, Sendable {
     ].compactMap { $0 }
 
     /// A photo from the camera.
-    @concurrent nonisolated static func photo(_ image: UIImage, name: String = "photo") async -> ImportFile? {
-        jpeg(image, name: name)
+    @concurrent nonisolated static func photo(
+        _ image: UIImage, name: String = "photo", longestSide: CGFloat = longestPhotoSide
+    ) async -> ImportFile? {
+        jpeg(image, name: name, longestSide: longestSide)
     }
 
     /// A photo from the library, as the bytes the picker handed over.
-    @concurrent nonisolated static func photo(data: Data, name: String = "photo") async -> ImportFile? {
-        UIImage(data: data).flatMap { jpeg($0, name: name) }
+    @concurrent nonisolated static func photo(
+        data: Data, name: String = "photo", longestSide: CGFloat = longestPhotoSide
+    ) async -> ImportFile? {
+        UIImage(data: data).flatMap { jpeg($0, name: name, longestSide: longestSide) }
     }
 
     /// Reads a file the person picked in Files. Images go through `jpeg` for
@@ -61,10 +65,10 @@ nonisolated struct ImportFile: Equatable, Sendable {
     ///
     /// The renderer is pinned to scale 1: its default is the screen's scale,
     /// which would triple the pixels on each side instead of shrinking them.
-    static func jpeg(_ image: UIImage, name: String) -> ImportFile? {
+    static func jpeg(_ image: UIImage, name: String, longestSide: CGFloat = longestPhotoSide) -> ImportFile? {
         let pixelWidth = image.size.width * image.scale
         let pixelHeight = image.size.height * image.scale
-        let shrink = min(1, longestPhotoSide / max(pixelWidth, pixelHeight))
+        let shrink = min(1, longestSide / max(pixelWidth, pixelHeight))
         let size = CGSize(width: (pixelWidth * shrink).rounded(), height: (pixelHeight * shrink).rounded())
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1

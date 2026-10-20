@@ -20,7 +20,7 @@ struct DayDashboard: View {
                         .accessibilityIdentifier("day-card-\(kind.rawValue)")
                 }
             }
-            BodyCard(measurements: day.body, bodyMap: store?.bodyMap) { editingBody = true }
+            BodyCard(measurements: day.body, bodyMap: store?.bodyMap, shape: store?.bodyShape ?? .modelled) { editingBody = true }
             DayTimeline(day: day)
             if let trends = store?.trends, !trends.series.isEmpty || !trends.fasts.isEmpty {
                 TrendsSection(trends: trends)
@@ -430,6 +430,7 @@ private struct RingRow: View {
 private struct BodyCard: View {
     let measurements: Components.Schemas.DayBody
     let bodyMap: BodyMap?
+    let shape: BodyShape
     let edit: () -> Void
     @State private var selected: String?
     @Environment(AppRouter.self) private var router
@@ -476,7 +477,7 @@ private struct BodyCard: View {
                 }
                 Spacer()
                 VStack(spacing: 4) {
-                    BodyMapView(heat: bodyMap?.heat ?? [:]) { selected = $0 }
+                    BodyMapView(heat: bodyMap?.heat ?? [:], shape: shape) { selected = $0 }
                         .frame(width: 170, height: 250)
                         .popover(item: Binding(get: { selected.map(MuscleRoute.init(id:)) }, set: { selected = $0?.id })) { route in
                             MuscleCallout(id: route.id, lastTrainedOn: bodyMap?.muscle(route.id)?.lastTrainedOn) {

@@ -50,6 +50,10 @@ actor FakeDayService: DayServicing {
     func bodyMap(days: Int) async throws -> BodyMap {
         BodyMap(days: days, lastSessionOn: "2026-09-25", muscles: [.init(id: "quads", intensity: 0.6, lastTrainedOn: "2026-09-25")])
     }
+
+    func bodyShape() async throws -> BodyShape {
+        BodyShape(waist: 0.4)
+    }
 }
 
 @MainActor
