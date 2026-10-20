@@ -1,8 +1,11 @@
-Thanks for trying Khepri. Please try:
-1. Sign up, go through the short setup, and do your first check-in.
-2. Ask the coach something real, by text or voice.
-3. Generate a training plan and start a workout.
-4. Add the Today widget and log water from it.
-5. Say "Capture in Khepri" to Siri and log something in one sentence.
+Thanks for trying Khepri. New in this build, please try:
+1. More > Nutrition > Plans > Build with AI: pick a goal, meals per day and foods to leave out, then review and save the plan.
+2. More > Progress check: add a check with photos or measurements, then look at the body figure on Today.
+3. Today > Your week: open the recap, switch to 30 days, and share it.
+4. Training: generate a plan with the weekdays you choose.
+5. More > Daily Post: read today's post, give kudos, tap Ask the Coach About This.
+6. More > Settings > App: switch the language and the appearance.
+
+Also worth a look: coach messages on Today, and answering one from the notification.
 
 Anything confusing, broken or missing: use TestFlight's feedback (screenshot and send).

@@ -1,18 +1,24 @@
 Khepri is a coach that knows you. It remembers what you told it last month, sees how you slept and trained, and helps you take the next small step toward the goals you set.
 
 A COACH WITH MEMORY
-Talk it through by text or voice. Khepri remembers what matters to you and what it learned from past conversations. You approve, pin or forget anything it keeps. Every week it writes you a short review of how things went.
+Talk it through by text or voice. Khepri remembers what matters to you and what it learned from past conversations. You approve, pin or forget anything it keeps. Every week it writes you a short review of how things went. If you want, your coach messages you first: it can make a session lighter when recovery is low, or offer to move one you missed, and you answer straight from the notification.
 
 TRAINING THAT FITS YOUR WEEK
-Tell it your level, your equipment and your days, and get a plan built around them. Every exercise comes with an animated demonstration, cues and the muscles it works. Log sets, rest between them, and see your session on the Lock Screen while you train.
+Tell it your level, your equipment, the days you can train and how long you have, and get a plan built around them. Every exercise comes with an animated demonstration, cues and the muscles it works. Log sets, warm-ups and reps in reserve, rest between them, and see your session on the Lock Screen while you train. On Today, a body figure lights up the muscles you trained this week.
+
+MEALS BUILT AROUND YOUR MACROS
+Tell the coach your goal, how many meals a day you want and the foods you won't eat, and it builds a meal plan that fits your macro target, day by day. Review it before you save it. Mark meals optional, add options, or import a plan you already have.
+
+PROGRESS YOU CAN SEE
+Progress checks: front, side and back photos with your measurements, a reminder when the next one is due, and your first and latest checks side by side. The body figure takes its shape from your latest check. A recap of your week or month shows what you did, ready to share or post to friends.
 
 THE WHOLE DAY, NOT JUST THE WORKOUT
 • My Day: water, sleep, food, caffeine, daylight and activity at a glance
 • Daily check-ins with a streak to keep
+• A short daily post on wellbeing and food, written by AI, to read and give kudos
 • Goals with milestones and progress
 • Water, sleep, habits and reminders
-• Meals, ingredients and your macro target
-• A private journal
+• A private journal and a library for your notes and documents
 • Decisions you thought through, and how they turned out
 
 FRIENDS AND CREWS
@@ -23,6 +29,9 @@ Workouts, steps, heart rate, sleep and weight come in from Apple Health, and rid
 
 OUTSIDE THE APP
 Widgets for your next workout, your streak and today's water. Log a glass without opening the app. Say "Capture in Khepri" and log water, sleep or a check-in in one sentence.
+
+YOUR WAY
+In English, Spanish and Portuguese (Portugal and Brazil), in light or dark mode, or following your iPhone.
 
 YOUR DATA
 Export everything whenever you like, or delete your account from Settings. Your health data is used to coach you and nothing else.

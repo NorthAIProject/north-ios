@@ -1,1 +1,1 @@
-habit,workout,training,goals,journal,check-in,streak,sleep,water,strava,wellness,mood,friends,crew
+habit,workout,training,goals,meal plan,macros,check-in,streak,sleep,water,strava,wellness,progress
