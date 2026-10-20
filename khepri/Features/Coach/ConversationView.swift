@@ -89,9 +89,10 @@ struct ConversationView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if !store.ended {
-                Composer(
+                ChatComposer(
                     text: $draft,
-                    isReplying: store.phase == .replying,
+                    placeholder: "Message your coach",
+                    isBusy: store.phase == .replying,
                     canSend: store.canSendMessage(draft),
                     focused: $composing,
                     onListeningChange: { dictating = $0 },
@@ -319,64 +320,5 @@ private struct ApprovalCard: View {
             RoundedRectangle(cornerRadius: NorthRadius.medium)
                 .strokeBorder(NorthColor.agent.opacity(0.3), lineWidth: 1)
         }
-    }
-}
-
-private struct Composer<Attachments: View>: View {
-    @Binding var text: String
-    let isReplying: Bool
-    /// Whether the message as typed, with its file, can go now.
-    let canSend: Bool
-    var focused: FocusState<Bool>.Binding
-    let onListeningChange: (Bool) -> Void
-    let onAttach: () -> Void
-    let onSend: () -> Void
-    let onStop: () -> Void
-    /// The file the next message carries, shown above the field.
-    @ViewBuilder let attachments: () -> Attachments
-
-    var body: some View {
-        VStack(spacing: 8) {
-            attachments()
-            HStack(alignment: .bottom, spacing: 8) {
-                Button(action: onAttach) {
-                    Image(systemName: "paperclip").font(.title3)
-                }
-                .padding(.bottom, 6)
-                .accessibilityLabel("Attach a file or photo")
-
-                TextField("Message your coach", text: $text, axis: .vertical)
-                    .lineLimit(1...6)
-                    // The placeholder names the field only while it is empty.
-                    .accessibilityIdentifier("composer")
-                    .focused(focused)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20))
-
-                // The keyboard's microphone only appears once the keyboard is up
-                // and stops on a pause; this one is a tap away and keeps
-                // listening until tapped again.
-                if !isReplying {
-                    DictationButton(text: $text, onListeningChange: onListeningChange)
-                }
-
-                if isReplying {
-                    Button(action: onStop) {
-                        Image(systemName: "stop.circle.fill").font(.title)
-                    }
-                    .accessibilityLabel("Stop")
-                } else {
-                    Button(action: onSend) {
-                        Image(systemName: "arrow.up.circle.fill").font(.title)
-                    }
-                    .disabled(!canSend)
-                    .accessibilityLabel("Send")
-                }
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(.bar)
     }
 }
