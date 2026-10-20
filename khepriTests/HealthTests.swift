@@ -56,6 +56,16 @@ struct HealthPayloadTests {
         #expect(requests[1].workouts?.isEmpty == true)
     }
 
+    @Test func workoutsWithNoReadingsStillGoInOneRequest() {
+        let run = HealthWorkoutRecord(id: UUID(), type: .running, start: day(20, 7), end: day(20, 8),
+                                      kilocalories: 500, meters: 10_000, indoor: false)
+        let requests = HealthPayload.requests(from: HealthSnapshot(workouts: [run]), calendar: utc)
+
+        #expect(requests.count == 1)
+        #expect(requests[0].readings?.isEmpty == true)
+        #expect(requests[0].workouts?.count == 1)
+    }
+
     @Test func aWorkoutIsTranslatedWithItsOwnIdAndCalories() throws {
         let id = UUID()
         let run = HealthWorkoutRecord(id: id, type: .running, start: day(20, 7), end: day(20, 8),

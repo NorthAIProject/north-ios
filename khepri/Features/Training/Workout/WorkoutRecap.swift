@@ -1,3 +1,4 @@
+import Algorithms
 import Charts
 import NorthAPI
 import NorthKit
@@ -98,17 +99,11 @@ struct WorkoutRecapModel: Equatable {
     /// server leaves them out of its recap.
     @MainActor
     static func local(from session: WorkoutSession) -> WorkoutRecapModel {
-        var order: [String] = []
-        var names: [String: String] = [:]
-        var grouped: [String: [WorkoutSession.LoggedSet]] = [:]
-        for set in session.logged where set.counts {
-            if grouped[set.exerciseKey] == nil { order.append(set.exerciseKey) }
-            names[set.exerciseKey] = set.exerciseName
-            grouped[set.exerciseKey, default: []].append(set)
-        }
-        let exercises = order.map { key in
+        let counted = session.logged.filter(\.counts)
+        let grouped = counted.grouped(by: \.exerciseKey)
+        let exercises = counted.map(\.exerciseKey).uniqued().map { key in
             let sets = grouped[key] ?? []
-            let name = names[key] ?? key
+            let name = sets.last?.exerciseName ?? key
             let volume = sets.reduce(0) { $0 + $1.volumeKg }
             let best = sets.filter { $0.weightKg > 0 }.max { $0.e1rmKg < $1.e1rmKg }
             var previous: Double?

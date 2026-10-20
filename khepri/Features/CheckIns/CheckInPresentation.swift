@@ -1,3 +1,4 @@
+import Algorithms
 import Foundation
 import NorthAPI
 import NorthKit
@@ -43,11 +44,11 @@ enum CheckInSource {
 /// `#`, each kept once in the order written.
 enum CheckInTags {
     static func parse(_ text: String) -> [String] {
-        var seen: Set<String> = []
-        return text.split(separator: ",")
+        text.split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .map { $0.hasPrefix("#") ? String($0.dropFirst()).trimmingCharacters(in: .whitespaces) : $0 }
-            .filter { !$0.isEmpty && seen.insert($0.lowercased()).inserted }
+            .filter { !$0.isEmpty }
+            .uniqued(on: { $0.lowercased() })
     }
 
     static func text(_ tags: [String]) -> String {

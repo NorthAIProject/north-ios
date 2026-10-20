@@ -1,3 +1,4 @@
+import Algorithms
 import NorthAPI
 import NorthKit
 import SwiftUI
@@ -314,9 +315,9 @@ private struct WorkoutSummary: View {
     private var statGrid: some View {
         let items = headlineStats
         return Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
-            ForEach(Array(stride(from: 0, to: items.count, by: 2)), id: \.self) { start in
+            ForEach(Array(items.indices.chunks(ofCount: 2)), id: \.self) { row in
                 GridRow {
-                    ForEach(start..<min(start + 2, items.count), id: \.self) { index in
+                    ForEach(row, id: \.self) { index in
                         stat(items[index].value, items[index].label)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }

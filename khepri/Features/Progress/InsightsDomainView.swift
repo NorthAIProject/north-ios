@@ -1,3 +1,4 @@
+import Algorithms
 import Charts
 import NorthAPI
 import NorthKit
@@ -441,9 +442,9 @@ private struct StatGrid: View {
 
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
-            ForEach(Array(stride(from: 0, to: stats.count, by: 2)), id: \.self) { start in
+            ForEach(Array(stats.indices.chunks(ofCount: 2)), id: \.self) { row in
                 GridRow {
-                    ForEach(start..<min(start + 2, stats.count), id: \.self) { index in
+                    ForEach(row, id: \.self) { index in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(stats[index].label).northEyebrow()
                             Text(stats[index].value).northDisplayNumber(.title2)
