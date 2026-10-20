@@ -156,6 +156,35 @@ struct RouterTests {
         #expect(router.coachDraft == "About today's post: ")
     }
 
+    /// A crew push's link: More → Crews → that crew, on that channel.
+    @Test func crewChannelLinkRoutes() throws {
+        let crew = "66666666-6666-6666-6666-666666666666"
+        let channel = "77777777-7777-7777-7777-777777777777"
+        let url = try #require(URL(string: "/app/crews/\(crew)/c/\(channel)"))
+        #expect(AppRouter.destination(for: url) == .crewChannel(crewID: crew, channelID: channel))
+        #expect(
+            AppRouter.destination(for: try #require(URL(string: "khepri://crews/\(crew)/c/\(channel)")))
+                == .crewChannel(crewID: crew, channelID: channel)
+        )
+
+        let router = AppRouter()
+        router.open(url: url)
+        #expect(router.selectedTab == .more)
+        #expect(router.openSection == "crews")
+        #expect(router.openCrew == CrewRoute(crewID: crew, channelID: channel))
+    }
+
+    /// A crew's own link opens its default channel; a malformed one, the list.
+    @Test func crewLinkRoutes() throws {
+        let crew = "66666666-6666-6666-6666-666666666666"
+        #expect(
+            AppRouter.destination(for: try #require(URL(string: "https://kheprios.com/app/crews/\(crew)")))
+                == .crewChannel(crewID: crew, channelID: nil)
+        )
+        #expect(AppRouter.destination(for: try #require(URL(string: "/app/crews/not-an-id"))) == .section("crews"))
+        #expect(AppRouter.destination(for: try #require(URL(string: "/app/crews/\(crew)/c/nope"))) == .section("crews"))
+    }
+
     @Test func checkInFlowPresentsWithoutLeavingTab() {
         let router = AppRouter()
         router.open(.checkInFlow)

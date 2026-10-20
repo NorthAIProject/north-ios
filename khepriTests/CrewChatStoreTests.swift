@@ -11,6 +11,9 @@ actor FakeCrewChat: CrewChatServicing {
     private(set) var fetchCount = 0
     private(set) var afterCursors: [Int64?] = []
     private(set) var sentClientIDs: [UUID] = []
+    /// "crew/channel: body" for each send, in order.
+    private(set) var sentTo: [String] = []
+    private var unreadList: Components.Schemas.CrewUnreadList?
     private(set) var termsAcceptedCalls = 0
     private(set) var markReadSeqs: [Int64] = []
     private var nextSeq: Int64 = 1
@@ -107,6 +110,7 @@ actor FakeCrewChat: CrewChatServicing {
         _ crewID: String, channel: String, body: String, replyTo: String?, clientID: UUID
     ) async throws -> CrewMessage {
         sentClientIDs.append(clientID)
+        sentTo.append("\(crewID)/\(channel): \(body)")
         if !sendErrors.isEmpty { throw sendErrors.removeFirst() }
         if let id = byClientID[clientID], let msg = stored.first(where: { $0.id == id }) { return msg }
         let msg = seed(body, author: "me")
@@ -134,7 +138,12 @@ actor FakeCrewChat: CrewChatServicing {
 
     func setNotify(_ crewID: String, notify: String, mutedUntil: Date?) async throws {}
     func space(_ crewID: String) async throws -> CrewSpace { throw APIError.notFound(nil) }
-    func unread() async throws -> Components.Schemas.CrewUnreadList { throw APIError.notFound(nil) }
+    func setUnread(_ list: Components.Schemas.CrewUnreadList) { unreadList = list }
+
+    func unread() async throws -> Components.Schemas.CrewUnreadList {
+        guard let unreadList else { throw APIError.notFound(nil) }
+        return unreadList
+    }
     func termsAccepted() async throws -> Bool { true }
     func acceptTerms() async throws { termsAcceptedCalls += 1 }
     func block(_ userID: String) async throws { blocked.insert(userID) }

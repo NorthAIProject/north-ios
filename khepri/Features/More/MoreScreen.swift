@@ -6,6 +6,7 @@ import SwiftUI
 struct MoreScreen: View {
     let user: APIUser
     @Environment(AppRouter.self) private var router
+    @Environment(CrewUnread.self) private var crewUnread
     @State private var path: [String] = []
 
     private struct Section: Identifiable {
@@ -104,6 +105,7 @@ struct MoreScreen: View {
                 NavigationLink(value: section.id) {
                     Label(section.title, systemImage: section.systemImage)
                 }
+                .badge(section.id == "crews" ? crewUnread.total : 0)
             }
         }
     }

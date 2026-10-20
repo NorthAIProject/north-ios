@@ -8,11 +8,14 @@ import UserNotifications
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     /// Links from notification taps, handed to the router once it exists.
     @MainActor var onOpenURL: ((URL) -> Void)?
+    /// A crew push arrived while the app is open: the unread badges refresh.
+    @MainActor var onCrewPush: (() -> Void)?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        center.setNotificationCategories(Set([WorkoutReminders.category, CheckInActions.category] + CoachActions.categories))
+        let categories = [WorkoutReminders.category, CheckInActions.category, CrewNotifications.notificationCategory]
+        center.setNotificationCategories(Set(categories + CoachActions.categories))
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
         // A workout Live Activity from before a kill has nothing behind it
@@ -51,8 +54,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     /// Shown even when the app is open: a reminder is still useful then.
     /// The end of a rest is not: the workout on screen says it with a haptic.
+    /// Nor is a crew message in the channel on screen, which shows it already.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        notification.request.identifier == RestNotifications.identifier ? [] : [.banner, .sound]
+        if notification.request.identifier == RestNotifications.identifier { return [] }
+        let content = notification.request.content
+        if content.categoryIdentifier == CrewNotifications.category {
+            let href = content.userInfo["href"] as? String
+            let open = await MainActor.run {
+                onCrewPush?()
+                return CrewNotifications.openChannel
+            }
+            if !CrewNotifications.shouldPresent(href: href, open: open) { return [] }
+        }
+        return [.banner, .sound]
     }
 
     /// A tap, or the Start Workout button, opens where the notification says.
@@ -63,6 +77,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         // without opening the app.
         if let answer = CoachActions.answer(forAction: response.actionIdentifier) {
             _ = try? await OutreachService().answer(id: "today", action: answer)
+            return
+        }
+        // Text typed under a crew message goes to its channel, also without
+        // opening the app.
+        if response.actionIdentifier == CrewNotifications.replyAction {
+            let request = response.notification.request
+            guard let text = (response as? UNTextInputNotificationResponse)?.userText,
+                  let href = request.content.userInfo["href"] as? String else { return }
+            await CrewNotifications.reply(text, href: href, notificationID: request.identifier)
             return
         }
         // A nudge from the server carries the web's link in `href`.

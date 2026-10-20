@@ -10,6 +10,9 @@ struct CrewSpaceScreen: View {
     let meID: String
     let crews: CrewsServicing
     var chat: CrewChatServicing = CrewChatService()
+    /// The channel to open first, from a push or a link; nil (or a channel
+    /// that is gone) opens the crew's default one.
+    var initialChannelID: String?
     /// The crew list may need reloading: someone left, or the challenge changed.
     let onChange: () -> Void
 
@@ -26,6 +29,7 @@ struct CrewSpaceScreen: View {
     @State private var showingClosed = false
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
+    @Environment(CrewUnread.self) private var crewUnread
 
     var body: some View {
         Group {
@@ -54,6 +58,9 @@ struct CrewSpaceScreen: View {
             }
         }
         .task { await loadSpace() }
+        // What was read here, and what came in elsewhere, is the server's to
+        // count: the crew badges ask it again on the way out.
+        .onDisappear { Task { await crewUnread.refresh() } }
         // The stream runs only while the app is in front; nothing is replayed,
         // so every (re)connect makes the channel resync.
         .task(id: scenePhase) {
@@ -166,7 +173,11 @@ struct CrewSpaceScreen: View {
             clearUnread(open)
             return
         }
-        if let first = channels.first(where: { $0._default == true }) ?? channels.first {
+        // The first load may start on a pushed channel; later ones fall back
+        // to the default.
+        let wanted = store == nil ? initialChannelID?.lowercased() : nil
+        let linked = channels.first { $0.id.lowercased() == wanted }
+        if let first = linked ?? channels.first(where: { $0._default == true }) ?? channels.first {
             store = nil
             open(first)
         }
@@ -196,6 +207,8 @@ struct CrewSpaceScreen: View {
         guard closed == nil else { return }
         closed = reason
         showingClosed = true
+        // Out of the crew: its messages stop counting.
+        crewUnread.clear(crewID: crew.id)
     }
 
     private func bumpUnread(_ channelID: String) {

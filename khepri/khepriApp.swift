@@ -9,6 +9,7 @@ struct KhepriApp: App {
     @State private var app = AppModel()
     @State private var router = AppRouter()
     @State private var tour = GuidedTour()
+    @State private var crewUnread = CrewUnread()
 
     init() {
         NorthFont.register()
@@ -20,9 +21,19 @@ struct KhepriApp: App {
                 .environment(app)
                 .environment(router)
                 .environment(tour)
+                .environment(crewUnread)
                 .task {
                     delegate.onOpenURL = { router.open(url: $0) }
+                    delegate.onCrewPush = {
+                        guard case .signedIn = app.phase else { return }
+                        Task { await crewUnread.refresh() }
+                    }
                     await app.start()
+                }
+                // Badges belong to whoever is signed in.
+                .onChange(of: app.phase) { _, phase in
+                    if case .signedIn = phase { return }
+                    crewUnread.reset()
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .authSessionDidInvalidate)) { _ in
                     app.sessionEnded()

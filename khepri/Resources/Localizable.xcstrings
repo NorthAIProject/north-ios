@@ -1963,6 +1963,29 @@
         }
       }
     },
+    "Message" : {
+      "comment" : "Placeholder of the reply field under a crew message notification",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensaje"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem"
+          }
+        }
+      }
+    },
     "Message #%@" : {
       "localizations" : {
         "es" : {

@@ -43,6 +43,9 @@ enum AppDestination: Equatable {
     /// A crew's join link (`/i/c/<code>`): kept, joined once there is a
     /// session, and the crew opens.
     case crewJoin(String)
+    /// One crew's space (`/app/crews/<crew>[/c/<channel>]`): a crew push, or
+    /// the web's link to a crew. No channel opens the crew's default one.
+    case crewChannel(crewID: String, channelID: String?)
     /// One exercise, shown as a sheet over whatever is open: Spotlight, or
     /// "Show push-up in Khepri".
     case exercise(String)
@@ -99,6 +102,9 @@ final class AppRouter {
     var invitesReceived = 0
     /// Counts crew links opened, for Crews to join on each one.
     var crewLinksReceived = 0
+    /// Set with `openSection` for one crew's space; the Crews screen opens it
+    /// and clears it.
+    var openCrew: CrewRoute?
     /// Set when a link asks for one exercise; the tab view presents it and
     /// clears it on dismiss.
     var openExercise: String?
@@ -164,6 +170,10 @@ final class AppRouter {
             PendingCrewJoin.store(code)
             crewLinksReceived += 1
             selectedTab = .more
+            openSection = "crews"
+        case .crewChannel(let crewID, let channelID):
+            selectedTab = .more
+            openCrew = CrewRoute(crewID: crewID, channelID: channelID)
             openSection = "crews"
         case .invite(let code):
             PendingInvite.store(code)
@@ -241,6 +251,9 @@ final class AppRouter {
         if parts.first == "decisions", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .decision(parts[1])
         }
+        if let crew = crewRoute(parts) {
+            return .crewChannel(crewID: crew.crewID, channelID: crew.channelID)
+        }
         if parts.first == "i", parts.count == 3, parts[1] == "c", parts[2].count == 10, parts[2].allSatisfy({ $0.isLetter || $0.isNumber }) {
             return .crewJoin(parts[2].lowercased())
         }
@@ -266,4 +279,20 @@ final class AppRouter {
         default: nil
         }
     }
+
+    /// `crews/<crew>` or `crews/<crew>/c/<channel>`, with real ids: the path
+    /// of a crew's space after `/app/`. Anything else under `crews` is not one.
+    nonisolated static func crewRoute(_ parts: [String]) -> CrewRoute? {
+        guard parts.first == "crews", parts.count == 2 || parts.count == 4,
+              UUID(uuidString: parts[1]) != nil else { return nil }
+        guard parts.count == 4 else { return CrewRoute(crewID: parts[1].lowercased(), channelID: nil) }
+        guard parts[2] == "c", UUID(uuidString: parts[3]) != nil else { return nil }
+        return CrewRoute(crewID: parts[1].lowercased(), channelID: parts[3].lowercased())
+    }
+}
+
+/// A crew's space to open, on one channel or its default one.
+nonisolated struct CrewRoute: Equatable, Sendable {
+    let crewID: String
+    let channelID: String?
 }

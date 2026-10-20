@@ -108,6 +108,12 @@ struct ChannelView: View {
             )
         }
         .toolbar(.hidden, for: .tabBar)
+        // While this channel is on screen its pushes stay quiet.
+        .onAppear { CrewNotifications.openChannel = (store.crewID, store.channelID) }
+        .onDisappear {
+            // Another channel may already have taken over.
+            if CrewNotifications.openChannel?.channelID == store.channelID { CrewNotifications.openChannel = nil }
+        }
         .task {
             await store.load()
             loaded = true

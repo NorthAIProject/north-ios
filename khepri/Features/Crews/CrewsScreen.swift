@@ -14,8 +14,11 @@ struct CrewsScreen: View {
     @State private var naming = false
     @State private var newName = ""
     @State private var opened: Crew?
+    /// A crew a link or a push asked for, pushed over the list.
+    @State private var linked: CrewLink?
     @Environment(AppRouter.self) private var router
     @Environment(AppModel.self) private var app
+    @Environment(CrewUnread.self) private var unread
 
     var body: some View {
         List {
@@ -36,9 +39,17 @@ struct CrewsScreen: View {
                         Text("\(crew.memberCount) people").font(.caption).foregroundStyle(.secondary)
                     }
                 }
+                .badge(unread.count(for: crew.id))
             }
         }
         .navigationTitle("Crews")
+        .navigationDestination(item: $linked) { link in
+            CrewSpaceScreen(crew: link.crew, meID: meID, crews: service, initialChannelID: link.channelID) {
+                Task { await load() }
+            }
+            // A new link replaces the screen rather than reusing its state.
+            .id(link)
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Crew", systemImage: "plus") { naming = true }
@@ -69,6 +80,17 @@ struct CrewsScreen: View {
                 await load()
             }
         }
+        // A crew push or link: that crew's space, on its channel. A crew you
+        // are not in (any more) leaves the list showing.
+        .task(id: router.openCrew) {
+            guard let route = router.openCrew else { return }
+            if !crews.contains(where: { $0.id.lowercased() == route.crewID }) { await load() }
+            if let crew = crews.first(where: { $0.id.lowercased() == route.crewID }) {
+                opened = nil
+                linked = CrewLink(crew: crew, channelID: route.channelID)
+            }
+            router.openCrew = nil
+        }
         .refreshable { await load() }
     }
 
@@ -81,6 +103,7 @@ struct CrewsScreen: View {
     private func load() async {
         do { crews = try await service.crews(); error = nil } catch { self.error = error.localizedDescription }
         loaded = true
+        await unread.refresh()
     }
 
     private func create() async {
@@ -94,6 +117,12 @@ struct CrewsScreen: View {
             self.error = error.localizedDescription
         }
     }
+}
+
+/// A crew opened from a link, on a channel or its default one.
+private struct CrewLink: Hashable {
+    let crew: Crew
+    let channelID: String?
 }
 
 extension Crew: @retroactive Identifiable {}
