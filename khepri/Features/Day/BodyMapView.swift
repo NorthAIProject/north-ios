@@ -8,17 +8,21 @@ import SwiftUI
 /// each one. The same figure and the same payload (`GET /body/map`) as the
 /// web; this view only paints it.
 ///
-/// `BodyMap.usdz` is written by the web repo's `scripts/bodymap`: `shell`, the
-/// skin, and one mesh per muscle named by its key (`quads`, `delts`…). The skin
-/// is drawn twice from the one mesh — its back faces opaque and dark, the
-/// inside of the body, and its front faces translucent — so the muscles show
-/// through a body. Recolouring sets one material per muscle, and a tap
-/// resolves to a key by the entity's name; the skin is not a tap target.
+/// The web repo's `scripts/bodymap` writes `BodyMap.usdz`, one mesh per muscle
+/// named by its key (`quads`, `delts`…), and `BodyShell.bin`, the skin with
+/// its shape keys. The skin is an outline only: clear facing the camera, firm
+/// at the silhouette, so the muscles read as the body. Recolouring sets one
+/// material per muscle, and a tap resolves to a key by the entity's name; the
+/// skin is not a tap target.
 struct BodyMapView: View {
     /// Muscle key → 0…1. Missing means untrained.
     let heat: [String: Double]
     /// Show the back instead of the front; nil lets the heat decide.
     var side: BodySide?
+    /// The person's shape, from their latest progress check. Only their own
+    /// figure is shaped; one that shows what an exercise works stays as
+    /// modelled.
+    var shape: BodyShape = .modelled
     var onSelect: ((String) -> Void)?
 
     @State private var dragOffset: Float = 0
@@ -36,6 +40,7 @@ struct BodyMapView: View {
             } update: { content in
                 guard let figure = content.entities.first(where: { $0.name == BodyFigure.rootName }) else { return }
                 figure.orientation = simd_quatf(angle: yaw(at: context.date), axis: [0, 1, 0])
+                BodyFigure.reshape(figure, to: shape)
                 BodyFigure.paint(figure, heat: heat, palette: .init(colorScheme))
             }
         }
@@ -88,8 +93,10 @@ enum BodySide: String, CaseIterable, Identifiable {
 enum BodyFigure {
     static let rootName = "body-map"
     static let shellRegion = "shell"
-    static let coreName = "shell-core"
-    static let shellOpacity: Float = 0.3
+    /// The skin's edge, as on the web (viewer.js SHELL_EDGE_ALPHA and
+    /// SHELL_EDGE_POWER): how opaque the silhouette gets, and how thin it is.
+    static let shellEdgeAlpha: Float = 0.9
+    static let shellEdgePower: Float = 4
     static let frontYaw: Float = 0.45
     static let sway: Float = 0.35
     static let swayPeriod = 8.0
@@ -112,12 +119,11 @@ enum BodyFigure {
         let root = Entity()
         root.name = rootName
         root.addChild(loaded)
-        // The inside of the body: the skin's back faces, drawn opaque and
-        // dark, always behind the muscles. Same mesh, second entity.
-        guard let shell = root.findEntity(named: shellRegion) as? ModelEntity, let skin = shell.model?.mesh else { return nil }
-        let core = ModelEntity(mesh: skin)
-        core.name = coreName
-        shell.parent?.addChild(core)
+        if let skin = BodyShell.bundled, let mesh = try? skin.mesh(.modelled) {
+            let shell = ModelEntity(mesh: mesh)
+            shell.name = shellRegion
+            root.addChild(shell)
+        }
         for muscle in muscles(in: root) {
             muscle.components.set(InputTargetComponent())
             if let mesh = muscle.model?.mesh, let shape = try? await ShapeResource.generateStaticMesh(from: mesh) {
@@ -188,7 +194,7 @@ enum BodyFigure {
         return disc
     }
 
-    /// Every mesh of the figure: the muscles, the skin and its inside.
+    /// Every mesh of the figure: the muscles and the skin.
     static func models(in root: Entity) -> [ModelEntity] {
         var out: [ModelEntity] = []
         var stack = [root]
@@ -211,10 +217,29 @@ enum BodyFigure {
         var dark: Bool
     }
 
+    /// The shape the skin was last built for, so the per-frame update only
+    /// rebuilds it when a new check changes the weights.
+    struct Shaped: Component, Equatable {
+        var shape: BodyShape
+    }
+
+    static func reshape(_ root: Entity, to shape: BodyShape) {
+        Shaped.registerComponent()
+        let before = root.components[Shaped.self]?.shape ?? .modelled
+        guard before != shape,
+              let shell = root.findEntity(named: shellRegion) as? ModelEntity,
+              let skin = BodyShell.bundled,
+              let mesh = try? skin.mesh(shape)
+        else { return }
+        shell.model?.mesh = mesh
+        root.components.set(Shaped(shape: shape))
+    }
+
     struct Palette {
         let idle: UIColor
         let shell: UIColor
-        let core: UIColor
+        let rim: UIColor
+        let rimStrength: Float
         let heatLow: UIColor
         let ember: UIColor
         let dark: Bool
@@ -223,7 +248,11 @@ enum BodyFigure {
             let traits = UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light)
             idle = UIColor(NorthColor.Body.idle).resolvedColor(with: traits)
             shell = UIColor(NorthColor.Body.shell).resolvedColor(with: traits)
-            core = UIColor(NorthColor.Body.core).resolvedColor(with: traits)
+            // The web viewer's rim colours (viewer.js PALETTES).
+            rim = scheme == .dark
+                ? UIColor(red: 0x8E / 255, green: 0xC6 / 255, blue: 1, alpha: 1)
+                : UIColor(red: 0x2B / 255, green: 0x3A / 255, blue: 0x52 / 255, alpha: 1)
+            rimStrength = scheme == .dark ? 0.3 : 0.15
             heatLow = UIColor(NorthColor.Body.heatLow).resolvedColor(with: traits)
             ember = UIColor(NorthColor.ember).resolvedColor(with: traits)
             dark = scheme == .dark
@@ -258,18 +287,35 @@ enum BodyFigure {
         for muscle in muscles(in: root) {
             muscle.model?.materials = [material(tint: palette.color(heat: heat[muscle.name] ?? 0), roughness: 0.55)]
         }
-        guard before?.dark != palette.dark else { return }
-        if let shell = root.findEntity(named: shellRegion) as? ModelEntity {
-            var ghost = material(tint: palette.shell, roughness: 0.4)
-            ghost.blending = .transparent(opacity: .init(floatLiteral: shellOpacity))
-            ghost.faceCulling = .back
-            shell.model?.materials = [ghost]
+        guard before?.dark != palette.dark,
+              let shell = root.findEntity(named: shellRegion) as? ModelEntity
+        else { return }
+        // Without the outline shader there is no skin at all: a flat
+        // translucent fill is the grey second body the outline replaced.
+        if let outline = outline(palette) {
+            shell.model?.materials = [outline]
+        } else {
+            shell.isEnabled = false
         }
-        if let core = root.findEntity(named: coreName) as? ModelEntity {
-            var inside = material(tint: palette.core, roughness: 0.85)
-            inside.faceCulling = .front
-            core.model?.materials = [inside]
-        }
+    }
+
+    /// The skin's material: `bodyShellOutline` in BodyShell.metal.
+    @MainActor private static let outlineShader: CustomMaterial.SurfaceShader? = {
+        guard let library = MTLCreateSystemDefaultDevice()?.makeDefaultLibrary() else { return nil }
+        return CustomMaterial.SurfaceShader(named: "bodyShellOutline", in: library)
+    }()
+
+    @MainActor private static func outline(_ palette: Palette) -> CustomMaterial? {
+        guard let shader = outlineShader,
+              var material = try? CustomMaterial(surfaceShader: shader, lightingModel: .lit)
+        else { return nil }
+        material.baseColor = .init(tint: palette.shell)
+        material.emissiveColor = .init(color: palette.rim)
+        material.roughness = .init(floatLiteral: 0.4)
+        material.custom.value = SIMD4(shellEdgeAlpha, shellEdgePower, palette.rimStrength, 0)
+        material.blending = .transparent(opacity: .init(floatLiteral: 1))
+        material.faceCulling = .back
+        return material
     }
 
     private static func material(tint: UIColor, roughness: Float) -> PhysicallyBasedMaterial {
