@@ -31,6 +31,8 @@ final class CrewChatStore {
     @ObservationIgnored private let service: CrewChatServicing
     @ObservationIgnored private var fetching = false
     @ObservationIgnored private var fetchAgain = false
+    /// Bumped each time `load()` applies a snapshot, so older in-flight fetches can tell they are stale.
+    @ObservationIgnored private var loadGeneration = 0
 
     init(crewID: String, channelID: String, meID: String, service: CrewChatServicing) {
         self.crewID = crewID
@@ -48,8 +50,12 @@ final class CrewChatStore {
     func load() async {
         do {
             let page = try await service.messages(crewID, channel: channelID, before: nil, after: nil)
-            rows = []
+            // Rows newer than the snapshot arrived (a send, a live fetch) while it was in flight.
+            let ceiling = page.messages.compactMap(\.seq).max()
+            let newer = ceiling.map { top in rows.filter { ($0.seq ?? 0) > top } } ?? []
+            rows = newer
             merge(page.messages)
+            loadGeneration += 1
             hasOlder = page.hasMore ?? false
         } catch {
             fail(error)
@@ -96,8 +102,14 @@ final class CrewChatStore {
         defer { fetching = false }
         repeat {
             fetchAgain = false
+            let generation = loadGeneration
             do {
                 let page = try await service.messages(crewID, channel: channelID, before: nil, after: cursor)
+                if generation != loadGeneration {
+                    // A resync landed meanwhile; this page may predate it. Ask again.
+                    fetchAgain = true
+                    continue
+                }
                 merge(page.messages)
             } catch {
                 fail(error)
@@ -109,6 +121,9 @@ final class CrewChatStore {
     private func refetch(id: String) async {
         do {
             merge([try await service.message(crewID, id: id)])
+        } catch APIError.notFound {
+            // Hidden, reported or blocked for this reader: it is gone, not an error.
+            rows.removeAll { $0.id == id }
         } catch {
             fail(error)
         }
@@ -231,7 +246,10 @@ final class CrewChatStore {
     /// Replaces by id, then orders by `seq`.
     private func merge(_ incoming: [CrewMessage]) {
         var byID = Dictionary(rows.map { ($0.id, $0) }, uniquingKeysWith: { _, new in new })
-        for message in incoming { byID[message.id] = message }
+        // Live updates cover the whole crew; another channel's message is not ours.
+        for message in incoming where message.channelId == nil || message.channelId == channelID {
+            byID[message.id] = message
+        }
         rows = byID.values.sorted { ($0.seq ?? 0) < ($1.seq ?? 0) }
     }
 

@@ -23,15 +23,17 @@ actor FakeCrewChat: CrewChatServicing {
     private var reportGate: CheckedContinuation<Void, Never>?
     private var reportError: APIError?
     private var pageSize = 50
+    private var hidden: Set<String> = []
+    private var reported: Set<String> = []
 
     static func person(_ id: String) -> CrewMessage.AuthorPayload {
         .init(value1: .init(id: id, name: id))
     }
 
     @discardableResult
-    func seed(_ body: String, author: String = "other", kind: String = "text") -> CrewMessage {
+    func seed(_ body: String, author: String = "other", kind: String = "text", channel: String = "ch") -> CrewMessage {
         let message = CrewMessage(
-            id: UUID().uuidString, seq: nextSeq, channelId: "ch", kind: kind, body: body,
+            id: UUID().uuidString, seq: nextSeq, channelId: channel, kind: kind, body: body,
             author: Self.person(author), mentionsMe: false, reactions: [], pinned: false,
             edited: false, deleted: false, createdAt: Date()
         )
@@ -43,6 +45,7 @@ actor FakeCrewChat: CrewChatServicing {
     func setPageSize(_ count: Int) { pageSize = count }
     func failSends(_ errors: [APIError]) { sendErrors = errors }
     func holdNextFetch() { holdFetch = true }
+    func hide(id: String) { hidden.insert(id) }
     func holdReports() { holdReport = true }
     func failReport(_ error: APIError) { reportError = error }
 
@@ -69,8 +72,11 @@ actor FakeCrewChat: CrewChatServicing {
         stored[idx].deleted = true
     }
 
-    private func visible() -> [CrewMessage] {
-        stored.filter { !blocked.contains($0.author?.value1.id ?? "") }
+    private func visible(in channel: String? = nil) -> [CrewMessage] {
+        stored.filter {
+            !blocked.contains($0.author?.value1.id ?? "") && !hidden.contains($0.id) && !reported.contains($0.id)
+                && (channel == nil || $0.channelId == channel)
+        }
     }
 
     func messages(
@@ -78,11 +84,12 @@ actor FakeCrewChat: CrewChatServicing {
     ) async throws -> Components.Schemas.CrewMessagePage {
         fetchCount += 1
         afterCursors.append(after)
+        // The answer is fixed before the gate, like a server reply still on the wire.
+        var list = visible(in: channel)
         if holdFetch {
             holdFetch = false
             await withCheckedContinuation { fetchGate = $0 }
         }
-        var list = visible()
         if let after {
             list = list.filter { ($0.seq ?? 0) > after }
             return .init(messages: Array(list.prefix(pageSize)), hasMore: list.count > pageSize)
@@ -92,7 +99,7 @@ actor FakeCrewChat: CrewChatServicing {
     }
 
     func message(_ crewID: String, id: String) async throws -> CrewMessage {
-        guard let msg = stored.first(where: { $0.id == id }) else { throw APIError.notFound(nil) }
+        guard let msg = visible().first(where: { $0.id == id }) else { throw APIError.notFound(nil) }
         return msg
     }
 
@@ -120,6 +127,7 @@ actor FakeCrewChat: CrewChatServicing {
     func markRead(_ crewID: String, channel: String, seq: Int64) async throws { markReadSeqs.append(seq) }
 
     func report(_ crewID: String, id: String, reason: String, note: String?) async throws {
+        reported.insert(id)
         if holdReport { await withCheckedContinuation { reportGate = $0 } }
         if let reportError { throw reportError }
     }
@@ -388,5 +396,67 @@ struct CrewChatStoreTests {
         store.replyTo = msg
         await store.send("answer")
         #expect(store.replyTo == nil)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func updateForAnotherChannelIsIgnored() async throws {
+        let fake = FakeCrewChat()
+        await fake.seed("mine")
+        let foreign = await fake.seed("elsewhere", channel: "other")
+        let store = makeStore(fake)
+        await store.load()
+        await store.handle(.update(messageID: foreign.id))
+        #expect(store.rows.map(\.body) == ["mine"])
+        await store.markRead()
+        #expect(await fake.markReadSeqs == [1])
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func updateForHiddenMessageRemovesRow() async throws {
+        let fake = FakeCrewChat()
+        let msg = await fake.seed("rude")
+        await fake.seed("fine")
+        let store = makeStore(fake)
+        await store.load()
+        await fake.hide(id: msg.id)
+        await store.handle(.update(messageID: msg.id))
+        #expect(store.rows.map(\.body) == ["fine"])
+        #expect(store.error == nil)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func sendDuringLoadSurvivesLoad() async throws {
+        let fake = FakeCrewChat()
+        await fake.seed("a1")
+        await fake.seed("a2")
+        let store = makeStore(fake)
+        await fake.holdNextFetch()
+        let loading = Task { await store.load() }
+        await waitForFetches(1, fake)
+        await store.send("mine")
+        #expect(store.rows.map(\.body) == ["mine"])
+        await fake.releaseFetch()
+        await loading.value
+        #expect(store.rows.map(\.body) == ["a1", "a2", "mine"])
+        #expect(store.pending.isEmpty)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func staleAfterFetchDoesNotRevertResync() async throws {
+        let fake = FakeCrewChat()
+        await fake.seed("a1")
+        let store = makeStore(fake)
+        await store.load()
+        let second = await fake.seed("a2")
+        await fake.holdNextFetch()
+        let fetching = Task { await store.handle(.message(channelID: "ch", seq: 2)) }
+        await waitForFetches(2, fake)
+        await fake.remove(id: second.id)
+        await store.handle(.connected)
+        #expect(store.rows.last?.deleted == true)
+        await fake.releaseFetch()
+        await fetching.value
+        #expect(store.rows.count == 2)
+        #expect(store.rows.last?.deleted == true)
     }
 }
