@@ -71,6 +71,22 @@ struct CrewMessageRowTests {
         #expect(CrewMessageActions.available(for: message(kind: "poll"), meID: "me", role: .owner).isEmpty)
     }
 
+    @Test func followsNewRowsOnlyAtBottomOrForOwnMessages() {
+        #expect(CrewChannelScroll.shouldFollow(atBottom: true, lastAuthorID: "other", meID: "me"))
+        #expect(!CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: "other", meID: "me"))
+        #expect(!CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: nil, meID: "me"))
+        #expect(CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: "me", meID: "me"))
+        #expect(!CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: "", meID: ""))
+    }
+
+    @Test func atBottomWithinTolerance() {
+        #expect(CrewChannelScroll.isAtBottom(visibleMaxY: 1000, contentHeight: 1000))
+        #expect(CrewChannelScroll.isAtBottom(visibleMaxY: 970, contentHeight: 1000))
+        #expect(!CrewChannelScroll.isAtBottom(visibleMaxY: 800, contentHeight: 1000))
+        // Content shorter than the screen is always at the bottom.
+        #expect(CrewChannelScroll.isAtBottom(visibleMaxY: 700, contentHeight: 300))
+    }
+
     @Test func unknownRoleIsMember() {
         #expect(CrewRole("owner") == .owner)
         #expect(CrewRole("admin") == .admin)

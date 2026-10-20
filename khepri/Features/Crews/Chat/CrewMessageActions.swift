@@ -69,3 +69,18 @@ nonisolated enum CrewMessageActions {
         return actions
     }
 }
+
+/// When a channel follows new messages down. Someone reading history stays
+/// where they are, unless the new message is their own.
+nonisolated enum CrewChannelScroll {
+    /// How far above the end still counts as the bottom.
+    static let tolerance: Double = 40
+
+    static func isAtBottom(visibleMaxY: Double, contentHeight: Double) -> Bool {
+        visibleMaxY >= contentHeight - tolerance
+    }
+
+    static func shouldFollow(atBottom: Bool, lastAuthorID: String?, meID: String) -> Bool {
+        atBottom || (!meID.isEmpty && lastAuthorID == meID)
+    }
+}

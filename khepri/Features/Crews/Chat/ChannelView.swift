@@ -17,6 +17,8 @@ struct ChannelView: View {
     @State private var reporting: CrewMessage?
     @State private var blocking: CrewMessage?
     @State private var showingRules = false
+    /// Whether the reader is at the newest message, so new ones may scroll and count as read.
+    @State private var atBottom = true
     @FocusState private var composing: Bool
     @Environment(\.scenePhase) private var scenePhase
 
@@ -56,7 +58,20 @@ struct ChannelView: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .defaultScrollAnchor(.bottom)
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                CrewChannelScroll.isAtBottom(
+                    visibleMaxY: geometry.visibleRect.maxY, contentHeight: geometry.contentSize.height
+                )
+            } action: { _, isAtBottom in
+                atBottom = isAtBottom
+                // Back down at the newest message: what arrived meanwhile is now read.
+                if isAtBottom, scenePhase == .active { Task { await store.markRead() } }
+            }
             .onChange(of: store.rows.last?.id) {
+                let follow = CrewChannelScroll.shouldFollow(
+                    atBottom: atBottom, lastAuthorID: store.rows.last?.author?.value1.id, meID: store.meID
+                )
+                guard follow else { return }
                 proxy.scrollTo(bottom, anchor: .bottom)
                 if scenePhase == .active { Task { await store.markRead() } }
             }
@@ -99,7 +114,7 @@ struct ChannelView: View {
             await store.markRead()
         }
         .onChange(of: scenePhase) {
-            if scenePhase == .active { Task { await store.markRead() } }
+            if scenePhase == .active, atBottom { Task { await store.markRead() } }
         }
         .sheet(isPresented: $showingRules) {
             CrewRulesSheet {
