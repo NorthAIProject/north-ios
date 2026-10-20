@@ -177,6 +177,28 @@
         }
       }
     },
+    "%@ → %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ → %2$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ → %2$@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ → %2$@"
+          }
+        }
+      }
+    },
     "30 days" : {
       "comment" : "Recap range picker",
       "localizations" : {
@@ -219,6 +241,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "7 dias"
+          }
+        }
+      }
+    },
+    "A progress check is due. Whenever suits you today." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca un registro de progreso. Cuando te venga bien hoy."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tem um registro de progresso para fazer. Quando for melhor para você hoje."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tens um registo de progresso por fazer. Quando te der jeito hoje."
           }
         }
       }
@@ -307,6 +351,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mais alguma coisa?"
+          }
+        }
+      }
+    },
+    "Arm" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brazo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Braço"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Braço"
           }
         }
       }
@@ -487,6 +553,72 @@
         }
       }
     },
+    "Compare again" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar de nuevo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar de novo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar outra vez"
+          }
+        }
+      }
+    },
+    "Compare first and latest" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar primero y último"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar primeiro e último"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparar primeiro e último"
+          }
+        }
+      }
+    },
+    "Comparing…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparando…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparando…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A comparar…"
+          }
+        }
+      }
+    },
     "Couldn't load the daily post" : {
       "localizations" : {
         "es" : {
@@ -575,6 +707,28 @@
         }
       }
     },
+    "Delete this check?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar este registro?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir este registro?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar este registo?"
+          }
+        }
+      }
+    },
     "Different days" : {
       "localizations" : {
         "es" : {
@@ -642,6 +796,138 @@
         }
       }
     },
+    "Empty fields were filled in. Check them against a tape if you can, then save." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se han rellenado los campos vacíos. Compruébalos con una cinta si puedes y luego guarda."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os campos vazios foram preenchidos. Confira com uma fita métrica se puder e depois salve."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os campos vazios foram preenchidos. Confirma-os com uma fita métrica se puderes e depois guarda."
+          }
+        }
+      }
+    },
+    "Estimate from photos" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimar a partir de las fotos"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimar a partir das fotos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimar a partir das fotografias"
+          }
+        }
+      }
+    },
+    "Estimate, not a measurement · %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimación, no una medida · %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimativa, não uma medição · %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimativa, não uma medição · %@"
+          }
+        }
+      }
+    },
+    "Estimated, then confirmed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado y confirmado"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado e confirmado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado e confirmado"
+          }
+        }
+      }
+    },
+    "Estimating…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimando…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimando…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A estimar…"
+          }
+        }
+      }
+    },
+    "Every 2 weeks" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada 2 semanas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A cada 2 semanas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A cada 2 semanas"
+          }
+        }
+      }
+    },
     "Every day is built to your macro target and checked against your answers before you see it." : {
       "localizations" : {
         "es" : {
@@ -660,6 +946,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada dia é feito à medida da tua meta de macros e verificado com as tuas respostas antes de o veres."
+          }
+        }
+      }
+    },
+    "First and latest, compared" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero y último, comparados"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeiro e último, comparados"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeiro e último, comparados"
           }
         }
       }
@@ -748,6 +1056,116 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Do teu coach"
+          }
+        }
+      }
+    },
+    "Front" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frente"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frente"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frente"
+          }
+        }
+      }
+    },
+    "Front and side photos make a complete check; back is optional. Every number is optional too." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las fotos de frente y de lado completan un registro; la de espalda es opcional. Todas las medidas también son opcionales."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotos de frente e de lado completam um registro; a de costas é opcional. Todas as medidas também são opcionais."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotografias de frente e de lado completam um registo; a de costas é opcional. Todas as medidas também são opcionais."
+          }
+        }
+      }
+    },
+    "Its photos are deleted too. This cannot be undone." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sus fotos también se eliminan. No se puede deshacer."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotos também são excluídas. Não dá para desfazer."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotografias também são apagadas. Não dá para desfazer."
+          }
+        }
+      }
+    },
+    "Last" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anterior"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anterior"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anterior"
+          }
+        }
+      }
+    },
+    "high confidence" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confianza alta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança alta"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança alta"
           }
         }
       }
@@ -863,6 +1281,28 @@
         }
       }
     },
+    "Limits: %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Límites: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limitações: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limitações: %@"
+          }
+        }
+      }
+    },
     "Lose fat" : {
       "localizations" : {
         "es" : {
@@ -881,6 +1321,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perder gordura"
+          }
+        }
+      }
+    },
+    "low confidence" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confianza baja"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança baixa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança baixa"
           }
         }
       }
@@ -951,6 +1413,50 @@
         }
       }
     },
+    "Measurements" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas"
+          }
+        }
+      }
+    },
+    "medium confidence" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confianza media"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança média"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiança média"
+          }
+        }
+      }
+    },
     "My last 30 days on Khepri — %@" : {
       "localizations" : {
         "es" : {
@@ -995,6 +1501,94 @@
         }
       }
     },
+    "New check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva revisión"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova análise"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova análise"
+          }
+        }
+      }
+    },
+    "Next check: %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo registro: %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo registro: %@."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo registo: %@."
+          }
+        }
+      }
+    },
+    "No checks yet" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay registros"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum registro ainda"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem registos"
+          }
+        }
+      }
+    },
+    "No earlier photo" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin foto anterior"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem foto anterior"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem fotografia anterior"
+          }
+        }
+      }
+    },
     "No post yet today" : {
       "localizations" : {
         "es" : {
@@ -1013,6 +1607,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda não há publicação hoje"
+          }
+        }
+      }
+    },
+    "No reminder set." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin recordatorio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem lembrete."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem lembrete."
+          }
+        }
+      }
+    },
+    "Nothing could be estimated from these photos." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo estimar nada a partir de estas fotos."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível estimar nada a partir destas fotos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível estimar nada a partir destas fotografias."
+          }
+        }
+      }
+    },
+    "Numbers you had already entered were kept." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se han mantenido los números que ya habías introducido."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os números que você já tinha digitado foram mantidos."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os números que já tinhas introduzido foram mantidos."
+          }
+        }
+      }
+    },
+    "Observation from photos, not a measurement · %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observación a partir de fotos, no una medida · %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observação a partir de fotos, não uma medição · %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observação a partir de fotografias, não uma medição · %@"
           }
         }
       }
@@ -1083,6 +1765,50 @@
         }
       }
     },
+    "Photos" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotografias"
+          }
+        }
+      }
+    },
+    "Photos, weight and a few measurements on a schedule you choose, the way a trainer would take them. The figure on Today takes its shape from your latest check." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos, peso y algunas medidas con la frecuencia que elijas, como las tomaría un entrenador. La figura de Hoy toma la forma de tu último registro."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos, peso e algumas medidas na frequência que você escolher, do jeito que um treinador faria. A figura de Hoje ganha a forma do seu último registro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotografias, peso e algumas medidas com a frequência que escolheres, como um treinador as tiraria. A figura de Hoje ganha a forma do teu último registo."
+          }
+        }
+      }
+    },
     "Post to friends" : {
       "localizations" : {
         "es" : {
@@ -1149,6 +1875,50 @@
         }
       }
     },
+    "Progress check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de progreso"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de progresso"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registo de progresso"
+          }
+        }
+      }
+    },
+    "Read by %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leído por %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lido por %@."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lido por %@."
+          }
+        }
+      }
+    },
     "Recaps show with your training, and you're not sharing training with friends." : {
       "localizations" : {
         "es" : {
@@ -1167,6 +1937,160 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os resumos aparecem com o teu treino, e não estás a partilhar o treino com os teus amigos."
+          }
+        }
+      }
+    },
+    "Reminder" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lembrete"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lembrete"
+          }
+        }
+      }
+    },
+    "Remove Photo" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar foto"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover foto"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover fotografia"
+          }
+        }
+      }
+    },
+    "Save check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar registro"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar registro"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar registo"
+          }
+        }
+      }
+    },
+    "Sends the front and side photos of your first and latest checks to %@, on your own key. The result is saved here and your coach can read it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envía las fotos de frente y de perfil de tu primer y último registro a %@, con tu propia clave. El resultado se guarda aquí y tu coach puede leerlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia as fotos de frente e de lado do seu primeiro e último registro para %@, com sua própria chave. O resultado fica salvo aqui e seu coach pode lê-lo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia as fotografias de frente e de lado do teu primeiro e último registo para %@, com a tua própria chave. O resultado fica guardado aqui e o teu coach pode lê-lo."
+          }
+        }
+      }
+    },
+    "Sends the front and side photos of your first and latest checks to %@. The result is saved here and your coach can read it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envía las fotos de frente y de perfil de tu primer y último registro a %@. El resultado se guarda aquí y tu coach puede leerlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia as fotos de frente e de lado do seu primeiro e último registro para %@. O resultado fica salvo aqui e seu coach pode lê-lo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia as fotografias de frente e de lado do teu primeiro e último registo para %@. O resultado fica guardado aqui e o teu coach pode lê-lo."
+          }
+        }
+      }
+    },
+    "Sends these photos to %@ to estimate waist, hips and chest. Nothing is saved until you save the check." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envía estas fotos a %@ para estimar cintura, cadera y pecho. No se guarda nada hasta que guardes el registro."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia estas fotos para %@ para estimar cintura, quadril e peito. Nada é salvo até você salvar o registro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia estas fotografias para %@ para estimar cintura, anca e peito. Nada é guardado até guardares o registo."
+          }
+        }
+      }
+    },
+    "Sends these photos to %@, on your own key, to estimate waist, hips and chest. Nothing is saved until you save the check." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envía estas fotos a %@, con tu propia clave, para estimar cintura, cadera y pecho. No se guarda nada hasta que guardes el registro."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia estas fotos para %@, com sua própria chave, para estimar cintura, quadril e peito. Nada é salvo até você salvar o registro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envia estas fotografias para %@, com a tua própria chave, para estimar cintura, anca e peito. Nada é guardado até guardares o registo."
           }
         }
       }
@@ -1259,6 +2183,50 @@
         }
       }
     },
+    "Take or choose" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer o elegir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tirar ou escolher"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tirar ou escolher"
+          }
+        }
+      }
+    },
+    "Thigh" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muslo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coxa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coxa"
+          }
+        }
+      }
+    },
     "This takes up to a minute. You'll review every meal before anything is saved." : {
       "localizations" : {
         "es" : {
@@ -1322,6 +2290,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Amanhã"
+          }
+        }
+      }
+    },
+    "Waist" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura"
+          }
+        }
+      }
+    },
+    "Waist: at the navel, relaxed, tape level." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura: a la altura del ombligo, relajado, con la cinta nivelada."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura: na altura do umbigo, relaxado, com a fita nivelada."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cintura: à altura do umbigo, descontraído, com a fita nivelada."
           }
         }
       }
@@ -1392,6 +2404,72 @@
         }
       }
     },
+    "You have a newer check since. Compare again to include it." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienes un registro más reciente. Vuelve a comparar para incluirlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você tem um registro mais recente. Compare de novo para incluí-lo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tens um registo mais recente. Compara outra vez para o incluir."
+          }
+        }
+      }
+    },
+    "You have two checks with photos. Compare them to see what changed." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienes dos registros con fotos. Compáralos para ver qué ha cambiado."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você tem dois registros com fotos. Compare-os para ver o que mudou."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tens dois registos com fotografias. Compara-os para ver o que mudou."
+          }
+        }
+      }
+    },
+    "Your checks" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus registros"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus registros"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os teus registos"
+          }
+        }
+      }
+    },
     "Your Coach" : {
       "localizations" : {
         "es" : {
@@ -1436,6 +2514,50 @@
         }
       }
     },
+    "Your first one sets the starting point; each one after shows how things moved." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El primero marca el punto de partida; cada uno después muestra cómo han cambiado las cosas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O primeiro marca o ponto de partida; cada um depois mostra como as coisas mudaram."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O primeiro marca o ponto de partida; cada um a seguir mostra como as coisas mudaram."
+          }
+        }
+      }
+    },
+    "Your photos are private. Only you can see them." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus fotos son privadas. Solo tú puedes verlas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas fotos são privadas. Só você pode vê-las."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As tuas fotografias são privadas. Só tu as podes ver."
+          }
+        }
+      }
+    },
     "Your week" : {
       "localizations" : {
         "es" : {
@@ -1476,6 +2598,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A tua semana: %lld dias ativos, %lld treinos, %lld registos"
+          }
+        }
+      }
+    },
+    "· last known" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· último conocido"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· último conhecido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· último conhecido"
           }
         }
       }
