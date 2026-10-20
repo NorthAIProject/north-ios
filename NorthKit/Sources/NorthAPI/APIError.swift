@@ -17,6 +17,10 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case conflict(String?)
     case fieldValidation(message: String, fields: [String: String])
     case server(String)
+    /// The server refused with a named reason the app handles itself, such as
+    /// `terms_required` or `suspended` (a 403 whose error body carries `code`).
+    /// Open string: unknown codes still display their message.
+    case refused(code: String, message: String)
     /// The request never got an answer. `code` says why, when the system did.
     case network(String, code: URLError.Code? = nil)
     /// The session token could not be read, as while the phone is locked.
@@ -35,7 +39,7 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             message ?? String(localized: "That could not be found.", bundle: .module)
         case .conflict(let message):
             message ?? String(localized: "That is already in progress.", bundle: .module)
-        case .fieldValidation(let message, _), .server(let message), .network(let message, _):
+        case .fieldValidation(let message, _), .server(let message), .refused(_, let message), .network(let message, _):
             message
         case .locked:
             String(localized: "Unlock your phone to continue.", bundle: .module)
@@ -165,6 +169,8 @@ struct ErrorMappingMiddleware: ClientMiddleware {
             .conflict(detail?.message)
         case (_, let detail?) where !(detail.fields ?? [:]).isEmpty:
             .fieldValidation(message: detail.message, fields: detail.fields ?? [:])
+        case (403, let detail?) where !(detail.code ?? "").isEmpty:
+            .refused(code: detail.code ?? "", message: detail.message)
         case (_, let detail?):
             .server(detail.message)
         default:
@@ -179,5 +185,6 @@ struct ErrorMappingMiddleware: ClientMiddleware {
     struct ErrorDetail: Decodable {
         let message: String
         let fields: [String: String]?
+        let code: String?
     }
 }
