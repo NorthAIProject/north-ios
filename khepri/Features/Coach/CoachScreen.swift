@@ -8,7 +8,10 @@ struct CoachScreen: View {
     @State private var path: [ConversationSummary] = []
     @State private var loadError: String?
     @State private var isLoading = true
+    /// Composer text for a conversation started from a link, by its id.
+    @State private var drafts: [String: String] = [:]
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppRouter.self) private var router
 
     private let coach: CoachServicing
 
@@ -47,7 +50,7 @@ struct CoachScreen: View {
             .navigationTitle("Coach")
             .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: ConversationSummary.self) { summary in
-                ConversationView(summary: summary, coach: coach) { reflection in
+                ConversationView(summary: summary, coach: coach, draft: drafts[summary.id] ?? "") { reflection in
                     Task { await start(reflection: reflection) }
                 }
             }
@@ -61,6 +64,11 @@ struct CoachScreen: View {
         .task { await load() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await load() } }
+        }
+        .onChange(of: router.coachDraft, initial: true) { _, draft in
+            guard let draft else { return }
+            router.coachDraft = nil
+            Task { await start(reflection: false, draft: draft) }
         }
     }
 
@@ -115,9 +123,10 @@ struct CoachScreen: View {
         }
     }
 
-    private func start(reflection: Bool) async {
+    private func start(reflection: Bool, draft: String? = nil) async {
         do {
             let conversation = try await coach.start(reflection: reflection)
+            if let draft { drafts[conversation.id] = draft }
             conversations.insert(conversation, at: 0)
             path = [conversation]
         } catch {

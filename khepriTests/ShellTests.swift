@@ -123,6 +123,8 @@ struct RouterTests {
         ("khepri://check-ins?mood=4", .checkIn(mood: 4)),
         ("/app/check-ins?mood=2", .checkIn(mood: 2)),
         ("khepri://check-ins?mood=9", .section("check-ins")),
+        ("/app/daily", .section("daily")),
+        ("khepri://daily", .section("daily")),
     ])
     func mapsLinksToDestinations(_ link: String, _ expected: AppDestination) throws {
         #expect(AppRouter.destination(for: try #require(URL(string: link))) == expected)
@@ -138,6 +140,13 @@ struct RouterTests {
         router.open(url: try #require(URL(string: "khepri://settings")))
         #expect(router.selectedTab == .more)
         #expect(router.showsSettings)
+    }
+
+    @Test func askingTheCoachOpensTheCoachTabWithADraft() {
+        let router = AppRouter()
+        router.open(.askCoach("About today's post: "))
+        #expect(router.selectedTab == .coach)
+        #expect(router.coachDraft == "About today's post: ")
     }
 
     @Test func checkInFlowPresentsWithoutLeavingTab() {

@@ -54,6 +54,9 @@ enum AppDestination: Equatable {
     /// The weekly review, as a sheet over whatever is open: where the Sunday
     /// nudge leads.
     case weeklyReview
+    /// A new conversation with this text waiting in the composer, unsent:
+    /// the daily post's "Ask the coach about this".
+    case askCoach(String)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -105,6 +108,9 @@ final class AppRouter {
     /// Set with `openSection` for a single goal; the Goals screen opens it
     /// and clears it.
     var openGoal: String?
+    /// Set when a link asks for a new conversation with a draft; the Coach
+    /// tab starts one, puts the draft in its composer, and clears it.
+    var coachDraft: String?
     /// Counts writes on this device that change the day: a check-in, a quick
     /// add, an approved coach action, a Siri shortcut. Screens that show the
     /// day reload on each change, since a tab kept alive by the tab bar does
@@ -119,6 +125,7 @@ final class AppRouter {
     /// More's sections, by the path the web uses for them.
     static let sections: Set<String> = [
         "goals", "check-ins", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions", "friends", "crews", "inbox",
+        "daily",
     ]
 
     func open(_ destination: AppDestination) {
@@ -171,6 +178,9 @@ final class AppRouter {
             selectedTab = .more
             openGoal = id
             openSection = "goals"
+        case .askCoach(let draft):
+            selectedTab = .coach
+            coachDraft = draft
         }
     }
 

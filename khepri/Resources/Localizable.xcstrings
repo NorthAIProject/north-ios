@@ -267,6 +267,28 @@
         }
       }
     },
+    "AI-written" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        }
+      }
+    },
     "Anything Else?" : {
       "localizations" : {
         "es" : {
@@ -285,6 +307,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mais alguma coisa?"
+          }
+        }
+      }
+    },
+    "Ask the Coach About This" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregúntale al coach sobre esto"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perguntar ao coach sobre isso"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perguntar ao coach sobre isto"
           }
         }
       }
@@ -443,6 +487,28 @@
         }
       }
     },
+    "Couldn't load the daily post" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo cargar la publicación del día"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar o post do dia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar a publicação do dia"
+          }
+        }
+      }
+    },
     "Daily activity" : {
       "localizations" : {
         "es" : {
@@ -461,6 +527,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Atividade diária"
+          }
+        }
+      }
+    },
+    "Daily Post" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publicación del día"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Post do dia"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publicação do dia"
           }
         }
       }
@@ -528,6 +616,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fazer hoje"
+          }
+        }
+      }
+    },
+    "Earlier posts" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publicaciones anteriores"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posts anteriores"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publicações anteriores"
           }
         }
       }
@@ -885,6 +995,28 @@
         }
       }
     },
+    "No post yet today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía no hay publicación hoy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não tem post hoje"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há publicação hoje"
+          }
+        }
+      }
+    },
     "Opens your recap" : {
       "localizations" : {
         "es" : {
@@ -1149,6 +1281,28 @@
         }
       }
     },
+    "Today's post is still being written. Check back a little later." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La publicación de hoy aún se está escribiendo. Vuelve un poco más tarde."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O post de hoje ainda está sendo escrito. Volte um pouco mais tarde."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A publicação de hoje ainda está a ser escrita. Volta um pouco mais tarde."
+          }
+        }
+      }
+    },
     "Tomorrow" : {
       "comment" : "Button on the coach's notification about a missed session",
       "localizations" : {
@@ -1190,6 +1344,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Que dias?"
+          }
+        }
+      }
+    },
+    "Written by AI" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA"
+          }
+        }
+      }
+    },
+    "Written by AI and reviewed automatically before it is posted. Posts are written in English. Not medical advice: for anything persistent, see a doctor." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA y revisado automáticamente antes de publicarse. Las publicaciones están en inglés. No es consejo médico: ante cualquier cosa persistente, consulta a un médico."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA e revisado automaticamente antes de ser publicado. Os posts são em inglês. Não é orientação médica: para algo persistente, procure um médico."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escrito por IA e revisto automaticamente antes de ser publicado. As publicações são em inglês. Não é aconselhamento médico: para algo persistente, consulta um médico."
           }
         }
       }
