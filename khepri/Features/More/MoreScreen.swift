@@ -15,6 +15,7 @@ struct MoreScreen: View {
     }
 
     private let growth: [Section] = [
+        .init(id: "daily", title: "Daily Post", systemImage: "newspaper"),
         .init(id: "goals", title: "Goals", systemImage: "target"),
         .init(id: "check-ins", title: "Check-ins", systemImage: "checkmark.circle"),
         .init(id: "reports", title: "Reports", systemImage: "doc.text"),
@@ -90,6 +91,7 @@ struct MoreScreen: View {
         case "friends": FriendsScreen()
         case "crews": CrewsScreen()
         case "inbox": InboxScreen()
+        case "daily": DailyPostScreen()
         default: EmptyView()
         }
     }

@@ -23,8 +23,10 @@ struct ConversationView: View {
     /// Starts another conversation or reflection from the header.
     private let onNew: (_ reflection: Bool) -> Void
 
-    init(summary: ConversationSummary, coach: CoachServicing, onNew: @escaping (_ reflection: Bool) -> Void = { _ in }) {
+    /// `draft` starts in the composer, unsent.
+    init(summary: ConversationSummary, coach: CoachServicing, draft: String = "", onNew: @escaping (_ reflection: Bool) -> Void = { _ in }) {
         _store = State(initialValue: ConversationStore(conversationID: summary.id, title: summary.title, coach: coach))
+        _draft = State(initialValue: draft)
         self.onNew = onNew
     }
 

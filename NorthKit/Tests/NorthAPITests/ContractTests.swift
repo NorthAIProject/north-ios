@@ -452,6 +452,15 @@ struct ContractTests {
         #expect(shared.trainingShared)
     }
 
+    @Test func dailyPosts() throws {
+        let posts = try decode(Schemas.DailyPosts.self, "daily-posts")
+        #expect(posts.today?.title == "Water before meals" && posts.today?.aiGenerated == true)
+        #expect(posts.today?.kudos == 3 && posts.today?.kudoed == true && posts.today?.date == "2026-10-20")
+        #expect(posts.earlier.count == 1 && posts.earlier.first?.theme == "sleep")
+        let empty = try decode(Schemas.DailyPosts.self, "daily-posts-empty")
+        #expect(empty.today == nil && empty.earlier.isEmpty)
+    }
+
     @Test func xp() throws {
         let summary = try decode(Schemas.XPSummary.self, "summary")
         #expect(summary.total == 340 && summary.weekTotal == 65)
@@ -489,7 +498,7 @@ struct ContractTests {
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
-                            "weekly-review", "weekly-focus", "recap", "recap-shared",
+                            "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",
                             "progress_comparison", "progress_estimate", "progress_assist"]
