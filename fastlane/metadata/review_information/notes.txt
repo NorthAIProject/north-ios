@@ -1,14 +1,17 @@
-Resubmission after the 5 October rejection (guideline 5.1.1(iv)): the microphone, Apple Health and notification explainers now have a single Continue button that always leads to the iOS permission prompt; none can be skipped or postponed, and none is labelled "Allow".
-
 Sign in with the demo account above (email and password). It is seeded with a training plan, goals, check-ins and a coach conversation, so every tab has content.
 
+Since the 5 October rejection (guideline 5.1.1(iv)), the microphone, Apple Health and notification explainers have a single Continue button that always leads to the iOS permission prompt; none can be skipped or postponed, and none is labelled "Allow".
+
 Where to look:
-- Today: the body figure shows the muscles trained in the last 7 days. Tap a highlighted muscle to see when it was last trained and open its exercises.
+- Today: the body figure shows the muscles trained in the last 7 days. Tap a highlighted muscle to see when it was last trained and open its exercises. "Your week" opens a 7 or 30 day recap that can be shared.
 - Coach tab: ask anything, e.g. "How do I do a push-up?" to see the inline exercise card.
 - Training tab: the plan, a day's exercises with animations, and "Start Workout" (Live Activity).
 - Progress tab: charts from check-ins and, if connected, Apple Health.
-- More: goals, check-ins, reports, memories, knowledge, nutrition, care, journal, decisions. Settings (More > Settings) holds Export My Data and, at the bottom, Delete Account.
+- More > Nutrition > Plans > Build with AI: the coach builds a meal plan from a goal, meals per day and foods to leave out; it is shown for review before anything is saved.
+- More > Progress check: photos and measurements. Photos are only sent for an estimate after the screen names the AI provider, and estimates are labelled as such.
+- More > Daily Post: one short post a day, written by AI and marked "AI-written". Readers can only give kudos; there are no comments or user posts.
+- More: goals, check-ins, reports, memories, knowledge, care, journal, decisions. Settings (More > Settings) holds Language, Appearance, Export My Data and, at the bottom, Delete Account.
 
 HealthKit: used to read workouts, activity, heart rate, sleep and weight for coaching, and to save workouts finished in the app. Nothing is used for advertising.
-Notifications: workout reminders are scheduled on the device; coaching nudges arrive by push.
+Notifications: workout reminders are scheduled on the device; coaching nudges and coach messages arrive by push, and both can be turned off in Settings.
 Sign in with Apple and Google are offered alongside email.
