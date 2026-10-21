@@ -94,7 +94,7 @@ struct CrewSpaceScreen: View {
             }
         }
         .sheet(isPresented: $showingNotify) {
-            CrewNotifySheet(current: space?.notify) { notify, mutedUntil in
+            CrewNotifySheet(current: space?.notify, mutedUntil: space?.mutedUntil) { notify, mutedUntil in
                 Task { await saveNotify(notify, mutedUntil: mutedUntil) }
             }
         }

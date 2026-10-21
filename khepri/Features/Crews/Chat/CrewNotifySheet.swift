@@ -2,11 +2,12 @@ import SwiftUI
 
 /// What this crew may notify you about, and for how long to mute it.
 struct CrewNotifySheet: View {
-    /// Saves the choice: `mutedUntil` nil clears any mute, as on the web.
+    /// Saves the choice: `mutedUntil` nil clears any mute, as on the web. An
+    /// active mute is offered first and kept unless another choice is made.
     let onSave: (_ notify: String, _ mutedUntil: Date?) -> Void
 
     @State private var notify: String
-    @State private var mute: Mute = .off
+    @State private var mute: Mute
     @Environment(\.dismiss) private var dismiss
 
     /// The server's notify values. Anything else it sends reads as all.
@@ -16,20 +17,35 @@ struct CrewNotifySheet: View {
         ("none", "Nothing")
     ]
 
-    enum Mute: CaseIterable, Hashable {
+    enum Mute: Hashable {
+        /// The mute already set, kept as it is.
+        case current(Date)
         case off, hour, day, week
 
-        var title: LocalizedStringKey {
+        /// An active mute first, so saving another setting does not lift it.
+        static func choices(mutedUntil: Date?, now: Date) -> [Mute] {
+            let active = initial(mutedUntil: mutedUntil, now: now)
+            return (active == .off ? [] : [active]) + [.off, .hour, .day, .week]
+        }
+
+        static func initial(mutedUntil: Date?, now: Date) -> Mute {
+            guard let mutedUntil, mutedUntil > now else { return .off }
+            return .current(mutedUntil)
+        }
+
+        var title: Text {
             switch self {
-            case .off: "Don't mute"
-            case .hour: "For an hour"
-            case .day: "For a day"
-            case .week: "For a week"
+            case .current(let date): Text("Muted until \(date, format: .dateTime.weekday().hour().minute())")
+            case .off: Text("Don't mute")
+            case .hour: Text("For an hour")
+            case .day: Text("For a day")
+            case .week: Text("For a week")
             }
         }
 
         func until(from now: Date) -> Date? {
             switch self {
+            case .current(let date): date
             case .off: nil
             case .hour: now.addingTimeInterval(3600)
             case .day: now.addingTimeInterval(86400)
@@ -38,9 +54,17 @@ struct CrewNotifySheet: View {
         }
     }
 
-    init(current: String?, onSave: @escaping (_ notify: String, _ mutedUntil: Date?) -> Void) {
+    private let muteChoices: [Mute]
+
+    init(
+        current: String?, mutedUntil: Date?,
+        onSave: @escaping (_ notify: String, _ mutedUntil: Date?) -> Void
+    ) {
         let known = Self.levels.contains { $0.key == current }
         _notify = State(initialValue: known ? current ?? "all" : "all")
+        let now = Date()
+        _mute = State(initialValue: Mute.initial(mutedUntil: mutedUntil, now: now))
+        muteChoices = Mute.choices(mutedUntil: mutedUntil, now: now)
         self.onSave = onSave
     }
 
@@ -58,8 +82,8 @@ struct CrewNotifySheet: View {
                 }
                 Section("Mute") {
                     Picker("Mute", selection: $mute) {
-                        ForEach(Mute.allCases, id: \.self) { option in
-                            Text(option.title).tag(option)
+                        ForEach(muteChoices, id: \.self) { option in
+                            option.title.tag(option)
                         }
                     }
                     .pickerStyle(.inline)

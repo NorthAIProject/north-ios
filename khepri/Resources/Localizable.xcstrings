@@ -2052,6 +2052,28 @@
         }
       }
     },
+    "Muted until %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciado hasta %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciado até %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciado até %@"
+          }
+        }
+      }
+    },
     "My last 30 days on Khepri — %@" : {
       "localizations" : {
         "es" : {
