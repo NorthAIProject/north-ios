@@ -7,7 +7,8 @@ struct MoreScreen: View {
     let user: APIUser
     @Environment(AppRouter.self) private var router
     @Environment(CrewUnread.self) private var crewUnread
-    @State private var path: [String] = []
+    @State private var path: [MoreRoute] = []
+    private let crewsService: CrewsServicing = CrewsService()
 
     private struct Section: Identifiable {
         let id: String
@@ -61,20 +62,65 @@ struct MoreScreen: View {
                 }
             }
             .navigationTitle("More")
-            .navigationDestination(for: String.self) { id in
-                if let section = (growth + life).first(where: { $0.id == id }) {
-                    destination(for: section)
+            .navigationDestination(for: MoreRoute.self) { route in
+                switch route {
+                case .section(let id):
+                    if let section = (growth + life).first(where: { $0.id == id }) {
+                        destination(for: section)
+                    }
+                case .crew(let opened):
+                    // Each opening is its own space, with its own live stream,
+                    // never an earlier one's state. (An id on the destination
+                    // itself left an old space showing.)
+                    ZStack {
+                        CrewSpaceScreen(
+                            crew: opened.crew, meID: user.id, crews: crewsService, firstChannelID: opened.channelID
+                        )
+                            .id(opened)
+                    }
                 }
             }
             .sheet(isPresented: $router.showsSettings) {
                 SettingsScreen(user: user)
             }
         }
+        // A crew push or link. Handled here, at the stack's root, and not by
+        // the Crews list under an open space: a covered screen reacting to
+        // it made the stack drop the space above it.
+        .onChange(of: router.openCrew, initial: true) { _, route in
+            guard let route else { return }
+            router.openCrew = nil
+            Task { await follow(route) }
+        }
         // A widget, a shortcut or a nudge naming a section lands on it.
         .onChange(of: router.openSection, initial: true) { _, id in
             guard let id else { return }
             router.openSection = nil
-            path = [id]
+            let next = MorePath.opening(section: id, in: path)
+            if next != path { path = next }
+        }
+    }
+
+    /// The open crew moves to the linked channel; any other crew's space
+    /// replaces it. A crew you are not in (any more) leaves the list showing.
+    private func follow(_ route: CrewRoute) async {
+        switch CrewLinkLanding(route, openCrewID: MorePath.openCrewID(in: path)) {
+        case .switchChannel:
+            router.crewChannelRequest = route
+        case .openSpace:
+            let crews = (try? await crewsService.crews()) ?? []
+            guard let crew = crews.first(where: { $0.id.lowercased() == route.crewID }) else { return }
+            if MorePath.openCrewID(in: path) != nil {
+                // Swapping the top of the stack in place is not reliable: the
+                // stack often kept showing the old space. Close it without
+                // animation, then push the new one.
+                var closing = Transaction()
+                closing.disablesAnimations = true
+                withTransaction(closing) { path = MorePath.closingCrew(in: path) }
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+            // The channel rides on the path value, not on router state.
+            path = MorePath.opening(OpenedCrew(crew: crew, channelID: route.channelID), in: path)
         }
     }
 
@@ -92,7 +138,7 @@ struct MoreScreen: View {
         case "mind": JournalScreen()
         case "decisions": DecisionsScreen()
         case "friends": FriendsScreen()
-        case "crews": CrewsScreen()
+        case "crews": CrewsScreen(path: $path)
         case "inbox": InboxScreen()
         case "daily": DailyPostScreen()
         default: EmptyView()
@@ -102,11 +148,49 @@ struct MoreScreen: View {
     private func sectionRows(_ header: LocalizedStringKey, _ sections: [Section]) -> some View {
         SwiftUI.Section(header) {
             ForEach(sections) { section in
-                NavigationLink(value: section.id) {
+                NavigationLink(value: MoreRoute.section(section.id)) {
                     Label(section.title, systemImage: section.systemImage)
                 }
                 .badge(section.id == "crews" ? crewUnread.total : 0)
             }
         }
+    }
+}
+
+/// A screen on the More tab's stack: a section, or one crew's space over
+/// Crews. Crew spaces live on the path itself rather than in a nested
+/// `navigationDestination(item:)`: a path-bound stack drops item-pushed
+/// screens whenever it updates (a link setting the tab and section is
+/// enough), which left a stale space on screen and pushed a second one under
+/// it.
+enum MoreRoute: Hashable {
+    case section(String)
+    case crew(OpenedCrew)
+}
+
+/// How links and taps change the More stack.
+nonisolated enum MorePath {
+    /// A section link opens that section alone, unless the stack already
+    /// starts there: a crew link names Crews too, and must not pop the crew
+    /// space it is about to switch.
+    static func opening(section id: String, in path: [MoreRoute]) -> [MoreRoute] {
+        path.first == .section(id) ? path : [.section(id)]
+    }
+
+    /// The crew whose space is on top of the stack, lowercased.
+    static func openCrewID(in path: [MoreRoute]) -> String? {
+        guard case .crew(let opened) = path.last else { return nil }
+        return opened.crew.id.lowercased()
+    }
+
+    /// The stack with any crew space closed: Crews, if it was open.
+    static func closingCrew(in path: [MoreRoute]) -> [MoreRoute] {
+        path.filter { if case .crew = $0 { false } else { true } }
+    }
+
+    /// Crews with this crew's space on top. Any other space is replaced, so
+    /// there is one space (and one live stream) and Back goes to the list.
+    static func opening(_ opened: OpenedCrew, in path: [MoreRoute]) -> [MoreRoute] {
+        [.section("crews"), .crew(opened)]
     }
 }

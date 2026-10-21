@@ -10,12 +10,9 @@ struct CrewSpaceScreen: View {
     let meID: String
     let crews: CrewsServicing
     var chat: CrewChatServicing = CrewChatService()
-    /// The latest push or link for this crew. Its channel opens first, and
-    /// each new one moves the open space to its channel; nil (or a channel
-    /// that is gone) means the crew's default one.
-    var channelRequest: CrewRoute?
-    /// The crew list may need reloading: someone left, or the challenge changed.
-    let onChange: () -> Void
+    /// The channel a push or link opened this space on; nil (or a channel
+    /// that is gone) is the crew's default one.
+    var firstChannelID: String?
 
     enum Tab: Hashable { case chat, challenge }
 
@@ -31,12 +28,15 @@ struct CrewSpaceScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
     @Environment(CrewUnread.self) private var crewUnread
+    /// Its `crewChannelRequest` is a push or link for the crew already open:
+    /// each new one moves this space to its channel, and to Chat.
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         Group {
             switch tab {
             case .chat: chatTab
-            case .challenge: CrewBoardView(crewID: crew.id, service: crews, chat: chat, onChange: onChange)
+            case .challenge: CrewBoardView(crewID: crew.id, service: crews, chat: chat)
             }
         }
         .navigationTitle(crew.name)
@@ -59,7 +59,9 @@ struct CrewSpaceScreen: View {
             }
         }
         .task { await loadSpace() }
-        .onChange(of: channelRequest) { Task { await follow(channelRequest) } }
+        .onChange(of: router.crewChannelRequest) {
+            Task { await follow(router.crewChannelRequest) }
+        }
         // What was read here, and what came in elsewhere, is the server's to
         // count: the crew badges ask it again on the way out.
         .onDisappear { Task { await crewUnread.refresh() } }
@@ -76,10 +78,7 @@ struct CrewSpaceScreen: View {
             if let reason = store?.closedReason { close(reason) }
         }
         .alert(closed ?? "", isPresented: $showingClosed) {
-            Button("OK") {
-                onChange()
-                dismiss()
-            }
+            Button("OK") { dismiss() }
         }
         .sheet(isPresented: $showingPins) {
             if let store {
@@ -188,7 +187,7 @@ struct CrewSpaceScreen: View {
         }
         // The first load may start on a pushed channel; later ones fall back
         // to the default.
-        let wanted = store == nil && channelRequest?.crewID == crew.id.lowercased() ? channelRequest?.channelID : nil
+        let wanted = store == nil ? firstChannelID?.lowercased() : nil
         let linked = channels.first { $0.id.lowercased() == wanted }
         if let first = linked ?? channels.first(where: { $0._default == true }) ?? channels.first {
             store = nil

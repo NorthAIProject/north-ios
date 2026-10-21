@@ -105,6 +105,9 @@ final class AppRouter {
     /// Set with `openSection` for one crew's space; the Crews screen opens it
     /// and clears it.
     var openCrew: CrewRoute?
+    /// A crew push or link for the crew space already open: that space
+    /// moves to its channel, and to Chat. Set by More, which owns the stack.
+    var crewChannelRequest: CrewRoute?
     /// Set when a link asks for one exercise; the tab view presents it and
     /// clears it on dismiss.
     var openExercise: String?

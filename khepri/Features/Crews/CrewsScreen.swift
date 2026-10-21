@@ -6,6 +6,8 @@ import SwiftUI
 /// and trained today, streaks and the week's challenge, and chat in the crew's
 /// channels.
 struct CrewsScreen: View {
+    /// The More tab's stack. A crew space is pushed onto it, over this list.
+    @Binding var path: [MoreRoute]
     var service: CrewsServicing = CrewsService()
 
     @State private var crews: [Crew] = []
@@ -13,29 +15,19 @@ struct CrewsScreen: View {
     @State private var error: String?
     @State private var naming = false
     @State private var newName = ""
-    /// The crew space pushed over the list. Rows, new and joined crews, links
-    /// and pushes all open it here, so a new one replaces the open space
-    /// instead of stacking a second one (and a second live stream) on it.
-    @State private var opened: OpenedCrew?
-    /// The latest push or link for the open crew, which moves it to a channel.
-    @State private var channelRequest: CrewRoute?
     @Environment(AppRouter.self) private var router
     @Environment(AppModel.self) private var app
     @Environment(CrewUnread.self) private var unread
 
     var body: some View {
-        // Read here, so a new request redraws the open space.
-        let request = channelRequest
         List {
             if let error { ErrorRow(error) }
             if loaded, crews.isEmpty {
                 Text("A crew is a small group who keep each other going.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
-            // Buttons into `opened`, not navigation links: one way in, so a
-            // push can replace whatever crew is open. Crews is itself pushed
-            // with a value link from More, and mixing link styles in one stack
-            // misplaces screens.
+            // Buttons that edit More's path, not navigation links: one way in,
+            // so a push can replace whatever crew is open.
             ForEach(crews, id: \.id) { crew in
                 Button {
                     open(crew)
@@ -57,13 +49,9 @@ struct CrewsScreen: View {
             }
         }
         .navigationTitle("Crews")
-        .navigationDestination(item: $opened) { shown in
-            CrewSpaceScreen(crew: shown.crew, meID: meID, crews: service, channelRequest: request) {
-                Task { await load() }
-            }
-            // Another crew is a new screen, never this one's state reused.
-            .id(shown)
-        }
+        // Back from a crew: someone may have left, or the challenge or the
+        // unread counts changed.
+        .onAppear { if loaded { Task { await load() } } }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Crew", systemImage: "plus") { naming = true }
@@ -83,13 +71,6 @@ struct CrewsScreen: View {
                 await load()
             }
         }
-        // A crew push or link. `onChange` rather than a task: it still fires
-        // while the list is covered by an open crew.
-        .onChange(of: router.openCrew, initial: true) {
-            guard let route = router.openCrew else { return }
-            router.openCrew = nil
-            Task { await follow(route) }
-        }
         .refreshable { await load() }
     }
 
@@ -99,23 +80,9 @@ struct CrewsScreen: View {
         return ""
     }
 
+    /// A row, or a new or joined crew: its default channel.
     private func open(_ crew: Crew) {
-        channelRequest = nil
-        opened = OpenedCrew(crew: crew)
-    }
-
-    /// The open crew moves to the linked channel; any other crew's space
-    /// replaces it. A crew you are not in (any more) leaves the list showing.
-    private func follow(_ route: CrewRoute) async {
-        switch CrewLinkLanding(route, openCrewID: opened?.crew.id) {
-        case .switchChannel:
-            channelRequest = route
-        case .openSpace:
-            if !crews.contains(where: { $0.id.lowercased() == route.crewID }) { await load() }
-            guard let crew = crews.first(where: { $0.id.lowercased() == route.crewID }) else { return }
-            channelRequest = route
-            opened = OpenedCrew(crew: crew)
-        }
+        path = MorePath.opening(OpenedCrew(crew: crew), in: path)
     }
 
     private func load() async {
@@ -138,9 +105,11 @@ struct CrewsScreen: View {
 }
 
 /// One opening of a crew's space: a new one is a new screen, even for the
-/// same crew.
-private struct OpenedCrew: Hashable {
+/// same crew. A push or link names the channel it opens on; nil is the
+/// crew's default one.
+struct OpenedCrew: Hashable {
     let crew: Crew
+    var channelID: String?
     let id = UUID()
 }
 
@@ -167,7 +136,6 @@ struct CrewBoardView: View {
     let service: CrewsServicing
     /// Blocks a member; the friends slice owns blocking.
     var chat: CrewChatServicing = CrewChatService()
-    let onChange: () -> Void
 
     @State private var board: CrewBoard?
     @State private var error: String?
@@ -240,7 +208,6 @@ struct CrewBoardView: View {
                     guard let me = board?.value2.members.first(where: \.me) else { return }
                     do {
                         try await service.remove(crewID, member: me.id)
-                        onChange()
                         dismiss()
                     } catch {
                         self.error = error.localizedDescription
@@ -270,7 +237,6 @@ struct CrewBoardView: View {
         Task {
             do { try await action(); error = nil } catch { self.error = error.localizedDescription }
             await load()
-            onChange()
         }
     }
 
