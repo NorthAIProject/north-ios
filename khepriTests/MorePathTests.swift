@@ -48,6 +48,18 @@ struct MorePathTests {
         #expect(MorePath.opening(nightOwlsSpace, in: [.section("goals")]) == [.section("crews"), .crew(nightOwlsSpace)])
     }
 
+    /// The path can name a space the stack never showed (a push written
+    /// while the app was not in front). Only a space that reported itself on
+    /// screen counts as open; a link for it otherwise pushes it again.
+    @Test func aSpaceIsOpenOnlyOnceShown() {
+        let opened = OpenedCrew(crew: crew(ironRats.uppercased(), "Iron rats"))
+        let path: [MoreRoute] = [.section("crews"), .crew(opened)]
+        #expect(MorePath.shownCrewID(in: path, shown: nil) == nil)
+        #expect(MorePath.shownCrewID(in: path, shown: UUID()) == nil)
+        #expect(MorePath.shownCrewID(in: path, shown: opened.id) == ironRats)
+        #expect(MorePath.shownCrewID(in: [.section("crews")], shown: opened.id) == nil)
+    }
+
     /// Before another crew's space is pushed, the open one is closed.
     @Test func closingACrewLeavesCrews() {
         let space = MoreRoute.crew(OpenedCrew(crew: crew(ironRats, "Iron rats")))

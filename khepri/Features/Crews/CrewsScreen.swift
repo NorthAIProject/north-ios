@@ -15,7 +15,6 @@ struct CrewsScreen: View {
     @State private var error: String?
     @State private var naming = false
     @State private var newName = ""
-    @Environment(AppRouter.self) private var router
     @Environment(AppModel.self) private var app
     @Environment(CrewUnread.self) private var unread
 
@@ -62,15 +61,9 @@ struct CrewsScreen: View {
             Button("Create") { Task { await create() } }
             Button("Cancel", role: .cancel) { newName = "" }
         }
-        // A crew link opened while here, or before signing in.
-        .task(id: router.crewLinksReceived) {
-            if let joined = await PendingCrewJoin.joinIfAny(using: service) {
-                await load()
-                open(joined)
-            } else {
-                await load()
-            }
-        }
+        // Join links are More's to follow: it joins, then opens the crew
+        // over this list. A joined crew is here on the way back.
+        .task { await load() }
         .refreshable { await load() }
     }
 
