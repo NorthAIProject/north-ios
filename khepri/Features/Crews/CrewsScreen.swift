@@ -15,7 +15,6 @@ struct CrewsScreen: View {
     @State private var error: String?
     @State private var naming = false
     @State private var newName = ""
-    @Environment(AppModel.self) private var app
     @Environment(CrewUnread.self) private var unread
 
     var body: some View {
@@ -65,12 +64,6 @@ struct CrewsScreen: View {
         // over this list. A joined crew is here on the way back.
         .task { await load() }
         .refreshable { await load() }
-    }
-
-    /// The signed-in person, whose messages are "mine".
-    private var meID: String {
-        if case .signedIn(let user) = app.phase { return user.id }
-        return ""
     }
 
     /// A row, or a new or joined crew: its default channel.

@@ -102,8 +102,8 @@ final class AppRouter {
     var invitesReceived = 0
     /// Counts crew links opened, for Crews to join on each one.
     var crewLinksReceived = 0
-    /// Set with `openSection` for one crew's space; the Crews screen opens it
-    /// and clears it.
+    /// Set with `openSection` for one crew's space; More, which owns the
+    /// stack, opens it and clears it.
     var openCrew: CrewRoute?
     /// A crew push or link for the crew space already open: that space
     /// moves to its channel, and to Chat. Set by More, which owns the stack.
