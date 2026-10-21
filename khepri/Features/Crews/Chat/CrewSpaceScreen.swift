@@ -73,10 +73,11 @@ struct CrewSpaceScreen: View {
         // What was read here, and what came in elsewhere, is the server's to
         // count: the crew badges ask it again on the way out.
         .onDisappear { Task { await crewUnread.refresh() } }
-        // The stream runs only while the app is in front; nothing is replayed,
-        // so every (re)connect makes the channel resync.
-        .task(id: scenePhase) {
-            guard scenePhase == .active, closed == nil else { return }
+        // The stream runs until the app goes to the background; nothing is
+        // replayed, so every (re)connect makes the channel resync. Inactive
+        // (Control Center, a notification banner, Face ID) keeps it open.
+        .task(id: scenePhase == .background) {
+            guard scenePhase != .background, closed == nil else { return }
             for await event in CrewLiveStream(crewID: crew.id, service: chat).events() {
                 let closing = await route(event)
                 if closing { break }
