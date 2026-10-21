@@ -49,12 +49,20 @@ struct CrewSpaceScreen: View {
                 }
                 .pickerStyle(.segmented)
                 .fixedSize()
+                // The bar does not grow with the text; past this size the
+                // segments would push the other items off it.
+                .dynamicTypeSize(...DynamicTypeSize.xxLarge)
             }
-            if tab == .chat, let store {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    channelMenu(openID: store.channelID)
-                    Button("Pinned messages", systemImage: "pin") { showingPins = true }
-                    Button("Notifications", systemImage: notifyIcon) { showingNotify = true }
+            // One item beside the picker, so both fit at iPhone width; the
+            // channel switcher has its own bar over the messages.
+            if tab == .chat, store != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("Pinned messages", systemImage: "pin") { showingPins = true }
+                        Button("Notifications", systemImage: notifyIcon) { showingNotify = true }
+                    } label: {
+                        Label("Crew Options", systemImage: "ellipsis.circle")
+                    }
                 }
             }
         }
@@ -96,6 +104,7 @@ struct CrewSpaceScreen: View {
         if let store {
             ChannelView(store: store, channelName: channelName(store.channelID), role: CrewRole(space?.myRole))
                 .id(store.channelID)
+                .safeAreaInset(edge: .top, spacing: 0) { channelBar(openID: store.channelID) }
                 .overlay(alignment: .top) {
                     if let error {
                         CrewErrorBanner(text: error) { self.error = nil }
@@ -124,6 +133,18 @@ struct CrewSpaceScreen: View {
         return space?.notify == "none" ? "bell.slash" : "bell"
     }
 
+    /// The open channel over the messages, and the way to the others.
+    private func channelBar(openID: String) -> some View {
+        HStack {
+            channelMenu(openID: openID)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+    }
+
     private func channelMenu(openID: String) -> some View {
         Menu {
             Picker("Channels", selection: Binding(get: { openID }, set: { id in
@@ -135,9 +156,22 @@ struct CrewSpaceScreen: View {
             }
             .pickerStyle(.inline)
         } label: {
-            Text(verbatim: "#\(channelName(openID))")
-                .lineLimit(1)
-                .frame(maxWidth: 110)
+            HStack(spacing: 6) {
+                Text(verbatim: "#\(channelName(openID))")
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .accessibilityHidden(true)
+                // Something unread in another channel.
+                if channels.contains(where: { $0.id != openID && ($0.unread ?? 0) > 0 }) {
+                    Circle()
+                        .fill(NorthColor.signal)
+                        .frame(width: 8, height: 8)
+                        .accessibilityHidden(true)
+                }
+            }
+            .contentShape(.rect)
         }
         .accessibilityLabel(Text("Channels"))
         .accessibilityValue(Text(verbatim: "#\(channelName(openID))"))

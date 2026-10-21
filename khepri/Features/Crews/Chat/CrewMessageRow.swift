@@ -107,14 +107,18 @@ struct CrewMessageRow: View {
 
     @ViewBuilder private var menu: some View {
         if actions.contains(.react) {
-            ControlGroup {
-                ForEach(CrewEmoji.keys, id: \.self) { key in
-                    Button(CrewEmoji.glyph(key) ?? key) { onReact(key) }
+            // Two rows of four: one palette row shows only six, and the last
+            // reactions were out of reach.
+            Section("React") {
+                ForEach(CrewEmoji.rows, id: \.self) { row in
+                    ControlGroup {
+                        ForEach(row, id: \.self) { key in
+                            Button(CrewEmoji.glyph(key) ?? key) { onReact(key) }
+                        }
+                    }
+                    .controlGroupStyle(.palette)
                 }
-            } label: {
-                Text("React")
             }
-            .controlGroupStyle(.palette)
         }
         ForEach(actions.filter { $0 != .react }, id: \.self) { action in
             CrewMessageMenuItem(action: action, authorName: message.authorName) { onAction(action) }

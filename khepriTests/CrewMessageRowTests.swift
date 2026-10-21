@@ -26,6 +26,12 @@ struct CrewMessageRowTests {
         #expect(CrewEmoji.glyph("thumbsup") == nil)
     }
 
+    /// The menu shows the reactions in rows short enough to fit, every one
+    /// of them, in order.
+    @Test func reactionRowsHoldEveryKey() {
+        #expect(CrewEmoji.rows == [["fire", "muscle", "clap", "heart"], ["laugh", "hundred", "trophy", "eyes"]])
+    }
+
     @Test func mentionRunsHighlight() {
         let body = "lift with @ana and @leo"
         let runs = CrewMention.runs(in: body)

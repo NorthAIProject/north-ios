@@ -6,6 +6,11 @@ import NorthAPI
 nonisolated enum CrewEmoji {
     static let keys = ["fire", "muscle", "clap", "heart", "laugh", "hundred", "trophy", "eyes"]
 
+    /// The keys in rows of four, for the message menu's palette.
+    static var rows: [[String]] {
+        stride(from: 0, to: keys.count, by: 4).map { Array(keys[$0..<min($0 + 4, keys.count)]) }
+    }
+
     private static let glyphs: [String: String] = [
         "fire": "🔥", "muscle": "💪", "clap": "👏", "heart": "❤️",
         "laugh": "😂", "hundred": "💯", "trophy": "🏆", "eyes": "👀"

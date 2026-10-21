@@ -927,6 +927,28 @@
         }
       }
     },
+    "Crew Options" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones del grupo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opções do grupo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opções do grupo"
+          }
+        }
+      }
+    },
     "Crew rules" : {
       "localizations" : {
         "es" : {
