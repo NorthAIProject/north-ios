@@ -214,13 +214,15 @@ final class CrewChatStore {
         }
     }
 
-    /// Hides the message at once; it comes back only if the report fails.
+    /// Hides the message at once; it comes back only if the report fails. A
+    /// message not loaded here (an older pin) is not added on the way back.
     func report(_ message: CrewMessage, reason: String, note: String?) async {
+        let shown = rows.contains { $0.id == message.id }
         rows.removeAll { $0.id == message.id }
         do {
             try await service.report(crewID, id: message.id, reason: reason, note: note)
         } catch {
-            merge([message])
+            if shown { merge([message]) }
             fail(error)
         }
     }

@@ -73,6 +73,12 @@ nonisolated enum CrewMessageActions {
         }
         return actions
     }
+
+    /// What the pins sheet offers: Report and Block, on the same terms as the
+    /// channel, so every message on screen can be reported.
+    static func moderation(for message: CrewMessage, meID: String, role: CrewRole) -> [CrewMessageAction] {
+        available(for: message, meID: meID, role: role).filter { $0 == .report || $0 == .block }
+    }
 }
 
 /// When a channel follows new messages down. Someone reading history stays

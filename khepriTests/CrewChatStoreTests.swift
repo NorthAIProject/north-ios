@@ -344,6 +344,21 @@ struct CrewChatStoreTests {
         #expect(store.error == "no")
     }
 
+    /// A pin reported from the pins sheet may be older than the loaded page.
+    @Test(.timeLimit(.minutes(1)))
+    func failedReportOfAnUnloadedMessageAddsNoRow() async throws {
+        let fake = FakeCrewChat()
+        let old = await fake.seed("old pin")
+        for idx in 1...3 { await fake.seed("msg\(idx)") }
+        await fake.setPageSize(2)
+        let store = makeStore(fake)
+        await store.load()
+        await fake.failReport(.server("no"))
+        await store.report(old, reason: "spam", note: nil)
+        #expect(store.rows.map(\.body) == ["msg2", "msg3"])
+        #expect(store.error == "no")
+    }
+
     @Test(.timeLimit(.minutes(1)))
     func blockReloadsChannel() async throws {
         let fake = FakeCrewChat()

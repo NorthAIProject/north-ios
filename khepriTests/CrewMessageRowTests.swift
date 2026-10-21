@@ -77,6 +77,19 @@ struct CrewMessageRowTests {
         #expect(CrewMessageActions.available(for: message(kind: "poll"), meID: "me", role: .owner).isEmpty)
     }
 
+    /// The pins sheet offers only Report and Block, on the same terms as the channel.
+    @Test func pinnedMessagesOfferReportAndBlockOnOthersOnly() {
+        let others = message(pinned: true)
+        #expect(CrewMessageActions.moderation(for: others, meID: "me", role: .owner) == [.report, .block])
+        #expect(CrewMessageActions.moderation(for: others, meID: "me", role: .member) == [.report, .block])
+        let mine = message(author: "me", pinned: true)
+        #expect(CrewMessageActions.moderation(for: mine, meID: "me", role: .member).isEmpty)
+        let system = message(author: nil, kind: "system", pinned: true)
+        #expect(CrewMessageActions.moderation(for: system, meID: "me", role: .owner).isEmpty)
+        let deleted = message(deleted: true, pinned: true)
+        #expect(CrewMessageActions.moderation(for: deleted, meID: "me", role: .member).isEmpty)
+    }
+
     @Test func followsNewRowsOnlyAtBottomOrForOwnMessages() {
         #expect(CrewChannelScroll.shouldFollow(atBottom: true, lastAuthorID: "other", meID: "me"))
         #expect(!CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: "other", meID: "me"))

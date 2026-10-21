@@ -90,7 +90,7 @@ struct CrewSpaceScreen: View {
         }
         .sheet(isPresented: $showingPins) {
             if let store {
-                CrewPinsSheet(crewID: crew.id, channelID: store.channelID, service: chat)
+                CrewPinsSheet(store: store, role: CrewRole(space?.myRole), service: chat)
             }
         }
         .sheet(isPresented: $showingNotify) {

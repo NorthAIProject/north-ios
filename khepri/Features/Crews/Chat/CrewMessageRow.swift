@@ -151,7 +151,7 @@ struct CrewMessageRow: View {
 }
 
 /// One entry of the message menu.
-private struct CrewMessageMenuItem: View {
+struct CrewMessageMenuItem: View {
     let action: CrewMessageAction
     let authorName: String
     let run: () -> Void
