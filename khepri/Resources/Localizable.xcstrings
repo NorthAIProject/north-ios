@@ -1059,6 +1059,28 @@
         }
       }
     },
+    "Delete this message?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar este mensaje?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir esta mensagem?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar esta mensagem?"
+          }
+        }
+      }
+    },
     "Different days" : {
       "localizations" : {
         "es" : {

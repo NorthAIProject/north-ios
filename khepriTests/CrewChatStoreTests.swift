@@ -398,6 +398,18 @@ struct CrewChatStoreTests {
     }
 
     @Test(.timeLimit(.minutes(1)))
+    func discardDropsAFailedSend() async throws {
+        let fake = FakeCrewChat()
+        await fake.failSends([.server("too long")])
+        let store = makeStore(fake)
+        await store.send("hello")
+        #expect(store.pending.count == 1)
+        store.discard(store.pending[0].id)
+        #expect(store.pending.isEmpty)
+        #expect(await fake.sentClientIDs.count == 1)
+    }
+
+    @Test(.timeLimit(.minutes(1)))
     func removedClosesChannel() async throws {
         let fake = FakeCrewChat()
         let store = makeStore(fake)

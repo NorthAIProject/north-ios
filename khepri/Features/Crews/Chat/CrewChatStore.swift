@@ -147,6 +147,11 @@ final class CrewChatStore {
         await attempt(id)
     }
 
+    /// Drops a failed send the person gives up on, such as one the server keeps refusing.
+    func discard(_ id: UUID) {
+        pending.removeAll { $0.id == id && $0.failed }
+    }
+
     func acceptTermsAndResend() async {
         do {
             try await service.acceptTerms()

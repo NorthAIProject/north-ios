@@ -90,6 +90,17 @@ struct CrewMessageRowTests {
         #expect(CrewMessageActions.moderation(for: deleted, meID: "me", role: .member).isEmpty)
     }
 
+    /// The server takes 4000 runes; a longer draft is cut there, never mid-character.
+    @Test func bodyIsCappedAtTheServerLimit() {
+        #expect(CrewMessageBody.capped("hi") == "hi")
+        let exact = String(repeating: "a", count: 4000)
+        #expect(CrewMessageBody.capped(exact) == exact)
+        #expect(CrewMessageBody.capped(exact + "b") == exact)
+        // A flag is two scalars: 2001 of them are 4002 runes, cut to 2000 whole flags.
+        let flags = String(repeating: "🇵🇹", count: 2001)
+        #expect(CrewMessageBody.capped(flags) == String(repeating: "🇵🇹", count: 2000))
+    }
+
     @Test func followsNewRowsOnlyAtBottomOrForOwnMessages() {
         #expect(CrewChannelScroll.shouldFollow(atBottom: true, lastAuthorID: "other", meID: "me"))
         #expect(!CrewChannelScroll.shouldFollow(atBottom: false, lastAuthorID: "other", meID: "me"))

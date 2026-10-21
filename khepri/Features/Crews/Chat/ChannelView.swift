@@ -16,6 +16,7 @@ struct ChannelView: View {
     @State private var editing: CrewMessage?
     @State private var reporting: CrewMessage?
     @State private var blocking: CrewMessage?
+    @State private var deleting: CrewMessage?
     @State private var showingRules = false
     /// Whether the reader is at the newest message, so new ones may scroll and count as read.
     @State private var atBottom = true
@@ -48,6 +49,7 @@ struct ChannelView: View {
                             item: item,
                             waitingForRules: store.needsTerms && !item.failed,
                             onRetry: { Task { await store.retry(item.id) } },
+                            onDiscard: { store.discard(item.id) },
                             onRules: { showingRules = true }
                         )
                         .id(item.id)
@@ -107,6 +109,11 @@ struct ChannelView: View {
                 attachments: { composerBar }
             )
         }
+        // The server refuses longer bodies; stop the draft at its limit.
+        .onChange(of: draft) {
+            let capped = CrewMessageBody.capped(draft)
+            if capped != draft { draft = capped }
+        }
         .toolbar(.hidden, for: .tabBar)
         // While this channel is on screen its pushes stay quiet.
         .onAppear { CrewNotifications.openChannel = (store.crewID, store.channelID) }
@@ -141,6 +148,16 @@ struct ChannelView: View {
         ) { message in
             Button("Block", role: .destructive) {
                 Task { await store.block(authorOf: message) }
+            }
+        }
+        .confirmationDialog(
+            Text("Delete this message?"),
+            isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }),
+            titleVisibility: .visible,
+            presenting: deleting
+        ) { message in
+            Button("Delete", role: .destructive) {
+                Task { await store.delete(message) }
             }
         }
     }
@@ -197,7 +214,7 @@ struct ChannelView: View {
         case .pin, .unpin:
             Task { await store.setPinned(message, action == .pin) }
         case .delete:
-            Task { await store.delete(message) }
+            deleting = message
         case .report:
             reporting = message
         case .block:
@@ -227,12 +244,13 @@ private struct ComposerBar: View {
     }
 }
 
-/// A message on its way: dimmed while sending, with Retry once it failed,
-/// and a way back to the rules when they stand in its way.
+/// A message on its way: dimmed while sending, with Retry or Discard once it
+/// failed, and a way back to the rules when they stand in its way.
 private struct PendingRow: View {
     let item: CrewChatStore.Pending
     let waitingForRules: Bool
     let onRetry: () -> Void
+    let onDiscard: () -> Void
     let onRules: () -> Void
 
     var body: some View {
@@ -240,9 +258,13 @@ private struct PendingRow: View {
             CrewMessageText(text: item.body)
                 .opacity(item.failed ? 1 : 0.5)
             if item.failed {
-                Button("Try Again", systemImage: "exclamationmark.circle", action: onRetry)
-                    .font(.caption)
-                    .foregroundStyle(NorthColor.destructive)
+                HStack(spacing: 16) {
+                    Button("Try Again", systemImage: "exclamationmark.circle", action: onRetry)
+                        .foregroundStyle(NorthColor.destructive)
+                    Button("Discard", systemImage: "trash", action: onDiscard)
+                        .foregroundStyle(.secondary)
+                }
+                .font(.caption)
             } else if waitingForRules {
                 Button("Accept the crew rules to post.", action: onRules)
                     .font(.caption)

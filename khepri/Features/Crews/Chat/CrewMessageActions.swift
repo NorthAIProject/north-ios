@@ -81,6 +81,25 @@ nonisolated enum CrewMessageActions {
     }
 }
 
+/// The server's length limit on a message body.
+nonisolated enum CrewMessageBody {
+    /// In runes, as the server counts them.
+    static let limit = 4000
+
+    /// The text cut to the limit at a whole character.
+    static func capped(_ text: String) -> String {
+        guard text.unicodeScalars.count > limit else { return text }
+        var scalars = 0
+        var kept = ""
+        for character in text {
+            scalars += character.unicodeScalars.count
+            if scalars > limit { break }
+            kept.append(character)
+        }
+        return kept
+    }
+}
+
 /// When a channel follows new messages down. Someone reading history stays
 /// where they are, unless the new message is their own.
 nonisolated enum CrewChannelScroll {
