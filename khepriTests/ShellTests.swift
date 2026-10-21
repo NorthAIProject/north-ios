@@ -171,7 +171,33 @@ struct RouterTests {
         router.open(url: url)
         #expect(router.selectedTab == .more)
         #expect(router.openSection == "crews")
-        #expect(router.openCrew == CrewRoute(crewID: crew, channelID: channel))
+        #expect(router.openCrew?.crewID == crew)
+        #expect(router.openCrew?.channelID == channel)
+    }
+
+    /// Tapping the same push twice is two requests: the second must still
+    /// land, e.g. after switching to another channel in between.
+    @Test func eachCrewLinkTapIsDistinct() throws {
+        let link = "/app/crews/66666666-6666-6666-6666-666666666666/c/77777777-7777-7777-7777-777777777777"
+        let url = try #require(URL(string: link))
+        let router = AppRouter()
+        router.open(url: url)
+        let first = router.openCrew
+        router.open(url: url)
+        #expect(first != nil)
+        #expect(router.openCrew != first)
+        #expect(router.openCrew?.channelID == first?.channelID)
+    }
+
+    /// A link for the crew already open moves it to the channel; any other
+    /// replaces the open space.
+    @Test func crewLinkLandsInTheOpenSpaceOrReplacesIt() {
+        let route = CrewRoute(crewID: "66666666-6666-6666-6666-666666666666", channelID: nil)
+        #expect(CrewLinkLanding(route, openCrewID: "66666666-6666-6666-6666-666666666666") == .switchChannel)
+        #expect(CrewLinkLanding(route, openCrewID: "66666666-6666-6666-6666-66666666666A".lowercased()) == .openSpace)
+        #expect(CrewLinkLanding(route, openCrewID: nil) == .openSpace)
+        let upper = CrewRoute(crewID: "6666666a-6666-6666-6666-666666666666", channelID: nil)
+        #expect(CrewLinkLanding(upper, openCrewID: "6666666A-6666-6666-6666-666666666666") == .switchChannel)
     }
 
     /// A crew's own link opens its default channel; a malformed one, the list.

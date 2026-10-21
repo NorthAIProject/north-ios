@@ -54,6 +54,8 @@ final class CrewUnread {
 
     /// Forgets a crew you are no longer in, so its messages stop counting.
     func clear(crewID: String) {
+        // A refresh already on its way may still count the crew.
+        generation += 1
         guard let counts = byCrew.removeValue(forKey: crewID.lowercased()) else { return }
         total = max(0, total - counts.unread)
     }

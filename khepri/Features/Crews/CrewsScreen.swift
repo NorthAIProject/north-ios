@@ -13,42 +13,56 @@ struct CrewsScreen: View {
     @State private var error: String?
     @State private var naming = false
     @State private var newName = ""
-    @State private var opened: Crew?
-    /// A crew a link or a push asked for, pushed over the list.
-    @State private var linked: CrewLink?
+    /// The crew space pushed over the list. Rows, new and joined crews, links
+    /// and pushes all open it here, so a new one replaces the open space
+    /// instead of stacking a second one (and a second live stream) on it.
+    @State private var opened: OpenedCrew?
+    /// The latest push or link for the open crew, which moves it to a channel.
+    @State private var channelRequest: CrewRoute?
     @Environment(AppRouter.self) private var router
     @Environment(AppModel.self) private var app
     @Environment(CrewUnread.self) private var unread
 
     var body: some View {
+        // Read here, so a new request redraws the open space.
+        let request = channelRequest
         List {
             if let error { ErrorRow(error) }
             if loaded, crews.isEmpty {
                 Text("A crew is a small group who keep each other going.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
-            // Destination links, not value links: Crews is itself pushed with
-            // one from More, and mixing the two in one stack misplaces screens.
+            // Buttons into `opened`, not navigation links: one way in, so a
+            // push can replace whatever crew is open. Crews is itself pushed
+            // with a value link from More, and mixing link styles in one stack
+            // misplaces screens.
             ForEach(crews, id: \.id) { crew in
-                NavigationLink {
-                    CrewSpaceScreen(crew: crew, meID: meID, crews: service) { Task { await load() } }
+                Button {
+                    open(crew)
                 } label: {
                     HStack {
                         Text(crew.name)
                         Spacer()
                         Text("\(crew.memberCount) people").font(.caption).foregroundStyle(.secondary)
+                        // A button has no disclosure chevron; this row pushes, so it shows one.
+                        Image(systemName: "chevron.forward")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
+                    .contentShape(.rect)
                 }
+                .foregroundStyle(.primary)
                 .badge(unread.count(for: crew.id))
             }
         }
         .navigationTitle("Crews")
-        .navigationDestination(item: $linked) { link in
-            CrewSpaceScreen(crew: link.crew, meID: meID, crews: service, initialChannelID: link.channelID) {
+        .navigationDestination(item: $opened) { shown in
+            CrewSpaceScreen(crew: shown.crew, meID: meID, crews: service, channelRequest: request) {
                 Task { await load() }
             }
-            // A new link replaces the screen rather than reusing its state.
-            .id(link)
+            // Another crew is a new screen, never this one's state reused.
+            .id(shown)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -60,36 +74,21 @@ struct CrewsScreen: View {
             Button("Create") { Task { await create() } }
             Button("Cancel", role: .cancel) { newName = "" }
         }
-        // A crew just made or joined opens over the list.
-        .sheet(item: $opened) { crew in
-            NavigationStack {
-                CrewSpaceScreen(crew: crew, meID: meID, crews: service) { Task { await load() } }
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { opened = nil }
-                        }
-                    }
-            }
-        }
         // A crew link opened while here, or before signing in.
         .task(id: router.crewLinksReceived) {
             if let joined = await PendingCrewJoin.joinIfAny(using: service) {
                 await load()
-                opened = joined
+                open(joined)
             } else {
                 await load()
             }
         }
-        // A crew push or link: that crew's space, on its channel. A crew you
-        // are not in (any more) leaves the list showing.
-        .task(id: router.openCrew) {
+        // A crew push or link. `onChange` rather than a task: it still fires
+        // while the list is covered by an open crew.
+        .onChange(of: router.openCrew, initial: true) {
             guard let route = router.openCrew else { return }
-            if !crews.contains(where: { $0.id.lowercased() == route.crewID }) { await load() }
-            if let crew = crews.first(where: { $0.id.lowercased() == route.crewID }) {
-                opened = nil
-                linked = CrewLink(crew: crew, channelID: route.channelID)
-            }
             router.openCrew = nil
+            Task { await follow(route) }
         }
         .refreshable { await load() }
     }
@@ -98,6 +97,25 @@ struct CrewsScreen: View {
     private var meID: String {
         if case .signedIn(let user) = app.phase { return user.id }
         return ""
+    }
+
+    private func open(_ crew: Crew) {
+        channelRequest = nil
+        opened = OpenedCrew(crew: crew)
+    }
+
+    /// The open crew moves to the linked channel; any other crew's space
+    /// replaces it. A crew you are not in (any more) leaves the list showing.
+    private func follow(_ route: CrewRoute) async {
+        switch CrewLinkLanding(route, openCrewID: opened?.crew.id) {
+        case .switchChannel:
+            channelRequest = route
+        case .openSpace:
+            if !crews.contains(where: { $0.id.lowercased() == route.crewID }) { await load() }
+            guard let crew = crews.first(where: { $0.id.lowercased() == route.crewID }) else { return }
+            channelRequest = route
+            opened = OpenedCrew(crew: crew)
+        }
     }
 
     private func load() async {
@@ -112,17 +130,30 @@ struct CrewsScreen: View {
         do {
             let crew = try await service.create(name: name)
             await load()
-            opened = crew
+            open(crew)
         } catch {
             self.error = error.localizedDescription
         }
     }
 }
 
-/// A crew opened from a link, on a channel or its default one.
-private struct CrewLink: Hashable {
+/// One opening of a crew's space: a new one is a new screen, even for the
+/// same crew.
+private struct OpenedCrew: Hashable {
     let crew: Crew
-    let channelID: String?
+    let id = UUID()
+}
+
+/// Where a crew push or link lands, given the crew space already open.
+nonisolated enum CrewLinkLanding: Equatable {
+    /// The open space is that crew's: it moves to the linked channel.
+    case switchChannel
+    /// Nothing open, or another crew: that crew's space replaces it.
+    case openSpace
+
+    init(_ route: CrewRoute, openCrewID: String?) {
+        self = openCrewID?.lowercased() == route.crewID.lowercased() ? .switchChannel : .openSpace
+    }
 }
 
 extension Crew: @retroactive Identifiable {}

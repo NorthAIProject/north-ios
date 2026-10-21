@@ -295,4 +295,7 @@ final class AppRouter {
 nonisolated struct CrewRoute: Equatable, Sendable {
     let crewID: String
     let channelID: String?
+    /// New for every tap, so tapping the same push again still lands, say
+    /// after moving to another channel in between.
+    var token = UUID()
 }

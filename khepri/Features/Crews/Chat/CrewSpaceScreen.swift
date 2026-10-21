@@ -10,9 +10,10 @@ struct CrewSpaceScreen: View {
     let meID: String
     let crews: CrewsServicing
     var chat: CrewChatServicing = CrewChatService()
-    /// The channel to open first, from a push or a link; nil (or a channel
-    /// that is gone) opens the crew's default one.
-    var initialChannelID: String?
+    /// The latest push or link for this crew. Its channel opens first, and
+    /// each new one moves the open space to its channel; nil (or a channel
+    /// that is gone) means the crew's default one.
+    var channelRequest: CrewRoute?
     /// The crew list may need reloading: someone left, or the challenge changed.
     let onChange: () -> Void
 
@@ -58,6 +59,7 @@ struct CrewSpaceScreen: View {
             }
         }
         .task { await loadSpace() }
+        .onChange(of: channelRequest) { Task { await follow(channelRequest) } }
         // What was read here, and what came in elsewhere, is the server's to
         // count: the crew badges ask it again on the way out.
         .onDisappear { Task { await crewUnread.refresh() } }
@@ -157,6 +159,17 @@ struct CrewSpaceScreen: View {
         clearUnread(channel.id)
     }
 
+    /// A push or link for this crew while it is open: back to the chat, on
+    /// the linked channel. A channel this build has not seen yet makes the
+    /// space reload first.
+    private func follow(_ request: CrewRoute?) async {
+        guard let request, request.crewID == crew.id.lowercased() else { return }
+        tab = .chat
+        guard let wanted = request.channelID else { return }
+        if !channels.contains(where: { $0.id.lowercased() == wanted }) { await loadSpace() }
+        if let channel = channels.first(where: { $0.id.lowercased() == wanted }) { open(channel) }
+    }
+
     // MARK: Loading and live events
 
     /// Loads the space and keeps the open channel, or opens the default one
@@ -175,7 +188,7 @@ struct CrewSpaceScreen: View {
         }
         // The first load may start on a pushed channel; later ones fall back
         // to the default.
-        let wanted = store == nil ? initialChannelID?.lowercased() : nil
+        let wanted = store == nil && channelRequest?.crewID == crew.id.lowercased() ? channelRequest?.channelID : nil
         let linked = channels.first { $0.id.lowercased() == wanted }
         if let first = linked ?? channels.first(where: { $0._default == true }) ?? channels.first {
             store = nil
