@@ -72,6 +72,10 @@ final class ScreenshotUITests: XCTestCase {
 
         tap(app.buttons["Crews"])
         tap(labelled(app.buttons, env["SHOTS_CREW"] ?? "Morning runners"))
+        // A crew opens on its chat; the board and its invite are under Challenge.
+        let challenge = app.buttons.matching(NSPredicate(format: "label == %@", "Challenge"))
+        XCTAssertTrue(challenge.firstMatch.waitForExistence(timeout: 20))
+        tap(challenge.allElementsBoundByIndex.first(where: \.isHittable) ?? challenge.firstMatch)
         XCTAssertTrue(app.buttons["Invite to the Crew"].waitForExistence(timeout: 20))
         try shoot("crew")
     }
