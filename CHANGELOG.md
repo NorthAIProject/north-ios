@@ -3,6 +3,17 @@
 What each App Store build of Khepri contains. TestFlight beta builds (the
 separate `.beta` app) ship every merge to `main` and are not listed here.
 
+## 1.0.1 — planned
+
+Not yet submitted. Crew chat waits for 1.0.1 so that the crew rules,
+reporting and blocking reach review together (guideline 1.2).
+
+- **Crew chat**: each crew has channels with live messages, replies,
+  reactions, edits, pins and @mentions, unread badges on More, Crews and each
+  crew, and per-crew notifications with an inline Reply. The crew rules are
+  agreed before the first post; every message can be reported, and its author
+  blocked from the message menu or the member list.
+
 ## 1.0 — next build (October 2026)
 
 Not yet submitted. Version 1.0 has not been released; it was withdrawn from
