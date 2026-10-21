@@ -358,6 +358,31 @@ struct CrewChatStoreTests {
     }
 
     @Test(.timeLimit(.minutes(1)))
+    func blockingTheNewestAuthorRemovesTheirMessages() async throws {
+        let fake = FakeCrewChat()
+        await fake.seed("fine", author: "friend")
+        let bad = await fake.seed("rude", author: "troll")
+        await fake.seed("worse", author: "troll")
+        let store = makeStore(fake)
+        await store.load()
+        await store.block(authorOf: bad)
+        #expect(store.rows.map(\.body) == ["fine"])
+    }
+
+    @Test(.timeLimit(.minutes(1)))
+    func newestMessageHiddenWhileAwayIsGoneAfterReconnect() async throws {
+        let fake = FakeCrewChat()
+        await fake.seed("fine")
+        let rude = await fake.seed("rude")
+        let store = makeStore(fake)
+        await store.handle(.connected)
+        #expect(store.rows.count == 2)
+        await fake.hide(id: rude.id)
+        await store.handle(.connected)
+        #expect(store.rows.map(\.body) == ["fine"])
+    }
+
+    @Test(.timeLimit(.minutes(1)))
     func removedClosesChannel() async throws {
         let fake = FakeCrewChat()
         let store = makeStore(fake)

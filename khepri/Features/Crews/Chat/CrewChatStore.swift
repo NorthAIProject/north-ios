@@ -48,12 +48,14 @@ final class CrewChatStore {
 
     /// Replaces the rows with the newest page and keeps the pending sends.
     func load() async {
+        // Rows shown before the request are the snapshot's to keep or drop: one
+        // it leaves out was hidden, or its author blocked, even if it was the newest.
+        let known = Set(rows.map(\.id))
         do {
             let page = try await service.messages(crewID, channel: channelID, before: nil, after: nil)
-            // Rows newer than the snapshot arrived (a send, a live fetch) while it was in flight.
-            let ceiling = page.messages.compactMap(\.seq).max()
-            let newer = ceiling.map { top in rows.filter { ($0.seq ?? 0) > top } } ?? []
-            rows = newer
+            // Only rows that arrived (a send, a live fetch) while it was in flight survive it.
+            let top = page.messages.compactMap(\.seq).max() ?? 0
+            rows = rows.filter { ($0.seq ?? 0) > top && !known.contains($0.id) }
             merge(page.messages)
             loadGeneration += 1
             hasOlder = page.hasMore ?? false
@@ -231,6 +233,8 @@ final class CrewChatStore {
             fail(error)
             return
         }
+        // Gone at once; the reload then catches what else the block hides.
+        rows.removeAll { $0.author?.value1.id == author }
         await load()
     }
 
