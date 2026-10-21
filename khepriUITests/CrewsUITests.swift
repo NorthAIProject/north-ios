@@ -2,7 +2,7 @@ import XCTest
 
 /// Crews against a local server: Ana's crew has a weekly challenge and Ana
 /// checked in today. The seeded joiner opens the crew link from outside the
-/// app and lands on the board.
+/// app, lands in the crew's chat, and finds the board under Challenge.
 ///
 /// Pass TEST_RUNNER_CREW_JOINER, TEST_RUNNER_CREW_PASSWORD and
 /// TEST_RUNNER_CREW_CODE.
@@ -26,6 +26,11 @@ final class CrewsUITests: XCTestCase {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
 
         XCTAssertTrue(app.navigationBars["Morning runners"].waitForExistence(timeout: 20), "the crew did not open")
+        // A crew opens on its chat, in the default channel.
+        XCTAssertTrue(app.buttons["Channels"].waitForExistence(timeout: 10), "the crew did not open on its chat")
+        XCTAssertEqual(app.buttons["Channels"].value as? String, "#general")
+
+        app.buttons["Challenge"].tap()
         XCTAssertTrue(app.staticTexts["5 check-ins each, Monday to Sunday."].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["1/5"].exists, "Ana's week is not on the board")
         XCTAssertTrue(app.buttons["Invite to the Crew"].exists)

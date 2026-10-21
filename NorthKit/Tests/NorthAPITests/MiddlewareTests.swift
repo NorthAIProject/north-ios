@@ -54,6 +54,20 @@ struct MiddlewareTests {
         }
     }
 
+    @Test func refusedCarriesCode() async throws {
+        let transport = CannedTransport(
+            status: .forbidden,
+            json: #"{"error":{"message":"Accept the crew rules to post.","code":"terms_required"}}"#
+        )
+        await #expect(throws: APIError.refused(code: "terms_required", message: "Accept the crew rules to post.")) {
+            try await NorthAPI.call { try await client(transport).getMe().ok.body.json }
+        }
+        let plain = CannedTransport(status: .forbidden, json: #"{"error":{"message":"Not yours."}}"#)
+        await #expect(throws: APIError.server("Not yours.")) {
+            try await NorthAPI.call { try await client(plain).getMe().ok.body.json }
+        }
+    }
+
     @Test func aMissingThingIsNotFoundWithTheServersWords() async throws {
         let transport = CannedTransport(status: .notFound, json: #"{"error":{"message":"No intake yet."}}"#)
         await #expect(throws: APIError.notFound("No intake yet.")) {

@@ -386,6 +386,21 @@ struct ContractTests {
         #expect(board.value2.isOwner && board.value1.name == "Morning runners")
     }
 
+    @Test func crewSpaceGoldenDecodes() throws {
+        let space = try decode(Schemas.CrewSpace.self, "crew-space")
+        let channels: [Schemas.CrewChannel] = space.channels ?? []
+        #expect(channels.contains(where: { $0._default == true }))
+        #expect(space.channels?.first?.unread == 4)
+        #expect(space.members?.count == 2)
+    }
+
+    @Test func crewMessagesGoldenDecodes() throws {
+        let page = try decode(Schemas.CrewMessagePage.self, "crew-messages")
+        #expect(page.hasMore == true)
+        #expect(page.messages.contains(where: { !($0.reactions ?? []).isEmpty }))
+        #expect(page.messages.contains(where: { $0.replyTo != nil }))
+    }
+
     @Test func decisionRevisits() throws {
         let list = try decode(Schemas.DecisionList.self, "decisions")
         #expect(list.decisions.first?.held == .yes)
@@ -497,7 +512,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "summary", "board",
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "crew-space", "crew-messages", "summary", "board",
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",

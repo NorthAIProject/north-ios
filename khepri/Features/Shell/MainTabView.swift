@@ -6,6 +6,7 @@ struct MainTabView: View {
     let user: APIUser
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
+    @Environment(CrewUnread.self) private var crewUnread
     @Environment(\.scenePhase) private var scenePhase
     /// A workout the app was killed during, picked up where it was.
     @State private var resumedWorkout: WorkoutSession?
@@ -28,6 +29,8 @@ struct MainTabView: View {
             Tab("More", systemImage: "square.grid.2x2", value: AppTab.more) {
                 MoreScreen(user: user)
             }
+            // Unread crew messages; 0 hides the badge.
+            .badge(crewUnread.total)
         }
         .guidedTourOverlay(tour, router: router)
         .sheet(isPresented: $router.showsCheckInFlow) {
@@ -74,10 +77,12 @@ struct MainTabView: View {
         // Spotlight's copy of exercises and goals with it; each decides for
         // itself whether there is anything to do. A workout Live Activity with
         // no workout behind it (one stopped on the web, say) ends here too;
-        // one a killed workout left is kept for the resumed workout.
+        // one a killed workout left is kept for the resumed workout. Crew
+        // badges catch up with pushes that arrived while it was away.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 WorkoutLiveActivityController.endOrphans()
+                Task { await crewUnread.refresh() }
                 Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
                 Task.detached { await SpotlightIndex.refresh() }
             }
