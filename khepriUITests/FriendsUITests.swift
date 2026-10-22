@@ -24,7 +24,7 @@ final class FriendsUITests: XCTestCase {
         tap(app.buttons["Friends"])
         XCTAssertTrue(app.navigationBars["Friends"].waitForExistence(timeout: 15))
         XCTAssertTrue(app.buttons["Share Your Invite Link"].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.staticTexts["Leo"].waitForExistence(timeout: 10), "the inviter is not listed")
+        XCTAssertTrue(named("Leo", in: app).waitForExistence(timeout: 10), "the inviter is not listed")
         // Leo shares goals and achieved one: it is in Recent, with kudos.
         XCTAssertTrue(app.staticTexts["Achieved a goal: Run a half marathon"].waitForExistence(timeout: 10), "Leo's goal is not in Recent")
         tap(app.buttons["Give kudos"])
@@ -43,7 +43,16 @@ final class FriendsUITests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         if springboard.buttons["Open"].waitForExistence(timeout: 3) { springboard.buttons["Open"].tap() }
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
-        XCTAssertTrue(app.staticTexts["Zoe"].waitForExistence(timeout: 15), "the invite did not connect Zoe")
+        // Zoe is in Following, below the fold of a lazy list.
+        let zoe = named("Zoe", in: app)
+        for _ in 0..<8 where !zoe.exists { app.swipeUp() }
+        XCTAssertTrue(zoe.waitForExistence(timeout: 15), "the invite did not connect Zoe")
         attach(app, "02-invited")
+    }
+
+    /// A person's name wherever it shows: a feed author button, a list row
+    /// link or plain text, whichever the screen makes of it.
+    private func named(_ name: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", name)).firstMatch
     }
 }

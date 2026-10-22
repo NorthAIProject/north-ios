@@ -339,7 +339,7 @@ struct ContractTests {
     @Test func social() throws {
         let overview = try decode(Schemas.SocialOverview.self, "social")
         #expect(overview.invite.url.hasSuffix("/i/k7m2p9qx4r") && overview.joined == 2)
-        #expect(overview.requests.first?.value2.status == .pending && overview.requests.first?.value1.handle == "")
+        #expect(overview.requests.isEmpty, "following is open, so nothing waits for a yes")
         #expect(overview.followers.first?.value1.handle == "ana_runs")
         #expect(try decode(Schemas.InviteView.self, "invite").channel == "link")
         #expect(try decode(Schemas.InvitePreview.self, "invite-preview").inviter.displayName == "Ana")
@@ -351,6 +351,20 @@ struct ContractTests {
         let matches = try decode(Schemas.ContactMatches.self, "contacts-match").people
         #expect(matches.first?.value1.handle == "ana_runs" && matches.first?.value2.following == "")
         #expect(matches.last?.value2.following == "pending")
+    }
+
+    @Test func profiles() throws {
+        let profile = try decode(Schemas.ProfileView.self, "profiles-profile")
+        #expect(profile.value2.shares?.training == true && profile.value2.level?.number == 3)
+        #expect(profile.value2.workouts == 14 && profile.value2.recentWorkouts?.count == 2)
+        #expect(profile.value2.recentWorkouts?.first?.exercises.first?.pr == true)
+        let hidden = try decode(Schemas.ProfileView.self, "profiles-profile-private")
+        #expect(hidden.value2.shares?.training == false && hidden.value2.level == nil)
+        #expect(hidden.value2.workouts == nil && hidden.value2.recentWorkouts == nil)
+        let page = try decode(Schemas.ProfileWorkouts.self, "profiles-profile-workouts")
+        #expect(page.shared && page.items.count == 2 && page.before != nil)
+        let none = try decode(Schemas.ProfileWorkouts.self, "profiles-profile-workouts-private")
+        #expect(!none.shared && none.items.isEmpty && none.before == nil)
     }
 
     @Test func friendFinding() throws {
@@ -372,6 +386,10 @@ struct ContractTests {
         let feed = try decode(Schemas.Feed.self, "feed")
         #expect(feed.items.first?.category == .training && feed.items.first?.kudos == 3 && feed.items.first?.kudoed == true)
         #expect(feed.before == nil)
+        #expect(feed.items.first?.workout == nil, "only a finished workout carries a card")
+        let card = try #require(feed.items.compactMap(\.workout).first)
+        #expect(card.sets == 9 && card.prs == 1 && card.distanceM == nil)
+        #expect(card.exercises.map(\.name) == ["Squat", "Bench press"] && card.exercises.first?.best == "100 kg × 5")
         let sharing = try decode(Schemas.Sharing.self, "sharing")
         #expect(sharing.training && !sharing.streaks && sharing.goals && sharing.xp == true)
     }
@@ -512,7 +530,7 @@ struct ContractTests {
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
                             "form-check-playback", "diets",
-                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "sharing", "crews", "crew", "crew-board", "crew-space", "crew-messages", "summary", "board",
+                            "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "profiles-profile", "profiles-profile-private", "profiles-profile-workouts", "profiles-profile-workouts-private", "sharing", "crews", "crew", "crew-board", "crew-space", "crew-messages", "summary", "board",
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",

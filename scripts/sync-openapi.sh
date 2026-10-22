@@ -16,7 +16,7 @@ SPEC_DEST="$ROOT/NorthKit/Sources/NorthAPI/openapi.yaml"
 GOLDEN_DEST="$ROOT/NorthKit/Tests/NorthAPITests/Contract"
 
 # Golden files that describe /api/v1 responses. mcpserver's are not API.
-GOLDEN_SOURCES=(activity auth caffeine lifts stats calculator capture care checkins coach dashboard day decisions fasting milestones screentime soreness supplements documents exercises fitness goals health insights meals media memories mind news nudges onboarding reports settings workouts social achievements crews xp weekly inbox lighterday recaps outreach progresschecks dailyposts)
+GOLDEN_SOURCES=(activity auth caffeine lifts stats calculator capture care checkins coach dashboard day decisions fasting milestones screentime soreness supplements documents exercises fitness goals health insights meals media memories mind news nudges onboarding reports settings workouts social achievements crews xp weekly inbox lighterday recaps outreach progresschecks dailyposts profiles)
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
@@ -24,8 +24,12 @@ trap 'rm -rf "$stage"' EXIT
 cp "$WEB/docs/api/openapi.yaml" "$stage/openapi.yaml"
 mkdir -p "$stage/golden"
 for pkg in "${GOLDEN_SOURCES[@]}"; do
+  # internal/profiles/testdata/profile.golden.json has the same name as
+  # settings' (a different schema), so profiles' files get a prefix.
+  prefix=""
+  [[ "$pkg" == "profiles" ]] && prefix="profiles-"
   for f in "$WEB/internal/$pkg/testdata/"*.golden.json; do
-    cp "$f" "$stage/golden/$(basename "$f")"
+    cp "$f" "$stage/golden/$prefix$(basename "$f")"
   done
 done
 

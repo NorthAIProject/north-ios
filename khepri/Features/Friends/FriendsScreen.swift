@@ -19,6 +19,8 @@ struct FriendsScreen: View {
     @State private var followHandle = ""
     @State private var followError: String?
     @State private var joinedNow = false
+    @State private var openProfile: ProfileRoute?
+    @State private var openWorkout: WorkoutRoute?
     @Environment(AppRouter.self) private var router
 
     var body: some View {
@@ -39,6 +41,10 @@ struct FriendsScreen: View {
             await load()
         }
         .refreshable { await load() }
+        .navigationDestination(item: $openProfile) { ProfileScreen(handle: $0.handle) }
+        .navigationDestination(item: $openWorkout) {
+            WorkoutDetailScreen(handle: $0.handle, card: $0.card, authorName: $0.authorName)
+        }
     }
 
     private func content(_ o: SocialOverview) -> some View {
@@ -52,6 +58,13 @@ struct FriendsScreen: View {
             }
 
             Section {
+                if !o.handle.isEmpty {
+                    NavigationLink {
+                        ProfileScreen(handle: o.handle)
+                    } label: {
+                        Label("Your Profile", systemImage: "person.crop.circle")
+                    }
+                }
                 NavigationLink {
                     LeaderboardScreen(inviteURL: URL(string: o.invite.url), friends: service)
                 } label: {
@@ -65,7 +78,14 @@ struct FriendsScreen: View {
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 ForEach(feed, id: \.id) { item in
-                    FeedRow(item: item) { act { item.kudoed ? try await service.takeKudos(item.id) : try await service.giveKudos(item.id) } }
+                    FeedRow(
+                        item: item,
+                        openProfile: { openProfile = ProfileRoute(handle: item.handle) },
+                        openWorkout: { card in
+                            openWorkout = WorkoutRoute(handle: item.handle, card: card, authorName: item.displayName)
+                        },
+                        toggleKudos: { act { item.kudoed ? try await service.takeKudos(item.id) : try await service.giveKudos(item.id) } }
+                    )
                 }
             } header: {
                 Text("Recent")
@@ -178,7 +198,7 @@ struct FriendsScreen: View {
                     Text("Nobody yet.").foregroundStyle(.secondary)
                 }
                 ForEach(o.following, id: \.value1.id) { c in
-                    PersonRow(person: c.value1)
+                    PersonLink(person: c.value1)
                         .swipeActions {
                             Button("Unfollow", role: .destructive) {
                                 act { try await service.unfollow(c.value1.id) }
@@ -193,7 +213,7 @@ struct FriendsScreen: View {
                     Text("Nobody follows you yet.").foregroundStyle(.secondary)
                 }
                 ForEach(o.followers, id: \.value1.id) { c in
-                    PersonRow(person: c.value1)
+                    PersonLink(person: c.value1)
                         .swipeActions {
                             Button("Remove", role: .destructive) { act { try await service.removeFollower(c.value1.id) } }
                             Button("Block") { act { try await service.block(c.value1.id) } }
@@ -295,8 +315,10 @@ struct PersonRow: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var initials: String {
-        let letters = person.displayName.split(separator: " ").prefix(2).compactMap(\.first)
+    private var initials: String { Self.initials(of: person.displayName) }
+
+    static func initials(of name: String) -> String {
+        let letters = name.split(separator: " ").prefix(2).compactMap(\.first)
         return letters.isEmpty ? "?" : String(letters).uppercased()
     }
 }
@@ -304,23 +326,28 @@ struct PersonRow: View {
 /// One moment: who, what, when, and kudos.
 private struct FeedRow: View {
     let item: FeedItem
+    let openProfile: () -> Void
+    let openWorkout: (WorkoutCard) -> Void
     let toggleKudos: () -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
-                    (item.mine ? Text("You") : Text(item.displayName)).font(.subheadline.weight(.medium))
+                    authorName
                     Text("· \(item.occurredAt.formatted(.relative(presentation: .named)))")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                if item.kind == "recap_shared" {
+                if let workout = item.workout {
+                    Text(item.title)
+                    workoutCard(workout)
+                } else if item.kind == "recap_shared" {
                     Label(item.title, systemImage: "chart.bar.fill")
                         .labelStyle(.titleAndIcon)
                 } else {
                     Text(item.title)
                 }
-                if !item.detail.isEmpty {
+                if item.workout == nil, !item.detail.isEmpty {
                     Text(item.detail).font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -343,5 +370,26 @@ private struct FeedRow: View {
             }
         }
         .padding(.vertical, 2)
+    }
+
+    /// The author's name, opening their profile when they have a handle.
+    @ViewBuilder private var authorName: some View {
+        let name = item.mine ? Text("You") : Text(item.displayName)
+        if item.handle.isEmpty {
+            name.font(.subheadline.weight(.medium))
+        } else {
+            Button(action: openProfile) { name.font(.subheadline.weight(.medium)) }
+                .buttonStyle(.borderless)
+        }
+    }
+
+    /// The card, opening the workout when the author has a handle to find it by.
+    @ViewBuilder private func workoutCard(_ workout: WorkoutCard) -> some View {
+        if item.handle.isEmpty {
+            WorkoutCardView(card: workout)
+        } else {
+            Button { openWorkout(workout) } label: { WorkoutCardView(card: workout) }
+                .buttonStyle(.borderless)
+        }
     }
 }
