@@ -10,6 +10,11 @@ Where to look:
 - More > Nutrition > Plans > Build with AI: the coach builds a meal plan from a goal, meals per day and foods to leave out; it is shown for review before anything is saved.
 - More > Progress check: photos and measurements. Photos are only sent for an estimate after the screen names the AI provider, and estimates are labelled as such.
 - More > Daily Post: one short post a day, written by AI and marked "AI-written". Readers can only give kudos; there are no comments or user posts.
+- More > Crews > "Review Crew": crew chat, the only user-generated content in the app (guideline 1.2). Crews are private and invite-only, up to 25 members; the demo account belongs to this crew with a second member and some messages.
+  - Rules: the crew rules must be agreed ("I agree" is the only option) before the first message can be sent.
+  - Filter: the server rejects messages that match a word list in English, Spanish and Portuguese.
+  - Report: long-press any message > Report, with a reason and an optional note. The message is hidden for the reporter at once, and for everyone once 2 or 3 members report it, depending on crew size. Each report reaches the developer by push and is reviewed in a moderation queue, where content can be removed and the author suspended from posting, within 24 hours.
+  - Block: long-press a message > Block, or from the member list. The author's messages disappear for you at once.
 - More: goals, check-ins, reports, memories, knowledge, care, journal, decisions. Settings (More > Settings) holds Language, Appearance, Export My Data and, at the bottom, Delete Account.
 
 HealthKit: used to read workouts, activity, heart rate, sleep and weight for coaching, and to save workouts finished in the app. Nothing is used for advertising.
