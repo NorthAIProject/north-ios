@@ -115,8 +115,10 @@ struct ProfileScreen: View {
         do {
             profile = try await service.profile(handle: handle)
             error = nil
+            actionError = nil
         } catch {
-            if profile == nil { self.error = error.localizedDescription }
+            // Keep what is showing and say the refresh failed.
+            if profile == nil { self.error = error.localizedDescription } else { actionError = error.localizedDescription }
         }
     }
 
