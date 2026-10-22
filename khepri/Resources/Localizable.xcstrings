@@ -7979,28 +7979,6 @@
         }
       }
     },
-    "Accept" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceptar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceitar"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceitar"
-          }
-        }
-      }
-    },
     "Account" : {
       "localizations" : {
         "es" : {
@@ -10032,28 +10010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Faz-me perguntas. Ajuda-me a pensar."
-          }
-        }
-      }
-    },
-    "Ask to Follow" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir seguir"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir para seguir"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir para seguir"
           }
         }
       }
@@ -14561,28 +14517,6 @@
         }
       }
     },
-    "Decline" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechazar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recusar"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recusar"
-          }
-        }
-      }
-    },
     "Declined" : {
       "comment" : "Agent tool call outcome",
       "localizations" : {
@@ -17688,6 +17622,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Folato"
+          }
+        }
+      }
+    },
+    "Follow" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
           }
         }
       }
@@ -27088,28 +27044,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desativado"
-          }
-        }
-      }
-    },
-    "Off until you turn it on. Your journal, decisions, food and health numbers are never shared." : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desactivado hasta que lo actives. Tu diario, decisiones, comida y datos de salud nunca se comparten."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desativado até você ativar. Seu diário, decisões, alimentação e dados de saúde nunca são compartilhados."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desativado até o ativares. O teu diário, decisões, alimentação e dados de saúde nunca são partilhados."
           }
         }
       }
@@ -37411,28 +37345,6 @@
         }
       }
     },
-    "Waiting" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En espera"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Na fila"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em espera"
-          }
-        }
-      }
-    },
     "Waiting for code" : {
       "localizations" : {
         "es" : {
@@ -37473,28 +37385,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À tua espera"
-          }
-        }
-      }
-    },
-    "Waiting for Your Yes" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esperando tu sí"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esperando o seu sim"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À espera do teu sim"
           }
         }
       }
@@ -38707,28 +38597,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Com uma hora de início, o teu iPhone lembra-te pouco antes."
-          }
-        }
-      }
-    },
-    "Withdraw" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar pedido"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirar"
           }
         }
       }
@@ -40205,6 +40073,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zinco"
+          }
+        }
+      }
+    },
+    "Followers see what you switch on here. Your journal, decisions, food and health numbers are never shared." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus seguidores ven lo que actives aquí. Tu diario, decisiones, comida y datos de salud nunca se comparten."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus seguidores veem o que você ativar aqui. Seu diário, decisões, alimentação e dados de saúde nunca são compartilhados."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os teus seguidores veem o que ativares aqui. O teu diário, decisões, alimentação e dados de saúde nunca são partilhados."
           }
         }
       }

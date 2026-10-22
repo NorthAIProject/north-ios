@@ -35,7 +35,7 @@ final class FriendsUITests: XCTestCase {
         let field = app.textFields["@their_handle"]
         for _ in 0..<6 where !field.isHittable { app.swipeUp() }
         type(field, "nobody_has_this_1")
-        tap(app.buttons["Ask to Follow"])
+        tap(app.buttons["Follow"])
         XCTAssertTrue(app.staticTexts["Nobody has that handle."].waitForExistence(timeout: 10))
 
         // Zoe's link from outside the app: Friends opens with Zoe in it.

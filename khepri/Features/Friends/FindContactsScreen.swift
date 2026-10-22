@@ -165,25 +165,22 @@ struct FindContactsScreen: View {
 }
 
 /// A person found in your contacts or on Facebook, with the same
-/// ask-to-follow as Friends.
+/// follow as Friends.
 struct MatchRow: View {
     let match: ContactMatch
     let follow: () -> Void
 
     var body: some View {
         HStack {
-            PersonRow(person: match.person, pending: match.following == "pending")
-            switch match.following {
-            case "":
-                Button("Ask to Follow", action: follow)
+            PersonRow(person: match.person)
+            if match.isFollowing {
+                Text("Following").northEyebrow()
+            } else {
+                Button("Follow", action: follow)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-            case "accepted":
-                Text("Following").northEyebrow()
-            default:
-                EmptyView()
             }
         }
-        .sensoryFeedback(.success, trigger: match.following) { _, now in now == "pending" || now == "accepted" }
+        .sensoryFeedback(.success, trigger: match.following) { _, now in !now.isEmpty }
     }
 }

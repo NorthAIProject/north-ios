@@ -12,10 +12,9 @@ typealias FacebookFriends = Components.Schemas.FacebookFriends
 protocol FriendsServicing: Sendable {
     func overview() async throws -> SocialOverview
     func setHandle(_ handle: String) async throws -> String
-    /// Asks to follow; the connection says whether it waits for their yes.
+    /// Follows at once: the returned connection is already accepted.
     @discardableResult func follow(handle: String) async throws -> Connection
     func unfollow(_ userID: String) async throws
-    func accept(_ userID: String) async throws
     func removeFollower(_ userID: String) async throws
     func block(_ userID: String) async throws
     func unblock(_ userID: String) async throws
@@ -62,10 +61,6 @@ struct FriendsService: FriendsServicing {
 
     func unfollow(_ userID: String) async throws {
         try await NorthAPI.call { _ = try await api.unfollow(path: .init(userID: userID)).noContent }
-    }
-
-    func accept(_ userID: String) async throws {
-        try await NorthAPI.call { _ = try await api.acceptFollower(path: .init(userID: userID)).noContent }
     }
 
     func removeFollower(_ userID: String) async throws {
