@@ -139,7 +139,7 @@ struct FriendsScreen: View {
                 } header: {
                     Text("What Followers See")
                 } footer: {
-                    Text("Off until you turn it on. Your journal, decisions, food and health numbers are never shared.")
+                    Text("Followers see what you switch on here. Your journal, decisions, food and health numbers are never shared.")
                 }
             }
 

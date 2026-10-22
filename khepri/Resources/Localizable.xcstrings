@@ -27048,28 +27048,6 @@
         }
       }
     },
-    "Off until you turn it on. Your journal, decisions, food and health numbers are never shared." : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desactivado hasta que lo actives. Tu diario, decisiones, comida y datos de salud nunca se comparten."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desativado até você ativar. Seu diário, decisões, alimentação e dados de saúde nunca são compartilhados."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desativado até o ativares. O teu diário, decisões, alimentação e dados de saúde nunca são partilhados."
-          }
-        }
-      }
-    },
     "OK" : {
       "localizations" : {
         "es" : {
@@ -40095,6 +40073,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zinco"
+          }
+        }
+      }
+    },
+    "Followers see what you switch on here. Your journal, decisions, food and health numbers are never shared." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus seguidores ven lo que actives aquí. Tu diario, decisiones, comida y datos de salud nunca se comparten."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus seguidores veem o que você ativar aqui. Seu diário, decisões, alimentação e dados de saúde nunca são compartilhados."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os teus seguidores veem o que ativares aqui. O teu diário, decisões, alimentação e dados de saúde nunca são partilhados."
           }
         }
       }
