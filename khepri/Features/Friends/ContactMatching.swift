@@ -7,8 +7,11 @@ import NorthAPI
 /// Somebody in your contacts who is already on Khepri.
 nonisolated struct ContactMatch: Identifiable, Equatable, Sendable {
     let person: PublicPerson
-    /// "", pending or accepted: how you follow them already.
+    /// "" or accepted: how you follow them already. Following is open, so
+    /// there is no waiting state; an old server's "pending" counts as following.
     var following: String
+
+    var isFollowing: Bool { !following.isEmpty }
 
     var id: String { person.id }
 }

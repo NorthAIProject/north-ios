@@ -15,7 +15,6 @@ protocol FriendsServicing: Sendable {
     /// Asks to follow; the connection says whether it waits for their yes.
     @discardableResult func follow(handle: String) async throws -> Connection
     func unfollow(_ userID: String) async throws
-    func accept(_ userID: String) async throws
     func removeFollower(_ userID: String) async throws
     func block(_ userID: String) async throws
     func unblock(_ userID: String) async throws
@@ -62,10 +61,6 @@ struct FriendsService: FriendsServicing {
 
     func unfollow(_ userID: String) async throws {
         try await NorthAPI.call { _ = try await api.unfollow(path: .init(userID: userID)).noContent }
-    }
-
-    func accept(_ userID: String) async throws {
-        try await NorthAPI.call { _ = try await api.acceptFollower(path: .init(userID: userID)).noContent }
     }
 
     func removeFollower(_ userID: String) async throws {

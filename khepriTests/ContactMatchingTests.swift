@@ -71,6 +71,18 @@ struct ContactMatchingTests {
         #expect(!asked && people.isEmpty)
     }
 
+    @Test func anyFollowShowsAsFollowing() {
+        func following(_ state: String) -> Bool {
+            var found = match("1", "ana")
+            found.following = state
+            return found.isFollowing
+        }
+        #expect(following("accepted"))
+        // An old server may still say pending; the app never shows a waiting state.
+        #expect(following("pending"))
+        #expect(!following(""))
+    }
+
     private func match(_ id: String, _ name: String) -> ContactMatch {
         ContactMatch(person: PublicPerson(id: id, displayName: name, handle: name.lowercased()), following: "")
     }

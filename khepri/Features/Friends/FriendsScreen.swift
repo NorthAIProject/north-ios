@@ -127,23 +127,6 @@ struct FriendsScreen: View {
                 Text("How friends find you. Without one, only your invite link does.")
             }
 
-            if !o.requests.isEmpty {
-                Section("Waiting for Your Yes") {
-                    ForEach(o.requests, id: \.value1.id) { request in
-                        PersonRow(person: request.value1)
-                            .swipeActions {
-                                Button("Decline") { act { try await service.removeFollower(request.value1.id) } }
-                                Button("Accept") { act { try await service.accept(request.value1.id) } }
-                                    .tint(NorthColor.signal)
-                            }
-                            .contextMenu {
-                                Button("Accept", systemImage: "checkmark") { act { try await service.accept(request.value1.id) } }
-                                Button("Decline", systemImage: "xmark") { act { try await service.removeFollower(request.value1.id) } }
-                            }
-                    }
-                }
-            }
-
             if let sharing {
                 Section {
                     Toggle("Workouts you finish", isOn: share(\.training, in: sharing))
@@ -166,7 +149,7 @@ struct FriendsScreen: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .onSubmit { Task { await follow() } }
-                    Button("Ask to Follow") { Task { await follow() } }
+                    Button("Follow") { Task { await follow() } }
                         .disabled(followHandle.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
                 if let followError { ErrorRow(followError) }
@@ -195,12 +178,9 @@ struct FriendsScreen: View {
                     Text("Nobody yet.").foregroundStyle(.secondary)
                 }
                 ForEach(o.following, id: \.value1.id) { c in
-                    PersonRow(person: c.value1, pending: c.value2.status == .pending)
+                    PersonRow(person: c.value1)
                         .swipeActions {
-                            Button(
-                                c.value2.status == .pending ? String(localized: "Withdraw") : String(localized: "Unfollow"),
-                                role: .destructive
-                            ) {
+                            Button("Unfollow", role: .destructive) {
                                 act { try await service.unfollow(c.value1.id) }
                             }
                             Button("Block") { act { try await service.block(c.value1.id) } }
@@ -297,7 +277,6 @@ struct FriendsScreen: View {
 
 struct PersonRow: View {
     let person: PublicPerson
-    var pending = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -312,9 +291,6 @@ struct PersonRow: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            if pending {
-                Text("Waiting").northEyebrow()
-            }
         }
         .accessibilityElement(children: .combine)
     }

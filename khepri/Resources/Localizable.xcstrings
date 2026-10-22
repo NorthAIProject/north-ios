@@ -7979,28 +7979,6 @@
         }
       }
     },
-    "Accept" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceptar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceitar"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aceitar"
-          }
-        }
-      }
-    },
     "Account" : {
       "localizations" : {
         "es" : {
@@ -10032,28 +10010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Faz-me perguntas. Ajuda-me a pensar."
-          }
-        }
-      }
-    },
-    "Ask to Follow" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir seguir"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir para seguir"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pedir para seguir"
           }
         }
       }
@@ -14561,28 +14517,6 @@
         }
       }
     },
-    "Decline" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechazar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recusar"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recusar"
-          }
-        }
-      }
-    },
     "Declined" : {
       "comment" : "Agent tool call outcome",
       "localizations" : {
@@ -17688,6 +17622,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Folato"
+          }
+        }
+      }
+    },
+    "Follow" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir"
           }
         }
       }
@@ -37411,28 +37367,6 @@
         }
       }
     },
-    "Waiting" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En espera"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Na fila"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em espera"
-          }
-        }
-      }
-    },
     "Waiting for code" : {
       "localizations" : {
         "es" : {
@@ -37473,28 +37407,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À tua espera"
-          }
-        }
-      }
-    },
-    "Waiting for Your Yes" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esperando tu sí"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esperando o seu sim"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À espera do teu sim"
           }
         }
       }
@@ -38707,28 +38619,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Com uma hora de início, o teu iPhone lembra-te pouco antes."
-          }
-        }
-      }
-    },
-    "Withdraw" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar pedido"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirar"
           }
         }
       }
