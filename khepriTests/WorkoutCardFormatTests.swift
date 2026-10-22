@@ -62,6 +62,14 @@ struct WorkoutCardFormatTests {
         #expect(WorkoutCardFormat.recordNames(sample) == ["Bench", "Squat"])
     }
 
+    @Test func recordsBeyondTheNamedExercisesAreCountedNotLost() {
+        let sample = card(prs: 3, exercises: [exercise("Bench", pr: true), exercise("Press")])
+        #expect(WorkoutCardFormat.unnamedRecords(sample) == 2)
+        let allNamed = card(prs: 2, exercises: [exercise("Bench", pr: true), exercise("Press", pr: true)])
+        #expect(WorkoutCardFormat.unnamedRecords(allNamed) == 0)
+        #expect(WorkoutCardFormat.unnamedRecords(card(prs: 0)) == 0)
+    }
+
     @Test func anExerciseLineDropsZeroVolumeAndMissingBest() {
         #expect(WorkoutCardFormat.detail(exercise("Bench", sets: 4, volume: 1600), locale: en) == "4 sets · 1,600 kg · 60 kg × 6")
         #expect(WorkoutCardFormat.detail(exercise("Pull-up", sets: 1, volume: 0, best: nil), locale: en) == "1 set")

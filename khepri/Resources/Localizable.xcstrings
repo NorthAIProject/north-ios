@@ -40165,6 +40165,28 @@
         }
       }
     },
+    "+%lld PR" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld PR"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld PR"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld PR"
+          }
+        }
+      }
+    },
     "Level %lld · %@" : {
       "localizations" : {
         "es" : {

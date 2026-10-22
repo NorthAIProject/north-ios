@@ -63,4 +63,10 @@ enum WorkoutCardFormat {
     static func recordNames(_ card: WorkoutCard) -> [String] {
         card.exercises.filter(\.pr).map(\.name)
     }
+
+    /// Records the card counts but does not name: the API carries only the top
+    /// two exercises, so a record on the third or later shows as "+N PR".
+    static func unnamedRecords(_ card: WorkoutCard) -> Int {
+        max(0, card.prs - recordNames(card).count)
+    }
 }

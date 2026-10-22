@@ -26,8 +26,9 @@ struct WorkoutCardView: View {
                 }
             }
             let records = WorkoutCardFormat.recordNames(card)
-            if !records.isEmpty {
-                RecordChips(names: records)
+            let unnamed = WorkoutCardFormat.unnamedRecords(card)
+            if !records.isEmpty || unnamed > 0 {
+                RecordChips(names: records, unnamed: unnamed)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -37,15 +38,19 @@ struct WorkoutCardView: View {
     }
 }
 
-/// "PR · Bench press", one per record.
+/// "PR · Bench press", one per named record, then "+2 PR" for the rest.
 struct RecordChips: View {
     let names: [String]
+    var unnamed = 0
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(names, id: \.self) { name in
                     PRBadge(text: "PR · \(name)")
+                }
+                if unnamed > 0 {
+                    PRBadge(text: "+\(unnamed) PR")
                 }
             }
         }

@@ -33,7 +33,11 @@ struct ProfileWorkoutsScreen: View {
         }
         .navigationTitle("Workouts")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await load() }
+        .task {
+            // Coming back from a workout re-runs this; keep the pages and scroll.
+            guard !loaded else { return }
+            await load()
+        }
         .refreshable { await load() }
     }
 
