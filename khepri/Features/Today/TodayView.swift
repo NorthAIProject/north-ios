@@ -102,6 +102,10 @@ struct TodayView: View {
         .onChange(of: outreach.message?.action) {
             Task { await firstWeek.load() }
         }
+        // The review sheet closes the week; the card follows.
+        .onChange(of: router.dataVersion) {
+            Task { await firstWeek.load() }
+        }
         .sheet(isPresented: $showingRecap) {
             RecapScreen(store: recap)
         }
