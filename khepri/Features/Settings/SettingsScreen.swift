@@ -80,6 +80,9 @@ struct SettingsScreen: View {
                         Label("Show Me Around", systemImage: "hand.point.up.left")
                     }
                     ReviewSettingsRows()
+                    Link(destination: AppEnvironment.discordURL) {
+                        Label("Join us on Discord", systemImage: "bubble.left.and.bubble.right")
+                    }
                     NavigationLink { Acknowledgements() } label: {
                         Label("Acknowledgements", systemImage: "text.book.closed")
                     }

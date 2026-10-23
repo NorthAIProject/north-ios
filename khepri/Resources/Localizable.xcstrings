@@ -20904,6 +20904,28 @@
         }
       }
     },
+    "Join us on Discord" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Únete a nosotros en Discord"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Junte-se a nós no Discord"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Junta-te a nós no Discord"
+          }
+        }
+      }
+    },
     "Journal" : {
       "localizations" : {
         "es" : {
