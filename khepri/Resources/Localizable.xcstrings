@@ -752,6 +752,28 @@
         }
       }
     },
+    "Build a habit" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear un hábito"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar um hábito"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar um hábito"
+          }
+        }
+      }
+    },
     "Build Meal Plan" : {
       "localizations" : {
         "es" : {
@@ -3238,6 +3260,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escreve algo para começar."
+          }
+        }
+      }
+    },
+    "See your week" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver tu semana"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver sua semana"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver a tua semana"
           }
         }
       }
@@ -20816,6 +20860,28 @@
         }
       }
     },
+    "Join a crew" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unirte a un grupo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar em um grupo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar num grupo"
+          }
+        }
+      }
+    },
     "Join me on Khepri" : {
       "localizations" : {
         "es" : {
@@ -21473,6 +21539,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "últimas 7 noites"
+          }
+        }
+      }
+    },
+    "Last day. Your week's review comes next." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Último día. Después llega el repaso de tu semana."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Último dia. Depois vem o resumo da sua semana."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Último dia. A seguir vem o balanço da tua semana."
           }
         }
       }
@@ -28971,6 +29059,28 @@
         }
       }
     },
+    "Pick a training plan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir un plan de entrenamiento"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher um plano de treino"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher um plano de treino"
+          }
+        }
+      }
+    },
     "Pick any. You can change these later." : {
       "localizations" : {
         "es" : {
@@ -35237,6 +35347,28 @@
         }
       }
     },
+    "The rest of Khepri is open now. Pick one thing to keep going with." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El resto de Khepri ya está abierto. Elige una cosa para seguir."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O resto do Khepri já está aberto. Escolha uma coisa para continuar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O resto do Khepri já está aberto. Escolhe uma coisa para continuar."
+          }
+        }
+      }
+    },
     "The same coach, the same memory: what you say there appears here." : {
       "localizations" : {
         "es" : {
@@ -38581,6 +38713,28 @@
         }
       }
     },
+    "What next?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Y ahora qué?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E agora?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E agora?"
+          }
+        }
+      }
+    },
     "What should your coach keep in view?" : {
       "localizations" : {
         "es" : {
@@ -40075,6 +40229,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O teu dia, num relance"
+          }
+        }
+      }
+    },
+    "Your first week is done" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu primera semana ha terminado"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua primeira semana terminou"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tua primeira semana terminou"
+          }
+        }
+      }
+    },
+    "Your first week" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu primera semana"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua primeira semana"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tua primeira semana"
           }
         }
       }

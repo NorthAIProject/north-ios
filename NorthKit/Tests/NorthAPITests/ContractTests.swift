@@ -462,8 +462,12 @@ struct ContractTests {
         #expect(week.days.first?.via == "log" && week.days[1].via == nil)
         let none = try decode(Schemas.FirstWeek.self, "first_week_none")
         #expect(none.status == "none" && none.days.isEmpty && none.action == nil)
+        #expect(week.review == nil)
         let finished = try decode(Schemas.FirstWeek.self, "first_week_finished")
-        #expect(finished.status == "finished" && finished.review?.text.isEmpty == false)
+        #expect(finished.status == "finished" && finished.day == 7)
+        let review = try #require(finished.review)
+        #expect(!review.text.isEmpty && review.writtenBy == "coach")
+        #expect(review.daysDone == 5 && review.daysByLog == 4 && review.daysByTap == 1 && review.loggedDays == 5)
     }
 
     @Test func progressChecks() throws {
