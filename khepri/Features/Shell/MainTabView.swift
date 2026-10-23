@@ -7,6 +7,7 @@ struct MainTabView: View {
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
     @Environment(CrewUnread.self) private var crewUnread
+    @Environment(AwardsCenter.self) private var awards
     @Environment(\.scenePhase) private var scenePhase
     /// A workout the app was killed during, picked up where it was.
     @State private var resumedWorkout: WorkoutSession?
@@ -71,6 +72,22 @@ struct MainTabView: View {
             }
         }
         .fullScreenCover(item: $resumedWorkout) { session in WorkoutSessionView(session: session) }
+        // Badges just earned, one cover paging through them. Closing it, either
+        // way, tells the server they were seen.
+        .fullScreenCover(isPresented: Binding(
+            get: { !awards.pending.isEmpty },
+            set: { if !$0 { Task { await awards.dismiss() } } }
+        )) {
+            UnlockCelebrationView(awards: awards.pending) {
+                Task { await awards.dismiss() }
+                router.opensOwnAwards = true
+                router.open(.tab(.progress))
+            } onDone: {
+                Task { await awards.dismiss() }
+            }
+        }
+        // A workout or check-in finished on this device may have earned one.
+        .onChange(of: router.dataVersion) { Task { await awards.refresh() } }
         .onAppear { tour.startIfNeeded() }
         .task { resumedWorkout = WorkoutSession.resumingKilledWorkout() }
         // Apple Health catches up whenever the app comes forward, and
@@ -83,6 +100,7 @@ struct MainTabView: View {
             if phase == .active {
                 WorkoutLiveActivityController.endOrphans()
                 Task { await crewUnread.refresh() }
+                Task { await awards.refresh() }
                 Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
                 Task.detached { await SpotlightIndex.refresh() }
             }
