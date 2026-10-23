@@ -19,15 +19,21 @@ struct MedalsTests {
         for area in areas {
             let style = Medals.shared.style(forArea: area)
             #expect(Medals.shared.areas[area] != nil, "\(area) has no colours")
-            #expect(style.fillHex.hasPrefix("#") && style.rimHex.hasPrefix("#"), "\(area): \(style)")
+            let hex = /^#[0-9A-Fa-f]{6}$/
+            #expect(style.fillHex.wholeMatch(of: hex) != nil && style.rimHex.wholeMatch(of: hex) != nil, "\(area): \(style)")
+            #expect(style.fillHex != style.rimHex)
         }
-        #expect(Medals.shared.monthlyRimHex.hasPrefix("#"))
+        #expect(Medals.shared.monthlyRimHex.wholeMatch(of: /^#[0-9A-Fa-f]{6}$/) != nil)
     }
 
     @Test func anUnknownAreaFallsBackToSlate() {
         let slate = Medals.shared.style(forArea: "body")
         #expect(Medals.shared.style(forArea: "telepathy") == slate)
         #expect(slate.fillHex == "#475569")
+    }
+
+    @Test func everyGlyphPathParses() {
+        #expect(Medals.shared.brokenGlyphs.isEmpty, "blank coins: \(Medals.shared.brokenGlyphs)")
     }
 
     @Test func aBadgeWithoutAGlyphStillDraws() {

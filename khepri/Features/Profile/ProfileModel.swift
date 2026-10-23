@@ -17,6 +17,14 @@ struct ProfileModel: Equatable {
         case list([Award])
     }
 
+    /// Where a profile's "See all" for awards leads.
+    enum AwardsLink: Equatable {
+        /// Your own profile: the full screen with what is still to earn.
+        case mine
+        /// Someone else's: the badges their profile response carries.
+        case theirs
+    }
+
     let name: String
     let handle: String
     let followers: Int
@@ -27,6 +35,12 @@ struct ProfileModel: Equatable {
     let awards: Awards
     let isSelf: Bool
     let isFollowing: Bool
+
+    /// Nil when there are no badges to see.
+    var awardsLink: AwardsLink? {
+        guard case .list = awards else { return nil }
+        return isSelf ? .mine : .theirs
+    }
 
     var canFollow: Bool { !isSelf }
 

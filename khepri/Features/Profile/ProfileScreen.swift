@@ -54,6 +54,14 @@ struct ProfileScreen: View {
                     Text("No awards yet.").foregroundStyle(.secondary)
                 case .list(let held):
                     awardsStrip(held)
+                    switch model.awardsLink {
+                    case .mine:
+                        NavigationLink("See All") { AwardsScreen() }
+                    case .theirs:
+                        NavigationLink("See All") { ProfileAwardsScreen(name: model.name, awards: held) }
+                    case nil:
+                        EmptyView()
+                    }
                 }
             } header: {
                 Text("Awards")

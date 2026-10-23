@@ -34,9 +34,6 @@ struct AwardsScreen: View {
             AwardDetailSheet(award: award)
                 .presentationDetents([.medium])
         }
-        .onChange(of: shown?.id) { _, id in
-            if let id, model?.earned.first(where: { $0.id == id })?.isNew == true { celebrated(id) }
-        }
     }
 
     private func content(_ model: AwardsModel) -> some View {
@@ -77,24 +74,11 @@ struct AwardsScreen: View {
             self.error = error.localizedDescription
         }
     }
-
-    /// Opening a new badge is the celebration; tell the server so no other device repeats it.
-    private func celebrated(_ id: String) {
-        Task {
-            try? await service.markSeen(id)
-            if let current = model {
-                model = AwardsModel(
-                    AwardsOverview(earned: current.earned.map(\.award), locked: current.locked.map(\.award)),
-                    unseen: current.earned.filter { $0.isNew && $0.id != id }.map(\.award)
-                )
-            }
-        }
-    }
 }
 
 extension Award: @retroactive Identifiable {}
 
-private struct AwardRow: View {
+struct AwardRow: View {
     let row: AwardsModel.Row
 
     var body: some View {

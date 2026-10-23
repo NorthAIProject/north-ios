@@ -52,6 +52,9 @@ public struct Medals: Sendable {
     public let monthlyRimHex: String
     public let areas: [String: AreaStyle]
     private let glyphs: [String: [Path]]
+    /// Badge ids with a glyph path that did not parse, or no paths at all.
+    /// Such a coin draws blank, so a test holds this empty.
+    public let brokenGlyphs: [String]
 
     /// Decodes a `medals.json`. Throws when it is malformed or a colour cannot be read.
     public init(json: Data) throws {
@@ -76,7 +79,11 @@ public struct Medals: Sendable {
             AreaStyle(fillHex: $0.fill, rimHex: $0.rim, fill: try colour($0.fill), rim: try colour($0.rim))
         }
         // A glyph that fails to parse is dropped: the coin still reads by colour.
-        glyphs = file.glyphs.mapValues { $0.compactMap { try? Path(SVGPath.parse($0)) } }
+        let parsed = file.glyphs.mapValues { $0.compactMap { try? Path(SVGPath.parse($0)) } }
+        glyphs = parsed
+        brokenGlyphs = file.glyphs.filter { id, paths in
+            paths.isEmpty || parsed[id]?.count != paths.count
+        }.keys.sorted()
     }
 
     /// The colours for `area`; a name this build has never seen draws as slate.

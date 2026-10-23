@@ -199,6 +199,28 @@
         }
       }
     },
+    "%@'s Awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premios de %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêmios de %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prémios de %@"
+          }
+        }
+      }
+    },
     "(edited)" : {
       "localizations" : {
         "es" : {
@@ -580,19 +602,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Logros"
+            "value" : "Premios"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistas"
+            "value" : "Prêmios"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistas"
+            "value" : "Prémios"
           }
         }
       }
@@ -602,19 +624,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los logros no se comparten."
+            "value" : "Los premios no se comparten."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As conquistas não são compartilhadas."
+            "value" : "Os prêmios não são compartilhados."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As conquistas não são partilhadas."
+            "value" : "Os prémios não são partilhados."
           }
         }
       }
@@ -624,19 +646,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los logros no se cargaron"
+            "value" : "Los premios no se cargaron"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As conquistas não carregaram"
+            "value" : "Os prêmios não carregaram"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As conquistas não carregaram"
+            "value" : "Os prémios não carregaram"
           }
         }
       }
@@ -1263,7 +1285,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguido el %@"
+            "value" : "Conseguida el %@"
           }
         },
         "pt-BR" : {
@@ -1285,7 +1307,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguidos · %lld de %lld"
+            "value" : "Conseguidas · %lld de %lld"
           }
         },
         "pt-BR" : {
@@ -1461,7 +1483,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Termina un entrenamiento, haz un registro diario o alcanza un objetivo y tu primera insignia aparecerá aquí."
+            "value" : "Termina un entrenamiento, haz un registro diario o alcanza un objetivo y tu primera medalla aparecerá aquí."
           }
         },
         "pt-BR" : {
@@ -1747,19 +1769,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lo tiene el %@ de las personas"
+            "value" : "Conseguida por el %@ de las personas"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ das pessoas têm esta medalha"
+            "value" : "Conquistada por %@ das pessoas"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ das pessoas têm esta medalha"
+            "value" : "Conquistada por %@ das pessoas"
           }
         }
       }
@@ -2387,19 +2409,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay logros."
+            "value" : "Aún no hay premios."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ainda sem conquistas."
+            "value" : "Ainda sem prêmios."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ainda sem conquistas."
+            "value" : "Ainda sem prémios."
           }
         }
       }
@@ -3449,7 +3471,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Por conquistar"
+            "value" : "Para conquistar"
           }
         },
         "pt-PT" : {
@@ -3884,19 +3906,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tus logros"
+            "value" : "Tus premios"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suas conquistas"
+            "value" : "Seus prêmios"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As tuas conquistas"
+            "value" : "Os teus prémios"
           }
         }
       }
