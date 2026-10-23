@@ -221,6 +221,28 @@
         }
       }
     },
+    "+%lld more" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld más"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld mais"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld mais"
+          }
+        }
+      }
+    },
     "30 days" : {
       "comment" : "Recap range picker",
       "localizations" : {
@@ -549,6 +571,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No máximo uma vez por dia, quando repara em algo: uma manhã de recuperação baixa, uma sessão que ficou por fazer. Quando alivia uma sessão diz-te porquê e podes desfazer."
+          }
+        }
+      }
+    },
+    "Awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logros"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistas"
+          }
+        }
+      }
+    },
+    "Awards aren't shared." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los logros no se comparten."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As conquistas não são compartilhadas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As conquistas não são partilhadas."
+          }
+        }
+      }
+    },
+    "Awards did not load" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los logros no se cargaron"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As conquistas não carregaram"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As conquistas não carregaram"
           }
         }
       }
@@ -1170,6 +1258,50 @@
         }
       }
     },
+    "Earned %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido el %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistada em %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistada em %@"
+          }
+        }
+      }
+    },
+    "Earned · %lld of %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguidos · %lld de %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistadas · %lld de %lld"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistadas · %lld de %lld"
+          }
+        }
+      }
+    },
     "Empty fields were filled in. Check them against a tape if you can, then save." : {
       "localizations" : {
         "es" : {
@@ -1320,6 +1452,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada dia é feito à medida da tua meta de macros e verificado com as tuas respostas antes de o veres."
+          }
+        }
+      }
+    },
+    "Finish a workout, check in or hit a goal, and your first badge lands here." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termina un entrenamiento, haz un registro diario o alcanza un objetivo y tu primera insignia aparecerá aquí."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conclua um treino, faça um registro diário ou atinja um objetivo e sua primeira medalha aparece aqui."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conclui um treino, faz um registo diário ou atinge um objetivo e a tua primeira medalha aparece aqui."
           }
         }
       }
@@ -1584,6 +1738,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ódio"
+          }
+        }
+      }
+    },
+    "Held by %@ of people" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo tiene el %@ de las personas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ das pessoas têm esta medalha"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ das pessoas têm esta medalha"
           }
         }
       }
@@ -2140,6 +2316,28 @@
         }
       }
     },
+    "New" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova"
+          }
+        }
+      }
+    },
     "New check" : {
       "localizations" : {
         "es" : {
@@ -2180,6 +2378,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximo registo: %@."
+          }
+        }
+      }
+    },
+    "No awards yet." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay logros."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem conquistas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem conquistas."
           }
         }
       }
@@ -3218,6 +3438,28 @@
         }
       }
     },
+    "Still to Earn" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por conseguir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por conquistar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por conquistar"
+          }
+        }
+      }
+    },
     "Take or choose" : {
       "localizations" : {
         "es" : {
@@ -3633,6 +3875,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Já não estás neste grupo"
+          }
+        }
+      }
+    },
+    "Your awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus logros"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas conquistas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As tuas conquistas"
           }
         }
       }

@@ -10,6 +10,13 @@ struct ProfileModel: Equatable {
         case list([WorkoutCard])
     }
 
+    /// The awards strip: not shared with you, shared but none yet, or the badges, newest first.
+    enum Awards: Equatable {
+        case hidden
+        case empty
+        case list([Award])
+    }
+
     let name: String
     let handle: String
     let followers: Int
@@ -17,6 +24,7 @@ struct ProfileModel: Equatable {
     let level: Components.Schemas.LevelView?
     let workoutCount: Int?
     let workouts: Workouts
+    let awards: Awards
     let isSelf: Bool
     let isFollowing: Bool
 
@@ -40,6 +48,14 @@ struct ProfileModel: Equatable {
             workouts = .list(recent)
         } else {
             workouts = .empty
+        }
+        // Same trust rule as workouts. The server leaves `awards` out when there are none.
+        if extra.shares?.awards != true {
+            awards = .hidden
+        } else if let held = extra.awards, !held.isEmpty {
+            awards = .list(held.sorted { ($0.earnedAt ?? .distantPast) > ($1.earnedAt ?? .distantPast) })
+        } else {
+            awards = .empty
         }
     }
 }

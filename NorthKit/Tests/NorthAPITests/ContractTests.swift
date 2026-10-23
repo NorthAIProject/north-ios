@@ -507,6 +507,30 @@ struct ContractTests {
         #expect(board.entries.last?.me == true && board.entries.last?.level == nil && board.entries.last?.handle == "")
     }
 
+    @Test func awards() throws {
+        let awards = try decode(Schemas.Awards.self, "awards")
+        #expect(awards.earned.first?.id == "workouts_1" && awards.earned.first?.earnedAt != nil && awards.earned.first?.rarity == "<1%")
+        let locked = try #require(awards.locked.first)
+        #expect(locked.id == "streak_30" && locked.progress == 12 && locked.target == 30 && locked.earnedAt == nil)
+        let unseen = try decode(Schemas.UnseenAwards.self, "unseen")
+        #expect(unseen.awards.map(\.id) == ["workouts_1"])
+    }
+
+    /// A badge feed item rides the closed `goals` category; the badge is in open string fields.
+    @Test func badgeFeedItem() throws {
+        let feed = try decode(Schemas.Feed.self, "feed-badge")
+        let item = try #require(feed.items.first)
+        #expect(item.kind == "badge_earned" && item.category == .goals)
+        #expect(item.badgeId == "workouts_1" && item.area == "training")
+        #expect(item.badges?.map(\.id) == ["workouts_1", "pr_1"])
+    }
+
+    @Test func profileWithAwards() throws {
+        let profile = try decode(Schemas.ProfileView.self, "profiles-profile-awards")
+        #expect(profile.value2.shares?.awards == true)
+        #expect(profile.value2.awards?.map(\.id) == ["workouts_1"])
+    }
+
     @Test func bodyMap() throws {
         let map = try decode(Schemas.BodyMap.self, "body_map")
         #expect(map.days == 7 && map.lastSessionOn != nil)
@@ -534,7 +558,8 @@ struct ContractTests {
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",
-                            "progress_comparison", "progress_estimate", "progress_assist"]
+                            "progress_comparison", "progress_estimate", "progress_assist",
+                            "awards", "unseen", "feed-badge", "profiles-profile-awards"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
