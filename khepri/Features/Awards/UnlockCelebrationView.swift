@@ -12,6 +12,7 @@ struct UnlockCelebrationView: View {
     let onDone: () -> Void
 
     @State private var selected: String?
+    @State private var shown: [Award] = []
 
     init(awards: [Award], onShown: @escaping (String) -> Void,
          onViewProfile: @escaping () -> Void, onDone: @escaping () -> Void) {
@@ -19,18 +20,19 @@ struct UnlockCelebrationView: View {
         self.onShown = onShown
         self.onViewProfile = onViewProfile
         self.onDone = onDone
+        _shown = State(initialValue: awards)
         _selected = State(initialValue: awards.first?.id)
     }
 
     var body: some View {
         VStack(spacing: 0) {
             TabView(selection: $selected) {
-                ForEach(awards) { award in
+                ForEach(shown) { award in
                     UnlockPage(award: award, isCurrent: selected == award.id, onShown: onShown)
                         .tag(Optional(award.id))
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: awards.count > 1 ? .always : .never))
+            .tabViewStyle(.page(indexDisplayMode: shown.count > 1 ? .always : .never))
             VStack(spacing: 8) {
                 Button(action: onViewProfile) {
                     Text("View on Profile").font(.headline).frame(maxWidth: .infinity).padding(.vertical, 8)
@@ -47,6 +49,13 @@ struct UnlockCelebrationView: View {
             .padding(.bottom, 16)
         }
         .background(Color(.systemBackground))
+        // The queue empties as soon as Done is pressed, while the cover is still
+        // sliding away, so what it pages through is kept here: new arrivals join,
+        // nothing leaves.
+        .onChange(of: awards.map(\.id), initial: true) {
+            for award in awards where !shown.contains(where: { $0.id == award.id }) { shown.append(award) }
+            if selected == nil { selected = shown.first?.id }
+        }
     }
 }
 

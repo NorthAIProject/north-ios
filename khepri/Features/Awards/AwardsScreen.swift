@@ -32,7 +32,7 @@ struct AwardsScreen: View {
         .refreshable { await load() }
         .sheet(item: $shown) { award in
             AwardDetailSheet(award: award)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
     }
 

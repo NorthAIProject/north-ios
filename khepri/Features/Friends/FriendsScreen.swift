@@ -45,7 +45,7 @@ struct FriendsScreen: View {
         .navigationDestination(item: $openProfile) { ProfileScreen(handle: $0.handle) }
         .sheet(item: $shownAward) { award in
             AwardDetailSheet(award: award)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
         .navigationDestination(item: $openWorkout) {
             WorkoutDetailScreen(handle: $0.handle, card: $0.card, authorName: $0.authorName)

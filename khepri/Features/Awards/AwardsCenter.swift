@@ -63,15 +63,19 @@ final class AwardsCenter {
         owed = []
     }
 
+    /// Tells the server what was celebrated. Stops the moment `reset()` runs,
+    /// so the last account's ids are never sent under the next account's session.
     private func settleOwed() async {
         let started = generation
         for id in owed {
+            guard started == generation else { return }
             do {
                 try await service.markSeen(id)
-                if started == generation { owed.removeAll { $0 == id } }
             } catch {
                 continue
             }
+            guard started == generation else { return }
+            owed.removeAll { $0 == id }
         }
     }
 }

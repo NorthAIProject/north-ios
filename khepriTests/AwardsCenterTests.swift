@@ -17,12 +17,22 @@ struct AwardsCenterTests {
         private var held = false
         private var gate: CheckedContinuation<Void, Never>?
         private(set) var fetchesStarted = 0
+        /// When set, `markSeen()` waits for `releaseMark()` before it records the call.
+        private var markHeld = false
+        private var markGate: CheckedContinuation<Void, Never>?
+        private(set) var marksStarted = 0
 
         init(unseen: [Award]) { unseenList = unseen }
 
         func setFailing(_ ids: Set<String>) { failing = ids }
         func setUnseen(_ list: [Award]) { unseenList = list }
         func setFailFetch(_ fail: Bool) { failFetch = fail }
+        func holdMark() { markHeld = true }
+        func releaseMark() {
+            markHeld = false
+            markGate?.resume()
+            markGate = nil
+        }
         func hold() { held = true }
         func release() {
             held = false
@@ -39,6 +49,8 @@ struct AwardsCenterTests {
             return snapshot
         }
         func markSeen(_ badgeID: String) async throws {
+            marksStarted += 1
+            if markHeld { await withCheckedContinuation { markGate = $0 } }
             if failing.contains(badgeID) { throw URLError(.notConnectedToInternet) }
             marked.append(badgeID)
             unseenList.removeAll { $0.id == badgeID }
@@ -146,6 +158,26 @@ struct AwardsCenterTests {
         await fake.release()
         await inFlight.value
         #expect(center.pending.isEmpty)
+    }
+
+    @Test func resetStopsMarkingTheLastAccountsBadges() async {
+        let fake = FakeAwards(unseen: [award("a"), award("b"), award("c")])
+        let center = AwardsCenter(service: fake)
+        await center.refresh()
+        show(center)
+
+        await fake.holdMark()
+        let settling = Task { await center.dismiss() }
+        while await fake.marksStarted < 1 { await Task.yield() }
+        center.reset()
+        await fake.releaseMark()
+        await settling.value
+
+        #expect(await fake.marksStarted == 1, "only the call already in flight; b and c are the old account's")
+        #expect(await fake.marked == ["a"])
+        // And the next account's own settle does not resurrect them.
+        await center.refresh()
+        #expect(await fake.marksStarted == 1)
     }
 
     @Test func resetForgetsWhatWasQueuedForTheLastAccount() async {

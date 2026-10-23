@@ -113,7 +113,11 @@ struct ProfileScreenModelTests {
     @Test func seeAllIsHiddenWithoutBadges() throws {
         let none = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": true}}"#
         let hidden = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": false}}"#
+        for json in [none, hidden] { #expect(ProfileModel(try profile(json)).awardsLink == nil) }
+    }
+
+    @Test func yourOwnProfileOffersSeeAllEvenWithNoBadges() throws {
         let mine = #"{\#(person), \#(relationship(following: "", isSelf: true)), "shares": {"training": true, "xp": true, "awards": true}}"#
-        for json in [none, hidden, mine] { #expect(ProfileModel(try profile(json)).awardsLink == nil) }
+        #expect(ProfileModel(try profile(mine)).awardsLink == .mine)
     }
 }

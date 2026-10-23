@@ -14,6 +14,9 @@ struct MainTabView: View {
     /// Whether the awards cover is asked for, and whether it is really on screen.
     @State private var celebrating = false
     @State private var celebrationVisible = false
+    /// When the cover was last asked for. A presentation younger than a
+    /// second is still on its way up, so it is never asked for again.
+    @State private var celebrationRequestedAt: Date?
 
     var body: some View {
         @Bindable var router = router
@@ -96,8 +99,9 @@ struct MainTabView: View {
             .onDisappear { celebrationVisible = false }
         }
         // A workout or check-in finished on this device may have earned one.
-        // The cover waits a moment after the answer, since the workout's own
-        // cover is still leaving when the badge arrives.
+        // The pending change below asks for the cover as soon as the answer
+        // lands; the wait here asks again after the workout's own cover has
+        // left, in case SwiftUI dropped the first request under it.
         .onChange(of: router.dataVersion) {
             Task {
                 await awards.refresh()
@@ -107,7 +111,9 @@ struct MainTabView: View {
         }
         .onChange(of: awards.pending.map(\.id)) { old, new in
             // Only a badge arriving asks for the cover; one leaving does not.
-            if new.contains(where: { !old.contains($0) }) { Task { await showCelebrationIfDue() } }
+            if new.contains(where: { !old.contains($0) }) {
+                Task { await showCelebrationIfDue() }
+            }
         }
         // A presentation SwiftUI dropped under a sheet or the tour is asked
         // for again as soon as that goes away.
@@ -139,15 +145,25 @@ struct MainTabView: View {
     }
 
     /// Presents the cover when badges are waiting and it is not on screen. If
-    /// it was asked for but never appeared (SwiftUI drops a cover requested
-    /// while another presentation is up), it is asked for again.
+    /// it was asked for more than a second ago and never appeared (SwiftUI
+    /// drops a cover requested while another presentation is up), it is asked
+    /// for again. A request still on its way up is never cancelled: toggling it
+    /// off mid-flight can leave the cover requested but never shown.
     private func showCelebrationIfDue() async {
         guard !awards.pending.isEmpty, !celebrationVisible else { return }
         if celebrating {
+            let age = celebrationRequestedAt.map { Date.now.timeIntervalSince($0) } ?? .infinity
+            guard age > 1 else {
+                // Look again once it has had its second.
+                try? await Task.sleep(for: .seconds(1 - age + 0.05))
+                await showCelebrationIfDue()
+                return
+            }
             celebrating = false
             try? await Task.sleep(for: .milliseconds(350))
-            guard !awards.pending.isEmpty, !celebrationVisible else { return }
+            guard !awards.pending.isEmpty, !celebrationVisible, !celebrating else { return }
         }
+        celebrationRequestedAt = .now
         celebrating = true
     }
 }

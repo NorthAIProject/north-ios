@@ -36,10 +36,17 @@ struct ProfileModel: Equatable {
     let isSelf: Bool
     let isFollowing: Bool
 
-    /// Nil when there are no badges to see.
+    /// Nil when there are no badges to see on someone else's profile. Your own
+    /// always leads to the full screen, which also lists what is still to earn,
+    /// so a new person with nothing yet is not left at a dead end. Not when
+    /// awards are hidden, which can only be a server that does not know them.
     var awardsLink: AwardsLink? {
+        if isSelf {
+            if case .hidden = awards { return nil }
+            return .mine
+        }
         guard case .list = awards else { return nil }
-        return isSelf ? .mine : .theirs
+        return .theirs
     }
 
     var canFollow: Bool { !isSelf }

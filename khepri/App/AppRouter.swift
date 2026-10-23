@@ -138,6 +138,7 @@ final class AppRouter {
     static let sections: Set<String> = [
         "goals", "check-ins", "progress-check", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
         "friends", "crews", "inbox", "daily",
+        "awards",
     ]
 
     func open(_ destination: AppDestination) {

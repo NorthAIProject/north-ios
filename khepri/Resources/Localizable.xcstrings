@@ -1854,28 +1854,6 @@
         }
       }
     },
-    "Held by %@ of people" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conseguido por el %@ de las personas"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conquistado por %@ das pessoas"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conquistado por %@ das pessoas"
-          }
-        }
-      }
-    },
     "I agree" : {
       "localizations" : {
         "es" : {

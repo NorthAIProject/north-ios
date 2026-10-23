@@ -19,7 +19,7 @@ struct ProfileAwardsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $shown) { award in
             AwardDetailSheet(award: award)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
     }
 }

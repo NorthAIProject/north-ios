@@ -11,6 +11,10 @@ struct AwardDetailSheet: View {
     private var isEarned: Bool { award.earnedAt != nil }
 
     var body: some View {
+        ScrollView { content }
+    }
+
+    private var content: some View {
         VStack(spacing: 14) {
             CoinMedalView(badgeID: award.id, area: award.area, size: 160, locked: !isEarned)
                 .padding(.top, 24)
@@ -29,10 +33,9 @@ struct AwardDetailSheet: View {
                 .padding(.horizontal, 32)
             }
             if let rarity = award.rarity, !rarity.isEmpty {
-                Text("Held by \(rarity) of people")
+                Text("Earned by \(rarity) of Khepri members")
                     .font(.footnote).foregroundStyle(.secondary)
             }
-            Spacer(minLength: 0)
             Button("Done") { dismiss() }
                 .buttonStyle(.borderedProminent)
                 .tint(NorthColor.signal)

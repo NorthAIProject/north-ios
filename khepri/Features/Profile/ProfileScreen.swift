@@ -38,7 +38,7 @@ struct ProfileScreen: View {
         .refreshable { await load() }
         .sheet(item: $shownAward) { award in
             AwardDetailSheet(award: award)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
     }
 
@@ -52,6 +52,7 @@ struct ProfileScreen: View {
                     Text("Awards aren't shared.").foregroundStyle(.secondary)
                 case .empty:
                     Text("No awards yet.").foregroundStyle(.secondary)
+                    if model.awardsLink == .mine { NavigationLink("See All") { AwardsScreen() } }
                 case .list(let held):
                     awardsStrip(held)
                     switch model.awardsLink {
