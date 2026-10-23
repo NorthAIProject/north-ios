@@ -6,14 +6,28 @@ import SwiftUI
 /// page inside this one cover. Nothing here is a loss warning or an XP count.
 struct UnlockCelebrationView: View {
     let awards: [Award]
+    /// Called when a badge's page is the one in front.
+    let onShown: (String) -> Void
     let onViewProfile: () -> Void
     let onDone: () -> Void
 
+    @State private var selected: String?
+
+    init(awards: [Award], onShown: @escaping (String) -> Void,
+         onViewProfile: @escaping () -> Void, onDone: @escaping () -> Void) {
+        self.awards = awards
+        self.onShown = onShown
+        self.onViewProfile = onViewProfile
+        self.onDone = onDone
+        _selected = State(initialValue: awards.first?.id)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            TabView {
+            TabView(selection: $selected) {
                 ForEach(awards) { award in
-                    UnlockPage(award: award)
+                    UnlockPage(award: award, isCurrent: selected == award.id, onShown: onShown)
+                        .tag(Optional(award.id))
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: awards.count > 1 ? .always : .never))
@@ -38,10 +52,28 @@ struct UnlockCelebrationView: View {
 
 private struct UnlockPage: View {
     let award: Award
+    let isCurrent: Bool
+    let onShown: (String) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var arrived = false
 
     var body: some View {
+        // Scrolls, with the content centred when it fits, so large text sizes
+        // are not clipped.
+        GeometryReader { proxy in
+            ScrollView {
+                content.frame(minHeight: proxy.size.height)
+            }
+        }
+        .sensoryFeedback(.success, trigger: arrived)
+        .onChange(of: isCurrent, initial: true) { _, current in
+            guard current else { return }
+            arrived = true
+            onShown(award.id)
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 14) {
             Spacer(minLength: 0)
             Text("Award earned")
@@ -64,9 +96,8 @@ private struct UnlockPage: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 24)
-        .sensoryFeedback(.success, trigger: arrived)
+        .padding(.vertical, 16)
         .accessibilityElement(children: .combine)
-        .onAppear { arrived = true }
     }
 }
 

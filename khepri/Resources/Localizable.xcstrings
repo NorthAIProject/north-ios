@@ -1285,19 +1285,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguida el %@"
+            "value" : "Conseguido el %@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada em %@"
+            "value" : "Conquistado em %@"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada em %@"
+            "value" : "Conquistado em %@"
           }
         }
       }
@@ -1307,19 +1307,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguidas · %lld de %lld"
+            "value" : "Conseguidos · %lld de %lld"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistadas · %lld de %lld"
+            "value" : "Conquistados · %lld de %lld"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistadas · %lld de %lld"
+            "value" : "Conquistados · %lld de %lld"
           }
         }
       }
@@ -1769,19 +1769,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguida por el %@ de las personas"
+            "value" : "Conseguido por el %@ de las personas"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada por %@ das pessoas"
+            "value" : "Conquistado por %@ das pessoas"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada por %@ das pessoas"
+            "value" : "Conquistado por %@ das pessoas"
           }
         }
       }
@@ -40676,19 +40676,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conseguida por el %@ de los miembros de Khepri"
+            "value" : "Conseguido por el %@ de los miembros de Khepri"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada por %@ dos membros do Khepri"
+            "value" : "Conquistado por %@ dos membros do Khepri"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conquistada por %@ dos membros do Khepri"
+            "value" : "Conquistado por %@ dos membros do Khepri"
           }
         }
       }
