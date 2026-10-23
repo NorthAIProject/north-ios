@@ -221,6 +221,29 @@
         }
       }
     },
+    "%lld of %lld days done" : {
+      "comment" : "First-week progress, read by VoiceOver",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld días hechos"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld dias feitos"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld dias feitos"
+          }
+        }
+      }
+    },
     "(edited)" : {
       "localizations" : {
         "es" : {
@@ -261,6 +284,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%lld mais"
+          }
+        }
+      }
+    },
+    "3 of 3 days. You have kept it every day so far." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 de 3 días. Lo has cumplido todos los días hasta ahora."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 de 3 dias. Você cumpriu todos os dias até agora."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 de 3 dias. Cumpriste todos os dias até agora."
           }
         }
       }
@@ -1147,6 +1192,29 @@
         }
       }
     },
+    "Day %lld of %lld" : {
+      "comment" : "Title of the first-week card on Today",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día %1$lld de %2$lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia %1$lld de %2$lld"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia %1$lld de %2$lld"
+          }
+        }
+      }
+    },
     "Delete this check?" : {
       "localizations" : {
         "es" : {
@@ -1254,6 +1322,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não silenciar"
+          }
+        }
+      }
+    },
+    "Done for today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hecho por hoy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feito por hoje"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feito por hoje"
           }
         }
       }
