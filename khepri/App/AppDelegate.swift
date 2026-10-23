@@ -14,7 +14,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        let categories = [WorkoutReminders.category, CheckInActions.category, CrewNotifications.notificationCategory]
+        let categories = [WorkoutReminders.category, CheckInActions.category, CrewNotifications.notificationCategory,
+                          FirstWeekActions.notificationCategory]
         center.setNotificationCategories(Set(categories + CoachActions.categories))
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
@@ -73,6 +74,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     /// A mood button on a check-in nudge opens today's check-in with that mood
     /// instead. The nudge is still opened first, so the server counts the tap.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        // Done under a first-week message or its evening note marks the day,
+        // also without opening the app.
+        if response.actionIdentifier == FirstWeekActions.doneAction {
+            _ = try? await FirstWeekService().markDone()
+            return
+        }
         // A button under the coach's message answers it where it stands,
         // without opening the app.
         if let answer = CoachActions.answer(forAction: response.actionIdentifier) {
