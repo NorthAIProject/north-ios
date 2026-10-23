@@ -40,6 +40,7 @@ extension Outreach {
         case "today": String(localized: "Do It Today", comment: "Answer to the coach's message about a missed session")
         case "tomorrow": String(localized: "Tomorrow", comment: "Answer to the coach's message about a missed session")
         case "let_go": String(localized: "Let It Go", comment: "Answer to the coach's message about a missed session")
+        case "done": String(localized: "Done", comment: "Marks today's first-week action done")
         default: action
         }
     }

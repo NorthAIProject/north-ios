@@ -12,6 +12,7 @@ struct TodayView: View {
     @State private var recovery = RecoveryStore()
     @State private var lighter = LighterDayStore()
     @State private var outreach = OutreachStore()
+    @State private var firstWeek = FirstWeekStore()
     @State private var recap = RecapStore()
     @State private var showingRecap = false
 
@@ -19,6 +20,9 @@ struct TodayView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Header(briefing: snapshot.briefing)
+
+                // A new person's first seven days: today's one action, first.
+                FirstWeekCard(store: firstWeek)
 
                 StatGrid(snapshot: snapshot) { router.open(.checkInFlow) }
                     // Without a next step, the tour points at the day's numbers.
@@ -91,7 +95,12 @@ struct TodayView: View {
             Task { await recovery.load() }
             Task { await lighter.load() }
             Task { await outreach.load() }
+            Task { await firstWeek.load() }
             Task { await recap.load(.week) }
+        }
+        // Done under the coach's first-week message marks the day too.
+        .onChange(of: outreach.message?.action) {
+            Task { await firstWeek.load() }
         }
         .sheet(isPresented: $showingRecap) {
             RecapScreen(store: recap)

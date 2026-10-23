@@ -455,6 +455,15 @@ struct ContractTests {
         #expect(answered.outcome?.isEmpty == false)
     }
 
+    @Test func firstWeek() throws {
+        let week = try decode(Schemas.FirstWeek.self, "first_week_active")
+        #expect(week.status == "active" && week.template == "sleep" && week.day == 3 && week.totalDays == 7)
+        #expect(week.done && week.doneCount == 2 && week.days.count == 7)
+        #expect(week.days.first?.via == "log" && week.days[1].via == nil)
+        let none = try decode(Schemas.FirstWeek.self, "first_week_none")
+        #expect(none.status == "none" && none.days.isEmpty && none.action == nil)
+    }
+
     @Test func progressChecks() throws {
         let list = try decode(Schemas.ProgressChecks.self, "progress_checks")
         #expect(!list.checks.isEmpty && list.canCompare == false)
@@ -534,7 +543,8 @@ struct ContractTests {
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",
-                            "progress_comparison", "progress_estimate", "progress_assist"]
+                            "progress_comparison", "progress_estimate", "progress_assist",
+                            "first_week_active", "first_week_none"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
