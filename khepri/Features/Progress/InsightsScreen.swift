@@ -7,6 +7,8 @@ import SwiftUI
 /// numbers worth watching, and the health data Apple Health sends.
 struct InsightsScreen: View {
     @State private var store = InsightsStore()
+    @State private var showsOwnAwards = false
+    @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -31,6 +33,13 @@ struct InsightsScreen: View {
                 }
                 .navigationDestination(for: AreasRoute.self) { _ in
                     AreasScreen()
+                }
+                .navigationDestination(isPresented: $showsOwnAwards) { OwnAwardsDestination() }
+                // "View on Profile" in the celebration lands here.
+                .onChange(of: router.opensOwnAwards, initial: true) { _, opens in
+                    guard opens else { return }
+                    router.opensOwnAwards = false
+                    showsOwnAwards = true
                 }
                 .navigationDestination(for: ConsistencyRoute.self) { _ in
                     ConsistencyPage(service: store.service)
@@ -75,6 +84,8 @@ private struct SummaryList: View {
 
     var body: some View {
         List {
+            AwardsCard()
+
             if summary.empty {
                 Section {
                     Text("Nothing is logged for this window yet. Check-ins, sleep, water and workouts fill this in, and so does Apple Health once it is connected.")

@@ -21,6 +21,7 @@ struct FriendsScreen: View {
     @State private var joinedNow = false
     @State private var openProfile: ProfileRoute?
     @State private var openWorkout: WorkoutRoute?
+    @State private var shownAward: Award?
     @Environment(AppRouter.self) private var router
 
     var body: some View {
@@ -42,6 +43,10 @@ struct FriendsScreen: View {
         }
         .refreshable { await load() }
         .navigationDestination(item: $openProfile) { ProfileScreen(handle: $0.handle) }
+        .sheet(item: $shownAward) { award in
+            AwardDetailSheet(award: award)
+                .presentationDetents([.medium, .large])
+        }
         .navigationDestination(item: $openWorkout) {
             WorkoutDetailScreen(handle: $0.handle, card: $0.card, authorName: $0.authorName)
         }
@@ -84,6 +89,7 @@ struct FriendsScreen: View {
                         openWorkout: { card in
                             openWorkout = WorkoutRoute(handle: item.handle, card: card, authorName: item.displayName)
                         },
+                        openAward: { shownAward = $0 },
                         toggleKudos: { act { item.kudoed ? try await service.takeKudos(item.id) : try await service.giveKudos(item.id) } }
                     )
                 }
@@ -155,6 +161,10 @@ struct FriendsScreen: View {
                     // Only a server that sent xp accepts it back.
                     if sharing.xp != nil {
                         Toggle("Your XP and level, on friends' leaderboards", isOn: share(\.sharesXP, in: sharing))
+                    }
+                    // Likewise for awards; the private areas are never shared.
+                    if sharing.awards != nil {
+                        Toggle("Your awards", isOn: share(\.sharesAwards, in: sharing))
                     }
                 } header: {
                     Text("What Followers See")
@@ -328,6 +338,7 @@ private struct FeedRow: View {
     let item: FeedItem
     let openProfile: () -> Void
     let openWorkout: (WorkoutCard) -> Void
+    let openAward: (Award) -> Void
     let toggleKudos: () -> Void
 
     var body: some View {
@@ -341,13 +352,15 @@ private struct FeedRow: View {
                 if let workout = item.workout {
                     Text(item.title)
                     workoutCard(workout)
+                } else if item.kind == "badge_earned", let badges = item.badges, !badges.isEmpty {
+                    badgeCard(badges)
                 } else if item.kind == "recap_shared" {
                     Label(item.title, systemImage: "chart.bar.fill")
                         .labelStyle(.titleAndIcon)
                 } else {
                     Text(item.title)
                 }
-                if item.workout == nil, !item.detail.isEmpty {
+                if item.workout == nil, item.kind != "badge_earned" || item.badges?.isEmpty != false, !item.detail.isEmpty {
                     Text(item.detail).font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -370,6 +383,30 @@ private struct FeedRow: View {
             }
         }
         .padding(.vertical, 2)
+    }
+
+    /// The coins earned in one moment, the title and what it took.
+    private func badgeCard(_ badges: [Award]) -> some View {
+        HStack(spacing: 10) {
+            HStack(spacing: -10) {
+                ForEach(badges.prefix(3), id: \.id) { badge in
+                    Button { openAward(badge) } label: {
+                        CoinMedalView(badgeID: badge.id, area: badge.area, size: 44)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(badge.name)
+                }
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                if !item.detail.isEmpty {
+                    Text(item.detail).font(.caption).foregroundStyle(.secondary)
+                }
+                if badges.count > 3 {
+                    Text("+\(badges.count - 3) more").font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+        }
     }
 
     /// The author's name, opening their profile when they have a handle.

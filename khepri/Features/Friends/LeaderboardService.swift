@@ -99,6 +99,13 @@ extension Sharing {
         set { xp = newValue }
     }
 
+    /// Awards are optional on the wire like XP: only a server that sent them
+    /// accepts them back.
+    var sharesAwards: Bool {
+        get { awards ?? false }
+        set { awards = newValue }
+    }
+
     /// This sharing with the switch for `board` turned on.
     func turningOn(_ board: LeaderboardBoard) -> Sharing {
         var next = self

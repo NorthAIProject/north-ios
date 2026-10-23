@@ -130,6 +130,9 @@ final class AppRouter {
     /// day reload on each change, since a tab kept alive by the tab bar does
     /// not reload by itself. A screen must not bump it from its own load.
     private(set) var dataVersion = 0
+    /// Set when the awards celebration asks to see your own awards; the
+    /// Progress tab opens them and clears it.
+    var opensOwnAwards = false
 
     /// Says the day's data changed, so every screen showing it reloads.
     func dataChanged() {
@@ -140,6 +143,7 @@ final class AppRouter {
     static let sections: Set<String> = [
         "goals", "check-ins", "progress-check", "reports", "memories", "knowledge", "nutrition", "care", "mind", "decisions",
         "friends", "crews", "inbox", "daily",
+        "awards",
     ]
 
     func open(_ destination: AppDestination) {

@@ -199,6 +199,28 @@
         }
       }
     },
+    "%@'s Awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premios de %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêmios de %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prémios de %@"
+          }
+        }
+      }
+    },
     "%lld of %lld days done" : {
       "comment" : "First-week progress, read by VoiceOver",
       "localizations" : {
@@ -240,6 +262,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "(editada)"
+          }
+        }
+      }
+    },
+    "+%lld more" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld más"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld mais"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld mais"
           }
         }
       }
@@ -594,6 +638,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No máximo uma vez por dia, quando repara em algo: uma manhã de recuperação baixa, uma sessão que ficou por fazer. Quando alivia uma sessão diz-te porquê e podes desfazer."
+          }
+        }
+      }
+    },
+    "Awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premios"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêmios"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prémios"
+          }
+        }
+      }
+    },
+    "Awards aren't shared." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los premios no se comparten."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os prêmios não são compartilhados."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os prémios não são partilhados."
+          }
+        }
+      }
+    },
+    "Awards did not load" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los premios no se cargaron"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os prêmios não carregaram"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os prémios não carregaram"
           }
         }
       }
@@ -1282,6 +1392,50 @@
         }
       }
     },
+    "Earned %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido el %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistado em %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistado em %@"
+          }
+        }
+      }
+    },
+    "Earned · %lld of %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguidos · %lld de %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistados · %lld de %lld"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistados · %lld de %lld"
+          }
+        }
+      }
+    },
     "Empty fields were filled in. Check them against a tape if you can, then save." : {
       "localizations" : {
         "es" : {
@@ -1432,6 +1586,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada dia é feito à medida da tua meta de macros e verificado com as tuas respostas antes de o veres."
+          }
+        }
+      }
+    },
+    "Finish a workout, check in or hit a goal, and your first badge lands here." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termina un entrenamiento, haz un registro diario o alcanza un objetivo y tu primera medalla aparecerá aquí."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conclua um treino, faça um registro diário ou atinja um objetivo e sua primeira medalha aparece aqui."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conclui um treino, faz um registo diário ou atinge um objetivo e a tua primeira medalha aparece aqui."
           }
         }
       }
@@ -2252,6 +2428,28 @@
         }
       }
     },
+    "New" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova"
+          }
+        }
+      }
+    },
     "New check" : {
       "localizations" : {
         "es" : {
@@ -2292,6 +2490,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Próximo registo: %@."
+          }
+        }
+      }
+    },
+    "No awards yet." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay premios."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem prêmios."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem prémios."
           }
         }
       }
@@ -3352,6 +3572,28 @@
         }
       }
     },
+    "Still to Earn" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por conseguir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para conquistar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por conquistar"
+          }
+        }
+      }
+    },
     "Take or choose" : {
       "localizations" : {
         "es" : {
@@ -3767,6 +4009,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Já não estás neste grupo"
+          }
+        }
+      }
+    },
+    "Your awards" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus premios"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus prêmios"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os teus prémios"
           }
         }
       }
@@ -40625,6 +40889,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível carregar os treinos"
+          }
+        }
+      }
+    },
+    "Award earned" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premio conseguido"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêmio conquistado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prémio conquistado"
+          }
+        }
+      }
+    },
+    "View on Profile" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver en el perfil"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver no perfil"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver no perfil"
+          }
+        }
+      }
+    },
+    "Earned by %@ of Khepri members" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conseguido por el %@ de los miembros de Khepri"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistado por %@ dos membros do Khepri"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conquistado por %@ dos membros do Khepri"
           }
         }
       }

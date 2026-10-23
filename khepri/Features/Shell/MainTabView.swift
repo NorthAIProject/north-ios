@@ -7,9 +7,16 @@ struct MainTabView: View {
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
     @Environment(CrewUnread.self) private var crewUnread
+    @Environment(AwardsCenter.self) private var awards
     @Environment(\.scenePhase) private var scenePhase
     /// A workout the app was killed during, picked up where it was.
     @State private var resumedWorkout: WorkoutSession?
+    /// Whether the awards cover is asked for, and whether it is really on screen.
+    @State private var celebrating = false
+    @State private var celebrationVisible = false
+    /// When the cover was last asked for. A presentation younger than a
+    /// second is still on its way up, so it is never asked for again.
+    @State private var celebrationRequestedAt: Date?
 
     var body: some View {
         @Bindable var router = router
@@ -78,6 +85,50 @@ struct MainTabView: View {
             }
         }
         .fullScreenCover(item: $resumedWorkout) { session in WorkoutSessionView(session: session) }
+        // Badges just earned, one cover paging through them. Closing it, either
+        // way, tells the server they were seen.
+        .fullScreenCover(isPresented: $celebrating) {
+            UnlockCelebrationView(
+                awards: awards.pending,
+                onShown: { awards.didShow($0) },
+                onViewProfile: {
+                    Task { await awards.dismiss() }
+                    celebrating = false
+                    router.opensOwnAwards = true
+                    router.open(.tab(.progress))
+                },
+                onDone: {
+                    Task { await awards.dismiss() }
+                    celebrating = false
+                }
+            )
+            .onAppear { celebrationVisible = true }
+            .onDisappear { celebrationVisible = false }
+        }
+        // A workout or check-in finished on this device may have earned one.
+        // The pending change below asks for the cover as soon as the answer
+        // lands; the wait here asks again after the workout's own cover has
+        // left, in case SwiftUI dropped the first request under it.
+        .onChange(of: router.dataVersion) {
+            Task {
+                await awards.refresh()
+                try? await Task.sleep(for: .milliseconds(700))
+                await showCelebrationIfDue()
+            }
+        }
+        .onChange(of: awards.pending.map(\.id)) { old, new in
+            // Only a badge arriving asks for the cover; one leaving does not.
+            if new.contains(where: { !old.contains($0) }) {
+                Task { await showCelebrationIfDue() }
+            }
+        }
+        // A presentation SwiftUI dropped under a sheet or the tour is asked
+        // for again as soon as that goes away.
+        .onChange(of: router.showsCheckInFlow) { _, shown in if !shown { Task { await showCelebrationIfDue() } } }
+        .onChange(of: router.showsWeeklyReview) { _, shown in if !shown { Task { await showCelebrationIfDue() } } }
+        .onChange(of: router.openExercise) { _, open in if open == nil { Task { await showCelebrationIfDue() } } }
+        .onChange(of: router.openMuscle) { _, open in if open == nil { Task { await showCelebrationIfDue() } } }
+        .onChange(of: resumedWorkout == nil) { _, none in if none { Task { await showCelebrationIfDue() } } }
         .onAppear { tour.startIfNeeded() }
         .task { resumedWorkout = WorkoutSession.resumingKilledWorkout() }
         // Apple Health catches up whenever the app comes forward, and
@@ -90,10 +141,37 @@ struct MainTabView: View {
             if phase == .active {
                 WorkoutLiveActivityController.endOrphans()
                 Task { await crewUnread.refresh() }
+                Task {
+                    await awards.refresh()
+                    await showCelebrationIfDue()
+                }
                 Task.detached { _ = try? await HealthSync.shared.syncIfEnabled() }
                 Task.detached { await SpotlightIndex.refresh() }
             }
         }
+    }
+
+    /// Presents the cover when badges are waiting and it is not on screen. If
+    /// it was asked for more than a second ago and never appeared (SwiftUI
+    /// drops a cover requested while another presentation is up), it is asked
+    /// for again. A request still on its way up is never cancelled: toggling it
+    /// off mid-flight can leave the cover requested but never shown.
+    private func showCelebrationIfDue() async {
+        guard !awards.pending.isEmpty, !celebrationVisible else { return }
+        if celebrating {
+            let age = celebrationRequestedAt.map { Date.now.timeIntervalSince($0) } ?? .infinity
+            guard age > 1 else {
+                // Look again once it has had its second.
+                try? await Task.sleep(for: .seconds(1 - age + 0.05))
+                await showCelebrationIfDue()
+                return
+            }
+            celebrating = false
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !awards.pending.isEmpty, !celebrationVisible, !celebrating else { return }
+        }
+        celebrationRequestedAt = .now
+        celebrating = true
     }
 }
 

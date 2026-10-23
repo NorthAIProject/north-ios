@@ -68,4 +68,56 @@ struct ProfileScreenModelTests {
         let model = ProfileModel(try profile(#"{\#(person), \#(relationship())}"#))
         #expect(model.workouts == .hidden)
     }
+
+    private let badge = """
+        {"id": "workouts_1", "area": "training", "name": "First Workout", "description": "Finish your first workout.",
+         "earnedAt": "2026-10-20T18:30:00Z", "target": 1}
+        """
+    private let newerBadge = """
+        {"id": "pr_1", "area": "lifts", "name": "First Personal Record", "description": "Set your first personal record.",
+         "earnedAt": "2026-10-21T18:30:00Z", "target": 1}
+        """
+
+    @Test func sharedAwardsListNewestFirst() throws {
+        let json = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": true}, "awards": [\#(badge), \#(newerBadge)]}"#
+        guard case .list(let held) = ProfileModel(try profile(json)).awards else { Issue.record("expected a list"); return }
+        #expect(held.map(\.id) == ["pr_1", "workouts_1"])
+    }
+
+    @Test func awardsSharedWithNoneYetSaysEmptyNotHidden() throws {
+        let json = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": true}}"#
+        #expect(ProfileModel(try profile(json)).awards == .empty)
+    }
+
+    @Test func awardsKeptPrivateAreHidden() throws {
+        let off = #"{\#(person), \#(relationship()), "shares": {"training": true, "xp": true, "awards": false}}"#
+        #expect(ProfileModel(try profile(off)).awards == .hidden)
+    }
+
+    @Test func aServerFromBeforeAwardsIsTreatedAsHidden() throws {
+        let json = #"{\#(person), \#(relationship()), "shares": {"training": true, "xp": true}}"#
+        #expect(ProfileModel(try profile(json)).awards == .hidden)
+        #expect(ProfileModel(try profile(#"{\#(person), \#(relationship())}"#)).awards == .hidden)
+    }
+
+    @Test func seeAllGoesToTheFullScreenOnYourOwnProfile() throws {
+        let json = #"{\#(person), \#(relationship(following: "", isSelf: true)), "shares": {"training": true, "xp": true, "awards": true}, "awards": [\#(badge)]}"#
+        #expect(ProfileModel(try profile(json)).awardsLink == .mine)
+    }
+
+    @Test func seeAllListsTheirBadgesOnSomeoneElsesProfile() throws {
+        let json = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": true}, "awards": [\#(badge)]}"#
+        #expect(ProfileModel(try profile(json)).awardsLink == .theirs)
+    }
+
+    @Test func seeAllIsHiddenWithoutBadges() throws {
+        let none = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": true}}"#
+        let hidden = #"{\#(person), \#(relationship()), "shares": {"training": false, "xp": false, "awards": false}}"#
+        for json in [none, hidden] { #expect(ProfileModel(try profile(json)).awardsLink == nil) }
+    }
+
+    @Test func yourOwnProfileOffersSeeAllEvenWithNoBadges() throws {
+        let mine = #"{\#(person), \#(relationship(following: "", isSelf: true)), "shares": {"training": true, "xp": true, "awards": true}}"#
+        #expect(ProfileModel(try profile(mine)).awardsLink == .mine)
+    }
 }

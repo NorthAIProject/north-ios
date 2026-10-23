@@ -13,6 +13,7 @@ struct WorkoutSessionView: View {
     @State private var imperial = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppRouter.self) private var router
 
     init(session: WorkoutSession) {
         _session = State(initialValue: session)
@@ -22,7 +23,12 @@ struct WorkoutSessionView: View {
         NavigationStack {
             Group {
                 if session.phase == .finished {
-                    WorkoutSummary(session: session) { dismiss() }
+                    WorkoutSummary(session: session) {
+                        dismiss()
+                        // The workout may have earned a badge; the cover that
+                        // celebrates it waits for this one to close.
+                        router.dataChanged()
+                    }
                 } else {
                     inProgress
                 }

@@ -14,6 +14,7 @@ struct ProfileScreen: View {
     @State private var error: String?
     @State private var actionError: String?
     @State private var isWorking = false
+    @State private var shownAward: Award?
 
     var body: some View {
         Group {
@@ -35,12 +36,37 @@ struct ProfileScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .refreshable { await load() }
+        .sheet(item: $shownAward) { award in
+            AwardDetailSheet(award: award)
+                .presentationDetents([.medium, .large])
+        }
     }
 
     private func content(_ model: ProfileModel, userID: String) -> some View {
         List {
             Section { header(model, userID: userID) }
             if let actionError { Section { ErrorRow(actionError) } }
+            Section {
+                switch model.awards {
+                case .hidden:
+                    Text("Awards aren't shared.").foregroundStyle(.secondary)
+                case .empty:
+                    Text("No awards yet.").foregroundStyle(.secondary)
+                    if model.awardsLink == .mine { NavigationLink("See All") { AwardsScreen() } }
+                case .list(let held):
+                    awardsStrip(held)
+                    switch model.awardsLink {
+                    case .mine:
+                        NavigationLink("See All") { AwardsScreen() }
+                    case .theirs:
+                        NavigationLink("See All") { ProfileAwardsScreen(name: model.name, awards: held) }
+                    case nil:
+                        EmptyView()
+                    }
+                }
+            } header: {
+                Text("Awards")
+            }
             Section {
                 switch model.workouts {
                 case .hidden:
@@ -65,6 +91,21 @@ struct ProfileScreen: View {
             } header: {
                 Text("Workouts")
             }
+        }
+    }
+
+    private func awardsStrip(_ held: [Award]) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(held, id: \.id) { award in
+                    Button { shownAward = award } label: {
+                        CoinMedalView(badgeID: award.id, area: award.area, size: 52)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(award.name)
+                }
+            }
+            .padding(.vertical, 4)
         }
     }
 
