@@ -22,4 +22,8 @@ public enum AppEnvironment {
         let raw = Bundle.main.object(forInfoDictionaryKey: "AppStoreID") as? String ?? ""
         return raw.isEmpty ? nil : raw
     }()
+
+    /// The invite to Khepri's channel on the community Discord. The same in
+    /// every build, so it is a constant rather than an `Info.plist` key.
+    public static let discordURL = URL(string: "https://discord.gg/FHHhFUk9e")!
 }
