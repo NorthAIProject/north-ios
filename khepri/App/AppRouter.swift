@@ -57,6 +57,9 @@ enum AppDestination: Equatable {
     /// The weekly review, as a sheet over whatever is open: where the Sunday
     /// nudge leads.
     case weeklyReview
+    /// The first week's day-7 review, as a sheet: where the day-7 coach
+    /// message and the Today card lead. Opening it closes the week.
+    case firstWeekReview
     /// A new conversation with this text waiting in the composer, unsent:
     /// the daily post's "Ask the coach about this".
     case askCoach(String)
@@ -96,6 +99,8 @@ final class AppRouter {
     var showsCheckInFlow = false
     /// Set when a link asks for the weekly review; the tab view presents it.
     var showsWeeklyReview = false
+    /// Set when a link asks for the first-week review; the tab view presents it.
+    var showsFirstWeekReview = false
     /// Counts invite links opened while the app runs. Friends redeems on each
     /// change, which also covers a link opened while Friends is already on
     /// screen, where navigating to it changes nothing.
@@ -169,6 +174,8 @@ final class AppRouter {
             showsCheckInFlow = true
         case .weeklyReview:
             showsWeeklyReview = true
+        case .firstWeekReview:
+            showsFirstWeekReview = true
         case .crewJoin(let code):
             PendingCrewJoin.store(code)
             crewLinksReceived += 1
@@ -216,6 +223,7 @@ final class AppRouter {
     ///     khepri://exercises/push-up → the push-up, as a sheet
     ///     khepri://goals/<id>      → More → Goals → that goal
     ///     khepri://weekly          → the weekly review, as a sheet
+    ///     /app/first-week/review   → the first-week review, as a sheet
     ///     /app/chat/…              → Coach tab (a web path from the server)
     ///     /app/progress            → More → Progress check
     static func destination(for url: URL) -> AppDestination? {
@@ -265,6 +273,11 @@ final class AppRouter {
         }
         if parts.first == "goals", parts.count == 2, UUID(uuidString: parts[1]) != nil {
             return .goal(parts[1])
+        }
+        // /app/first-week/review, where the day-7 coach message leads. The
+        // web's /app/first-week is only the card, which lives on Today.
+        if parts.first == "first-week" {
+            return parts.count == 2 && parts[1] == "review" ? .firstWeekReview : .tab(.today)
         }
         // /app/exercises/<slug>, the web's own exercise page.
         if parts.first == "exercises", parts.count == 2, !parts[1].isEmpty {

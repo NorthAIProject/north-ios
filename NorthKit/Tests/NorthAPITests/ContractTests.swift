@@ -462,6 +462,12 @@ struct ContractTests {
         #expect(week.days.first?.via == "log" && week.days[1].via == nil)
         let none = try decode(Schemas.FirstWeek.self, "first_week_none")
         #expect(none.status == "none" && none.days.isEmpty && none.action == nil)
+        #expect(week.review == nil)
+        let finished = try decode(Schemas.FirstWeek.self, "first_week_finished")
+        #expect(finished.status == "finished" && finished.day == 7)
+        let review = try #require(finished.review)
+        #expect(!review.text.isEmpty && review.writtenBy == "coach")
+        #expect(review.daysDone == 5 && review.daysByLog == 4 && review.daysByTap == 1 && review.loggedDays == 5)
     }
 
     @Test func progressChecks() throws {
@@ -544,7 +550,7 @@ struct ContractTests {
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",
                             "progress_comparison", "progress_estimate", "progress_assist",
-                            "first_week_active", "first_week_none"]
+                            "first_week_active", "first_week_none", "first_week_finished"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")

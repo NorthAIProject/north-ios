@@ -51,6 +51,13 @@ struct MainTabView: View {
         .sheet(isPresented: $router.showsWeeklyReview) {
             WeeklyReviewFlow()
         }
+        .sheet(isPresented: $router.showsFirstWeekReview) {
+            FirstWeekReviewFlow()
+        }
+        // Opening the review closed the week: Today drops the card.
+        .onChange(of: router.showsFirstWeekReview) { _, shown in
+            if !shown { router.dataChanged() }
+        }
         // An exercise from Spotlight or Siri, over whatever tab is open.
         .sheet(item: Binding(
             get: { router.openExercise.map(ExerciseSlugRoute.init(slug:)) },
