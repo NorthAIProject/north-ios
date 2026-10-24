@@ -33,6 +33,9 @@ struct AwardsCard: View {
                 }
             }
             .accessibilityIdentifier("awards.card")
+            if let challenge = overview?.monthlyChallenge {
+                MonthlyChallengeCard(challenge: challenge, coinSize: 40)
+            }
         }
         .task(id: router.dataVersion) { overview = try? await service.awards() }
     }

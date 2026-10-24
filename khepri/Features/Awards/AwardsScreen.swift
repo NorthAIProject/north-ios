@@ -59,14 +59,8 @@ struct AwardsScreen: View {
 
     private func challengeSection(_ challenge: AwardsModel.MonthlyChallenge) -> some View {
         Section("This Month") {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(challenge.title).font(.body.weight(.medium))
-                Text(challenge.goal).font(.caption).foregroundStyle(.secondary)
-                ProgressView(value: min(1, max(0, Double(challenge.progress) / Double(max(challenge.target, 1)))))
-                Text(challenge.progressText).font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("awards.monthlyChallenge")
+            MonthlyChallengeCard(challenge: challenge)
+                .accessibilityIdentifier("awards.monthlyChallenge")
         }
     }
 

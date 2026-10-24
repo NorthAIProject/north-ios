@@ -80,3 +80,35 @@ struct SharingAwardsTests {
         #expect(sharing.awards == true)
     }
 }
+
+/// The monthly challenge card's inputs, from the awards response.
+struct MonthlyChallengeCardTests {
+    private func decode<T: Decodable>(_ type: T.Type, _ json: String) throws -> T {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(type, from: Data(json.utf8))
+    }
+
+    private let challenge = """
+        {"month": "2026-10", "metric": "workouts", "target": 5, "progress": 3, "met": false,
+         "title": "October challenge", "goal": "Log 5 workouts in October", "progressText": "3 of 5 workouts"}
+        """
+
+    @Test func theMonthlyChallengeIsCarriedAsSent() throws {
+        let overview = try decode(AwardsOverview.self, #"{"earned": [], "locked": [], "monthlyChallenge": \#(challenge)}"#)
+        let shown = try #require(AwardsModel(overview).challenge)
+        #expect(shown.title == "October challenge" && shown.progressText == "3 of 5 workouts" && !shown.met)
+        #expect(MonthlyChallengeCard.fraction(progress: shown.progress, target: shown.target) == 0.6)
+    }
+
+    @Test func noChallengeFromAnOlderServerIsNone() throws {
+        let overview = try decode(AwardsOverview.self, #"{"earned": [], "locked": []}"#)
+        #expect(AwardsModel(overview).challenge == nil)
+    }
+
+    @Test func aMetChallengeFillsTheBar() throws {
+        let met = try decode(Components.Schemas.MonthlyChallengeView.self, #"{"month": "2026-10", "metric": "checkin_days", "target": 1, "progress": 1, "met": true, "title": "t", "goal": "g", "progressText": "1 of 1"}"#)
+        #expect(met.met && MonthlyChallengeCard.fraction(progress: met.progress, target: met.target) == 1)
+        #expect(MonthlyChallengeCard.fraction(progress: 4, target: 0) == 1)
+    }
+}

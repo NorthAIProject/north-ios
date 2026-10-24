@@ -46,6 +46,9 @@ struct ProfileScreen: View {
         List {
             Section { header(model, userID: userID) }
             if let actionError { Section { ErrorRow(actionError) } }
+            if let challenge = model.monthlyChallenge {
+                Section("This Month") { MonthlyChallengeCard(challenge: challenge) }
+            }
             Section {
                 switch model.awards {
                 case .hidden:
