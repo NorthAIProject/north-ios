@@ -6,6 +6,7 @@ import SwiftUI
 struct AwardsCard: View {
     var service: AwardsServicing = AwardsService()
     @Environment(AppRouter.self) private var router
+    @Environment(\.scenePhase) private var scenePhase
     @State private var overview: AwardsOverview?
 
     var body: some View {
@@ -16,7 +17,7 @@ struct AwardsCard: View {
                 if let overview {
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 2) {
-                            let badges = overview.earned.count(where: { $0.monthly == nil })
+                            let badges = AwardsCard.badges(overview.earned).count
                             Text("Earned · \(badges) of \(badges + overview.locked.count)")
                             if overview.earned.isEmpty {
                                 Text("Finish a workout, check in or hit a goal, and your first badge lands here.")
@@ -38,11 +39,18 @@ struct AwardsCard: View {
             }
         }
         .task(id: router.dataVersion) { overview = try? await service.awards() }
+        // A month ends while the app sleeps: reload so last month's challenge does not linger.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { overview = try? await service.awards() } }
+        }
     }
 
-    /// The three most recently earned.
+    /// Badges only: a monthly medal is shown by the challenge row, not here.
+    static func badges(_ earned: [Award]) -> [Award] { earned.filter { $0.monthly == nil } }
+
+    /// The three most recently earned badges.
     static func latest(_ earned: [Award]) -> [Award] {
-        Array(earned.sorted { ($0.earnedAt ?? .distantPast) > ($1.earnedAt ?? .distantPast) }.prefix(3))
+        Array(badges(earned).sorted { ($0.earnedAt ?? .distantPast) > ($1.earnedAt ?? .distantPast) }.prefix(3))
     }
 }
 

@@ -128,4 +128,14 @@ struct ProfileScreenModelTests {
         #expect(ProfileModel(try profile(with)).monthlyChallenge?.title == "October challenge")
         #expect(ProfileModel(try profile(without)).monthlyChallenge == nil)
     }
+
+    @Test func anotherPersonsChallengeFollowsTheAwardsShareFlag() throws {
+        let challenge = #""monthlyChallenge": {"month": "2026-10", "metric": "workouts", "target": 5, "progress": 3, "met": false, "title": "t", "goal": "g", "progressText": "3 of 5"}"#
+        let shared = #"{\#(person), \#(relationship()), "shares": {"training": true, "xp": true, "awards": true}, \#(challenge)}"#
+        let kept = #"{\#(person), \#(relationship()), "shares": {"training": true, "xp": true, "awards": false}, \#(challenge)}"#
+        let mine = #"{\#(person), \#(relationship(following: "", isSelf: true)), "shares": {"training": true, "xp": true}, \#(challenge)}"#
+        #expect(ProfileModel(try profile(shared)).monthlyChallenge != nil)
+        #expect(ProfileModel(try profile(kept)).monthlyChallenge == nil)
+        #expect(ProfileModel(try profile(mine)).monthlyChallenge != nil)
+    }
 }

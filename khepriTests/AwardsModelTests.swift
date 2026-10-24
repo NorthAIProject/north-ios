@@ -111,4 +111,11 @@ struct MonthlyChallengeCardTests {
         #expect(met.met && MonthlyChallengeCard.fraction(progress: met.progress, target: met.target) == 1)
         #expect(MonthlyChallengeCard.fraction(progress: 4, target: 0) == 1)
     }
+
+    @Test func theAwardsStripAndCountIgnoreMonthlyMedals() throws {
+        let badge = try decode(Award.self, #"{"id": "workouts_1", "area": "training", "name": "A", "description": "a", "earnedAt": "2026-10-01T09:00:00Z", "target": 1}"#)
+        let medal = try decode(Award.self, #"{"id": "monthly-2026-10", "area": "consistency", "name": "M", "description": "m", "earnedAt": "2026-10-23T09:00:00Z", "target": 5, "monthly": {"month": "2026-10", "metric": "workouts", "target": 5}}"#)
+        #expect(AwardsCard.badges([badge, medal]).map(\.id) == ["workouts_1"])
+        #expect(AwardsCard.latest([badge, medal]).map(\.id) == ["workouts_1"])
+    }
 }
