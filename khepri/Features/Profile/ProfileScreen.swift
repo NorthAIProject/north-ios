@@ -99,7 +99,7 @@ struct ProfileScreen: View {
             HStack(spacing: 12) {
                 ForEach(held, id: \.id) { award in
                     Button { shownAward = award } label: {
-                        CoinMedalView(badgeID: award.id, area: award.area, size: 52)
+                        AwardCoin(award: award, size: 52)
                     }
                     .buttonStyle(.borderless)
                     .accessibilityLabel(award.name)

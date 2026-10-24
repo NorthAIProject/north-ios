@@ -16,8 +16,8 @@ struct AwardsCard: View {
                 if let overview {
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 2) {
-                            let total = overview.earned.count + overview.locked.count
-                            Text("Earned · \(overview.earned.count) of \(total)")
+                            let badges = overview.earned.count(where: { $0.monthly == nil })
+                            Text("Earned · \(badges) of \(badges + overview.locked.count)")
                             if overview.earned.isEmpty {
                                 Text("Finish a workout, check in or hit a goal, and your first badge lands here.")
                                     .font(.footnote).foregroundStyle(.secondary)
@@ -25,7 +25,7 @@ struct AwardsCard: View {
                         }
                         Spacer(minLength: 0)
                         ForEach(AwardsCard.latest(overview.earned)) { award in
-                            CoinMedalView(badgeID: award.id, area: award.area, size: 36, locked: false)
+                            AwardCoin(award: award, size: 36)
                         }
                     }
                 } else {

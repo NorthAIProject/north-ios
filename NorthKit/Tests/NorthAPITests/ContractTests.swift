@@ -546,6 +546,33 @@ struct ContractTests {
         #expect(profile.value2.awards?.map(\.id) == ["workouts_1"])
     }
 
+    /// A monthly medal is an award with `monthly` and area "monthly"; the challenge rides beside the lists.
+    @Test func monthlyAwards() throws {
+        let awards = try decode(Schemas.Awards.self, "awards-monthly")
+        let medal = try #require(awards.earned.first { $0.monthly != nil })
+        #expect(medal.id == "monthly-2026-09" && medal.area == "monthly" && medal.monthly?.month == "2026-09")
+        #expect(medal.monthly?.metric == "habit_days" && medal.monthly?.target == 12 && medal.rarity == nil)
+        let challenge = try #require(awards.monthlyChallenge)
+        #expect(challenge.month == "2026-10" && challenge.metric == "workouts" && challenge.target == 5)
+        #expect(challenge.progress == 3 && !challenge.met && !challenge.title.isEmpty && !challenge.progressText.isEmpty)
+        let unseen = try decode(Schemas.UnseenAwards.self, "unseen-monthly")
+        #expect(unseen.awards.map(\.id) == ["workouts_1", "monthly-2026-09"])
+    }
+
+    @Test func monthlyProfile() throws {
+        let profile = try decode(Schemas.ProfileView.self, "profiles-profile-monthly")
+        #expect(profile.value2.awards?.last?.monthly?.target == 12)
+        #expect(profile.value2.monthlyChallenge?.goal == "Log 5 workouts in October")
+    }
+
+    /// The monthly met item rides the closed `goals` category; the month is in an open object.
+    @Test func monthlyFeedItem() throws {
+        let feed = try decode(Schemas.Feed.self, "feed-monthly")
+        let item = try #require(feed.items.first)
+        #expect(item.kind == "monthly_challenge_met" && item.category == .goals)
+        #expect(item.monthly?.month == "2026-09" && item.monthly?.metric == "workouts" && item.monthly?.target == 12)
+    }
+
     @Test func bodyMap() throws {
         let map = try decode(Schemas.BodyMap.self, "body_map")
         #expect(map.days == 7 && map.lastSessionOn != nil)
@@ -575,6 +602,7 @@ struct ContractTests {
                             "outreach_open", "outreach_answered", "progress_checks", "body_current",
                             "progress_comparison", "progress_estimate", "progress_assist",
                             "awards", "unseen", "feed-badge", "profiles-profile-awards",
+                            "awards-monthly", "unseen-monthly", "feed-monthly", "profiles-profile-monthly",
                             "first_week_active", "first_week_none", "first_week_finished"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }

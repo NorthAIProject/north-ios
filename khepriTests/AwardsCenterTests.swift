@@ -66,6 +66,20 @@ struct AwardsCenterTests {
         for award in center.pending { center.didShow(award.id) }
     }
 
+    @Test func aMonthlyMedalFlowsThroughRefreshAndMarkSeen() async {
+        let medal = Award(id: "monthly-2026-09", area: "monthly", name: "September 2026 challenge", description: "Kept a habit.",
+                          earnedAt: .now, target: 12, monthly: .init(month: "2026-09", metric: "habit_days", target: 12))
+        let service = FakeAwards(unseen: [award("a"), medal])
+        let center = AwardsCenter(service: service)
+        await center.refresh()
+        #expect(center.pending.map(\.id) == ["a", "monthly-2026-09"])
+        #expect(center.pending.last?.monthly?.target == 12)
+        show(center)
+        await center.dismiss()
+        #expect(await service.marked == ["a", "monthly-2026-09"])
+        #expect(center.pending.isEmpty)
+    }
+
     @Test func refreshFillsPending() async {
         let center = AwardsCenter(service: FakeAwards(unseen: [award("a"), award("b")]))
         await center.refresh()
