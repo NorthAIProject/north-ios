@@ -152,6 +152,7 @@ private struct LogActivitySheet: View {
         if case .km(let value) = parsedDistance { km = value }
         do {
             _ = try await service.log(.init(activityCode: code, startedAt: startedAt, durationMinutes: minutes, distanceKm: km))
+            ReviewPrompter.shared.recordSuccess()
             await onLogged()
             dismiss()
         } catch {

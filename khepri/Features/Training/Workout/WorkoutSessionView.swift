@@ -314,7 +314,17 @@ private struct WorkoutSummary: View {
         }
         .task { imperial = (try? await SettingsService().preferences().unitsSystem) == .imperial }
         .task(id: session.recorded?.id) { await loadRecap() }
+        // The summary shows as soon as the workout ends, before the server has
+        // answered: only a workout it recorded counts as a success.
+        .onChange(of: isSaved, initial: true) { _, saved in
+            guard saved else { return }
+            ReviewPrompter.shared.recordSuccess()
+            ReviewPrompter.shared.recordMilestone(once: "firstWorkout")
+        }
+        .reviewPrompt()
     }
+
+    private var isSaved: Bool { session.recorded?.status == .completed }
 
     /// Two columns, so a long duration or a five-digit volume shrinks instead
     /// of turning into "54:3…" and "11 5…".

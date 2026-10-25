@@ -1,9 +1,14 @@
 import StoreKit
 import SwiftUI
 
-/// Asks iOS for the rating sheet about a second after a success makes a prompt
-/// due, and only while this screen is on screen and the app is active.
-/// Attach to the coach conversation: `.reviewPrompt()`.
+/// Asks iOS for the rating sheet about a second and a half after a success or
+/// a milestone makes a prompt due, once the screen's animations have settled,
+/// and only while this screen is on screen and the app is active. A prompt that
+/// came due on a screen without a presenter is asked when the next one appears.
+/// Attach to a screen where things go well: `.reviewPrompt()`.
+///
+/// Does nothing under the UI tests: debug builds always show the sheet, and it
+/// would cover the screens the tests are driving.
 struct ReviewPromptPresenter: ViewModifier {
     let prompter: ReviewPrompter
     @Environment(\.requestReview) private var requestReview
@@ -14,22 +19,30 @@ struct ReviewPromptPresenter: ViewModifier {
         content
             .onAppear {
                 isVisible = true
-                // A prompt that came due while this screen was away has passed.
-                if prompter.isPromptDue { prompter.skipPrompt() }
+                if prompter.isPromptDue { askAfterSettling() }
             }
             .onDisappear { isVisible = false }
             .onChange(of: prompter.isPromptDue) { _, isDue in
-                guard isDue else { return }
-                Task {
-                    try? await Task.sleep(for: .seconds(1))
-                    guard isVisible, scenePhase == .active, prompter.shouldPrompt else {
-                        prompter.skipPrompt()
-                        return
-                    }
-                    prompter.didPrompt()
-                    requestReview()
-                }
+                if isDue { askAfterSettling() }
             }
+    }
+
+    private func askAfterSettling() {
+        guard !UITesting.isLaunchedByTests else {
+            prompter.skipPrompt()
+            return
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(1.5))
+            // Already asked, or let go, by another check that got here first.
+            guard prompter.isPromptDue else { return }
+            guard isVisible, scenePhase == .active, prompter.shouldPrompt else {
+                prompter.skipPrompt()
+                return
+            }
+            prompter.didPrompt()
+            requestReview()
+        }
     }
 }
 

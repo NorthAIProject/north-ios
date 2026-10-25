@@ -144,9 +144,11 @@ struct ConversationView: View {
                 stopped: stopped
             ) {
                 flash = earned
+                ReviewPrompter.shared.recordSuccess()
             }
         }
         .coachFlash($flash)
+        .reviewPrompt()
         .navigationTitle(store.title)
         .toolbarVisibility(.hidden, for: .navigationBar)
         .interactivePopEnabled()
