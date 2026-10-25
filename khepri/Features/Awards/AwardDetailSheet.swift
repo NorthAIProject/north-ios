@@ -2,7 +2,7 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// One badge, large: what it is for, when it was earned or how far along it is.
+/// One badge or monthly medal, large: what it is for, when it was earned or how far along it is.
 /// Used from the awards screen, a profile's strip and the feed.
 struct AwardDetailSheet: View {
     let award: Award
@@ -16,7 +16,7 @@ struct AwardDetailSheet: View {
 
     private var content: some View {
         VStack(spacing: 14) {
-            CoinMedalView(badgeID: award.id, area: award.area, size: 160, locked: !isEarned)
+            AwardCoin(award: award, size: 160, locked: !isEarned)
                 .padding(.top, 24)
                 .accessibilityHidden(true)
             Text(award.name).font(.title2.weight(.semibold)).multilineTextAlignment(.center)
@@ -24,7 +24,7 @@ struct AwardDetailSheet: View {
             if let earnedAt = award.earnedAt {
                 Text("Earned \(earnedAt.formatted(date: .abbreviated, time: .omitted))")
                     .font(.subheadline)
-            } else {
+            } else if award.monthly == nil {
                 VStack(spacing: 4) {
                     ProgressView(value: fraction)
                     Text("\(award.progress ?? 0) of \(award.target)")

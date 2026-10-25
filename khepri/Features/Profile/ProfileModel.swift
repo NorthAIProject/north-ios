@@ -33,6 +33,7 @@ struct ProfileModel: Equatable {
     let workoutCount: Int?
     let workouts: Workouts
     let awards: Awards
+    let monthlyChallenge: Components.Schemas.MonthlyChallengeView?
     let isSelf: Bool
     let isFollowing: Bool
 
@@ -58,6 +59,8 @@ struct ProfileModel: Equatable {
         followers = extra.followers
         following = extra.following
         level = extra.level
+        // Same share rule as awards for anyone but you; yours always shows.
+        monthlyChallenge = (extra.relationship._self || extra.shares?.awards == true) ? extra.monthlyChallenge : nil
         workoutCount = extra.workouts
         isSelf = extra.relationship._self
         // Pending counts: the follow was made, whatever the server calls it.

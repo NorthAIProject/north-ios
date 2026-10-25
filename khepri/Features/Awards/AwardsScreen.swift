@@ -39,6 +39,7 @@ struct AwardsScreen: View {
     private func content(_ model: AwardsModel) -> some View {
         List {
             if let error { ErrorRow(error) }
+            if let challenge = model.challenge { challengeSection(challenge) }
             Section {
                 if model.earned.isEmpty {
                     Text("Finish a workout, check in or hit a goal, and your first badge lands here.")
@@ -46,13 +47,20 @@ struct AwardsScreen: View {
                 }
                 ForEach(model.earned) { row in awardButton(row) }
             } header: {
-                Text("Earned · \(model.earned.count) of \(model.total)")
+                Text("Earned · \(model.badgesEarned) of \(model.total)")
             }
             if !model.locked.isEmpty {
                 Section("Still to Earn") {
                     ForEach(model.locked) { row in awardButton(row) }
                 }
             }
+        }
+    }
+
+    private func challengeSection(_ challenge: AwardsModel.MonthlyChallenge) -> some View {
+        Section("This Month") {
+            MonthlyChallengeCard(challenge: challenge)
+                .accessibilityIdentifier("awards.monthlyChallenge")
         }
     }
 
@@ -83,7 +91,7 @@ struct AwardRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            CoinMedalView(badgeID: row.award.id, area: row.award.area, size: 48, locked: !row.isEarned)
+            AwardCoin(award: row.award, size: 48, locked: !row.isEarned)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {

@@ -1,22 +1,20 @@
 import SwiftUI
 
 /// One badge as a coin: a metallic rim, a deep face in the area's colour and a
-/// white glyph. Monthly medals get a gold scalloped rim; a locked one is
-/// greyscale and faded. It draws what the web's `medal.Coin` draws, from the
+/// white glyph; a locked one is greyscale and faded. The monthly challenge coin
+/// is `MonthlyCoinView`. It draws what the web's `medal.Coin` draws, from the
 /// same `medals.json`.
 public struct CoinMedalView: View {
     private let badgeID: String
     private let area: String
     private let size: CGFloat
     private let locked: Bool
-    private let monthly: Bool
 
-    public init(badgeID: String, area: String, size: CGFloat, locked: Bool = false, monthly: Bool = false) {
+    public init(badgeID: String, area: String, size: CGFloat, locked: Bool = false) {
         self.badgeID = badgeID
         self.area = area
         self.size = size
         self.locked = locked
-        self.monthly = monthly
     }
 
     public var body: some View {
@@ -28,9 +26,9 @@ public struct CoinMedalView: View {
             let mid = geometry.viewBox / 2
             context.scaleBy(x: canvasSize.width / geometry.viewBox, y: canvasSize.height / geometry.viewBox)
 
-            let rim = monthly ? medals.scallop() : Path(ellipseIn: Self.square(around: mid, radius: geometry.rimRadius))
+            let rim = Path(ellipseIn: Self.square(around: mid, radius: geometry.rimRadius))
             let box = rim.boundingRect
-            let rimColour = monthly ? medals.monthlyRim : style.rim
+            let rimColour = style.rim
             let gradient = Gradient(stops: [
                 .init(color: .white, location: 0),
                 .init(color: rimColour, location: 0.35),
@@ -63,7 +61,7 @@ public struct CoinMedalView: View {
     HStack {
         CoinMedalView(badgeID: "workouts_1", area: "training", size: 64)
         CoinMedalView(badgeID: "streak_30", area: "consistency", size: 64, locked: true)
-        CoinMedalView(badgeID: "workouts_1", area: "social", size: 64, monthly: true)
+        MonthlyCoinView(month: "2026-10", target: 12, size: 64)
         CoinMedalView(badgeID: "nope", area: "unknown", size: 64)
     }
     .padding()

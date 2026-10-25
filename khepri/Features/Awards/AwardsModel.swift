@@ -3,6 +3,8 @@ import NorthAPI
 
 /// What the awards screen shows, decided from the two responses alone.
 struct AwardsModel: Equatable {
+    typealias MonthlyChallenge = Components.Schemas.MonthlyChallengeView
+
     struct Row: Equatable, Identifiable {
         let award: Award
         /// Earned and not yet celebrated on any device.
@@ -27,9 +29,15 @@ struct AwardsModel: Equatable {
     /// Badges still to earn, the nearest first.
     let locked: [Row]
 
-    var total: Int { earned.count + locked.count }
+    /// The current month's challenge, when the server sent one.
+    let challenge: MonthlyChallenge?
+
+    /// Earned badges; monthly medals are not counted in "N of M".
+    var badgesEarned: Int { earned.count(where: { $0.award.monthly == nil }) }
+    var total: Int { badgesEarned + locked.count }
 
     init(_ overview: AwardsOverview, unseen: [Award] = []) {
+        challenge = overview.monthlyChallenge
         let fresh = Set(unseen.map(\.id))
         earned = overview.earned
             .sorted { ($0.earnedAt ?? .distantPast) > ($1.earnedAt ?? .distantPast) }

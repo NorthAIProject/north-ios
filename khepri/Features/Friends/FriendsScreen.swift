@@ -354,13 +354,15 @@ private struct FeedRow: View {
                     workoutCard(workout)
                 } else if item.kind == "badge_earned", let badges = item.badges, !badges.isEmpty {
                     badgeCard(badges)
+                } else if let medal = monthlyMedal {
+                    badgeCard([medal])
                 } else if item.kind == "recap_shared" {
                     Label(item.title, systemImage: "chart.bar.fill")
                         .labelStyle(.titleAndIcon)
                 } else {
                     Text(item.title)
                 }
-                if item.workout == nil, item.kind != "badge_earned" || item.badges?.isEmpty != false, !item.detail.isEmpty {
+                if item.workout == nil, monthlyMedal == nil, item.kind != "badge_earned" || item.badges?.isEmpty != false, !item.detail.isEmpty {
                     Text(item.detail).font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -385,13 +387,20 @@ private struct FeedRow: View {
         .padding(.vertical, 2)
     }
 
+    /// The medal a monthly_challenge_met item stands for, shaped as an award so it draws and opens like one.
+    private var monthlyMedal: Award? {
+        guard item.kind == "monthly_challenge_met", let monthly = item.monthly else { return nil }
+        return Award(id: "monthly-\(monthly.month)", area: "monthly", name: item.title, description: item.detail,
+                     earnedAt: item.occurredAt, target: monthly.target, monthly: monthly)
+    }
+
     /// The coins earned in one moment, the title and what it took.
     private func badgeCard(_ badges: [Award]) -> some View {
         HStack(spacing: 10) {
             HStack(spacing: -10) {
                 ForEach(badges.prefix(3), id: \.id) { badge in
                     Button { openAward(badge) } label: {
-                        CoinMedalView(badgeID: badge.id, area: badge.area, size: 44)
+                        AwardCoin(award: badge, size: 44)
                     }
                     .buttonStyle(.borderless)
                     .accessibilityLabel(badge.name)

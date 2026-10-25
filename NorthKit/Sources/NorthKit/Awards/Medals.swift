@@ -29,6 +29,42 @@ public struct Medals: Sendable {
         var lockedGrayscale: Double
     }
 
+    /// The month-and-number text of the monthly coin, in the 100-unit viewBox.
+    public struct MonthlyText: Sendable {
+        public var color: Color
+        public var monthSize: Double
+        public var monthY: Double
+        public var numberSize: Double
+        public var numberY: Double
+        public var numberWideFrom: Int
+        public var numberWideScale: Double
+        public var fontWeight: Int
+        public var fontFamily: String
+        public var anchor: String
+        public var baseline: Bool
+
+        /// Targets of `numberWideFrom` and up shrink so they stay inside the face.
+        public func numberSize(forTarget target: Int) -> Double {
+            target >= numberWideFrom ? numberSize * numberWideScale : numberSize
+        }
+
+        public var weight: Font.Weight {
+            switch fontWeight {
+            case ..<150: .ultraLight
+            case ..<250: .thin
+            case ..<350: .light
+            case ..<450: .regular
+            case ..<550: .medium
+            case ..<650: .semibold
+            case ..<750: .bold
+            case ..<850: .heavy
+            default: .black
+            }
+        }
+
+        public var design: Font.Design { fontFamily == "rounded" ? .rounded : .default }
+    }
+
     public enum LoadError: Error, Equatable {
         case missingResource
         case badColour(String)
@@ -50,6 +86,9 @@ public struct Medals: Sendable {
     let stroke: Double
     let monthlyRim: Color
     public let monthlyRimHex: String
+    let monthlyFill: Color
+    public let monthlyFillHex: String
+    public let monthlyText: MonthlyText
     public let areas: [String: AreaStyle]
     private let glyphs: [String: [Path]]
     /// Badge ids with a glyph path that did not parse, or no paths at all.
@@ -75,6 +114,15 @@ public struct Medals: Sendable {
         stroke = file.stroke
         monthlyRim = try colour(file.monthly.rim)
         monthlyRimHex = file.monthly.rim
+        monthlyFill = try colour(file.monthly.fill)
+        monthlyFillHex = file.monthly.fill
+        let text = file.monthly.text
+        monthlyText = MonthlyText(
+            color: try colour(text.color), monthSize: text.monthSize, monthY: text.monthY,
+            numberSize: text.numberSize, numberY: text.numberY, numberWideFrom: text.numberWideFrom,
+            numberWideScale: text.numberWideScale, fontWeight: text.fontWeight, fontFamily: text.fontFamily,
+            anchor: text.anchor, baseline: text.baseline
+        )
         areas = try file.areas.mapValues {
             AreaStyle(fillHex: $0.fill, rimHex: $0.rim, fill: try colour($0.fill), rim: try colour($0.rim))
         }
@@ -129,7 +177,24 @@ public struct Medals: Sendable {
             let scallop: Scallop
             let locked: Locked
         }
-        struct Monthly: Decodable { let rim: String }
+        struct Monthly: Decodable {
+            struct Text: Decodable {
+                let color: String
+                let monthSize: Double
+                let monthY: Double
+                let numberSize: Double
+                let numberY: Double
+                let numberWideFrom: Int
+                let numberWideScale: Double
+                let fontWeight: Int
+                let fontFamily: String
+                let anchor: String
+                let baseline: Bool
+            }
+            let rim: String
+            let fill: String
+            let text: Text
+        }
         let coin: Coin
         let stroke: Double
         let areas: [String: Area]

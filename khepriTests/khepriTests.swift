@@ -45,8 +45,10 @@ struct AuthTests {
     @Test func loginStoresTheSessionTheServerReturns() async throws {
         let store = MemoryStore()
         let sessions = AuthSessionManager(secureStore: store)
+        // An hour ahead, so the fixture never goes stale; the server's nanosecond fraction is kept.
+        let expiry = ISO8601DateFormatter().string(from: Date().addingTimeInterval(3600)).replacingOccurrences(of: "Z", with: ".123456789Z")
         let transport = RecordingTransport(json: """
-        {"token":"server-token","expiresAt":"2026-10-24T09:30:00.123456789Z",
+        {"token":"server-token","expiresAt":"\(expiry)",
          "user":{"id":"22222222-2222-2222-2222-222222222222","email":"ana@example.com",
                  "displayName":"Ana","timezone":"Europe/Lisbon","needsOnboarding":true}}
         """)

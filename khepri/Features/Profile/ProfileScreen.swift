@@ -46,6 +46,9 @@ struct ProfileScreen: View {
         List {
             Section { header(model, userID: userID) }
             if let actionError { Section { ErrorRow(actionError) } }
+            if let challenge = model.monthlyChallenge {
+                Section("This Month") { MonthlyChallengeCard(challenge: challenge) }
+            }
             Section {
                 switch model.awards {
                 case .hidden:
@@ -99,7 +102,7 @@ struct ProfileScreen: View {
             HStack(spacing: 12) {
                 ForEach(held, id: \.id) { award in
                     Button { shownAward = award } label: {
-                        CoinMedalView(badgeID: award.id, area: award.area, size: 52)
+                        AwardCoin(award: award, size: 52)
                     }
                     .buttonStyle(.borderless)
                     .accessibilityLabel(award.name)

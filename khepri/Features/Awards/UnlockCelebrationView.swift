@@ -89,7 +89,7 @@ private struct UnlockPage: View {
                 .font(.subheadline.weight(.semibold))
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
-            CoinMedalView(badgeID: award.id, area: award.area, size: 200, locked: false)
+            AwardCoin(award: award, size: 200)
                 .modifier(CoinEntrance(arrived: arrived, reduceMotion: reduceMotion))
                 .padding(.vertical, 12)
                 .accessibilityHidden(true)
