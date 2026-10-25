@@ -122,4 +122,106 @@ struct ReviewPrompterTests {
         prompter.recordSuccess()
         #expect(prompter.isPromptDue)
     }
+
+    @Test func aMilestoneAsksOnTheFirstDay() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        clock.now += 60
+
+        prompter.recordMilestone()
+        #expect(prompter.isPromptDue)
+        #expect(prompter.shouldPrompt, "the presenter's check must not veto a milestone")
+        #expect(prompter.successCount == 0)
+    }
+
+    @Test func aMilestoneSurvivesASuccessBeforeTheAsk() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+
+        prompter.recordSuccess()
+        prompter.recordMilestone(once: "firstWorkout")
+        prompter.recordSuccess()
+        #expect(prompter.isPromptDue)
+        #expect(prompter.shouldPrompt)
+    }
+
+    @Test func aOnceMilestoneAsksOnlyOnce() {
+        let clock = Clock()
+        let defaults = UserDefaults.ephemeral()
+        let prompter = makePrompter(clock, defaults: defaults)
+
+        prompter.recordMilestone(once: "firstWorkout")
+        #expect(prompter.isPromptDue)
+        prompter.skipPrompt()
+
+        prompter.recordMilestone(once: "firstWorkout")
+        #expect(!prompter.isPromptDue)
+        #expect(!prompter.shouldPrompt)
+
+        // Remembered across launches, and other keys are their own.
+        let relaunched = makePrompter(clock, defaults: defaults)
+        relaunched.recordMilestone(once: "firstWorkout")
+        #expect(!relaunched.isPromptDue)
+        prompter.recordMilestone(once: "firstAward")
+        #expect(prompter.isPromptDue)
+    }
+
+    @Test func aMilestoneWaitsOutTheCooldown() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        prompter.recordMilestone()
+        prompter.didPrompt()
+
+        clock.advance(days: 119)
+        prompter.recordMilestone()
+        #expect(!prompter.isPromptDue)
+        #expect(!prompter.shouldPrompt)
+
+        clock.advance(days: 2)
+        prompter.recordMilestone()
+        #expect(prompter.isPromptDue)
+    }
+
+    @Test func aMilestoneInCooldownStillUsesUpItsOnce() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        prompter.recordMilestone()
+        prompter.didPrompt()
+
+        prompter.recordMilestone(once: "firstWorkout")
+        clock.advance(days: 121)
+        prompter.recordMilestone(once: "firstWorkout")
+        #expect(!prompter.isPromptDue)
+    }
+
+    @Test func turnedOffBlocksAMilestone() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        prompter.isEnabled = false
+
+        prompter.recordMilestone(once: "firstWorkout")
+        #expect(!prompter.isPromptDue)
+        #expect(!prompter.shouldPrompt)
+    }
+
+    @Test func askingClearsTheMilestone() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        prompter.recordMilestone()
+
+        prompter.didPrompt()
+        #expect(!prompter.isPromptDue)
+        #expect(!prompter.shouldPrompt)
+    }
+
+    @Test func skippingLetsTheMilestoneGo() {
+        let clock = Clock()
+        let prompter = makePrompter(clock)
+        prompter.recordMilestone()
+
+        prompter.skipPrompt()
+        #expect(!prompter.shouldPrompt)
+        prompter.recordSuccess()
+        #expect(!prompter.isPromptDue, "one success on day one is not enough on its own")
+    }
 }
