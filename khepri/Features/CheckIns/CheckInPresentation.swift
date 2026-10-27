@@ -23,6 +23,8 @@ enum CheckInSource {
         case "coach": String(localized: "Coach")
         case "mcp": String(localized: "Agent")
         case "capture": String(localized: "Capture")
+        case "widget": String(localized: "Widget")
+        case "notification": String(localized: "Notification")
         default: String(localized: "Elsewhere")
         }
     }

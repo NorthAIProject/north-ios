@@ -19,7 +19,7 @@ GOLDEN_DEST="$ROOT/NorthKit/Tests/NorthAPITests/Contract"
 MEDALS_DEST="$ROOT/NorthKit/Sources/NorthKit/Resources/medals.json"
 
 # Golden files that describe /api/v1 responses. mcpserver's are not API.
-GOLDEN_SOURCES=(activity auth caffeine lifts stats calculator capture care checkins coach dashboard day decisions fasting milestones screentime soreness supplements documents exercises fitness goals health insights meals media memories mind news nudges onboarding reports settings workouts social achievements crews xp weekly inbox lighterday recaps outreach progresschecks dailyposts profiles firstweek awards)
+GOLDEN_SOURCES=(activity auth caffeine lifts stats calculator capture care checkins coach dashboard day decisions fasting milestones screentime soreness supplements documents exercises fitness goals health insights meals media memories mind news nudges onboarding reports settings workouts social achievements crews xp weekly inbox lighterday recaps outreach progresschecks dailyposts profiles firstweek awards checkinreply)
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT

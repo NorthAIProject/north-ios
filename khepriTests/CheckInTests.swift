@@ -13,6 +13,8 @@ struct CheckInPresentationTests {
     @Test func knownSourcesHaveNamesAndTheRestAreGeneric() {
         #expect(CheckInSource.label("ios") == "iPhone")
         #expect(CheckInSource.label("siri") == "Siri")
+        #expect(CheckInSource.label("widget") == "Widget")
+        #expect(CheckInSource.label("notification") == "Notification")
         #expect(CheckInSource.label("mcp") == "Agent")
         #expect(CheckInSource.label("unknown") == "Elsewhere")
         #expect(CheckInSource.label("watch") == "Elsewhere", "a source added after this build still shows")

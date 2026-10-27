@@ -24,11 +24,15 @@ struct LogCheckInIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let body = Components.Schemas.CheckInRequest(mood: mood, energy: energy, notes: note, source: "siri")
-        _ = try await NorthAPI.call { try await API.shared.saveTodayCheckIn(body: .json(body)).ok.body.json }
+        let saved = try await NorthAPI.call { try await API.shared.saveTodayCheckIn(body: .json(body)).ok.body.json }
         WidgetCenter.shared.reloadAllTimelines()
         // The intent runs in the app's process: an open Today shows it now.
         await MainActor.run {
             NotificationCenter.default.post(name: .dayDataDidChange, object: nil)
+        }
+        let streak = saved.value2.streak
+        if streak > 1 {
+            return .result(dialog: "Checked in. \(streak) days in a row.")
         }
         return .result(dialog: "Checked in for today.")
     }

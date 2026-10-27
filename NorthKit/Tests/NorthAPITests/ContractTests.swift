@@ -255,6 +255,23 @@ struct ContractTests {
         #expect(checkIns.streak == 6)
         #expect(checkIns.today?.source == "siri" && checkIns.today?.tags == ["travel", "race week"])
         #expect(checkIns.today?.stress == 2 && checkIns.today?.sleepQuality == 4)
+        #expect(checkIns.bestStreak == 23 && checkIns.restDaysHeld == 0 && checkIns.restDaysUsed == 1)
+        #expect(!checkIns.perfectWeek && checkIns.week.count == 7)
+        #expect(checkIns.week.first?.date == "2026-09-21" && checkIns.week[1].state == "rest")
+    }
+
+    @Test func savedCheckIn() throws {
+        let saved = try decode(Schemas.SavedCheckIn.self, "check-in-saved")
+        #expect(saved.value1.mood == 4 && saved.value1.source == "ios")
+        #expect(saved.value2.created && saved.value2.streak == 6 && saved.value2.restDaysHeld == 0)
+        #expect(saved.value2.moment?.kind == "comeback" && saved.value2.moment?.body == "New run. Your best is 23 days.")
+        let edit = try decode(Schemas.SavedCheckIn.self, "check-in-saved-edit")
+        #expect(!edit.value2.created && edit.value2.moment == nil)
+    }
+
+    @Test func checkInReply() throws {
+        let reply = try decode(Schemas.CheckInReply.self, "reply")
+        #expect(reply.kind == "pattern" && reply.text.hasPrefix("You sleep 4 or 5"))
     }
 
     @Test func reportsAndMemories() throws {
@@ -603,7 +620,8 @@ struct ContractTests {
                             "progress_comparison", "progress_estimate", "progress_assist",
                             "awards", "unseen", "feed-badge", "profiles-profile-awards",
                             "awards-monthly", "unseen-monthly", "feed-monthly", "profiles-profile-monthly",
-                            "first_week_active", "first_week_none", "first_week_finished"]
+                            "first_week_active", "first_week_none", "first_week_finished",
+                            "check-in-saved", "check-in-saved-edit", "reply"]
         let names = try FileManager.default.contentsOfDirectory(at: contractDirectory, includingPropertiesForKeys: nil)
             .map { $0.lastPathComponent.replacingOccurrences(of: ".golden.json", with: "") }
         #expect(Set(names) == covered, "add a decode test for each new golden file")
@@ -655,6 +673,20 @@ extension ContractTests {
         let checkIn = try decode(Schemas.CheckIn.self, from: recent[0])
         #expect(checkIn.stress == nil && checkIn.sleepQuality == nil)
         #expect(checkIn.tags.isEmpty && checkIn.source == "telepathy")
+    }
+
+    /// A week state and a moment kind this build has never seen still decode:
+    /// both are open strings, so a new one cannot fail the whole save.
+    @Test func checkInRunWithUnknownValues() throws {
+        var list = try golden("check-ins")
+        var week = try #require(list["week"] as? [[String: Any]])
+        week[0]["state"] = "holiday"
+        list["week"] = week
+        #expect(try decode(Schemas.CheckInList.self, from: list).week.first?.state == "holiday")
+
+        var saved = try golden("check-in-saved")
+        saved["moment"] = ["kind": "eclipse", "title": "t", "body": "b"]
+        #expect(try decode(Schemas.SavedCheckIn.self, from: saved).value2.moment?.kind == "eclipse")
     }
 
     /// A golden file as a dictionary, for tests that decode a variation of it.
