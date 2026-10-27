@@ -45,14 +45,13 @@ struct CheckInStreak: Equatable, Sendable {
     }
 
     /// The line over today's check-in. A rest day is said plainly; after a
-    /// break it names the best run rather than the gap. Empty before the
-    /// first check-in.
+    /// break, before today's check-in, it names the best run rather than the
+    /// gap. Empty before the first check-in. Once checked in, one day reads as
+    /// one day: the app cannot tell a comeback from checking in every other
+    /// day, and the save's moment card already marks a real one.
     var headline: String {
         if days == 0 {
             return best > 0 ? String(localized: "New run starts today · best \(best)") : ""
-        }
-        if days == 1 && best >= 3 {
-            return String(localized: "Day one of a new run · best \(best)")
         }
         let run = days == 1 ? String(localized: "1 day in a row") : String(localized: "\(days) days in a row")
         switch restsUsed {

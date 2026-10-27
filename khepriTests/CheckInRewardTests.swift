@@ -18,7 +18,8 @@ struct CheckInStreakTests {
 
     @Test func aNewRunNamesTheBestOneNotTheGap() {
         #expect(CheckInStreak(days: 0, best: 23).headline == "New run starts today · best 23")
-        #expect(CheckInStreak(days: 1, best: 23).headline == "Day one of a new run · best 23")
+        // Every other day is not a comeback each time: one day reads as one day.
+        #expect(CheckInStreak(days: 1, best: 23).headline == "1 day in a row")
         #expect(CheckInStreak(days: 0, best: 0).headline.isEmpty, "nothing before the first check-in")
     }
 

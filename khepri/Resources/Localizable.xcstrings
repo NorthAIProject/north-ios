@@ -41047,28 +41047,6 @@
         }
       }
     },
-    "Day one of a new run · best %lld" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primer día de una nueva racha · mejor %lld"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primeiro dia de uma nova sequência · melhor %lld"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primeiro dia de uma nova sequência · melhor %lld"
-          }
-        }
-      }
-    },
     "1 rest day" : {
       "localizations" : {
         "es" : {
