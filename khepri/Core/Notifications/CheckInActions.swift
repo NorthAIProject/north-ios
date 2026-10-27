@@ -77,7 +77,9 @@ enum CheckInActions {
         content.title = String(localized: "And your energy?")
         content.categoryIdentifier = energyCategoryIdentifier
         content.threadIdentifier = thread
-        content.userInfo = [moodKey: mood, dayKey: day]
+        // A plain tap, rather than a button, opens today's check-in with the
+        // mood already set.
+        content.userInfo = [moodKey: mood, dayKey: day, "url": url(mood: mood).absoluteString]
         return UNNotificationRequest(identifier: "checkin-energy-\(day)", content: content, trigger: nil)
     }
 }
@@ -87,6 +89,8 @@ enum CheckInNotificationFlow {
     enum Step: Equatable {
         case askEnergy(mood: Int, day: String)
         case file(mood: Int, energy: Int)
+        /// An energy button on a banner from an earlier day.
+        case expired(mood: Int)
         case ignore
     }
 
@@ -95,37 +99,72 @@ enum CheckInNotificationFlow {
         if let mood = CheckInActions.mood(forAction: action) {
             return .askEnergy(mood: mood, day: today)
         }
-        if let energy = CheckInActions.energy(forAction: action),
-           let mood = userInfo[CheckInActions.moodKey] as? Int, (1...5).contains(mood),
-           userInfo[CheckInActions.dayKey] as? String == today {
-            return .file(mood: mood, energy: energy)
+        guard let energy = CheckInActions.energy(forAction: action),
+              let mood = userInfo[CheckInActions.moodKey] as? Int, (1...5).contains(mood) else { return .ignore }
+        guard userInfo[CheckInActions.dayKey] as? String == today else { return .expired(mood: mood) }
+        return .file(mood: mood, energy: energy)
+    }
+
+    /// Posts the energy banner, then counts the nudge as opened. In that
+    /// order: the count is a network call, and an app woken in the background
+    /// may be suspended before a slow one returns.
+    static func askEnergy(
+        mood: Int, day: String, thread: String,
+        post: (UNNotificationRequest) async -> Void, countOpen: () async -> Void
+    ) async {
+        await post(CheckInActions.energyRequest(mood: mood, day: day, thread: thread))
+        await countOpen()
+    }
+
+    /// The banner after the energy tap: done, and where to look.
+    static func confirmation(_ outcome: QuickCheckInFiler.Outcome, thread: String) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.threadIdentifier = thread
+        content.userInfo = ["url": "khepri://check-ins"]
+        switch outcome {
+        case let .filed(streak, momentTitle):
+            content.title = streak > 1
+                ? String(localized: "Checked in · \(streak) days in a row")
+                : String(localized: "Checked in")
+            if let momentTitle { content.body = momentTitle }
+        case .alreadyCheckedIn:
+            content.title = String(localized: "Already checked in today")
         }
-        return .ignore
+        return content
+    }
+
+    /// Yesterday's energy banner tapped today: nothing is filed, and the
+    /// person is told so instead of thinking it was.
+    static func expiredContent(mood: Int, thread: String) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.threadIdentifier = thread
+        content.title = String(localized: "That was yesterday's check-in")
+        content.body = String(localized: "Tap to check in today.")
+        content.userInfo = ["url": CheckInActions.url(mood: mood).absoluteString]
+        return content
     }
 
     /// Files the check-in from the energy tap and says so in one last
     /// banner. If it cannot, the banner opens today's check-in with the mood
     /// set instead, so the two taps are not lost.
     static func file(mood: Int, energy: Int, thread: String) async {
-        let content = UNMutableNotificationContent()
-        content.threadIdentifier = thread
+        let content: UNMutableNotificationContent
         do {
-            switch try await QuickCheckInFiler.live(source: "notification").file(mood: mood, energy: energy) {
-            case let .filed(streak, momentTitle):
-                content.title = streak > 1
-                    ? String(localized: "Checked in · \(streak) days in a row")
-                    : String(localized: "Checked in")
-                if let momentTitle { content.body = momentTitle }
-            case .alreadyCheckedIn:
-                content.title = String(localized: "Already checked in today")
-            }
+            let outcome = try await QuickCheckInFiler.live(source: "notification").file(mood: mood, energy: energy)
+            content = confirmation(outcome, thread: thread)
             WidgetCenter.shared.reloadAllTimelines()
             await MainActor.run { NotificationCenter.default.post(name: .dayDataDidChange, object: nil) }
         } catch {
+            content = UNMutableNotificationContent()
+            content.threadIdentifier = thread
             content.title = String(localized: "Could not check in")
             content.body = String(localized: "Tap to finish it in Khepri.")
             content.userInfo = ["url": CheckInActions.url(mood: mood).absoluteString]
         }
+        await post(content)
+    }
+
+    static func post(_ content: UNMutableNotificationContent) async {
         let request = UNNotificationRequest(identifier: "checkin-done", content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request)
     }

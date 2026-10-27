@@ -81,13 +81,21 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         switch CheckInNotificationFlow.next(action: response.actionIdentifier, userInfo: content.userInfo,
                                             today: CalendarDay.string(from: .now)) {
         case let .askEnergy(mood, day):
-            if let href = content.userInfo["href"] as? String {
-                await PushRegistration.open(href: href) { _ in }
-            }
-            try? await center.add(CheckInActions.energyRequest(mood: mood, day: day, thread: thread))
+            let href = content.userInfo["href"] as? String
+            await CheckInNotificationFlow.askEnergy(
+                mood: mood, day: day, thread: thread,
+                post: { try? await center.add($0) },
+                countOpen: {
+                    guard let href else { return }
+                    await PushRegistration.open(href: href) { _ in }
+                }
+            )
             return
         case let .file(mood, energy):
             await CheckInNotificationFlow.file(mood: mood, energy: energy, thread: thread)
+            return
+        case let .expired(mood):
+            await CheckInNotificationFlow.post(CheckInNotificationFlow.expiredContent(mood: mood, thread: thread))
             return
         case .ignore:
             break
