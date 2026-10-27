@@ -31,6 +31,7 @@
 		22C957C2C2F6D089AEBD517E /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187D50BD3DEDCBC1CE86DD34 /* ShareViewController.swift */; };
 		243D15825794CC9E0B3F9902 /* KhepriWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3400E739CD2C06B9618D127 /* KhepriWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2B741D60F4EA70696B3C1809 /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
+		1C7CACB76A116C3A308AF1C8 /* QuickCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24DCFA001A09AAF0DD5DC71 /* QuickCheckIn.swift */; };
 		227E172D296FBD49F76FDD7E /* CheckInStreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7B30D26A4F79322DA6AF0D /* CheckInStreak.swift */; };
 		2D28BB50B7EF28246FC190D7 /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = FEF37D107C5252F8E0439108 /* NorthAPI */; };
 		40F83AAE24A625A8F7FA807B /* Glance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B94846B0426BEFB857146 /* Glance.swift */; };
@@ -39,6 +40,7 @@
 		54AFB43EF1527A8035BB00EA /* Glance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B94846B0426BEFB857146 /* Glance.swift */; };
 		5CA992E33E305CD5E6A582E9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C795288A681BF7D9DCCFD8EC /* Localizable.xcstrings */; };
 		5F68B48949F7122A7A3DC8B6 /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
+		1CAB82F30562B640B77D9B25 /* QuickCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24DCFA001A09AAF0DD5DC71 /* QuickCheckIn.swift */; };
 		7327F3DFC9E91A07BB0F6679 /* CheckInStreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7B30D26A4F79322DA6AF0D /* CheckInStreak.swift */; };
 		61CE67C2C2500168835F9B1A /* SharedAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021795DB2B753589DCE50E9C /* SharedAPI.swift */; };
 		67B5F223672AE55BDB019C2B /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 3CF1BC5809BDBF2BC3586055 /* NorthAPI */; };
@@ -47,9 +49,11 @@
 		7C988BAD246DEC2DAA6080C7 /* SharedSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */; };
 		8100854B491DE4A021E1CE4A /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 580BFA17945221E61C8F9ED9 /* ShareView.swift */; };
 		90BDDE56F2535CC07F1A101B /* LogWaterIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */; };
+		7F067AE75C1BD67CBC3B37BF /* QuickCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24DCFA001A09AAF0DD5DC71 /* QuickCheckIn.swift */; };
 		0F69B341925EFC0269837C6A /* CheckInStreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7B30D26A4F79322DA6AF0D /* CheckInStreak.swift */; };
 		9ABBB1C0C7696F979AE9B00F /* NorthAPI in Frameworks */ = {isa = PBXBuildFile; productRef = F775B8E682906FE491DDD79D /* NorthAPI */; };
 		A48D29FDBD4FC12232C10E01 /* TodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */; };
+		B24D8357035D8011FC6354CD /* CheckInWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9550CE044669D41F9BB38BB /* CheckInWidget.swift */; };
 		C24FAE1B554A1CDE066ADAE7 /* LockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */; };
 		CC9A10B1E3DD154A88F5E0AB /* KhepriWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */; };
 		D261A5ABEE8305F2B0DC3D5C /* NorthKit in Frameworks */ = {isa = PBXBuildFile; productRef = 374D2B9F944381566FCEA46B /* NorthKit */; };
@@ -122,11 +126,13 @@
 		318A9749E33792B1DFD83AE9 /* KhepriWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KhepriWidgetsBundle.swift; sourceTree = "<group>"; };
 		3A64E19C9157B1E54B2863D1 /* WorkoutLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutLiveActivity.swift; sourceTree = "<group>"; };
 		3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LogWaterIntent.swift; sourceTree = "<group>"; };
+		C24DCFA001A09AAF0DD5DC71 /* QuickCheckIn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickCheckIn.swift; sourceTree = "<group>"; };
 		9C7B30D26A4F79322DA6AF0D /* CheckInStreak.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckInStreak.swift; sourceTree = "<group>"; };
 		540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedSession.swift; sourceTree = "<group>"; };
 		580BFA17945221E61C8F9ED9 /* ShareView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
 		7027D7BF47454299C63A03C5 /* KhepriShare.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = KhepriShare.entitlements; sourceTree = "<group>"; };
 		85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayWidget.swift; sourceTree = "<group>"; };
+		B9550CE044669D41F9BB38BB /* CheckInWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CheckInWidget.swift; sourceTree = "<group>"; };
 		8C2DE37EBDD501EF4882BC0B /* KhepriWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = KhepriWidgets.entitlements; sourceTree = "<group>"; };
 		9784842CA8BCC9867FB62BCB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayProvider.swift; sourceTree = "<group>"; };
@@ -243,6 +249,7 @@
 			isa = PBXGroup;
 			children = (
 				3C1BFD64E660448BD6B9059C /* LogWaterIntent.swift */,
+				C24DCFA001A09AAF0DD5DC71 /* QuickCheckIn.swift */,
 				9C7B30D26A4F79322DA6AF0D /* CheckInStreak.swift */,
 				021795DB2B753589DCE50E9C /* SharedAPI.swift */,
 				540B9D942D2C5FCC3ECAA253 /* SharedSession.swift */,
@@ -282,6 +289,7 @@
 				0BF497DE36C073C2C594CD1D /* Info.plist */,
 				ADB09A2A5F6720B78867EF47 /* TodayProvider.swift */,
 				85521D806D9C7B28CB9A5E93 /* TodayWidget.swift */,
+				B9550CE044669D41F9BB38BB /* CheckInWidget.swift */,
 				E631E7DE51679B29B412BA3D /* LockScreenWidget.swift */,
 				8C2DE37EBDD501EF4882BC0B /* KhepriWidgets.entitlements */,
 			);
@@ -541,6 +549,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5F68B48949F7122A7A3DC8B6 /* LogWaterIntent.swift in Sources */,
+				1CAB82F30562B640B77D9B25 /* QuickCheckIn.swift in Sources */,
 				7327F3DFC9E91A07BB0F6679 /* CheckInStreak.swift in Sources */,
 				E29E555D29214E65735EDE32 /* SharedAPI.swift in Sources */,
 				7C988BAD246DEC2DAA6080C7 /* SharedSession.swift in Sources */,
@@ -569,6 +578,7 @@
 				22C957C2C2F6D089AEBD517E /* ShareViewController.swift in Sources */,
 				8100854B491DE4A021E1CE4A /* ShareView.swift in Sources */,
 				2B741D60F4EA70696B3C1809 /* LogWaterIntent.swift in Sources */,
+				1C7CACB76A116C3A308AF1C8 /* QuickCheckIn.swift in Sources */,
 				227E172D296FBD49F76FDD7E /* CheckInStreak.swift in Sources */,
 				4218A95EA0DFB7554AE0115D /* SharedAPI.swift in Sources */,
 				D6D1576011B4CCF6B80DDA6D /* SharedSession.swift in Sources */,
@@ -584,8 +594,10 @@
 				FB6BAB19AAE471A5AB44E779 /* WorkoutLiveActivity.swift in Sources */,
 				1D12AC00C8E230CDDC061BD3 /* TodayProvider.swift in Sources */,
 				A48D29FDBD4FC12232C10E01 /* TodayWidget.swift in Sources */,
+				B24D8357035D8011FC6354CD /* CheckInWidget.swift in Sources */,
 				C24FAE1B554A1CDE066ADAE7 /* LockScreenWidget.swift in Sources */,
 				90BDDE56F2535CC07F1A101B /* LogWaterIntent.swift in Sources */,
+				7F067AE75C1BD67CBC3B37BF /* QuickCheckIn.swift in Sources */,
 				0F69B341925EFC0269837C6A /* CheckInStreak.swift in Sources */,
 				61CE67C2C2500168835F9B1A /* SharedAPI.swift in Sources */,
 				4419BBFD07C263AC8986E6E0 /* SharedSession.swift in Sources */,

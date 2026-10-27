@@ -77,7 +77,7 @@ end
 
 # Widget sources beyond the Live Activity.
 group = project.main_group.find_subpath(NAME, false)
-%w[TodayProvider.swift TodayWidget.swift LockScreenWidget.swift].each do |file|
+%w[TodayProvider.swift TodayWidget.swift LockScreenWidget.swift CheckInWidget.swift].each do |file|
   next if target.source_build_phase.files_references.any? { |r| r.path == file }
   target.add_file_references([group.files.find { |f| f.path == file } || group.new_reference(file)])
 end

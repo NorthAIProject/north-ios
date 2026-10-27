@@ -6,6 +6,8 @@ struct TodayEntry: TimelineEntry {
     /// there was nothing earlier to show.
     let snapshot: Glance?
     let signedIn: Bool
+    /// The mood the check-in widget's first tap picked, until the second.
+    var pendingMood: Int?
 }
 
 /// One provider for every Khepri widget: they all show the same day.
@@ -29,7 +31,12 @@ struct TodayProvider: TimelineProvider {
         Task {
             let entry = await entry()
             let refresh = Calendar.current.date(byAdding: .minute, value: 30, to: entry.date) ?? entry.date
-            completion(Timeline(entries: [entry], policy: .after(refresh)))
+            var entries = [entry]
+            // A half-made check-in goes back to the mood row when it lapses.
+            if entry.pendingMood != nil, let lapse = QuickCheckInStep().expiry, lapse < refresh {
+                entries.append(TodayEntry(date: lapse, snapshot: entry.snapshot, signedIn: entry.signedIn))
+            }
+            completion(Timeline(entries: entries, policy: .after(refresh)))
         }
     }
 
@@ -38,6 +45,6 @@ struct TodayProvider: TimelineProvider {
             return TodayEntry(date: .now, snapshot: nil, signedIn: false)
         }
         let snapshot = try? await Glance.load(with: client)
-        return TodayEntry(date: .now, snapshot: snapshot, signedIn: true)
+        return TodayEntry(date: .now, snapshot: snapshot, signedIn: true, pendingMood: QuickCheckInStep().pendingMood)
     }
 }

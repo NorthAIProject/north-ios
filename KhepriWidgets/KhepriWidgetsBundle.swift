@@ -9,6 +9,7 @@ struct KhepriWidgetsBundle: WidgetBundle {
     var body: some Widget {
         WorkoutLiveActivity()
         TodayWidget()
+        CheckInWidget()
         LockScreenWidget()
         CheckInAccessoryWidget()
     }
