@@ -14,8 +14,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
-        let categories = [WorkoutReminders.category, CheckInActions.category, CrewNotifications.notificationCategory,
-                          FirstWeekActions.notificationCategory]
+        // One call sets every category: a second would replace the first.
+        let categories = [WorkoutReminders.category, CheckInActions.category, CheckInActions.energyCategory,
+                          CrewNotifications.notificationCategory, FirstWeekActions.notificationCategory]
         center.setNotificationCategories(Set(categories + CoachActions.categories))
         // Before launch finishes, or HealthKit drops background deliveries.
         HealthBackgroundDelivery.register()
@@ -71,9 +72,26 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     /// A tap, or the Start Workout button, opens where the notification says.
-    /// A mood button on a check-in nudge opens today's check-in with that mood
-    /// instead. The nudge is still opened first, so the server counts the tap.
+    /// A mood button on a check-in nudge asks for energy in a second banner,
+    /// and an energy button files the check-in, both without opening the app.
+    /// The nudge is still opened, so the server counts the tap.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let content = response.notification.request.content
+        let thread = content.threadIdentifier.isEmpty ? "checkin" : content.threadIdentifier
+        switch CheckInNotificationFlow.next(action: response.actionIdentifier, userInfo: content.userInfo,
+                                            today: CalendarDay.string(from: .now)) {
+        case let .askEnergy(mood, day):
+            if let href = content.userInfo["href"] as? String {
+                await PushRegistration.open(href: href) { _ in }
+            }
+            try? await center.add(CheckInActions.energyRequest(mood: mood, day: day, thread: thread))
+            return
+        case let .file(mood, energy):
+            await CheckInNotificationFlow.file(mood: mood, energy: energy, thread: thread)
+            return
+        case .ignore:
+            break
+        }
         // Done under a first-week message or its evening note marks the day,
         // also without opening the app.
         if response.actionIdentifier == FirstWeekActions.doneAction {
@@ -97,9 +115,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
         // A nudge from the server carries the web's link in `href`.
         if let href = response.notification.request.content.userInfo["href"] as? String {
-            let checkIn = CheckInActions.mood(forAction: response.actionIdentifier).map(CheckInActions.url(mood:))
-            await MainActor.run { [href, checkIn] in
-                Task { @MainActor in await PushRegistration.open(href: href) { self.onOpenURL?(checkIn ?? $0) } }
+            await MainActor.run { [href] in
+                Task { @MainActor in await PushRegistration.open(href: href) { self.onOpenURL?($0) } }
             }
             return
         }
