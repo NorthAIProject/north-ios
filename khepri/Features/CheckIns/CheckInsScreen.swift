@@ -19,6 +19,11 @@ struct CheckInsScreen: View {
     /// The router's data version the last load started at, so this screen's
     /// own writes, which load right away, do not load a second time.
     @State private var loadedVersion: Int?
+    /// What the save that created today's check-in earned, until an edit.
+    @State private var celebration: CheckInCelebration?
+    @State private var replyNote: CheckInReplyNote?
+    @State private var replyPending = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
@@ -56,6 +61,11 @@ struct CheckInsScreen: View {
             await load()
         }
         .refreshable { await load() }
+        .sensoryFeedback(.success, trigger: celebration?.id) { _, new in new != nil }
+        .task(id: celebration?.id) {
+            guard celebration != nil else { return }
+            await fetchReply()
+        }
         .onChange(of: router.checkInMood, initial: true) { _, mood in
             guard let mood else { return }
             router.checkInMood = nil
@@ -66,16 +76,39 @@ struct CheckInsScreen: View {
     private func content(_ list: CheckInList) -> some View {
         List {
             if let error { ErrorRow(error) }
-            if list.streak > 0 {
+            let streak = CheckInStreak(list)
+            if !streak.headline.isEmpty {
                 Section {
+                    if let moment = celebration?.moment {
+                        CheckInMomentCard(moment: moment)
+                    }
                     Label {
-                        Text(list.streak == 1 ? "1 day in a row" : "\(list.streak) days in a row")
-                            .font(.system(size: 24, weight: .light))
-                            .contentTransition(.numericText())
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(streak.headline)
+                                .font(.system(size: 24, weight: .light))
+                                .contentTransition(.numericText())
+                            if let rests = streak.restsLabel {
+                                Text(rests).font(.footnote).foregroundStyle(.secondary)
+                            }
+                            if streak.week.count == 7 {
+                                CheckInWeekDots(week: streak.week, perfect: streak.perfectWeek)
+                            }
+                        }
                     } icon: {
-                        Image(systemName: "flame").foregroundStyle(NorthColor.ember)
+                        Image(systemName: streak.days > 0 ? "flame.fill" : "flame")
+                            .foregroundStyle(NorthColor.ember)
+                            .symbolEffect(.bounce, value: celebration?.id)
                     }
                     .padding(.vertical, 4)
+                }
+            }
+
+            if celebration != nil, replyPending || replyNote != nil {
+                Section {
+                    CheckInReplyBubble(note: replyNote) {
+                        router.showsCheckInFlow = false
+                        router.open(.tab(.coach))
+                    }
                 }
             }
 
@@ -83,15 +116,19 @@ struct CheckInsScreen: View {
                 // The row already says "Today"; a header would say it twice.
                 Section {
                     CheckInSummary(checkIn: today)
-                    Button("Edit Today's Check-in") { editingToday = true }
+                    Button("Edit Today's Check-in") {
+                        editingToday = true
+                        celebration = nil
+                    }
                 }
             } else {
                 CheckInForm(
                     title: String(localized: "Today"), existing: list.today,
                     goals: activeGoals, startingMood: startingMood
                 ) { request in
-                    _ = try await service.saveToday(request)
+                    let saved = try await service.saveToday(request)
                     editingToday = false
+                    celebration = CheckInCelebration(saved: saved)
                     await didWrite()
                 }
             }
@@ -129,10 +166,36 @@ struct CheckInsScreen: View {
         await load()
     }
 
+    /// Asks for the coach's note, giving up after eight seconds: the note is
+    /// decoration and the save never waits for it.
+    private func fetchReply() async {
+        replyNote = nil
+        replyPending = true
+        let service = service
+        let reply = await withTaskGroup(of: CheckInReply?.self) { group in
+            group.addTask { await service.reply() }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(8))
+                return nil
+            }
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+        guard !Task.isCancelled else { return }
+        replyNote = CheckInReplyNote(reply)
+        replyPending = false
+    }
+
     private func load() async {
         loadedVersion = router.dataVersion
         do {
-            list = try await service.checkIns()
+            let loaded = try await service.checkIns()
+            if reduceMotion {
+                list = loaded
+            } else {
+                withAnimation { list = loaded }
+            }
             activeGoals = (try? await goals.goals().goals.filter { $0.status == .active }) ?? []
             error = nil
         } catch {
