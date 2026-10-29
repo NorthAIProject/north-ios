@@ -27,7 +27,7 @@ struct FormCheckScreen: View {
                 }
                 .disabled(preparing)
             } footer: {
-                Text("Side-on, whole body in frame, one set. Up to 200 MB.")
+                Text("Side-on, whole body in frame, one set. Big clips are made smaller to send.")
             }
             if let error { ErrorRow(error) }
             if !uploader.uploads.isEmpty {
@@ -93,7 +93,9 @@ struct FormCheckScreen: View {
         do {
             guard let movie = try await item.loadTransferable(type: PickedMovie.self) else { return }
             defer { try? FileManager.default.removeItem(at: movie.url) }
-            try await uploader.upload(video: movie.url)
+            let video = try await FormCheckVideo.fitting(movie.url)
+            defer { if video != movie.url { try? FileManager.default.removeItem(at: video) } }
+            try await uploader.upload(video: video)
             error = nil
         } catch {
             self.error = error.localizedDescription

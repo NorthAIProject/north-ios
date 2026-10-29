@@ -207,7 +207,7 @@ final class FormCheckUploader {
         return url
     }
 
-    /// Off the main actor: copying 200 MB takes a moment.
+    /// Off the main actor: copying 90 MB takes a moment.
     @concurrent
     private nonisolated static func write(_ body: MultipartFileBody, video: URL, to destination: URL) async throws {
         try body.write(
