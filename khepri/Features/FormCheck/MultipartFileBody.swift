@@ -4,7 +4,7 @@ import Foundation
 ///
 /// A background URLSession uploads only from a file (`uploadTask(with:fromFile:)`),
 /// so the body the generated client would stream is built here instead. The
-/// file is copied in chunks, never held whole: a clip can be 200 MB.
+/// file is copied in chunks, never held whole: a clip can be 90 MB (FormCheckVideo.maxBytes).
 nonisolated struct MultipartFileBody: Sendable {
     let boundary: String
 

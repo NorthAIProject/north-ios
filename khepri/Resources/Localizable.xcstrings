@@ -32783,24 +32783,24 @@
         }
       }
     },
-    "Side-on, whole body in frame, one set. Up to 200 MB." : {
+    "Side-on, whole body in frame, one set. Big clips are made smaller to send." : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De perfil, cuerpo entero en el encuadre, una serie. Hasta 200 MB."
+            "value" : "De perfil, cuerpo entero en el encuadre, una serie. Los vídeos grandes se reducen para enviarlos."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De lado, corpo inteiro no enquadramento, uma série. Até 200 MB."
+            "value" : "De lado, corpo inteiro no enquadramento, uma série. Vídeos grandes são reduzidos para o envio."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De lado, corpo inteiro no enquadramento, uma série. Até 200 MB."
+            "value" : "De lado, corpo inteiro no enquadramento, uma série. Os vídeos grandes são reduzidos para o envio."
           }
         }
       }
@@ -35651,6 +35651,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível analisar este vídeo."
+          }
+        }
+      }
+    },
+    "This clip is too long to send. Trim it to the working set and try again." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo es demasiado largo para enviarlo. Recórtalo a la serie y vuelve a intentarlo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo é longo demais para enviar. Corte-o para a série e tente de novo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo é demasiado longo para enviar. Corta-o para a série e tenta de novo."
           }
         }
       }
