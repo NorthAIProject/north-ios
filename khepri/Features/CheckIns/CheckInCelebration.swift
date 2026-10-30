@@ -44,21 +44,18 @@ struct CheckInReplyNote: Equatable {
     }
 }
 
-/// The card a moment earns: Khepri's mark, the moment's symbol, a title and
+/// The card a moment earns: Khepri, the moment's symbol, a title and
 /// a line.
 struct CheckInMomentCard: View {
     let moment: CheckInCelebration.Moment
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // The mark carries fixed brand colour; never tint it.
-            NorthBrand.mark
-                .resizable()
-                .scaledToFit()
-                .padding(6)
+            // Khepri celebrating with you: still, so a stack of cards doesn't bob.
+            KhepriMascot(.success, hovers: false)
+                .padding(4)
                 .frame(width: 44, height: 44)
                 .background(Color(.secondarySystemFill), in: Circle())
-                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Label(moment.title, systemImage: CheckInCelebration.symbol(for: moment.kind))
                     .font(.headline)

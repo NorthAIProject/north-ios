@@ -101,9 +101,11 @@ struct RecapPalette {
     static let app = RecapPalette(training: NorthColor.signal, food: NorthColor.Day.food, checkIn: NorthColor.ember,
                                   track: Color(.tertiarySystemFill), label: .secondary)
 
-    /// On the violet share card: light segments that read on the brand colour.
-    static let share = RecapPalette(training: .white, food: .white.opacity(0.62), checkIn: Color(red: 1, green: 0.78, blue: 0.42),
-                                    track: .white.opacity(0.14), label: .white.opacity(0.7))
+    /// On the navy share card: ivory segments, with Solar Gold for the
+    /// check-ins so the one accent marks the habit the card celebrates.
+    static let share = RecapPalette(training: RecapShareCard.ivory, food: RecapShareCard.ivory.opacity(0.55),
+                                    checkIn: Color(red: 0.910, green: 0.714, blue: 0.361),
+                                    track: RecapShareCard.ivory.opacity(0.14), label: RecapShareCard.ivory.opacity(0.7))
 }
 
 /// The three areas as coloured dots with names.

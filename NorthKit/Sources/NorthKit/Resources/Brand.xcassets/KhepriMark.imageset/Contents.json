@@ -1,7 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "KhepriMark.pdf",
+      "filename" : "KhepriMark-light.pdf",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "KhepriMark-dark.pdf",
       "idiom" : "universal"
     }
   ],

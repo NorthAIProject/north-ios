@@ -22,8 +22,10 @@ public struct LoginScreen: View {
                             .padding(.top, 24)
                             .accessibilityHidden(true)
 
+                        // The brand serif, as in the wordmark. It has one weight.
                         Text(NorthBrand.name)
-                            .font(.north(.largeTitle).weight(.semibold))
+                            .font(.northDisplay(.largeTitle))
+                            .tracking(0.5)
 
                         Text(NorthBrand.tagline)
                             .font(.subheadline)

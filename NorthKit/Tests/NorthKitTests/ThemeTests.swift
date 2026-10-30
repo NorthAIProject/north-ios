@@ -25,5 +25,16 @@ struct ThemeTests {
         #expect(UIFont(name: "Geist-Regular", size: 17) != nil)
         #expect(UIFont(name: "GeistMono-Regular", size: 17) != nil)
     }
+
+    @Test func brandImagesResolveFromTheCatalog() {
+        for name in ["KhepriMark", "KhepriMarkSmall", "KhepriMascotIdle"] {
+            #expect(UIImage(named: name, in: NorthKitBundle.bundle, compatibleWith: nil) != nil, "missing image \(name)")
+        }
+    }
+
+    @Test func brandSerifRegistersWithCoreText() {
+        NorthFont.register()
+        #expect(UIFont(name: "Marcellus-Regular", size: 17) != nil)
+    }
 }
 #endif
