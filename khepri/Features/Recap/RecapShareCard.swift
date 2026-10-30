@@ -2,7 +2,7 @@ import NorthAPI
 import NorthKit
 import SwiftUI
 
-/// The image a recap is shared as: a fixed violet card at 4:5, the size a
+/// The image a recap is shared as: a fixed navy card at 4:5, the size a
 /// feed post or a message preview shows whole. It ignores the app's
 /// appearance and text size so every shared image looks the same.
 struct RecapShareCard: View {
@@ -11,21 +11,28 @@ struct RecapShareCard: View {
 
     /// Points; rendered at 3× for 1080 × 1350.
     static let size = CGSize(width: 360, height: 450)
+    /// Warm Ivory, the brand's light ink on navy.
+    static let ivory = Color(red: 0.965, green: 0.949, blue: 0.918)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(verbatim: "Khepri")
-                .font(.system(size: 13, weight: .semibold))
-                .tracking(2)
-                .textCase(.uppercase)
-                .foregroundStyle(.white.opacity(0.75))
+            HStack(spacing: 8) {
+                NorthBrand.markSmall
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                Text(verbatim: "Khepri")
+                    .font(.northDisplay(size: 17, relativeTo: .headline))
+                    .tracking(1)
+                    .foregroundStyle(Self.ivory)
+            }
             Text(range.heading)
-                .font(.system(size: 30, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.top, 10)
+                .font(.northDisplay(size: 32, relativeTo: .title))
+                .foregroundStyle(Self.ivory)
+                .padding(.top, 12)
             Text(recap.period)
                 .font(.system(size: 15))
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(Self.ivory.opacity(0.75))
                 .padding(.top, 2)
 
             Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 10) {
@@ -48,13 +55,14 @@ struct RecapShareCard: View {
 
             Text(verbatim: "kheprios.com")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(Self.ivory.opacity(0.7))
                 .padding(.top, 14)
         }
         .padding(28)
         .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
         .background(
-            LinearGradient(colors: [Color(red: 0.392, green: 0.302, blue: 0.776), Color(red: 0.25, green: 0.17, blue: 0.55)],
+            // Armor Navy to Obsidian Navy (docs/brand in north-web-app).
+            LinearGradient(colors: [Color(red: 0.106, green: 0.165, blue: 0.251), Color(red: 0.043, green: 0.067, blue: 0.110)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
         )
         .environment(\.colorScheme, .dark)
@@ -79,10 +87,10 @@ private struct Figure: View {
             Text(value, format: .number)
                 .font(.system(size: 32, weight: .semibold))
                 .monospacedDigit()
-                .foregroundStyle(.white)
+                .foregroundStyle(RecapShareCard.ivory)
             Text(label)
                 .font(.system(size: 14))
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(RecapShareCard.ivory.opacity(0.75))
         }
         .frame(minWidth: 130, alignment: .leading)
     }

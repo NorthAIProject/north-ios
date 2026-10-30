@@ -33,5 +33,14 @@
 	<string>$(KHEPRI_KEYCHAIN_GROUP)</string>
 	<key>NorthAPIBaseURL</key>
 	<string>$(API_BASE_URL)</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchMark</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

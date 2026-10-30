@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Generate the iOS colour sets from the web app's theme tokens.
 
-The web theme (north-client/web/assets/css/input.css) defines every colour in
-OKLCH under :root (light) and .dark. This script converts each token to
+The web theme (north-web-app/src/lib/styles/app.css, the SvelteKit app that
+replaced north-client's Go web UI) defines every colour in OKLCH under :root
+(light) and .dark. This script converts each token to
 Display P3 and writes one colour set per token, with a light and a dark
 appearance, into NorthKit's Theme.xcassets. Re-run it whenever the web theme
 changes; the web file stays the single source of truth.
 
-    python3 scripts/sync-theme.py [path/to/input.css]
+    python3 scripts/sync-theme.py [path/to/app.css]
 """
 
 import json
@@ -19,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_CSS = ROOT.parent.parent / "north-client/web/assets/css/input.css"
+DEFAULT_CSS = ROOT.parent.parent / "north-web-app/src/lib/styles/app.css"
 OUT = ROOT / "NorthKit/Sources/NorthKit/Resources/Theme.xcassets"
 # The app's global tint (buttons, links, toggles) follows the web's signal colour.
 ACCENT = ROOT / "khepri/Assets.xcassets/AccentColor.colorset/Contents.json"
@@ -27,7 +28,9 @@ ACCENT_TOKEN = "north-signal"
 # Tokens the app keeps as they are even though the web defines them: the web
 # body map moved to its own palette, and the iOS body map has not been checked
 # against the new values. Remove a token from here once it has.
-PINNED = {"north-body-idle", "north-heat-low"}
+# body-shell joined them on 2026-10-30: the SvelteKit value differs from the
+# one iOS draws, and the brand resync was not the place to change the figure.
+PINNED = {"north-body-idle", "north-heat-low", "north-body-shell"}
 
 # CSS token -> colour set name. Only tokens the native app uses; templUI's
 # sidebar and popover variants have no iOS counterpart.

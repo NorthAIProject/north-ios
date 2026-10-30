@@ -1,7 +1,8 @@
 import CoreText
 import SwiftUI
 
-/// Geist and Geist Mono, the web app's typefaces, bundled as variable TTFs.
+/// Geist and Geist Mono, the web app's typefaces, bundled as variable TTFs,
+/// and Marcellus, the brand serif of the wordmark.
 ///
 /// Fonts inside a Swift package cannot be declared in the app's Info.plist, so
 /// they are registered with Core Text at launch. Call `register()` once, before
@@ -9,6 +10,7 @@ import SwiftUI
 public enum NorthFont {
     static let sans = "Geist"
     static let mono = "Geist Mono"
+    static let display = "Marcellus"
 
     public static func register() {
         guard let urls = Bundle.module.urls(forResourcesWithExtension: "ttf", subdirectory: nil), !urls.isEmpty else {
@@ -34,6 +36,18 @@ public extension Font {
     /// the rare figure larger than any text style.
     static func north(size: CGFloat, relativeTo style: Font.TextStyle) -> Font {
         .custom(NorthFont.sans, size: size, relativeTo: style)
+    }
+
+    /// Marcellus, the brand serif, at the size of a system text style. For
+    /// brand moments only — a welcome, a celebration, a recap headline —
+    /// never controls or dense text. It has one weight, so don't bold it.
+    static func northDisplay(_ style: Font.TextStyle) -> Font {
+        .custom(NorthFont.display, size: UIFontMetrics.defaultSize(for: style), relativeTo: style)
+    }
+
+    /// Marcellus at a fixed size that scales with the given text style.
+    static func northDisplay(size: CGFloat, relativeTo style: Font.TextStyle) -> Font {
+        .custom(NorthFont.display, size: size, relativeTo: style)
     }
 
     /// Geist Mono at the size of a system text style, for numbers and timers.

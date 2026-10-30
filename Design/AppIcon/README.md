@@ -1,25 +1,22 @@
 # App icon
 
-**Status: approved 2026-09-24** for TestFlight and the App Store.
+**Status: 2026-10-30 rebrand, pending your verdict** (replaces the scarab
+icon approved 2026-09-24, kept as `legacy-scarab-mark.svg`).
 
-Traced from `north-web-app/web/assets/brand/source/khepri-emblem-original.jpg`,
-the scarab emblem the brand README names as the mark. No square source at or
-above 1024 px existed, and upscaling the 480 px `khepri-app-icon.png` would
-blur, so the emblem was vectorised instead:
+The icon is the solar emblem — two crescent wings cradling a gold sphere over
+a navy horizon — from the "Khepri: A Brighter Future" reference. The emblem is
+a hand-built vector interpretation of that image, not a designer's source
+file.
 
-1. `sips` upscales the 600 px JPEG to 2400 px and writes BMP.
-2. Two colour masks are split out: the brown silhouette (wings, scarab,
-   crescent) and the gold sun.
-3. `potrace` traces the silhouette. The sun is replaced by an exact circle
-   fitted to its mask, because the JPEG edge traced jagged.
-4. The paths are recoloured, gold on the brand board's navy, and placed on a
-   1024 plate at 70% of the canvas.
+The SVGs here are **generated**; don't edit them by hand. Their source is
+`north-web-app/scripts/brand/build.py`, which writes
+`static/assets/brand/solar/app-icon-{light,dark,tinted}.svg`. Copy those here:
 
 | File | Appearance |
 |------|------------|
-| `icon-light.svg` | Default. Navy plate, gold mark, soft sun halo. |
+| `icon-light.svg` | Default. Navy plate lifting toward the sphere, soft sun halo. |
 | `icon-dark.svg` | iOS dark icons. Darker plate. |
-| `icon-tinted.svg` | iOS tinted icons. White-to-grey mark on black; the system tints it. |
+| `icon-tinted.svg` | iOS tinted icons. Greyscale mark on black; the system tints it. |
 
 Render and install:
 
@@ -31,3 +28,9 @@ for v in light dark tinted; do
   sips -s format png /tmp/icon-$v.jpg --out khepri/Assets.xcassets/AppIcon.appiconset/AppIcon-$v.png
 done
 ```
+
+The same emblem is the in-app mark (`NorthKit` `Brand.xcassets`:
+`KhepriMark`, detailed, and `KhepriMarkSmall`, the silhouette for 32 pt and
+below) and the launch screen (`LaunchMark` on `LaunchBackground` in the app's
+asset catalog, set in `Config/Info.plist` under `UILaunchScreen`). Each is a
+PDF rendered from the web repo's SVGs with `rsvg-convert -f pdf`.
