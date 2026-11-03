@@ -6,10 +6,25 @@ on:
   pull_request:
     branches: [ main ]
 
+# A newer push to the same PR makes the older run moot; main keeps every run.
+concurrency:
+  group: ios-ci-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     name: Build and Test
     runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      # One fixed DerivedData and SwiftPM checkout location for every step, so
+      # the app is compiled exactly once (build-for-testing) and each test step
+      # reuses it (test-without-building). Before, a plain build targeted the
+      # generic simulator and `xcodebuild test` then recompiled everything for
+      # the concrete device: ~10 min build + a second compile inside the test
+      # step. Same fix as norviq-ios #140.
+      DERIVED_DATA: ${{ github.workspace }}/build/DerivedData
+      SPM_DIR: ${{ github.workspace }}/build/SourcePackages
 
     steps:
       - name: Checkout repository
@@ -20,41 +35,30 @@ jobs:
         with:
           xcode-version: "26.3"
 
-      - name: Cache derived data
+      # Only the SwiftPM checkouts are cached. DerivedData is deliberately not:
+      # checkout gives every source a fresh mtime, so Xcode recompiles all of it
+      # regardless, and restoring a multi-GB cache costs more than it saves
+      # (measured on norviq-ios). The old DerivedData key hashed
+      # contents.xcworkspacedata, which never changes, so it restored the same
+      # stale snapshot on every run.
+      - name: Cache SwiftPM checkouts
         uses: actions/cache@v4
         with:
-          path: ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-xcode-derived-data-${{ hashFiles('khepri.xcodeproj/project.xcworkspace/contents.xcworkspacedata') }}
+          path: build/SourcePackages
+          key: ${{ runner.os }}-xcode-26.3-spm-${{ hashFiles('khepri.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved', 'NorthKit/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-xcode-derived-data-
-
-      - name: Cache SwiftPM repositories
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/org.swift.swiftpm
-            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
-          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swiftpm-
+            ${{ runner.os }}-xcode-26.3-spm-
 
       - name: Resolve Package Dependencies (retry)
         run: |
           set -euo pipefail
           for i in 1 2 3; do
-            xcodebuild -project khepri.xcodeproj -scheme khepri -resolvePackageDependencies -skipPackagePluginValidation && break
+            xcodebuild -project khepri.xcodeproj -scheme khepri \
+              -clonedSourcePackagesDirPath "$SPM_DIR" \
+              -resolvePackageDependencies -skipPackagePluginValidation && break
             echo "Resolve attempt $i failed; retrying in 20s..."
             sleep 20
           done
-
-      - name: Build (no tests) to surface Swift errors
-        run: |
-          xcodebuild build \
-            -project khepri.xcodeproj \
-            -scheme khepri \
-            -destination 'generic/platform=iOS Simulator' \
-            -skipPackagePluginValidation \
-            -quiet
 
       - name: Resolve a simulator
         id: sim
@@ -63,7 +67,8 @@ jobs:
           # Ask xcodebuild, not simctl: it lists only simulators whose runtime
           # meets the deployment target. simctl's first iPhone can be on an
           # older iOS, which the test step then rejects.
-          destinations="$(xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations -skipPackagePluginValidation 2>/dev/null)"
+          destinations="$(xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations \
+            -clonedSourcePackagesDirPath "$SPM_DIR" -skipPackagePluginValidation 2>/dev/null)"
           line="$(grep -E 'platform:iOS Simulator, arch:arm64, id:[0-9A-F-]{36}, OS:[0-9.]+, name:iPhone' <<<"$destinations" | tail -1 || true)"
           if [ -z "$line" ]; then
             echo "::error::No iPhone simulator meets the deployment target. Available destinations:"
@@ -74,24 +79,65 @@ jobs:
           echo "Using simulator: $(grep -oE 'name:[^}]+' <<<"$line" | cut -d: -f2) iOS $(grep -oE 'OS:[0-9.]+' <<<"$line" | cut -d: -f2) ($udid)"
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
-      - name: Run Unit Tests
+      # Compiles the app and its test targets once, for the simulator the tests
+      # run on. A compile error fails here, before any test step — the job the
+      # old generic-destination build step existed for.
+      - name: Build for testing
         run: |
-          xcodebuild test \
+          xcodebuild build-for-testing \
             -project khepri.xcodeproj \
             -scheme khepri \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
-            -only-testing:khepriTests \
+            -derivedDataPath "$DERIVED_DATA" \
+            -clonedSourcePackagesDirPath "$SPM_DIR" \
             -skipPackagePluginValidation \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            -quiet
+
+      - name: Run Unit Tests
+        run: |
+          xcodebuild test-without-building \
+            -project khepri.xcodeproj \
+            -scheme khepri \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -clonedSourcePackagesDirPath "$SPM_DIR" \
+            -only-testing:khepriTests \
             -parallel-testing-enabled NO \
             -quiet
 
+      # NorthKit's own suite is a separate package scheme, so it compiles the
+      # package again for its test targets (~7 min, almost all compile). The app
+      # build above already proves NorthKit compiles; its tests only need to run
+      # when NorthKit itself (or this workflow) changed. Main always runs them.
+      - name: Did NorthKit change?
+        id: northkit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files="$(gh pr diff ${{ github.event.pull_request.number }} --repo "${{ github.repository }}" --name-only)"
+          if grep -qE '^(NorthKit/|\.github/workflows/ci\.yml$)' <<<"$files"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "NorthKit untouched in this PR — skipping its suite (runs on main)."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run NorthKit Tests
+        if: steps.northkit.outputs.run == 'true'
         working-directory: NorthKit
         run: |
           xcodebuild test \
             -scheme NorthKit-Package \
-            -skipPackagePluginValidation \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -clonedSourcePackagesDirPath "$SPM_DIR" \
+            -skipPackagePluginValidation \
+            COMPILER_INDEX_STORE_ENABLE=NO \
             -quiet
 
       - name: Upload Test Results
@@ -99,5 +145,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: |
-            ~/Library/Developer/Xcode/DerivedData/**/Logs/Test/*.xcresult
+          path: build/DerivedData/Logs/Test/*.xcresult
