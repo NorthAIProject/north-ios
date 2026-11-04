@@ -186,7 +186,7 @@ private struct ExerciseSlug: Identifiable {
 /// A user message as a tinted bubble on the right, under the files it
 /// carried; a coach reply as plain text on the left, with its exercise cards
 /// and a way to say it helped.
-private struct MessageRow: View {
+struct MessageRow: View {
     let message: DisplayMessage
     let onExercise: (String) -> Void
     let onRate: (Bool) -> Void
@@ -264,7 +264,7 @@ private struct HelpfulControl: View {
 }
 
 /// The connection dropped mid-reply and the server is still writing it.
-private struct StillThinkingRow: View {
+struct StillThinkingRow: View {
     var body: some View {
         HStack(spacing: 8) {
             TypingIndicator()
@@ -288,7 +288,7 @@ private struct TypingIndicator: View {
 }
 
 /// The coach wants to change something and waits for a yes.
-private struct ApprovalCard: View {
+struct ApprovalCard: View {
     let approval: ToolApproval
     /// The answer is on its way; both buttons wait until it lands.
     let isBusy: Bool

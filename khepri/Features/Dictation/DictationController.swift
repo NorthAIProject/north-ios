@@ -3,9 +3,10 @@ import SwiftUI
 /// One text field's dictation: listening, and writing what is heard into the
 /// field as it is heard.
 ///
-/// The words land in the field, never in a message. The person reads what
-/// was heard and sends it themselves, so a mis-heard word is caught by the
-/// one party who knows what they said.
+/// The words land in the field, never in a message. In a composer the person
+/// reads what was heard and sends it themselves, so a mis-heard word is caught
+/// by the one party who knows what they said. Only the quick coach's hold sends
+/// on release, and anything that writes still waits for the person's Allow.
 @MainActor @Observable
 final class DictationController {
     enum Phase: Equatable {
@@ -85,6 +86,22 @@ final class DictationController {
     func stop() {
         if phase == .preparing { session?.cancel() }
         Task { [transcriber] in await transcriber.stop() }
+    }
+
+    /// Stops listening and returns once the last words have landed, for a
+    /// caller about to use them. Not yet listening: nothing to wait for. A
+    /// model that never settles is given up on after `patience`.
+    func stopAndSettle(patience: Duration = .seconds(3)) async {
+        guard phase == .listening else {
+            cancel()
+            return
+        }
+        stop()
+        let deadline = ContinuousClock.now + patience
+        while phase == .listening, ContinuousClock.now < deadline {
+            guard (try? await Task.sleep(for: .milliseconds(20))) != nil else { break }
+        }
+        cancel()
     }
 
     /// Stops listening and drops whatever has not landed yet. For when the

@@ -41,6 +41,51 @@ final class CoachUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Helpful"].isSelected)
     }
 
+    /// A tap on Today's orb goes to the Coach tab. A hold listens, letting go
+    /// sends what was heard, the reply lands in the overlay, a typed follow-up
+    /// joins it, and "Open in chat" continues that same thread.
+    @MainActor
+    func testQuickCoachFromToday() throws {
+        let email = "quick+\(Int(Date().timeIntervalSince1970))@example.com"
+        let password = "Correct-horse-9"
+        let token = try Server.signUp(email: email, password: password)
+        try Server.post("/api/v1/onboarding", token: token, body: [
+            "focusAreas": ["fitness"], "coachingStyle": "direct", "nearTermGoal": "Get stronger",
+        ])
+
+        let app = launchSignedIn(email: email, password: password)
+        openTab(app, "Today")
+        let orb = app.buttons["coach-orb"]
+        XCTAssertTrue(orb.waitForExistence(timeout: 20), "no orb on Today")
+        attach(app, "05-orb")
+
+        // Real touches at its centre: the orb's gesture is what is under test.
+        let orbCentre = orb.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        orbCentre.tap()
+        XCTAssertTrue(app.buttons["new-conversation"].waitForExistence(timeout: 20), "a tap did not open Coach")
+        openTab(app, "Today")
+
+        orbCentre.press(forDuration: 2)
+        let phrase = NSPredicate(format: "label == %@", "How many rest days should I take")
+        XCTAssertTrue(app.staticTexts.matching(phrase).firstMatch.waitForExistence(timeout: 20), "the heard words were not sent")
+        XCTAssertTrue(app.buttons["Helpful"].waitForExistence(timeout: 60), "no finished reply in the overlay")
+        attach(app, "06-quick-reply")
+
+        type(app.textFields["composer"], "And what should I eat?")
+        tap(app.buttons["Send"])
+        let followUp = NSPredicate(format: "label == %@", "And what should I eat?")
+        XCTAssertTrue(app.staticTexts.matching(followUp).firstMatch.waitForExistence(timeout: 20), "the follow-up was not sent")
+        let replies = app.buttons.matching(identifier: "Helpful")
+        expectation(for: NSPredicate(format: "count == 2"), evaluatedWith: replies)
+        waitForExpectations(timeout: 60)
+        attach(app, "07-quick-follow-up")
+
+        tap(app.buttons["quick-coach-open-chat"])
+        XCTAssertTrue(app.buttons["thread-new-conversation"].waitForExistence(timeout: 20), "Open in chat did not open the thread")
+        XCTAssertTrue(app.staticTexts.matching(phrase).firstMatch.waitForExistence(timeout: 20), "a different thread opened")
+        attach(app, "08-quick-in-chat")
+    }
+
     /// A reply that looked an exercise up carries a native card; the card opens
     /// the full exercise.
     @MainActor

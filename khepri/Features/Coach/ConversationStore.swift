@@ -84,6 +84,10 @@ final class ConversationStore {
     /// reached the server's history after a minute of asking.
     private(set) var replyNote: String?
 
+    /// Told the reply's text as it grows, and once more when it ends, for
+    /// reading it aloud.
+    @ObservationIgnored var onReplyProgress: ((_ text: String, _ finished: Bool) -> Void)?
+
     /// The coach is still working on a reply or approved tools the app
     /// stopped hearing about, as when the phone locked mid-reply.
     var isAwaitingReply: Bool { owed != nil }
@@ -357,6 +361,7 @@ final class ConversationStore {
         switch event {
         case .token(let text):
             messages[index].text += text
+            onReplyProgress?(messages[index].text, false)
         case .exercises(let slugs):
             messages[index].exercises = slugs
         case .approval(let approval):
@@ -375,6 +380,7 @@ final class ConversationStore {
     private func finishReply() {
         if let index = messages.firstIndex(where: { $0.id == replyID }) {
             messages[index].isStreaming = false
+            onReplyProgress?(messages[index].text, true)
             // A turn that stopped to ask, or failed before a word, leaves no
             // empty bubble behind.
             if messages[index].text.isEmpty && messages[index].exercises.isEmpty {

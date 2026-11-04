@@ -14,6 +14,8 @@ struct TodayScreen: View {
     @State private var loadedVersion: Int?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppRouter.self) private var router
+    @Environment(GuidedTour.self) private var tour
+    @Environment(QuickCoachSession.self) private var quickCoach
 
     private let auth: AuthServicing
 
@@ -21,6 +23,9 @@ struct TodayScreen: View {
         self.auth = auth
         _dayStore = State(initialValue: DayStore(service: day))
     }
+
+    /// Lets the last card scroll clear of the orb.
+    private static let orbClearance: CGFloat = 88
 
     enum LoadState {
         case loading
@@ -45,6 +50,19 @@ struct TodayScreen: View {
                     } actions: {
                         Button("Try Again") { Task { await load() } }
                     }
+                }
+            }
+            // On the root screen, not the stack: a pushed screen has no orb.
+            .contentMargins(.bottom, Self.orbClearance, for: .scrollContent)
+            .overlay(alignment: .bottomTrailing) {
+                if tour.current == nil {
+                    CoachOrb(
+                        onTap: { router.open(.tab(.coach)) },
+                        onHoldBegan: { quickCoach.holdBegan() },
+                        onHoldEnded: { Task { await quickCoach.holdEnded() } },
+                        onAskByTyping: { quickCoach.openForTyping() }
+                    )
+                    .padding(16)
                 }
             }
             .navigationTitle(dayStore.isToday ? String(localized: "Today") : dayTitle)
