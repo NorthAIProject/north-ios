@@ -27,4 +27,13 @@ enum UITesting {
         false
         #endif
     }()
+
+    /// A test of the AI data sharing question itself (`-uitest-ai-consent`).
+    static let asksAIConsent: Bool = {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-uitest-ai-consent")
+        #else
+        false
+        #endif
+    }()
 }

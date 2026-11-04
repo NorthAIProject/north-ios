@@ -11,6 +11,7 @@ struct KhepriApp: App {
     @State private var tour = GuidedTour()
     @State private var crewUnread = CrewUnread()
     @State private var awards = AwardsCenter()
+    @State private var aiConsent = AIConsentCenter()
 
     init() {
         NorthFont.register()
@@ -24,6 +25,7 @@ struct KhepriApp: App {
                 .environment(tour)
                 .environment(crewUnread)
                 .environment(awards)
+                .environment(aiConsent)
                 .task {
                     delegate.onOpenURL = { router.open(url: $0) }
                     delegate.onCrewPush = {
@@ -34,6 +36,14 @@ struct KhepriApp: App {
                 }
                 // Badges belong to whoever is signed in.
                 .onChange(of: app.phase) { _, phase in
+                    switch phase {
+                    case .signedIn, .onboarding:
+                        Task { await aiConsent.load() }
+                    case .signedOut:
+                        aiConsent.reset()
+                    default:
+                        break
+                    }
                     if case .signedIn = phase { return }
                     crewUnread.reset()
                     awards.reset()
@@ -57,6 +67,19 @@ struct KhepriApp: App {
 /// Picks the root screen from the app's phase.
 struct RootView: View {
     @Environment(AppModel.self) private var app
+    @Environment(AIConsentCenter.self) private var aiConsent
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// Under test the question stays away unless a test asks for it: every
+    /// other UI test would otherwise have to answer it first.
+    private var asksAIConsent: Bool {
+        guard aiConsent.needsAnswer else { return false }
+        if UITesting.isLaunchedByTests && !UITesting.asksAIConsent { return false }
+        switch app.phase {
+        case .signedIn, .onboarding: return true
+        default: return false
+        }
+    }
 
     var body: some View {
         Group {
@@ -94,5 +117,14 @@ struct RootView: View {
         // UIKit-presented sheets too, and going back to System undoes cleanly.
         .onAppear { app.appearance.apply() }
         .onChange(of: app.appearance) { _, appearance in appearance.apply() }
+        .fullScreenCover(isPresented: .constant(asksAIConsent)) { AIConsentScreen() }
+        // A launch with no connection leaves the answer unknown; ask again.
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            switch app.phase {
+            case .signedIn, .onboarding: Task { await aiConsent.load() }
+            default: break
+            }
+        }
     }
 }
