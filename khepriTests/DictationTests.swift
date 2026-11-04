@@ -129,3 +129,69 @@ private actor FakeTranscriber: SpeechTranscribing {
         continuation = nil
     }
 }
+
+@MainActor
+struct DictationSettlingTests {
+    @Test func returnsOnlyOnceTheLastWordsHaveLanded() async throws {
+        let transcriber = SettlingTranscriber(settles: "last words", after: .milliseconds(80))
+        var text = ""
+        let controller = DictationController(transcriber: transcriber)
+        controller.start(Binding(get: { text }, set: { text = $0 }))
+        for _ in 0..<200 where controller.phase != .listening {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+
+        await controller.stopAndSettle()
+
+        #expect(text == "last words")
+        #expect(controller.phase == .idle)
+    }
+
+    @Test func aModelThatNeverSettlesIsGivenUpOn() async throws {
+        let transcriber = SettlingTranscriber(settles: nil, after: .zero)
+        let controller = DictationController(transcriber: transcriber)
+        controller.start(Binding(get: { "" }, set: { _ in }))
+        for _ in 0..<200 where controller.phase != .listening {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+
+        await controller.stopAndSettle(patience: .milliseconds(50))
+
+        #expect(controller.phase == .idle)
+    }
+
+    @Test func notYetListeningThereIsNothingToWaitFor() async {
+        let controller = DictationController(transcriber: SettlingTranscriber(settles: "unused", after: .zero))
+        await controller.stopAndSettle()
+        #expect(controller.phase == .idle)
+    }
+}
+
+/// Settles its last words some time after `stop`, as the on-device model does;
+/// with nothing to settle, its stream never ends.
+private actor SettlingTranscriber: SpeechTranscribing {
+    private let settles: String?
+    private let delay: Duration
+    private var continuation: AsyncThrowingStream<Transcript, Error>.Continuation?
+
+    init(settles: String?, after delay: Duration) {
+        self.settles = settles
+        self.delay = delay
+    }
+
+    func isAvailable() async -> Bool { true }
+
+    func start() async throws -> AsyncThrowingStream<Transcript, Error> {
+        let (stream, continuation) = AsyncThrowingStream.makeStream(of: Transcript.self, throwing: Error.self)
+        self.continuation = continuation
+        return stream
+    }
+
+    func stop() async {
+        guard let settles else { return }
+        try? await Task.sleep(for: delay)
+        continuation?.yield(Transcript(text: settles, isFinal: true))
+        continuation?.finish()
+        continuation = nil
+    }
+}

@@ -11,6 +11,7 @@ struct MainTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     /// A workout the app was killed during, picked up where it was.
     @State private var resumedWorkout: WorkoutSession?
+    @State private var quickCoach = QuickCoachSession()
     /// Whether the awards cover is asked for, and whether it is really on screen.
     @State private var celebrating = false
     @State private var celebrationVisible = false
@@ -40,6 +41,13 @@ struct MainTabView: View {
             .badge(crewUnread.total)
         }
         .guidedTourOverlay(tour, router: router)
+        .quickCoachOverlay(quickCoach)
+        .environment(quickCoach)
+        .task { await quickCoach.prepare() }
+        // A link followed from outside lands on what it opened, not under this.
+        .onChange(of: router.selectedTab) {
+            if quickCoach.mode != .closed { quickCoach.close() }
+        }
         .sheet(isPresented: $router.showsCheckInFlow) {
             NavigationStack {
                 CheckInsScreen()

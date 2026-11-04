@@ -12,6 +12,9 @@ struct ChatComposer<Attachments: View>: View {
     let canSend: Bool
     var focused: FocusState<Bool>.Binding
     var dictation: Bool = true
+    /// Asks for the microphone as soon as the composer appears, as the quick
+    /// coach does when a hold could not listen.
+    var asksForMicrophone: Bool = false
     /// Called when dictation starts or stops listening.
     var onListeningChange: (Bool) -> Void = { _ in }
     var onAttach: (() -> Void)?
@@ -45,7 +48,7 @@ struct ChatComposer<Attachments: View>: View {
                 // and stops on a pause; this one is a tap away and keeps
                 // listening until tapped again.
                 if dictation, !isBusy {
-                    DictationButton(text: $text, onListeningChange: onListeningChange)
+                    DictationButton(text: $text, asksOnAppear: asksForMicrophone, onListeningChange: onListeningChange)
                 }
 
                 if isBusy, let onStop {

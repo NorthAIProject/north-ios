@@ -21,6 +21,9 @@ extension EnvironmentValues {
 struct DictationButton: View {
     @Binding var text: String
     var font: Font = .title
+    /// Explains and asks without waiting for a tap, or says it is refused.
+    /// Does nothing once the person has already allowed it.
+    var asksOnAppear: Bool = false
     /// Told when listening starts and stops, so a screen can show it too.
     var onListeningChange: (Bool) -> Void = { _ in }
 
@@ -43,6 +46,7 @@ struct DictationButton: View {
             let controller = DictationController(transcriber: transcriber)
             self.controller = controller
             await controller.checkAvailability()
+            if asksOnAppear, controller.isAvailable { ask() }
         }
         .onChange(of: controller?.phase == .listening) { _, listening in onListeningChange(listening) }
         .onDisappear {
@@ -78,7 +82,7 @@ struct DictationButton: View {
             // No way out but forward: App Review (5.1.1(iv)) rejects an
             // explanation that lets the person put off the iOS prompt.
         } message: {
-            Text("Khepri needs the microphone to hear you. Your words are turned into text on this iPhone and appear in the box for you to check before sending.")
+            Text("Khepri needs the microphone to hear you. Your words are turned into text on this iPhone. Hold the coach button and let go to send, or tap the microphone to check them first.")
         }
         .alert("Dictation is off", isPresented: $refused) {
             Button("Open Settings") {
@@ -103,8 +107,16 @@ struct DictationButton: View {
             controller.toggle($text)
             return
         }
+        if Permissions.dictation == .granted {
+            controller.start($text)
+        } else {
+            ask()
+        }
+    }
+
+    private func ask() {
         switch Permissions.dictation {
-        case .granted: controller.start($text)
+        case .granted: break
         case .undetermined: explaining = true
         case .denied: refused = true
         }

@@ -70,6 +70,19 @@ struct CoachScreen: View {
             router.coachDraft = nil
             Task { await start(reflection: false, draft: draft) }
         }
+        .onChange(of: router.coachConversation, initial: true) { _, conversation in
+            guard let conversation else { return }
+            router.coachConversation = nil
+            if !conversations.contains(where: { $0.id == conversation.id }) {
+                conversations.insert(conversation, at: 0)
+            }
+            path = [conversation]
+        }
+        // The tab bar keeps this list alive, and the quick coach starts chats
+        // from outside it.
+        .onChange(of: router.selectedTab) { _, tab in
+            if tab == .coach { Task { await load() } }
+        }
     }
 
     private var list: some View {
