@@ -27,6 +27,9 @@ review (Developer Rejected) with build 16 attached.
 - **Progress checks** (#76): front, side and back photos with measurements,
   a reminder cadence, first-vs-latest comparison, and Today's body figure
   shaped by the latest check (outline-only skin).
+- **Quick coach** (#93): hold the orb on Today and speak, or type; the reply
+  appears over Today and is read aloud if you spoke. Each visit is a normal
+  Coach chat.
 - **Coach messages first** (#73): a lighter session on low recovery (with
   Undo) or a missed session moved, answered from the notification or Today.
 - **Your week** (#71): 7 / 30 day recap, share image, post to friends.
