@@ -1,4 +1,5 @@
 import Foundation
+import NorthAPI
 import Observation
 
 extension Notification.Name {
@@ -63,6 +64,9 @@ enum AppDestination: Equatable {
     /// A new conversation with this text waiting in the composer, unsent:
     /// the daily post's "Ask the coach about this".
     case askCoach(String)
+    /// A conversation that already exists, opened in the Coach tab: where the
+    /// quick coach's "Open in chat" leads.
+    case conversation(ConversationSummary)
 }
 
 /// Owns the selected tab and turns links into destinations.
@@ -125,6 +129,7 @@ final class AppRouter {
     /// Set when a link asks for a new conversation with a draft; the Coach
     /// tab starts one, puts the draft in its composer, and clears it.
     var coachDraft: String?
+    var coachConversation: ConversationSummary?
     /// Counts writes on this device that change the day: a check-in, a quick
     /// add, an approved coach action, a Siri shortcut. Screens that show the
     /// day reload on each change, since a tab kept alive by the tab bar does
@@ -205,6 +210,9 @@ final class AppRouter {
         case .askCoach(let draft):
             selectedTab = .coach
             coachDraft = draft
+        case .conversation(let conversation):
+            selectedTab = .coach
+            coachConversation = conversation
         }
     }
 

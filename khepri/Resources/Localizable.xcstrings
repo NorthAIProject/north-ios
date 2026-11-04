@@ -21279,28 +21279,6 @@
         }
       }
     },
-    "Khepri needs the microphone to hear you. Your words are turned into text on this iPhone and appear in the box for you to check before sending." : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Khepri necesita el micrófono para oírte. Tus palabras se convierten en texto en este iPhone y aparecen en el cuadro para que las revises antes de enviarlas."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Khepri precisa do microfone para ouvir você. Suas palavras são convertidas em texto neste iPhone e aparecem na caixa para você revisar antes de enviar."
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Khepri precisa do microfone para te ouvir. As tuas palavras são convertidas em texto neste iPhone e aparecem na caixa para as reveres antes de enviar."
-          }
-        }
-      }
-    },
     "Khepri switches to this language the next time you open it. The coach, reports and reminders already use it." : {
       "localizations" : {
         "es" : {
@@ -42077,6 +42055,248 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Só quando você decide enviá-los ou conectá-los: arquivos, fotos, vídeos de técnica e sua agenda"
+          }
+        }
+      }
+    },
+    "Ask your coach" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregunta a tu entrenador"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pergunte ao seu treinador"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pergunta ao teu treinador"
+          }
+        }
+      }
+    },
+    "Let go to send" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suelta para enviar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solte para enviar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larga para enviar"
+          }
+        }
+      }
+    },
+    "Listening…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchando…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvindo…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A ouvir…"
+          }
+        }
+      }
+    },
+    "Getting ready…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando…"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A preparar…"
+          }
+        }
+      }
+    },
+    "Didn't catch that. Type your question or tap the microphone." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No te he oído bien. Escribe tu pregunta o toca el micrófono."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não entendi. Digite sua pergunta ou toque no microfone."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não percebi. Escreve a tua pergunta ou toca no microfone."
+          }
+        }
+      }
+    },
+    "Ask about your training, meals or recovery." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregunta sobre tu entrenamiento, tus comidas o tu recuperación."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pergunte sobre seu treino, suas refeições ou sua recuperação."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pergunta sobre o teu treino, as tuas refeições ou a tua recuperação."
+          }
+        }
+      }
+    },
+    "Hold to ask" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsado para preguntar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque e segure para perguntar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantém premido para perguntar"
+          }
+        }
+      }
+    },
+    "Open in chat" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en el chat"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no chat"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no chat"
+          }
+        }
+      }
+    },
+    "Read replies aloud" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leer las respuestas en voz alta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler as respostas em voz alta"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler as respostas em voz alta"
+          }
+        }
+      }
+    },
+    "Stop reading replies aloud" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejar de leer las respuestas en voz alta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar de ler as respostas em voz alta"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar de ler as respostas em voz alta"
+          }
+        }
+      }
+    },
+    "Khepri needs the microphone to hear you. Your words are turned into text on this iPhone. Hold the coach button and let go to send, or tap the microphone to check them first." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri necesita el micrófono para oírte. Tus palabras se convierten en texto en este iPhone. Mantén pulsado el botón del entrenador y suelta para enviar, o toca el micrófono para revisarlas antes."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri precisa do microfone para ouvir você. Suas palavras são convertidas em texto neste iPhone. Segure o botão do treinador e solte para enviar, ou toque no microfone para revisar antes."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri precisa do microfone para te ouvir. As tuas palavras são convertidas em texto neste iPhone. Mantém premido o botão do treinador e larga para enviar, ou toca no microfone para as reveres antes."
           }
         }
       }

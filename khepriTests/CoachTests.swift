@@ -313,6 +313,9 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     var details: [ConversationDetail] = []
     private(set) var fetches = 0
     private(set) var resumes = 0
+    /// How many conversations were started.
+    private(set) var started = 0
+    var startError: Error?
 
     init(history: [ChatMessage] = [], reply: [CoachEvent] = [], resume: [CoachEvent] = []) {
         self.history = history
@@ -362,7 +365,11 @@ final class FakeCoach: CoachServicing, @unchecked Sendable {
     }
 
     func conversations() async throws -> [ConversationSummary] { [] }
-    func start(reflection: Bool) async throws -> ConversationSummary { throw APIError.invalidResponse }
+    func start(reflection: Bool) async throws -> ConversationSummary {
+        started += 1
+        if let startError { throw startError }
+        return ConversationSummary(id: "c\(started)", title: "New", kind: .chat, ended: false, updatedAt: .now)
+    }
     func delete(_ id: String) async throws {}
     func exercise(_ slug: String) async throws -> ExerciseDetail { throw APIError.invalidResponse }
 

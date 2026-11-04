@@ -188,25 +188,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Khepri listens only while the microphone button is on, to turn what you say into text."
+            "value" : "Khepri listens only while you hold the coach button or the microphone is on, to turn what you say into text."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Khepri solo escucha mientras el botón del micrófono está activado, para convertir lo que dices en texto."
+            "value" : "Khepri solo escucha mientras mantienes pulsado el botón del entrenador o el micrófono está activado, para convertir lo que dices en texto."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Khepri só escuta enquanto o botão do microfone está ativado, para transformar o que você diz em texto."
+            "value" : "O Khepri só escuta enquanto você segura o botão do treinador ou o microfone está ativado, para transformar o que você diz em texto."
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Khepri só ouve enquanto o botão do microfone está ligado, para converter o que dizes em texto."
+            "value" : "O Khepri só ouve enquanto manténs premido o botão do treinador ou o microfone está ligado, para converter o que dizes em texto."
           }
         }
       }
