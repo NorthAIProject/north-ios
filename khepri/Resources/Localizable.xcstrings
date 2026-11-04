@@ -42037,24 +42037,24 @@
         }
       }
     },
-    "Only when you choose to send or connect them: files, photos, form-check videos and your calendar" : {
+    "Only when you choose to send or connect them: files, photos and your calendar" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Solo cuando decides enviarlos o conectarlos: archivos, fotos, vídeos de técnica y tu calendario"
+            "value" : "Solo cuando decides enviarlos o conectarlos: archivos, fotos y tu calendario"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Só quando decides enviá-los ou ligá-los: ficheiros, fotos, vídeos de técnica e o teu calendário"
+            "value" : "Só quando decides enviá-los ou ligá-los: ficheiros, fotos e o teu calendário"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Só quando você decide enviá-los ou conectá-los: arquivos, fotos, vídeos de técnica e sua agenda"
+            "value" : "Só quando você decide enviá-los ou conectá-los: arquivos, fotos e sua agenda"
           }
         }
       }

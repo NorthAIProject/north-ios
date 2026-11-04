@@ -15,7 +15,7 @@ struct AIConsentDisclosure: View {
                 row("text.bubble", "What you write: coach messages, check-ins, journal entries, goals and decisions")
                 row("heart", "Health and fitness: workouts, sleep, weight, measurements, nutrition, medications and data you share from Apple Health")
                 row("person", "About you: your name, age, time zone, coaching style, and what the coach remembers about you")
-                row("doc", "Only when you choose to send or connect them: files, photos, form-check videos and your calendar")
+                row("doc", "Only when you choose to send or connect them: files, photos and your calendar")
             }
 
             VStack(alignment: .leading, spacing: 12) {

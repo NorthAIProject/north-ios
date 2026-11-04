@@ -26,9 +26,6 @@ struct TrainingScreen: View {
                             NavigationLink(value: DayRoute.muscles) {
                                 Label("Muscles This Week", systemImage: "figure.stand")
                             }
-                            NavigationLink(value: DayRoute.formCheck) {
-                                Label("Form Check", systemImage: "video.badge.checkmark")
-                            }
                             NavigationLink(value: DayRoute.history) {
                                 Label("Activity History", systemImage: "clock.arrow.circlepath")
                             }
