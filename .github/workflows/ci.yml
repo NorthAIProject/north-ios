@@ -67,9 +67,20 @@ jobs:
           # Ask xcodebuild, not simctl: it lists only simulators whose runtime
           # meets the deployment target. simctl's first iPhone can be on an
           # older iOS, which the test step then rejects.
-          destinations="$(xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations \
-            -clonedSourcePackagesDirPath "$SPM_DIR" -skipPackagePluginValidation 2>/dev/null)"
-          line="$(grep -E 'platform:iOS Simulator, arch:arm64, id:[0-9A-F-]{36}, OS:[0-9.]+, name:iPhone' <<<"$destinations" | tail -1 || true)"
+          resolve() {
+            destinations="$(xcodebuild -project khepri.xcodeproj -scheme khepri -showdestinations \
+              -clonedSourcePackagesDirPath "$SPM_DIR" -skipPackagePluginValidation 2>/dev/null)"
+            line="$(grep -E 'platform:iOS Simulator, arch:arm64, id:[0-9A-F-]{36}, OS:[0-9.]+, name:iPhone' <<<"$destinations" | tail -1 || true)"
+          }
+          resolve
+          # The hosted image can stop shipping a runtime that meets the deployment
+          # target, and the simulator list is then empty.
+          if [ -z "$line" ]; then
+            echo "No matching simulator. Installed runtimes:"
+            xcrun simctl list runtimes
+            xcodebuild -downloadPlatform iOS
+            resolve
+          fi
           if [ -z "$line" ]; then
             echo "::error::No iPhone simulator meets the deployment target. Available destinations:"
             echo "$destinations" | sed -n '1,60p'
