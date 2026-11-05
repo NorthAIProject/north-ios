@@ -41641,6 +41641,424 @@
         }
       }
     },
+    "AI Data Sharing" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir datos con la IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhamento de dados com a IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partilha de dados com a IA"
+          }
+        }
+      }
+    },
+    "AI is off" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La IA está desactivada"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A IA está desligada"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A IA está desligada"
+          }
+        }
+      }
+    },
+    "Allow AI data sharing" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir compartir datos con la IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir compartilhamento de dados com a IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir partilha de dados com a IA"
+          }
+        }
+      }
+    },
+    "Don't Allow" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No permitir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não permitir"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não permitir"
+          }
+        }
+      }
+    },
+    "Health and fitness: workouts, sleep, weight, measurements, nutrition, medications and data you share from Apple Health" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salud y forma física: entrenamientos, sueño, peso, medidas, nutrición, medicación y los datos que compartes desde Apple Salud"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saúde e condicionamento físico: treinos, sono, peso, medidas, nutrição, medicamentos e os dados que você compartilha do app Saúde da Apple"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saúde e condição física: treinos, sono, peso, medidas, nutrição, medicação e os dados que partilhas da app Saúde da Apple"
+          }
+        }
+      }
+    },
+    "If you connect your own AI provider in Settings, it receives this data first." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si conectas tu propio proveedor de IA en Ajustes, él recibe estos datos primero."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se você conectar seu próprio provedor de IA em Ajustes, ele recebe esses dados primeiro."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se ligares o teu próprio fornecedor de IA em Definições, é ele que recebe estes dados primeiro."
+          }
+        }
+      }
+    },
+    "If you don't allow this, AI features stay off and nothing is sent. You can change this in Settings under AI Data Sharing." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si no lo permites, las funciones de IA quedan desactivadas y no se envía nada. Puedes cambiarlo en Ajustes, en Compartir datos con la IA."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se você não permitir, os recursos de IA ficam desligados e nada é enviado. Você pode mudar isso em Ajustes, em Compartilhamento de dados com a IA."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se não permitires, as funcionalidades de IA ficam desligadas e nada é enviado. Podes alterar isto em Definições, em Partilha de dados com a IA."
+          }
+        }
+      }
+    },
+    "Khepri's coach, reports, meal and training plans are written by AI models run by other companies. To answer you, Khepri sends them your data." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El coach, los informes y los planes de comidas y entrenamiento de Khepri los escriben modelos de IA de otras empresas. Para responderte, Khepri les envía tus datos."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coach, os relatórios e os planos de refeições e de treino do Khepri são escritos por modelos de IA de outras empresas. Para responder a você, o Khepri envia seus dados a elas."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coach, os relatórios e os planos de refeições e de treino do Khepri são escritos por modelos de IA de outras empresas. Para te responder, o Khepri envia-lhes os teus dados."
+          }
+        }
+      }
+    },
+    "Read the privacy policy" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leer la política de privacidad"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler a política de privacidade"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler a política de privacidade"
+          }
+        }
+      }
+    },
+    "Review AI Data Sharing" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisar compartir datos con la IA"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisar compartilhamento de dados com a IA"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rever a partilha de dados com a IA"
+          }
+        }
+      }
+    },
+    "Share your data with AI?" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Compartir tus datos con la IA?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar seus dados com a IA?"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partilhar os teus dados com a IA?"
+          }
+        }
+      }
+    },
+    "The coach needs to send your data to AI providers to answer you. You turned that off." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El coach necesita enviar tus datos a proveedores de IA para responderte. Lo has desactivado."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coach precisa enviar seus dados a provedores de IA para responder a você. Você desligou essa opção."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coach precisa de enviar os teus dados a fornecedores de IA para te responder. Desligaste essa opção."
+          }
+        }
+      }
+    },
+    "What is sent" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué se envía"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que é enviado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que é enviado"
+          }
+        }
+      }
+    },
+    "What you write: coach messages, check-ins, journal entries, goals and decisions" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que escribes: mensajes al coach, check-ins, entradas del diario, objetivos y decisiones"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que você escreve: mensagens ao coach, check-ins, entradas do diário, metas e decisões"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que escreves: mensagens ao coach, check-ins, entradas do diário, objetivos e decisões"
+          }
+        }
+      }
+    },
+    "When this is off, AI features stay off and nothing is sent. Data already sent is not recalled." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si está desactivado, las funciones de IA no funcionan y no se envía nada. Los datos ya enviados no se recuperan."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando está desligado, os recursos de IA ficam desligados e nada é enviado. Os dados já enviados não são recuperados."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando está desligado, as funcionalidades de IA ficam desligadas e nada é enviado. Os dados já enviados não são recuperados."
+          }
+        }
+      }
+    },
+    "Who receives it" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quién los recibe"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem os recebe"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem os recebe"
+          }
+        }
+      }
+    },
+    "Your data is used to answer you and to run these features. Khepri does not sell it or use it for advertising." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus datos se usan para responderte y hacer funcionar estas funciones. Khepri no los vende ni los usa para publicidad."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus dados são usados para responder a você e para fazer esses recursos funcionarem. O Khepri não os vende nem os usa para publicidade."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os teus dados são usados para te responder e para pôr estas funcionalidades a funcionar. O Khepri não os vende nem os usa para publicidade."
+          }
+        }
+      }
+    },
+    "About you: your name, age, time zone, coaching style, and what the coach remembers about you" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre ti: tu nombre, edad, zona horaria, estilo de coaching y lo que el coach recuerda de ti"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre ti: o teu nome, idade, fuso horário, estilo de coaching e o que o coach se lembra de ti"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre você: seu nome, idade, fuso horário, estilo de coaching e o que o coach lembra sobre você"
+          }
+        }
+      }
+    },
+    "Only when you choose to send or connect them: files, photos and your calendar" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo cuando decides enviarlos o conectarlos: archivos, fotos y tu calendario"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só quando decides enviá-los ou ligá-los: ficheiros, fotos e o teu calendário"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só quando você decide enviá-los ou conectá-los: arquivos, fotos e sua agenda"
+          }
+        }
+      }
+    },
     "Ask your coach" : {
       "localizations" : {
         "es" : {

@@ -12,6 +12,7 @@ struct CoachScreen: View {
     @State private var drafts: [String: String] = [:]
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppRouter.self) private var router
+    @Environment(AIConsentCenter.self) private var aiConsent
 
     private let coach: CoachServicing
 
@@ -23,7 +24,9 @@ struct CoachScreen: View {
         NavigationStack(path: $path) {
             ScrollViewReader { proxy in
                 Group {
-                    if isLoading && conversations.isEmpty {
+                    if aiConsent.choice == .declined {
+                        AIOffView()
+                    } else if isLoading && conversations.isEmpty {
                         ProgressView()
                     } else if conversations.isEmpty {
                         empty

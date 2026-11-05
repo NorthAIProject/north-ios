@@ -16,6 +16,7 @@ struct TodayScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(GuidedTour.self) private var tour
     @Environment(QuickCoachSession.self) private var quickCoach
+    @Environment(AIConsentCenter.self) private var aiConsent
 
     private let auth: AuthServicing
 
@@ -55,7 +56,7 @@ struct TodayScreen: View {
             // On the root screen, not the stack: a pushed screen has no orb.
             .contentMargins(.bottom, Self.orbClearance, for: .scrollContent)
             .overlay(alignment: .bottomTrailing) {
-                if tour.current == nil {
+                if tour.current == nil, aiConsent.choice != .declined {
                     CoachOrb(
                         onTap: { router.open(.tab(.coach)) },
                         onHoldBegan: { quickCoach.holdBegan() },

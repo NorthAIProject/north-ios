@@ -33,6 +33,9 @@ struct SettingsScreen: View {
                     NavigationLink { AIProviderSettings(service: service) } label: {
                         Label("AI Provider", systemImage: "cpu")
                     }
+                    NavigationLink { AIConsentSettings() } label: {
+                        Label("AI Data Sharing", systemImage: "hand.raised")
+                    }
                 }
 
                 Section("Connections") {
