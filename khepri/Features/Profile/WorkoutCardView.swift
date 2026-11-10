@@ -33,7 +33,7 @@ struct WorkoutCardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 12))
+        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: NorthRadius.control))
         .accessibilityElement(children: .combine)
     }
 }

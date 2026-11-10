@@ -180,7 +180,13 @@ private struct PlanOverview: View {
             Section(week == nil ? String(localized: "Days") : String(localized: "Plan Days")) {
                 ForEach(Array(plan.days.enumerated()), id: \.offset) { index, day in
                     NavigationLink(value: DayRoute.day(index)) {
-                        DayRow(day: day)
+                        TrainingSessionRow(
+                            weekday: day.weekday,
+                            status: day.status,
+                            detail: day.focus,
+                            startTime: day.startTime,
+                            exerciseCount: day.exercises.count
+                        )
                     }
                 }
             }
@@ -196,45 +202,6 @@ private struct PlanOverview: View {
                 } footer: {
                     Text("Where the plan no longer matches what you asked for. Edits are yours to make; nothing is changed for you.")
                 }
-            }
-        }
-    }
-}
-
-private struct DayRow: View {
-    let day: TrainingDay
-
-    var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(day.weekday).font(.headline)
-                    switch day.status {
-                    case .completed:
-                        Label("Completed", systemImage: "checkmark.circle.fill")
-                            .labelStyle(.titleAndIcon)
-                            .northEyebrow()
-                    case .next:
-                        Text("Next", comment: "Badge on the next session to train")
-                            .northEyebrow(NorthColor.signal)
-                    case nil:
-                        EmptyView()
-                    }
-                }
-                Text(day.focus)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                if let start = day.startTime {
-                    Label(start, systemImage: "bell")
-                        .font(.subheadline.monospacedDigit())
-                        .labelStyle(.titleAndIcon)
-                }
-                Text("\(day.exercises.count) exercises")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
     }

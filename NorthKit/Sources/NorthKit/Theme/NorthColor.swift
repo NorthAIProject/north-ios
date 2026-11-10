@@ -77,5 +77,7 @@ public enum NorthColor {
 public enum NorthRadius {
     public static let small: CGFloat = 6
     public static let medium: CGFloat = 10
+    /// Fields, full-width buttons and the inset groups inside a card.
+    public static let control: CGFloat = 12
     public static let large: CGFloat = 16
 }

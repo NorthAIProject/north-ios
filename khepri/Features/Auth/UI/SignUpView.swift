@@ -3,6 +3,9 @@ import SwiftUI
 
 public struct SignUpView: View {
     @ObservedObject var viewModel: LoginViewModel
+    @FocusState private var emailFocused: Bool
+    @FocusState private var passwordFocused: Bool
+    @FocusState private var confirmationFocused: Bool
 
     public init(viewModel: LoginViewModel) {
         self.viewModel = viewModel
@@ -15,7 +18,9 @@ public struct SignUpView: View {
                 title: String(localized: "Your name"),
                 systemImage: "person.fill",
                 text: $viewModel.displayName,
-                autoCapitalization: .words
+                autoCapitalization: .words,
+                submitLabel: .next,
+                onSubmit: { emailFocused = true }
             )
 
             // Email Field
@@ -24,7 +29,10 @@ public struct SignUpView: View {
                 systemImage: "envelope.fill",
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
-                textContentType: .emailAddress
+                textContentType: .emailAddress,
+                submitLabel: .next,
+                focus: $emailFocused,
+                onSubmit: { passwordFocused = true }
             )
 
             // Password Field
@@ -33,7 +41,10 @@ public struct SignUpView: View {
                 systemImage: "lock.fill",
                 text: $viewModel.password,
                 isSecure: true,
-                textContentType: .newPassword
+                textContentType: .newPassword,
+                submitLabel: .next,
+                focus: $passwordFocused,
+                onSubmit: { confirmationFocused = true }
             )
 
             if !viewModel.password.isEmpty {
@@ -46,7 +57,13 @@ public struct SignUpView: View {
                 systemImage: "checkmark.shield.fill",
                 text: $viewModel.passwordConfirmation,
                 isSecure: true,
-                textContentType: .newPassword
+                textContentType: .newPassword,
+                submitLabel: .go,
+                focus: $confirmationFocused,
+                onSubmit: {
+                    guard viewModel.canSubmitSignUp, !viewModel.isLoading else { return }
+                    Task { await viewModel.signUp() }
+                }
             )
 
             if !viewModel.passwordConfirmation.isEmpty && viewModel.password != viewModel.passwordConfirmation {
@@ -91,20 +108,18 @@ public struct SignUpView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "person.badge.key.fill")
-                        .font(.system(size: 15))
+                        .font(.subheadline)
                     Text("Or create account with a Passkey")
                         .font(.subheadline.weight(.semibold))
                 }
-                .foregroundColor(.accentColor)
-                .padding(.top, 4)
+                .foregroundStyle(.tint)
+                .frame(minHeight: 44)
             }
             .disabled(viewModel.isLoading)
 
             // Social Section (Apple & Google for registration)
             SocialAuthSection(
-                onPasskey: {
-                    Task { await viewModel.registerWithPasskey() }
-                },
+                onPasskey: nil,
                 onApple: {
                     Task { await viewModel.signInWithApple() }
                 },

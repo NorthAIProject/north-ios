@@ -4,6 +4,7 @@ import SwiftUI
 public struct LoginScreen: View {
     @StateObject private var viewModel: LoginViewModel
     @Namespace private var animationNamespace
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(onAuthenticated: @escaping () -> Void = {}) {
         _viewModel = StateObject(wrappedValue: LoginViewModel(onAuthenticated: onAuthenticated))
@@ -33,63 +34,13 @@ public struct LoginScreen: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    // Mode Switcher (Sign In vs Sign Up)
                     HStack(spacing: 0) {
-                        Button {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                viewModel.isSignup = false
-                                viewModel.clearMessages()
-                            }
-                        } label: {
-                            Text("Sign In")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(viewModel.isSignup ? .secondary : .primary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(
-                                    ZStack {
-                                        if !viewModel.isSignup {
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(Color(uiColor: .tertiarySystemBackground))
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                        .strokeBorder(NorthColor.hairline, lineWidth: 1)
-                                                }
-                                                .matchedGeometryEffect(id: "TabBackground", in: animationNamespace)
-                                        }
-                                    }
-                                )
-                        }
-
-                        Button {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                viewModel.isSignup = true
-                                viewModel.clearMessages()
-                            }
-                        } label: {
-                            Text("Sign Up")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(viewModel.isSignup ? .primary : .secondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(
-                                    ZStack {
-                                        if viewModel.isSignup {
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(Color(uiColor: .tertiarySystemBackground))
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                        .strokeBorder(NorthColor.hairline, lineWidth: 1)
-                                                }
-                                                .matchedGeometryEffect(id: "TabBackground", in: animationNamespace)
-                                        }
-                                    }
-                                )
-                        }
+                        modeButton("Sign In", signup: false)
+                        modeButton("Sign Up", signup: true)
                     }
                     .padding(4)
                     .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        RoundedRectangle(cornerRadius: NorthRadius.control, style: .continuous)
                             .fill(Color(uiColor: .secondarySystemBackground))
                     )
 
@@ -98,6 +49,7 @@ public struct LoginScreen: View {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundStyle(NorthColor.destructive)
+                                .accessibilityHidden(true)
                             Text(error)
                                 .font(.footnote)
                                 .foregroundStyle(.primary)
@@ -105,9 +57,10 @@ public struct LoginScreen: View {
                         }
                         .padding(12)
                         .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            RoundedRectangle(cornerRadius: NorthRadius.medium, style: .continuous)
                                 .fill(NorthColor.destructive.opacity(0.1))
                         )
+                        .accessibilityElement(children: .combine)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
@@ -115,6 +68,7 @@ public struct LoginScreen: View {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(NorthColor.signal)
+                                .accessibilityHidden(true)
                             Text(info)
                                 .font(.footnote)
                                 .foregroundStyle(.primary)
@@ -122,9 +76,10 @@ public struct LoginScreen: View {
                         }
                         .padding(12)
                         .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            RoundedRectangle(cornerRadius: NorthRadius.medium, style: .continuous)
                                 .fill(NorthColor.signal.opacity(0.1))
                         )
+                        .accessibilityElement(children: .combine)
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
@@ -145,12 +100,53 @@ public struct LoginScreen: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
+                .frame(maxWidth: 480)
+                .frame(maxWidth: .infinity)
+                .animation(reduceMotion ? nil : .snappy, value: viewModel.errorMessage)
+                .animation(reduceMotion ? nil : .snappy, value: viewModel.infoMessage)
             }
-            .navigationBarHidden(true)
+            .scrollDismissesKeyboard(.interactively)
+            .toolbar(.hidden, for: .navigationBar)
+            .sensoryFeedback(.error, trigger: viewModel.errorMessage) { _, message in message != nil }
+            .onChange(of: viewModel.errorMessage) { _, message in announce(message) }
+            .onChange(of: viewModel.infoMessage) { _, message in announce(message) }
             .sheet(isPresented: $viewModel.isForgotPasswordPresented) {
                 ForgotPasswordSheet(viewModel: viewModel)
             }
         }
+    }
+
+    private func modeButton(_ title: LocalizedStringKey, signup: Bool) -> some View {
+        let isSelected = viewModel.isSignup == signup
+        return Button {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.8)) {
+                viewModel.isSignup = signup
+                viewModel.clearMessages()
+            }
+        } label: {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(isSelected ? .primary : .secondary)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: NorthRadius.medium, style: .continuous)
+                            .fill(Color(uiColor: .tertiarySystemBackground))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: NorthRadius.medium, style: .continuous)
+                                    .strokeBorder(NorthColor.hairline, lineWidth: 1)
+                            }
+                            .matchedGeometryEffect(id: "TabBackground", in: animationNamespace)
+                    }
+                }
+                .contentShape(.rect)
+        }
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func announce(_ message: String?) {
+        guard let message else { return }
+        AccessibilityNotification.Announcement(message).post()
     }
 }
 

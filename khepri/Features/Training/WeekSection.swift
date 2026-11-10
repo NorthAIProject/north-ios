@@ -13,13 +13,19 @@ struct WeekSection: View {
     var body: some View {
         Section {
             if week.days.isEmpty {
-                Text("A rest week — nothing is scheduled.")
+                Text("A rest week: nothing is scheduled.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             ForEach(week.days, id: \.date) { session in
                 NavigationLink(value: DayRoute.session(planID: session.planId, dayIndex: session.dayIndex, weekday: session.weekday)) {
-                    WeekSessionRow(session: session, fromOtherPlan: session.planId != followedPlanID)
+                    TrainingSessionRow(
+                        weekday: session.weekday,
+                        status: session.status,
+                        detail: session.planId == followedPlanID ? session.focus : "\(session.focus) · \(session.planName)",
+                        startTime: session.startTime,
+                        exerciseCount: session.exerciseCount
+                    )
                 }
             }
             Button("Change This Week", systemImage: "calendar.badge.plus", action: edit)
@@ -33,39 +39,78 @@ struct WeekSection: View {
     }
 }
 
-struct WeekSessionRow: View {
-    let session: WeekSession
-    let fromOtherPlan: Bool
+/// One session in a list: the weekday with its Completed or Next badge and
+/// what it trains, then its reminder time and exercise count. The trailing
+/// column moves under the text at accessibility sizes.
+struct TrainingSessionRow: View {
+    /// The server's English weekday name; shown in the reader's language.
+    let weekday: String
+    let status: DayStatus?
+    let detail: String
+    let startTime: String?
+    let exerciseCount: Int
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: 12) {
+        if dynamicTypeSize.isAccessibilitySize {
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(WeekdayName.display(session.weekday)).font(.headline)
-                    if session.completed {
-                        Label("Completed", systemImage: "checkmark.circle.fill")
-                            .labelStyle(.titleAndIcon)
-                            .northEyebrow()
-                    } else if session.isNext {
-                        Text("Next", comment: "Badge on the next session to train")
-                            .northEyebrow(NorthColor.signal)
-                    }
-                }
-                Text(fromOtherPlan ? "\(session.focus) · \(session.planName)" : session.focus)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                heading
+                facts(alignment: .leading)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                if let start = session.startTime {
-                    Label(start, systemImage: "bell")
-                        .font(.subheadline.monospacedDigit())
-                        .labelStyle(.titleAndIcon)
-                }
-                Text("\(session.exerciseCount) exercises")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        } else {
+            HStack(spacing: 12) {
+                heading
+                Spacer()
+                facts(alignment: .trailing)
             }
         }
+    }
+
+    private var heading: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Text(WeekdayName.display(weekday)).font(.headline)
+                switch status {
+                case .completed:
+                    Label("Completed", systemImage: "checkmark.circle.fill")
+                        .labelStyle(.titleAndIcon)
+                        .northEyebrow()
+                case .next:
+                    Text("Next", comment: "Badge on the next session to train")
+                        .northEyebrow(NorthColor.signal)
+                case nil:
+                    EmptyView()
+                }
+            }
+            Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func facts(alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 4) {
+            if let startTime {
+                Label {
+                    Text(ClockTime.date(from: startTime), style: .time)
+                } icon: {
+                    Image(systemName: "bell")
+                }
+                .font(.subheadline.monospacedDigit())
+                .labelStyle(.titleAndIcon)
+            }
+            Text("\(exerciseCount) exercises")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+extension WeekSession {
+    var status: DayStatus? {
+        if completed { return .completed }
+        if isNext { return .next }
+        return nil
     }
 }

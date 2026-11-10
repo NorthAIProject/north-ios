@@ -15,18 +15,26 @@ struct ActivityHistoryScreen: View {
         List {
             if let error { ErrorRow(error) }
             if let overview {
-                if overview.recent.isEmpty {
-                    Section {
-                        Text("Nothing yet. Workouts you time, and anything you log here, show up in this list.")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                    }
-                } else {
+                if !overview.recent.isEmpty {
                     Section("Recent") {
                         ForEach(overview.recent, id: \.id) { SessionRow(session: $0) }
                     }
                 }
             } else if error == nil {
                 ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+            }
+        }
+        .overlay {
+            if overview?.recent.isEmpty == true, error == nil {
+                ContentUnavailableView {
+                    Label("No activity yet", systemImage: "figure.run")
+                } description: {
+                    Text("Workouts you time, and anything you log here, show up in this list.")
+                } actions: {
+                    Button("Log Activity") { logging = true }
+                }
             }
         }
         .navigationTitle("Activity History")

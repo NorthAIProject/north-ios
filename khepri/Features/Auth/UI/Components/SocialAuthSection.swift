@@ -2,14 +2,15 @@ import AuthenticationServices
 import SwiftUI
 
 public struct SocialAuthSection: View {
-    let onPasskey: () -> Void
+    let onPasskey: (() -> Void)?
     let onApple: () -> Void
     let onGoogle: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
+    /// - Parameter onPasskey: Signs in with a passkey; nil leaves the button out.
     public init(
-        onPasskey: @escaping () -> Void,
+        onPasskey: (() -> Void)?,
         onApple: @escaping () -> Void,
         onGoogle: @escaping () -> Void
     ) {
@@ -26,7 +27,7 @@ public struct SocialAuthSection: View {
                     .frame(height: 0.5)
                 Text("OR")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .padding(.horizontal, 8)
                 Rectangle()
                     .fill(Color(uiColor: .separator))
@@ -35,15 +36,16 @@ public struct SocialAuthSection: View {
             .padding(.vertical, 8)
 
             VStack(spacing: 12) {
-                // Passkey Button
-                SocialAuthButton(provider: .passkey, action: onPasskey)
+                if let onPasskey {
+                    SocialAuthButton(provider: .passkey, action: onPasskey)
+                }
 
                 // Sign in with Apple Button
                 AppleSignInButton(
                     style: colorScheme == .dark ? .white : .black,
                     action: onApple
                 )
-                .frame(height: 50)
+                .frame(minHeight: 50)
 
                 // Google Button
                 SocialAuthButton(provider: .google, action: onGoogle)

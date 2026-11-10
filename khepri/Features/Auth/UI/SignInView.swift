@@ -3,6 +3,7 @@ import SwiftUI
 
 public struct SignInView: View {
     @ObservedObject var viewModel: LoginViewModel
+    @FocusState private var passwordFocused: Bool
 
     public init(viewModel: LoginViewModel) {
         self.viewModel = viewModel
@@ -16,7 +17,9 @@ public struct SignInView: View {
                 systemImage: "envelope.fill",
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
-                textContentType: .emailAddress
+                textContentType: .emailAddress,
+                submitLabel: .next,
+                onSubmit: { passwordFocused = true }
             )
 
             // Password Field
@@ -25,7 +28,13 @@ public struct SignInView: View {
                 systemImage: "lock.fill",
                 text: $viewModel.password,
                 isSecure: true,
-                textContentType: .password
+                textContentType: .password,
+                submitLabel: .go,
+                focus: $passwordFocused,
+                onSubmit: {
+                    guard viewModel.canSubmitSignIn, !viewModel.isLoading else { return }
+                    Task { await viewModel.signIn() }
+                }
             )
 
             // Forgot password button
@@ -36,7 +45,7 @@ public struct SignInView: View {
                 } label: {
                     Text("Forgot password?")
                         .font(.footnote.weight(.medium))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.tint)
                 }
             }
             .padding(.top, -4)

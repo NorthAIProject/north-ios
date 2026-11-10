@@ -75,37 +75,39 @@ struct DayView: View {
                     ForEach(Array(day.exercises.enumerated()), id: \.offset) { index, exercise in
                         ExerciseRow(exercise: exercise)
                             .contentShape(Rectangle())
+                            .accessibilityElement(children: .combine)
+                            .accessibilityAddTraits(exercise.catalogSlug == nil ? [] : .isButton)
                             .onTapGesture {
                                 if let slug = exercise.catalogSlug { viewing = ExerciseSlugRoute(slug: slug) }
                             }
                             .swipeActions {
                                 if isEditable {
-                                Button("Remove", role: .destructive) {
-                                    Task { await store.remove(day: dayIndex, index: index) }
-                                }
-                                Button("Swap") { picking = .swap(index) }
-                                    .tint(NorthColor.agent)
+                                    Button("Remove", role: .destructive) {
+                                        Task { await store.remove(day: dayIndex, index: index) }
+                                    }
+                                    Button("Swap") { picking = .swap(index) }
+                                        .tint(NorthColor.agent)
                                 }
                             }
                             .contextMenu {
                                 if isEditable {
-                                Button("Change Sets & Reps", systemImage: "slider.horizontal.3") {
-                                    adjusting = IndexedExercise(index: index, exercise: exercise)
-                                }
-                                Button("Swap Exercise", systemImage: "arrow.left.arrow.right") { picking = .swap(index) }
-                                if index > 0 {
-                                    Button("Move Up", systemImage: "arrow.up") {
-                                        Task { await store.move(day: dayIndex, index: index, up: true) }
+                                    Button("Change Sets & Reps", systemImage: "slider.horizontal.3") {
+                                        adjusting = IndexedExercise(index: index, exercise: exercise)
                                     }
-                                }
-                                if index < day.exercises.count - 1 {
-                                    Button("Move Down", systemImage: "arrow.down") {
-                                        Task { await store.move(day: dayIndex, index: index, up: false) }
+                                    Button("Swap Exercise", systemImage: "arrow.left.arrow.right") { picking = .swap(index) }
+                                    if index > 0 {
+                                        Button("Move Up", systemImage: "arrow.up") {
+                                            Task { await store.move(day: dayIndex, index: index, up: true) }
+                                        }
                                     }
-                                }
-                                Button("Remove", systemImage: "trash", role: .destructive) {
-                                    Task { await store.remove(day: dayIndex, index: index) }
-                                }
+                                    if index < day.exercises.count - 1 {
+                                        Button("Move Down", systemImage: "arrow.down") {
+                                            Task { await store.move(day: dayIndex, index: index, up: false) }
+                                        }
+                                    }
+                                    Button("Remove", systemImage: "trash", role: .destructive) {
+                                        Task { await store.remove(day: dayIndex, index: index) }
+                                    }
                                 }
                             }
                     }
@@ -125,7 +127,7 @@ struct DayView: View {
             .navigationTitle(WeekdayName.display(scheduledWeekday ?? day.weekday))
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
-                if store.isEditing { ProgressView().padding().background(.regularMaterial, in: .rect(cornerRadius: 10)) }
+                if store.isEditing { ProgressView().padding().background(.regularMaterial, in: .rect(cornerRadius: NorthRadius.medium)) }
             }
             .sheet(item: $picking) { purpose in
                 ExercisePicker(

@@ -217,7 +217,7 @@ struct WorkoutRecapCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 12))
+        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: NorthRadius.control))
     }
 
     private func exerciseRow(_ exercise: WorkoutRecapModel.Exercise) -> some View {

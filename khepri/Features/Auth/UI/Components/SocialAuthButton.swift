@@ -1,4 +1,5 @@
 import AuthenticationServices
+import NorthKit
 import SwiftUI
 
 public struct AppleSignInButton: UIViewRepresentable {
@@ -12,7 +13,7 @@ public struct AppleSignInButton: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
         let button = ASAuthorizationAppleIDButton(type: .continue, style: style)
-        button.cornerRadius = 12
+        button.cornerRadius = NorthRadius.control
         button.addAction(UIAction { _ in action() }, for: .touchUpInside)
         return button
     }
@@ -32,16 +33,25 @@ public struct SocialAuthButton: View {
             }
         }
 
-        var iconName: String {
+        /// Google's four-colour mark as drawn, never tinted; an SF Symbol for the passkey.
+        @ViewBuilder
+        func icon(markSize: CGFloat) -> some View {
             switch self {
-            case .google: return "globe"
-            case .passkey: return "person.badge.key.fill"
+            case .google:
+                Image("GoogleMark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: markSize, height: markSize)
+            case .passkey:
+                Image(systemName: "person.badge.key.fill")
+                    .font(.callout.weight(.semibold))
             }
         }
     }
 
     let provider: Provider
     let action: () -> Void
+    @ScaledMetric(relativeTo: .callout) private var markSize: CGFloat = 18
 
     public init(provider: Provider, action: @escaping () -> Void) {
         self.provider = provider
@@ -51,20 +61,19 @@ public struct SocialAuthButton: View {
     public var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Image(systemName: provider.iconName)
-                    .font(.system(size: 16, weight: .semibold))
+                provider.icon(markSize: markSize)
+                    .accessibilityHidden(true)
                 Text(provider.title)
                     .font(.subheadline.weight(.semibold))
             }
-            .foregroundColor(.primary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
+            .foregroundStyle(.primary)
+            .frame(maxWidth: .infinity, minHeight: 50)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: NorthRadius.control, style: .continuous)
                     .fill(Color(uiColor: .secondarySystemBackground))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: NorthRadius.control, style: .continuous)
                     .stroke(Color(uiColor: .separator), lineWidth: 0.5)
             )
         }

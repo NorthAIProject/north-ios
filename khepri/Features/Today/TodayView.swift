@@ -15,6 +15,10 @@ struct TodayView: View {
     @State private var firstWeek = FirstWeekStore()
     @State private var recap = RecapStore()
     @State private var showingRecap = false
+    /// The cards that load after the snapshot arrive together, so the page
+    /// shifts once rather than once per card.
+    @State private var cardsReady = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ScrollView {
@@ -22,7 +26,7 @@ struct TodayView: View {
                 Header(briefing: snapshot.briefing)
 
                 // A new person's first seven days: today's one action, first.
-                FirstWeekCard(store: firstWeek)
+                if cardsReady { FirstWeekCard(store: firstWeek) }
 
                 StatGrid(snapshot: snapshot) { router.open(.checkInFlow) }
                     // Without a next step, the tour points at the day's numbers.
@@ -40,20 +44,20 @@ struct TodayView: View {
                 }
 
                 // Today's recovery against the usual; nothing without a watch.
-                if let today = recovery.recovery {
+                if cardsReady, let today = recovery.recovery {
                     RecoveryCard(recovery: today)
                 }
 
                 // The coach's one unprompted message, on a day it spoke first.
-                OutreachCard(store: outreach)
+                if cardsReady { OutreachCard(store: outreach) }
 
                 // Only on a low-recovery morning with a session still to do,
                 // and only when the coach's message has not already covered it.
-                if outreach.message?.coversRecovery != true {
+                if cardsReady, outreach.message?.coversRecovery != true {
                     LighterDayCard(store: lighter)
                 }
 
-                if let week = recap.recaps[.week] {
+                if cardsReady, let week = recap.recaps[.week] {
                     YourWeekCard(recap: week) { showingRecap = true }
                 }
 
@@ -88,15 +92,17 @@ struct TodayView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 24)
-            .animation(.snappy, value: fitness.snapshot)
+            .animation(reduceMotion ? nil : .snappy, value: fitness.snapshot)
         }
-        .onAppear {
-            Task { await fitness.loadActivity() }
-            Task { await recovery.load() }
-            Task { await lighter.load() }
-            Task { await outreach.load() }
-            Task { await firstWeek.load() }
-            Task { await recap.load(.week) }
+        .task {
+            // A slow answer does not hold the rest back for long.
+            let patience = Task {
+                try? await Task.sleep(for: .seconds(2))
+                revealCards()
+            }
+            await loadCards()
+            patience.cancel()
+            revealCards()
         }
         // Done under the coach's first-week message marks the day too.
         .onChange(of: outreach.message?.action) {
@@ -109,6 +115,23 @@ struct TodayView: View {
         .sheet(isPresented: $showingRecap) {
             RecapScreen(store: recap)
         }
+    }
+}
+
+extension TodayView {
+    private func loadCards() async {
+        async let activity: Void = fitness.loadActivity()
+        async let recoveryLoad: Void = recovery.load()
+        async let lighterLoad: Void = lighter.load()
+        async let outreachLoad: Void = outreach.load()
+        async let firstWeekLoad: Void = firstWeek.load()
+        async let recapLoad: Void = recap.load(.week)
+        _ = await (activity, recoveryLoad, lighterLoad, outreachLoad, firstWeekLoad, recapLoad)
+    }
+
+    private func revealCards() {
+        guard !cardsReady else { return }
+        withAnimation(reduceMotion ? nil : .snappy) { cardsReady = true }
     }
 }
 
@@ -136,48 +159,76 @@ private struct StatGrid: View {
     let snapshot: TodaySnapshot
     let checkIn: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-            GridRow {
-                StatTile(title: String(localized: "Streak"), systemImage: "flame.fill", tint: NorthColor.ember,
-                         value: snapshot.streak.formatted(),
-                         unit: snapshot.streak == 1
-                            ? String(localized: "day", comment: "Streak unit, one day")
-                            : String(localized: "days", comment: "Streak unit, several days"))
-                if let today = snapshot.todayCheckIn {
-                    // Tapping shows the check-in, where it can be edited.
-                    Button(action: checkIn) {
-                        StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: NorthColor.signal,
-                                 value: "\(today.mood) · \(today.energy)",
-                                 caption: String(localized: "Mood · Energy · \(Self.time(today))"),
-                                 showsChevron: true)
-                            .accessibilityLabel(Self.accessibilityLabel(today))
-                    }
-                    .buttonStyle(.plain)
-                } else if snapshot.checkedInToday {
-                    // An older server says only that today is done.
-                    StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: NorthColor.signal,
-                             value: String(localized: "Done", comment: "Today's check-in is done"))
-                } else {
-                    Button(action: checkIn) {
-                        StatTile(title: String(localized: "Check-in"), systemImage: "circle.dashed", tint: NorthColor.signal,
-                                 value: String(localized: "Open", comment: "Today's check-in is still to do"), showsChevron: true)
-                    }
-                    .buttonStyle(.plain)
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: 12) {
+                streakTile
+                checkInTile
+                waterTile
+                sleepTile
+            }
+        } else {
+            Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                GridRow {
+                    streakTile
+                    checkInTile
+                }
+                GridRow {
+                    waterTile
+                    sleepTile
                 }
             }
-            GridRow {
-                StatTile(title: String(localized: "Water"), systemImage: "drop.fill", tint: NorthColor.Day.water,
-                         value: (Double(snapshot.hydration.todayML) / 1000).formatted(.number.precision(.fractionLength(1))),
-                         unit: String(localized: "of \(waterTarget) L", comment: "Water drunk today out of the target, in litres"),
-                         progress: snapshot.hydration.targetML > 0 ? Double(snapshot.hydration.todayML) / Double(snapshot.hydration.targetML) : nil)
-                StatTile(title: String(localized: "Sleep"), systemImage: "moon.fill", tint: NorthColor.Day.sleep,
-                         value: snapshot.sleep.logged ? sleepHours : "–",
-                         unit: snapshot.sleep.logged
-                            ? String(localized: "h", comment: "Unit: hours of sleep")
-                            : String(localized: "not logged", comment: "Sleep not logged today"))
-            }
         }
+    }
+
+    private var streakTile: some View {
+        StatTile(title: String(localized: "Streak"), systemImage: "flame.fill", tint: NorthColor.ember,
+                 value: snapshot.streak.formatted(),
+                 unit: snapshot.streak == 1
+                    ? String(localized: "day", comment: "Streak unit, one day")
+                    : String(localized: "days", comment: "Streak unit, several days"))
+    }
+
+    @ViewBuilder
+    private var checkInTile: some View {
+        if let today = snapshot.todayCheckIn {
+            // Tapping shows the check-in, where it can be edited.
+            Button(action: checkIn) {
+                StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: NorthColor.signal,
+                         value: "\(today.mood) · \(today.energy)",
+                         caption: String(localized: "Mood · Energy · \(Self.time(today))"),
+                         showsChevron: true)
+                    .accessibilityLabel(Self.accessibilityLabel(today))
+            }
+            .buttonStyle(.plain)
+        } else if snapshot.checkedInToday {
+            // An older server says only that today is done.
+            StatTile(title: String(localized: "Check-in"), systemImage: "checkmark.circle.fill", tint: NorthColor.signal,
+                     value: String(localized: "Done", comment: "Today's check-in is done"))
+        } else {
+            Button(action: checkIn) {
+                StatTile(title: String(localized: "Check-in"), systemImage: "circle.dashed", tint: NorthColor.signal,
+                         value: String(localized: "Open", comment: "Today's check-in is still to do"), showsChevron: true)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var waterTile: some View {
+        StatTile(title: String(localized: "Water"), systemImage: "drop.fill", tint: NorthColor.Day.water,
+                 value: (Double(snapshot.hydration.todayML) / 1000).formatted(.number.precision(.fractionLength(1))),
+                 unit: String(localized: "of \(waterTarget) L", comment: "Water drunk today out of the target, in litres"),
+                 progress: snapshot.hydration.targetML > 0 ? Double(snapshot.hydration.todayML) / Double(snapshot.hydration.targetML) : nil)
+    }
+
+    private var sleepTile: some View {
+        StatTile(title: String(localized: "Sleep"), systemImage: "moon.fill", tint: NorthColor.Day.sleep,
+                 value: snapshot.sleep.logged ? sleepHours : "–",
+                 unit: snapshot.sleep.logged
+                    ? String(localized: "h", comment: "Unit: hours of sleep")
+                    : String(localized: "not logged", comment: "Sleep not logged today"))
     }
 
     private var waterTarget: String {
@@ -281,7 +332,7 @@ private struct NextStepCard: View {
             Text(step.title)
                 .font(.north(.title2).weight(.bold))
             Text(step.body)
-                .font(.subheadline)
+                .font(.north(.subheadline))
                 .foregroundStyle(.secondary)
             Button(step.cta, action: action)
                 .northProminentButton()
@@ -302,7 +353,7 @@ private struct GoalRow: View {
                 Text(goal.title)
                     .font(.north(.body).weight(.medium))
                 Text(FocusArea(rawValue: goal.category)?.title ?? goal.category.capitalized)
-                    .font(.caption)
+                    .font(.north(.caption))
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -316,13 +367,16 @@ private struct GoalRow: View {
                 .tint(NorthColor.signal)
                 .scaleEffect(0.7)
                 .frame(width: 40, height: 40)
+                .accessibilityLabel("Progress")
+                .accessibilityValue(Text(Double(progress) / 100, format: .percent))
             } else if goal.milestoneTotal > 0 {
                 Text("\(goal.milestoneDone)/\(goal.milestoneTotal)")
-                    .font(.subheadline)
+                    .font(.north(.subheadline))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

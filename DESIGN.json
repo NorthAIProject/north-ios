@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T19:45:31+00:00",
+  "title": "Design System: Khepri",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Solar Gold",
+        "colorSetName": "AccentColor",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#2E2210",
+          "#4A3718",
+          "#664D20",
+          "#846328",
+          "#A8843F",
+          "#C9A257",
+          "#E0B86A",
+          "#F0D9A6"
+        ]
+      },
+      "signal": {
+        "role": "primary",
+        "displayName": "Solar Gold",
+        "colorSetName": "Signal",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#2E2210",
+          "#4A3718",
+          "#664D20",
+          "#846328",
+          "#A8843F",
+          "#C9A257",
+          "#E0B86A",
+          "#F0D9A6"
+        ]
+      },
+      "agent": {
+        "role": "secondary",
+        "displayName": "Coach Blue",
+        "colorSetName": "Agent",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#16222E",
+          "#243749",
+          "#365069",
+          "#496B8C",
+          "#6689AA",
+          "#88A9C8",
+          "#AFC6DB",
+          "#D6E2EE"
+        ]
+      },
+      "ember": {
+        "role": "tertiary",
+        "displayName": "Ember",
+        "colorSetName": "Ember",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#35190A",
+          "#582C14",
+          "#7B4324",
+          "#9D5B34",
+          "#B97546",
+          "#D48E5A",
+          "#E4B38E",
+          "#F3D9C6"
+        ]
+      },
+      "destructive": {
+        "role": "error",
+        "displayName": "Brick",
+        "colorSetName": "Destructive",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#3A1210",
+          "#5E221F",
+          "#7F312E",
+          "#9E413D",
+          "#B95F5C",
+          "#D27E7C",
+          "#E4AAA8",
+          "#F4D6D5"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Paper / Night",
+        "colorSetName": "Background",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#0C111B",
+          "#141C2A",
+          "#1E2A3E",
+          "#374156",
+          "#A7AFBC",
+          "#D8D1C4",
+          "#ECE7DD",
+          "#F5F2EB"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "colorSetName": "Foreground",
+        "hasDarkVariant": true,
+        "tonalRamp": [
+          "#0C111B",
+          "#111A29",
+          "#1E2A3E",
+          "#374156",
+          "#5C6474",
+          "#A7AFBC",
+          "#ECE7DD",
+          "#F5F2EB"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "fontSource": ".font(.northDisplay(.largeTitle))",
+        "dynamicType": true,
+        "purpose": "The wordmark and brand moments only. One weight."
+      },
+      "title": {
+        "displayName": "Title",
+        "fontSource": ".font(.north(.title2).weight(.semibold))",
+        "dynamicType": true,
+        "purpose": "The one statement a card makes."
+      },
+      "body": {
+        "displayName": "Body",
+        "fontSource": ".font(.north(.body))",
+        "dynamicType": true,
+        "purpose": "Row titles and prose inside cards."
+      },
+      "label": {
+        "displayName": "Eyebrow",
+        "fontSource": ".northEyebrow()",
+        "dynamicType": true,
+        "purpose": "Uppercase tracked label above a value, card or group."
+      },
+      "number": {
+        "displayName": "Number",
+        "fontSource": "NorthBigValue / .northDisplayNumber(_:)",
+        "dynamicType": true,
+        "purpose": "The figure a card is about, tabular digits, rolling on change."
+      },
+      "chrome": {
+        "displayName": "Chrome",
+        "fontSource": ".font(.body) and the other stock text styles",
+        "dynamicType": true,
+        "purpose": "List, Form, toolbar and auth control text."
+      }
+    },
+    "materials": [
+      {
+        "name": "system-bars",
+        "api": "stock iOS 26 Liquid Glass",
+        "usage": "Navigation bars, tab bar, toolbars. Never restyled."
+      },
+      {
+        "name": "floating-overlay",
+        "api": ".regularMaterial",
+        "usage": "Saving spinner over a list, quick coach reply over Today."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "orb",
+        "value": ".shadow(color: .black.opacity(0.18), radius: 10, y: 4)",
+        "purpose": "The coach orb floating over Today."
+      },
+      {
+        "name": "overlay",
+        "value": ".shadow(color: .black.opacity(0.2), radius: 20, y: 8)",
+        "purpose": "The quick coach reply floating over Today."
+      }
+    ],
+    "motion": [
+      {
+        "name": "standard",
+        "value": ".snappy",
+        "purpose": "Default for state changes and content arriving."
+      },
+      {
+        "name": "mode-switch",
+        "value": ".spring(response: 0.35, dampingFraction: 0.8)",
+        "purpose": "Sign In / Sign Up switcher."
+      },
+      {
+        "name": "focus",
+        "value": ".easeInOut(duration: 0.15)",
+        "purpose": "Field focus ring."
+      }
+    ],
+    "sfSymbols": {
+      "renderingMode": "monochrome",
+      "weightTracking": "text style and weight via .font(), matching adjacent text",
+      "inventory": {
+        "navigation": [
+          "chevron.right",
+          "chevron.left",
+          "ellipsis.circle",
+          "sun.horizon",
+          "square.grid.2x2"
+        ],
+        "actions": [
+          "plus",
+          "trash",
+          "square.and.arrow.up",
+          "square.and.pencil",
+          "doc.badge.plus"
+        ],
+        "status": [
+          "checkmark.circle.fill",
+          "exclamationmark.triangle",
+          "wifi.exclamationmark",
+          "flame.fill",
+          "sparkles"
+        ],
+        "content": [
+          "figure.strengthtraining.traditional",
+          "figure.run",
+          "target",
+          "drop.fill",
+          "moon.fill"
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Prominent Button",
+      "kind": "button",
+      "refersTo": "button-prominent",
+      "swiftAPI": "Button(\"Start Workout\") { }.northProminentButton().controlSize(.large)",
+      "description": "The one prominent action on a screen. Accent fill, PrimaryForeground label.",
+      "html": "<button class=\"ds-btn\">Start Workout</button>",
+      "css": ".ds-btn{background:#846328;color:#F5F2EB;font:600 17px -apple-system,sans-serif;padding:14px 20px;border:none;border-radius:12px;width:100%}.ds-btn:active{opacity:.8}.ds-btn:disabled{background:#e5e5ea;color:#8e8e93}@media (prefers-color-scheme:dark){.ds-btn{background:#E0B86A;color:#0C111B}}"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "surface-card",
+      "swiftAPI": "VStack { NorthCardHeader(\"Goals\"); ... }.northSurfaceCard()",
+      "description": "The card most screens are built from: grouped background, hairline edge, 16pt continuous corners.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-eyebrow\">Water</div><div class=\"ds-value\">1.5 <span>of 2 L</span></div></div>",
+      "css": ".ds-card{background:#f2f2f7;border:.5px solid rgba(38,46,60,.12);border-radius:16px;padding:20px;font-family:Geist,-apple-system,sans-serif}.ds-eyebrow{font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#6b6b70}.ds-value{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:10px}.ds-value span{font-size:20px;font-weight:400;color:#6b6b70}@media (prefers-color-scheme:dark){.ds-card{background:#1c1c1e;border-color:rgba(197,206,224,.1);color:#fff}}"
+    },
+    {
+      "name": "Inset List",
+      "kind": "list",
+      "refersTo": "inset-list",
+      "swiftAPI": "NorthInsetList(goals, id: \\.id) { GoalRow(goal: $0) }",
+      "description": "Rows on a darker inset inside a card, hairlines starting at the text.",
+      "html": "<div class=\"ds-inset\"><div>Run a 10k</div><div>Sleep 7.5 h</div></div>",
+      "css": ".ds-inset{background:rgba(255,255,255,.55);border-radius:12px;font:500 17px Geist,-apple-system,sans-serif}.ds-inset div{padding:12px 16px}.ds-inset div+div{border-top:.5px solid rgba(60,60,67,.29)}"
+    },
+    {
+      "name": "Auth Field",
+      "kind": "input",
+      "refersTo": "field",
+      "swiftAPI": "VaultTextField(title: \"Email address\", systemImage: \"envelope.fill\", text: $email, submitLabel: .next)",
+      "description": "Sign-in field with a leading symbol and an accent focus ring.",
+      "html": "<input class=\"ds-field\" placeholder=\"Email address\">",
+      "css": ".ds-field{background:#f2f2f7;border:1.5px solid transparent;border-radius:12px;padding:14px 16px;font:17px -apple-system,sans-serif;width:100%;box-sizing:border-box;transition:border-color .15s}.ds-field:focus{outline:none;border-color:#846328}"
+    },
+    {
+      "name": "Social Sign-in Button",
+      "kind": "button",
+      "refersTo": "social-button",
+      "swiftAPI": "SocialAuthButton(provider: .google) { }",
+      "description": "Secondary sign-in option. Provider mark as supplied, never tinted.",
+      "html": "<button class=\"ds-social\">Continue with Google</button>",
+      "css": ".ds-social{background:#f2f2f7;border:.5px solid rgba(60,60,67,.29);border-radius:12px;min-height:50px;width:100%;font:600 15px -apple-system,sans-serif;color:#000}.ds-social:active{opacity:.7}"
+    },
+    {
+      "name": "Eyebrow",
+      "kind": "label",
+      "refersTo": "label",
+      "swiftAPI": "Text(\"Next\").northEyebrow(NorthColor.signal)",
+      "description": "Small uppercase tracked label; quiet unless given a colour.",
+      "html": "<span class=\"ds-eyebrow-signal\">Next</span>",
+      "css": ".ds-eyebrow-signal{font:500 12px Geist,-apple-system,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#846328}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Instrument, Not the Show",
+    "overview": "Khepri reads like a well-made training log kept by someone who knows the science: warm paper in the light, deep navy at night, and a single gold that points at what matters. Data and the user's own words lead. Chrome recedes into system materials and semantic colours, so the app feels native first and branded second. The brand speaks in three places only: the coach, the sports and trackers, and the rare highlight.\n\nDensity is moderate and task-shaped. Today is a single scrolling column of cards, each one answering one question. Training, Settings and every editing surface are plain `List` and `Form`, because those are the honest affordances. Motion is `.snappy` and conveys state; nothing loops, nothing celebrates by default. Every animation checks `accessibilityReduceMotion`. At accessibility text sizes, side-by-side layouts stack.\n\nThis system rejects gym-bro energy (neon on black, flames, streak shaming, all-caps motivation), gamified wellness clutter (confetti, decorative badges), generic SaaS dashboards (hero-metric tiles, identical card grids, gradient accents), chatbot-first screens where the data hides behind bubbles, and the default SwiftUI tutorial stack of shadowed white cards.",
+    "keyCharacteristics": [
+      "Colour tokens are the web app's, generated from its CSS by `scripts/sync-theme.py`. Edit the CSS, never the catalog.",
+      "System chrome, brand content: `List`, `Form`, toolbars and sheets stay stock.",
+      "One gold accent, used for links, the Next badge, and the one prominent button.",
+      "Flat surfaces separated by tone and a hairline, never by shadow.",
+      "Geist for content, SF Pro for system controls, Marcellus for the wordmark and nothing else."
+    ],
+    "rules": [
+      {
+        "name": "The Three Voices Rule",
+        "body": "Colour means signal (gold), coach (blue) or effort (ember and the sport and day hues). A colour that is none of these is decoration and is prohibited.",
+        "section": "colors"
+      },
+      {
+        "name": "The System Chrome Rule",
+        "body": "Navigation bars, lists, forms, sheets and their text use system semantic colours. `NorthColor` is for content the brand owns.",
+        "section": "colors"
+      },
+      {
+        "name": "The Catalog Rule",
+        "body": "No `Color(red:green:blue:)`, no hex, no `.white` or `.black` on a surface. Every colour is a `NorthColor` token or a system semantic colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dynamic Type Contract",
+        "body": "Every font call names a text style. `.font(.system(size:))` is prohibited for text and for symbols beside text. If a view clips at AX5, a font call or a fixed frame is wrong.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Family Per Surface Rule",
+        "body": "Inside a card, every text is Geist. Inside a `List` or `Form` row, every text is SF Pro. Mixing the two in one row is drift.",
+        "section": "typography"
+      },
+      {
+        "name": "The Wordmark Rule",
+        "body": "Marcellus appears on brand moments only. It never sets a control, a label or a number.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Shadow Rule",
+        "body": "Cards, rows and buttons do not cast shadows. If a surface needs separating, change its tone or add the hairline.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Material Rule",
+        "body": "`.regularMaterial` is the only custom material. `.ultraThinMaterial` as a page or card background is prohibited.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** build a new card with `northSurfaceCard()`, `NorthCardHeader` and `northEyebrow()` before writing a background by hand.",
+      "**Do** take radii from `NorthRadius` (`small` 6, `medium` 10, `control` 12, `large` 16) and spacing from the 4 / 8 / 12 / 16 / 20 / 24 scale.",
+      "**Do** use `.north(_:)` for every text inside a card and stock text styles inside `List` and `Form`.",
+      "**Do** format numbers, times and durations with `FormatStyle`, add `.monospacedDigit()`, and pluralise through the String Catalog.",
+      "**Do** gate every animation on `accessibilityReduceMotion` and default to `.snappy`.",
+      "**Do** give every icon-only button an `accessibilityLabel` and a 44pt hit area.",
+      "**Do** stack side-by-side content when `dynamicTypeSize.isAccessibilitySize`.",
+      "**Do** add every new string in en, es, pt-PT and pt-BR."
+    ],
+    "donts": [
+      "**Don't** ship gym-bro energy: neon on black, flames, aggressive streak shaming, all-caps motivational copy.",
+      "**Don't** ship gamified wellness clutter: confetti on every action, badges as decoration, points everywhere.",
+      "**Don't** build generic SaaS dashboards: hero-metric tiles, identical card grids, gradient accents.",
+      "**Don't** make chatbot-first screens where everything is a chat bubble and the data is hidden.",
+      "**Don't** reach for the default SwiftUI tutorial stack: white `cornerRadius` cards with a drop shadow, a `List` for everything, system blue as the only brand expression.",
+      "**Don't** use `Color(red:green:blue:)`, hex, `.white` or `.black` on a surface.",
+      "**Don't** use `.font(.system(size:))`; it breaks Dynamic Type.",
+      "**Don't** add a shadow to a card, or a material to anything that does not float.",
+      "**Don't** set anything but the wordmark and brand moments in Marcellus, and never bold it.",
+      "**Don't** put `Ember` on text over a light surface; it fails contrast.",
+      "**Don't** edit `Theme.xcassets` by hand. Change the web CSS and run `scripts/sync-theme.py`.",
+      "**Don't** use em dashes in copy."
+    ]
+  }
+}

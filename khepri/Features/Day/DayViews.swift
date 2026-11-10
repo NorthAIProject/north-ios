@@ -620,8 +620,8 @@ struct DayTimeline: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
-            .background(color.opacity(0.12), in: .rect(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(color.opacity(0.22)))
+            .background(color.opacity(0.12), in: .rect(cornerRadius: NorthRadius.control))
+            .overlay(RoundedRectangle(cornerRadius: NorthRadius.control).strokeBorder(color.opacity(0.22)))
             .padding(.vertical, 3)
             .accessibilityElement(children: .combine)
         case .marker(let marker):

@@ -108,7 +108,7 @@ public struct NorthInsetList<Data: RandomAccessCollection, ID: Hashable, Row: Vi
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .background(Color(.systemBackground).opacity(0.55), in: .rect(cornerRadius: NorthRadius.medium + 2, style: .continuous))
+        .background(Color(.systemBackground).opacity(0.55), in: .rect(cornerRadius: NorthRadius.control, style: .continuous))
     }
 }
 #endif
