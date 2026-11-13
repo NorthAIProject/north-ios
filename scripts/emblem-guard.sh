@@ -1,6 +1,7 @@
 #!/bin/sh
-# Fails when this repository's copies of the emblem motion data drift from
-# north-web-app's design/ (the canonical files; ADR 0005 there).
+# Fails when this repository's copies of the 3D motion data (emblem and
+# mascot) drift from north-web-app's design/ (the canonical files; ADRs 0005
+# and 0006 there).
 #
 #   scripts/emblem-guard.sh                      # compare with north-web-app main on GitHub
 #   scripts/emblem-guard.sh ../north-web-app     # compare with a local checkout
@@ -12,7 +13,7 @@ cd "$(dirname "$0")/.."
 source="${1:-}"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-for name in emblem-motion.json emblem-motion.fixtures.json; do
+for name in emblem-motion.json emblem-motion.fixtures.json mascot-motion.json mascot-motion.fixtures.json; do
 	if [ -n "$source" ]; then
 		cp "$source/design/$name" "$tmp/$name"
 	else
@@ -28,4 +29,6 @@ check() {
 }
 check emblem-motion.json khepri/Resources/emblem-motion.json
 check emblem-motion.fixtures.json khepriTests/emblem-motion.fixtures.json
+check mascot-motion.json khepri/Resources/mascot-motion.json
+check mascot-motion.fixtures.json khepriTests/mascot-motion.fixtures.json
 exit $fail

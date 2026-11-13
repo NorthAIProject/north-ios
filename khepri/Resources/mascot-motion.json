@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "about": "The 3D mascot's motion (ADR 0006, docs/brand/README.md). Lengths are in model units: the mascot is 1 unit tall.",
+  "entrance": {
+    "durationSeconds": 0.6,
+    "easing": "easeOutCubic",
+    "from": { "translateY": -0.04, "rotateYDegrees": 10 }
+  },
+  "idle": [
+    {
+      "joint": "body",
+      "property": "translateY",
+      "periodSeconds": 6,
+      "easing": "sine",
+      "keyframes": [
+        { "t": 0, "v": 0 },
+        { "t": 0.5, "v": 0.015 },
+        { "t": 1, "v": 0 }
+      ]
+    },
+    {
+      "joint": "core",
+      "property": "emissiveScale",
+      "periodSeconds": 6,
+      "easing": "sine",
+      "keyframes": [
+        { "t": 0, "v": 0.85 },
+        { "t": 0.5, "v": 1.15 },
+        { "t": 1, "v": 0.85 }
+      ]
+    }
+  ],
+  "blink": {
+    "joint": "eyes",
+    "cycleSeconds": 7,
+    "startsSeconds": [2.2, 5.6, 5.95],
+    "closeSeconds": 0.07,
+    "holdSeconds": 0.04,
+    "openSeconds": 0.1,
+    "closedScaleY": 0.1
+  },
+  "lookAt": {
+    "maxHeadYawDegrees": 12,
+    "maxHeadPitchDegrees": 6,
+    "maxPupilX": 0.012,
+    "maxPupilY": 0.008,
+    "timeConstantSeconds": 0.3
+  }
+}
