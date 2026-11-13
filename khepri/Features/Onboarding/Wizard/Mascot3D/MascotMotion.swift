@@ -1,4 +1,3 @@
-#if DEBUG || BETA
 import Foundation
 
 /// The 3D mascot's motion: turns a time (and a pointer) into values.
@@ -9,8 +8,6 @@ import Foundation
 /// web's `mascot-motion.ts` does the same arithmetic, and both test suites
 /// assert `mascot-motion.fixtures.json`. Self-contained on purpose, so the
 /// emblem experiment can be deleted without touching this.
-///
-/// Debug and Beta only; Release excludes this file (DESIGN.md, 3D Mascot).
 struct MascotMotion: Decodable, Sendable {
     enum Easing: String, Decodable, Sendable {
         case linear, sine, easeOutCubic
@@ -151,4 +148,3 @@ struct MascotMotion: Decodable, Sendable {
         return try JSONDecoder().decode(MascotMotion.self, from: Data(contentsOf: url))
     }
 }
-#endif

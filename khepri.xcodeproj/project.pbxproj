@@ -835,16 +835,6 @@
 				DEVELOPMENT_TEAM = 84X9WYBF36;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					Emblem3DView.swift,
-					EmblemMotion.swift,
-					Emblem.usdz,
-					"emblem-motion.json",
-					Mascot3DView.swift,
-					MascotMotion.swift,
-					Mascot.usdz,
-					"mascot-motion.json",
-				);
 				GENERATE_INFOPLIST_FILE = YES;
 				GOOGLE_IOS_CLIENT_ID = "991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg.apps.googleusercontent.com";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.991268372645-5ahn5f3fqngms7mr5deb4pm4tefkickg";
@@ -920,12 +910,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 84X9WYBF36;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					EmblemMotionTests.swift,
-					"emblem-motion.fixtures.json",
-					MascotMotionTests.swift,
-					"mascot-motion.fixtures.json",
-				);
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
