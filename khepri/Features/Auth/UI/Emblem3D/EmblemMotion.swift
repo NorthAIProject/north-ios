@@ -1,4 +1,3 @@
-#if DEBUG || BETA
 import Foundation
 
 /// The 3D emblem's motion: turns a time (and a pointer) into values.
@@ -8,8 +7,6 @@ import Foundation
 /// checks it). No renderer import: `Emblem3DView` applies the values. The
 /// web's `emblem-motion.ts` does the same arithmetic, and both test suites
 /// assert `emblem-motion.fixtures.json`.
-///
-/// Debug and Beta only; Release excludes this file (DESIGN.md, 3D Emblem).
 struct EmblemMotion: Decodable, Sendable {
     enum Easing: String, Decodable, Sendable {
         case linear, sine, easeOutCubic
@@ -99,4 +96,3 @@ struct EmblemMotion: Decodable, Sendable {
         return try JSONDecoder().decode(EmblemMotion.self, from: Data(contentsOf: url))
     }
 }
-#endif

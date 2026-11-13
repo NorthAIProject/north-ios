@@ -1,4 +1,3 @@
-#if DEBUG || BETA
 import Foundation
 import Testing
 @testable import khepri
@@ -82,4 +81,3 @@ import Testing
         #expect(motion.blink.joint == "eyes")
     }
 }
-#endif

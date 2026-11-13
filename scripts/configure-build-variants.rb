@@ -10,12 +10,6 @@ require "xcodeproj"
 PROJECT_PATH = File.expand_path("../khepri.xcodeproj", __dir__)
 APP_BUNDLE_ID = "com.fernandocorreia.khepri"
 
-# Files only Debug and Beta builds contain. Keep in step with
-# scripts/verify-release-excludes.sh.
-RELEASE_EXCLUDED = "Emblem3DView.swift EmblemMotion.swift Emblem.usdz emblem-motion.json " \
-  "Mascot3DView.swift MascotMotion.swift Mascot.usdz mascot-motion.json"
-RELEASE_EXCLUDED_TESTS = "EmblemMotionTests.swift emblem-motion.fixtures.json " \
-  "MascotMotionTests.swift mascot-motion.fixtures.json"
 
 VARIANTS = {
   "Debug" => {
@@ -41,10 +35,6 @@ VARIANTS = {
     "API_BASE_URL" => "https:/$()/kheprios.com",
     "APS_ENVIRONMENT" => "production",
     "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.shared",
-    # The 3D emblem experiment is Debug and Beta only (DESIGN.md, 3D Emblem):
-    # its code, model and motion data are left out of the App Store build.
-    # scripts/verify-release-excludes.sh proves it.
-    "EXCLUDED_SOURCE_FILE_NAMES" => RELEASE_EXCLUDED,
   },
 }.freeze
 
@@ -101,6 +91,8 @@ app.build_configurations.each do |config|
   config.base_configuration_reference = base
   settings = config.build_settings
   APP_SETTINGS.merge(VARIANTS.fetch(config.name)).each { |k, v| settings[k] = v }
+  # The 3D emblem and mascot ship in every configuration since 2026-11-13.
+  settings.delete("EXCLUDED_SOURCE_FILE_NAMES")
   %w[MACOSX_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET ENABLE_APP_SANDBOX
      ENABLE_HARDENED_RUNTIME ENABLE_USER_SELECTED_FILES].each { |k| settings.delete(k) }
   settings.delete("LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]")
@@ -111,7 +103,8 @@ project.targets.reject { |t| t == app }.each do |target|
     s = config.build_settings
     if target.name == "khepriTests"
       s["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "BETA $(inherited)" if config.name == "Beta"
-      s["EXCLUDED_SOURCE_FILE_NAMES"] = RELEASE_EXCLUDED_TESTS if config.name == "Release"
+      # The 3D emblem and mascot ship in every configuration since 2026-11-13.
+      s.delete("EXCLUDED_SOURCE_FILE_NAMES")
     end
     s["SUPPORTED_PLATFORMS"] = "iphoneos iphonesimulator"
     s["SDKROOT"] = "iphoneos"

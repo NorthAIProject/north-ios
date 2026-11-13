@@ -16,19 +16,9 @@ public struct LoginScreen: View {
                 VStack(spacing: 28) {
                     // Header Branding
                     VStack(spacing: 8) {
-                        // Debug and Beta try the emblem in 3D (DESIGN.md, 3D Emblem);
-                        // the App Store build keeps the flat mark.
-                        #if DEBUG || BETA
+                        // The emblem in 3D (DESIGN.md, 3D Emblem); flat until its first frame.
                         Emblem3DView(size: 120)
                             .padding(.top, 24)
-                        #else
-                        NorthBrand.mark
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 120, height: 120)
-                            .padding(.top, 24)
-                            .accessibilityHidden(true)
-                        #endif
 
                         // The brand serif, as in the wordmark. It has one weight.
                         Text(NorthBrand.name)

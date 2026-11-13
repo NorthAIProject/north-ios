@@ -1,9 +1,8 @@
-#if DEBUG || BETA
 import NorthKit
 import RealityKit
 import SwiftUI
 
-/// The Khepri mascot in 3D, for the onboarding Welcome step (Debug and Beta only).
+/// The Khepri mascot in 3D, for the onboarding Welcome step.
 ///
 /// A non-AR `RealityView` with a virtual camera, drawn transparent over
 /// SwiftUI. The flat `KhepriMascot(.idle)` shows until the first frame and
@@ -11,10 +10,7 @@ import SwiftUI
 /// Motion values come from `MascotMotion` (mascot-motion.json); this view
 /// applies them to the model's joint entities (`Mascot_body`, `_core`,
 /// `_head`, `_eyes`, `_pupils`, written by north-web-app
-/// `scripts/brand/mascot_3d.py`). Release excludes this file,
-/// `MascotMotion.swift`, `Mascot.usdz` and `mascot-motion.json`
-/// (`scripts/configure-build-variants.rb`), and
-/// `scripts/verify-release-excludes.sh` proves it. DESIGN.md, 3D Mascot.
+/// `scripts/brand/mascot_3d.py`). DESIGN.md, 3D Mascot.
 struct Mascot3DView: View {
     var size: CGFloat = 200
 
@@ -196,4 +192,3 @@ final class MascotStage {
         ((entity as? ModelEntity).map { [$0] } ?? []) + entity.children.flatMap { models(in: $0) }
     }
 }
-#endif

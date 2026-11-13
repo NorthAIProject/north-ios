@@ -1,17 +1,14 @@
-#if DEBUG || BETA
 import NorthKit
 import RealityKit
 import SwiftUI
 
-/// The Khepri emblem in 3D, for the login screen (Debug and Beta only).
+/// The Khepri emblem in 3D, for the login screen.
 ///
 /// A non-AR `RealityView` with a virtual camera, drawn transparent over
 /// SwiftUI. The flat `NorthBrand.mark` shows until the first frame and stays
 /// under Reduce Motion, Low Power Mode, or a model that fails to load. Motion
 /// values come from `EmblemMotion` (emblem-motion.json); this view applies
-/// them. Release excludes this file, `EmblemMotion.swift`, `Emblem.usdz` and
-/// `emblem-motion.json` (`scripts/configure-build-variants.rb`), and
-/// `scripts/verify-release-excludes.sh` proves it. DESIGN.md, 3D Emblem.
+/// them. DESIGN.md, 3D Emblem.
 struct Emblem3DView: View {
     var size: CGFloat = 120
 
@@ -173,4 +170,3 @@ final class EmblemStage {
         ((entity as? ModelEntity).map { [$0] } ?? []) + entity.children.flatMap { models(in: $0) }
     }
 }
-#endif

@@ -16,16 +16,9 @@ struct WelcomeStep: View {
             onPrimary: next
         ) {
             // The first meeting: the companion, not the logo.
-            Group {
-                #if DEBUG || BETA
-                Mascot3DView(size: 200)
-                #else
-                KhepriMascot(.idle)
-                    .frame(maxWidth: 200, maxHeight: 200)
-                #endif
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
+            Mascot3DView(size: 200)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
         }
     }
 }
