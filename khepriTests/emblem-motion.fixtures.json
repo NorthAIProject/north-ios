@@ -1,0 +1,37 @@
+{
+  "about": "Both clients' motion tests assert these numbers against emblem-motion.json. Tolerance 1e-6.",
+  "ease": [
+    { "easing": "linear", "x": 0.3, "expect": 0.3 },
+    { "easing": "sine", "x": 0.25, "expect": 0.1464466094 },
+    { "easing": "easeOutCubic", "x": 0.5, "expect": 0.875 },
+    { "easing": "sine", "x": -1, "expect": 0 },
+    { "easing": "sine", "x": 2, "expect": 1 }
+  ],
+  "track": [
+    { "track": 0, "seconds": 0, "expect": 0.88 },
+    { "track": 0, "seconds": 0.75, "expect": 0.9151471863 },
+    { "track": 0, "seconds": 1.5, "expect": 1.0 },
+    { "track": 0, "seconds": 3, "expect": 1.12 },
+    { "track": 0, "seconds": 7.5, "expect": 1.0 },
+    { "track": 1, "seconds": 2, "expect": 0 },
+    { "track": 1, "seconds": 4, "expect": 30 },
+    { "track": 1, "seconds": -2, "expect": 0 }
+  ],
+  "entrance": [
+    { "seconds": 0, "translateY": -0.04, "rotateYDegrees": 12 },
+    { "seconds": 0.3, "translateY": -0.005, "rotateYDegrees": 1.5 },
+    { "seconds": 0.6, "translateY": 0, "rotateYDegrees": 0 },
+    { "seconds": 5, "translateY": 0, "rotateYDegrees": 0 },
+    { "seconds": -1, "translateY": -0.04, "rotateYDegrees": 12 }
+  ],
+  "tilt": [
+    { "x": 0, "y": 0, "yawDegrees": 0, "pitchDegrees": 0 },
+    { "x": 0.5, "y": 0.5, "yawDegrees": 4, "pitchDegrees": -2.5 },
+    { "x": 2, "y": -3, "yawDegrees": 8, "pitchDegrees": 5 }
+  ],
+  "approach": [
+    { "current": 0, "target": 10, "dt": 0.4, "tau": 0.4, "expect": 6.3212055883 },
+    { "current": 5, "target": 5, "dt": 1, "tau": 0.4, "expect": 5 },
+    { "current": 0, "target": 1, "dt": 0, "tau": 0.4, "expect": 0 }
+  ]
+}

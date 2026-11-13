@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "about": "Motion for the 3D Khepri emblem (docs/brand/README.md, ADR 0005). Values are offsets from rest. Units: the emblem is 1 tall; angles in degrees; rotateX is pitch, rotateY is yaw, applied yaw then pitch. Copies: src/lib/emblem3d/emblem-motion.json and north-ios khepri/Resources/emblem-motion.json; edit this file, then copy (scripts/brand/emblem-guard.sh).",
+  "entrance": {
+    "durationSeconds": 0.6,
+    "easing": "easeOutCubic",
+    "from": { "translateY": -0.04, "rotateYDegrees": 12 }
+  },
+  "idle": [
+    {
+      "material": "sun_face",
+      "property": "emissiveScale",
+      "periodSeconds": 6,
+      "easing": "sine",
+      "keyframes": [
+        { "t": 0, "v": 0.88 },
+        { "t": 0.5, "v": 1.12 },
+        { "t": 1, "v": 0.88 }
+      ]
+    },
+    {
+      "light": "key",
+      "property": "azimuthDegrees",
+      "periodSeconds": 8,
+      "easing": "sine",
+      "keyframes": [
+        { "t": 0, "v": -30 },
+        { "t": 0.5, "v": 30 },
+        { "t": 1, "v": -30 }
+      ]
+    }
+  ],
+  "pointer": {
+    "maxYawDegrees": 8,
+    "maxPitchDegrees": 5,
+    "timeConstantSeconds": 0.4
+  }
+}

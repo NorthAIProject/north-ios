@@ -10,6 +10,11 @@ require "xcodeproj"
 PROJECT_PATH = File.expand_path("../khepri.xcodeproj", __dir__)
 APP_BUNDLE_ID = "com.fernandocorreia.khepri"
 
+# Files only Debug and Beta builds contain. Keep in step with
+# scripts/verify-release-excludes.sh.
+RELEASE_EXCLUDED = "Emblem3DView.swift EmblemMotion.swift Emblem.usdz emblem-motion.json"
+RELEASE_EXCLUDED_TESTS = "EmblemMotionTests.swift emblem-motion.fixtures.json"
+
 VARIANTS = {
   "Debug" => {
     "PRODUCT_BUNDLE_IDENTIFIER" => APP_BUNDLE_ID,
@@ -25,6 +30,8 @@ VARIANTS = {
     "API_BASE_URL" => "https:/$()/kheprios.com",
     "APS_ENVIRONMENT" => "production",
     "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.beta.shared",
+    # `#if DEBUG || BETA` code: experiments the App Store build never contains.
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS" => "BETA $(inherited)",
   },
   "Release" => {
     "PRODUCT_BUNDLE_IDENTIFIER" => APP_BUNDLE_ID,
@@ -32,6 +39,10 @@ VARIANTS = {
     "API_BASE_URL" => "https:/$()/kheprios.com",
     "APS_ENVIRONMENT" => "production",
     "KHEPRI_KEYCHAIN_GROUP" => "$(AppIdentifierPrefix)#{APP_BUNDLE_ID}.shared",
+    # The 3D emblem experiment is Debug and Beta only (DESIGN.md, 3D Emblem):
+    # its code, model and motion data are left out of the App Store build.
+    # scripts/verify-release-excludes.sh proves it.
+    "EXCLUDED_SOURCE_FILE_NAMES" => RELEASE_EXCLUDED,
   },
 }.freeze
 
@@ -96,6 +107,10 @@ end
 project.targets.reject { |t| t == app }.each do |target|
   target.build_configurations.each do |config|
     s = config.build_settings
+    if target.name == "khepriTests"
+      s["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "BETA $(inherited)" if config.name == "Beta"
+      s["EXCLUDED_SOURCE_FILE_NAMES"] = RELEASE_EXCLUDED_TESTS if config.name == "Release"
+    end
     s["SUPPORTED_PLATFORMS"] = "iphoneos iphonesimulator"
     s["SDKROOT"] = "iphoneos"
     s["TARGETED_DEVICE_FAMILY"] = "1,2"
