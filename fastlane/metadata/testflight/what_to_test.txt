@@ -1,11 +1,8 @@
 Thanks for trying Khepri. New in this build, please try:
-1. More > Nutrition > Plans > Build with AI: pick a goal, meals per day and foods to leave out, then review and save the plan.
-2. More > Progress check: add a check with photos or measurements, then look at the body figure on Today.
-3. Today > Your week: open the recap, switch to 30 days, and share it.
-4. Training: generate a plan with the weekdays you choose.
-5. More > Daily Post: read today's post, give kudos, tap Ask the Coach About This.
-6. More > Settings > App: switch the language and the appearance.
-
-Also worth a look: coach messages on Today, and answering one from the notification.
+1. More > Crews: open a crew. It opens on Chat; agree to the crew rules, then send a message.
+2. Long-press a message: react, reply, edit, pin, report, or block its author.
+3. Leave the app and have a crew mate post: you get a notification, and Reply sends straight from it.
+4. Check the unread badges on More, the Crews row and each crew.
+5. A crew link (/app/crews/...) opens that crew's chat.
 
 Anything confusing, broken or missing: use TestFlight's feedback (screenshot and send).

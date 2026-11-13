@@ -1,10 +1,4 @@
-Khepri's first release on the App Store.
-
-New in this build:
-- Build a meal plan with the coach: your goal, meals per day and the foods you won't eat, fitted to your macro target. Meals can be marked optional.
-- Progress checks: photos and measurements on a schedule, first and latest side by side, and a body figure shaped by your latest check.
-- Your week: a 7 or 30 day recap you can share or post to friends.
-- Your coach can message you first, with answers right in the notification.
-- Pick the weekdays you train; plans fit the time you have.
-- A daily post on wellbeing and food, written by AI, under More.
-- Khepri in Spanish and Portuguese, and a Light, Dark or System appearance setting.
+New: crew chat.
+- Every crew has its own chat, with channels, replies, reactions, edits, pinned messages and @mentions.
+- Unread badges on More, Crews and each crew, and crew notifications you can answer from the notification.
+- Crew rules to agree before your first message, and every message can be reported or its author blocked.
