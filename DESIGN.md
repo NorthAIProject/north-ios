@@ -227,6 +227,10 @@ This system is flat by design. Depth comes from tone: a card is one grouped-back
 
 The one floating control: a brand orb at the bottom trailing corner of Today. Tap opens the coach, hold to speak. It is hidden during the tour and when AI is declined, and Today's scroll content is inset 88pt so the last card clears it.
 
+### 3D Emblem (Debug and Beta only)
+
+`Emblem3DView` shows the Khepri emblem as a RealityKit model on `LoginScreen`, in place of `NorthBrand.mark`. It is the one exception to "nothing loops" and to the brand rule against rotating or adding glow to the logo. The exception is limited to: a 600 ms entrance, a tilt toward a drag or hover (at most 8° yaw and 5° pitch), a ±12 % sun glow over 6 s, and a key light that sweeps the gold rules every 8 s. Values come from `emblem-motion.json`, a byte-for-byte copy of north-web-app `design/emblem-motion.json`. The flat mark shows until the first frame and stays under Reduce Motion and Low Power Mode. The Release configuration excludes the view, the motion driver, the model and the JSON (`EXCLUDED_SOURCE_FILE_NAMES`), and `scripts/verify-release-excludes.sh` proves the App Store build contains none of them. There is no Mac target, so nothing else needs gating.
+
 ## 6. Do's and Don'ts
 
 ### Do:
