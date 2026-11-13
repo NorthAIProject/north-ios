@@ -12,8 +12,10 @@ APP_BUNDLE_ID = "com.fernandocorreia.khepri"
 
 # Files only Debug and Beta builds contain. Keep in step with
 # scripts/verify-release-excludes.sh.
-RELEASE_EXCLUDED = "Emblem3DView.swift EmblemMotion.swift Emblem.usdz emblem-motion.json"
-RELEASE_EXCLUDED_TESTS = "EmblemMotionTests.swift emblem-motion.fixtures.json"
+RELEASE_EXCLUDED = "Emblem3DView.swift EmblemMotion.swift Emblem.usdz emblem-motion.json " \
+  "Mascot3DView.swift MascotMotion.swift Mascot.usdz mascot-motion.json"
+RELEASE_EXCLUDED_TESTS = "EmblemMotionTests.swift emblem-motion.fixtures.json " \
+  "MascotMotionTests.swift mascot-motion.fixtures.json"
 
 VARIANTS = {
   "Debug" => {

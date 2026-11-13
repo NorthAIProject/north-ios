@@ -1,0 +1,51 @@
+{
+  "about": "Both clients' motion tests assert these numbers against mascot-motion.json. Tolerance 1e-6.",
+  "ease": [
+    { "easing": "linear", "x": 0.3, "expect": 0.3 },
+    { "easing": "sine", "x": 0.25, "expect": 0.1464466094 },
+    { "easing": "easeOutCubic", "x": 0.5, "expect": 0.875 },
+    { "easing": "sine", "x": -1, "expect": 0.0 },
+    { "easing": "sine", "x": 2, "expect": 1.0 }
+  ],
+  "track": [
+    { "track": 0, "seconds": 0, "expect": 0.0 },
+    { "track": 0, "seconds": 1.5, "expect": 0.0075 },
+    { "track": 0, "seconds": 3, "expect": 0.015 },
+    { "track": 0, "seconds": 4.5, "expect": 0.0075 },
+    { "track": 0, "seconds": -1.5, "expect": 0.0075 },
+    { "track": 1, "seconds": 0, "expect": 0.85 },
+    { "track": 1, "seconds": 1, "expect": 0.925 },
+    { "track": 1, "seconds": 3, "expect": 1.15 },
+    { "track": 1, "seconds": 9, "expect": 1.15 }
+  ],
+  "entrance": [
+    { "seconds": 0, "translateY": -0.04, "rotateYDegrees": 10.0 },
+    { "seconds": 0.3, "translateY": -0.005, "rotateYDegrees": 1.25 },
+    { "seconds": 0.6, "translateY": 0.0, "rotateYDegrees": 0.0 },
+    { "seconds": 2, "translateY": 0.0, "rotateYDegrees": 0.0 }
+  ],
+  "blink": [
+    { "seconds": 0, "scaleY": 1.0 },
+    { "seconds": 2.2, "scaleY": 1.0 },
+    { "seconds": 2.235, "scaleY": 0.55 },
+    { "seconds": 2.27, "scaleY": 0.1 },
+    { "seconds": 2.29, "scaleY": 0.1 },
+    { "seconds": 2.36, "scaleY": 0.55 },
+    { "seconds": 2.41, "scaleY": 1.0 },
+    { "seconds": 5.65, "scaleY": 0.2694295892 },
+    { "seconds": 6.02, "scaleY": 0.1 },
+    { "seconds": 6.2, "scaleY": 1.0 },
+    { "seconds": 9.235, "scaleY": 0.55 },
+    { "seconds": -4.765, "scaleY": 0.55 }
+  ],
+  "look": [
+    { "x": 0, "y": 0, "headYawDegrees": 0.0, "headPitchDegrees": 0.0, "pupilX": 0.0, "pupilY": 0.0 },
+    { "x": 1, "y": 0, "headYawDegrees": 12.0, "headPitchDegrees": 0.0, "pupilX": 0.012, "pupilY": 0.0 },
+    { "x": -0.5, "y": 0.5, "headYawDegrees": -6.0, "headPitchDegrees": -3.0, "pupilX": -0.006, "pupilY": 0.004 },
+    { "x": 2, "y": -3, "headYawDegrees": 12.0, "headPitchDegrees": 6.0, "pupilX": 0.012, "pupilY": -0.008 }
+  ],
+  "approach": [
+    { "current": 0, "target": 10, "dt": 0.3, "tau": 0.3, "expect": 6.3212055883 },
+    { "current": 5, "target": 5, "dt": 0.1, "tau": 0.3, "expect": 5 }
+  ]
+}
