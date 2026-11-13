@@ -231,6 +231,10 @@ The one floating control: a brand orb at the bottom trailing corner of Today. Ta
 
 `Emblem3DView` shows the Khepri emblem as a RealityKit model on `LoginScreen`, in place of `NorthBrand.mark`. It is the one exception to "nothing loops" and to the brand rule against rotating or adding glow to the logo. The exception is limited to: a 600 ms entrance, a tilt toward a drag or hover (at most 8° yaw and 5° pitch), a ±12 % sun glow over 6 s, and a key light that sweeps the gold rules every 8 s. Values come from `emblem-motion.json`, a byte-for-byte copy of north-web-app `design/emblem-motion.json`. The flat mark shows until the first frame and stays under Reduce Motion and Low Power Mode. The Release configuration excludes the view, the motion driver, the model and the JSON (`EXCLUDED_SOURCE_FILE_NAMES`), and `scripts/verify-release-excludes.sh` proves the App Store build contains none of them. There is no Mac target, so nothing else needs gating.
 
+### 3D Mascot (Debug and Beta only)
+
+`Mascot3DView` shows the Khepri mascot as a RealityKit character on the onboarding `WelcomeStep`, in place of `KhepriMascot(.idle)`. The mascot is a character, so unlike the emblem it may blink and look. The exception is limited to: a 600 ms entrance; a slow hover (1.5 % of its height over 6 s); a ±15 % solar-core glow over 6 s; a scheduled blink (two per 7 s cycle, one a double blink, about 210 ms each); and a look toward a drag or hover, with the head at most 12° yaw and 6° pitch and the pupils following. Values come from `mascot-motion.json`, a byte-for-byte copy of north-web-app `design/mascot-motion.json` (ADR 0006 there). The flat mascot shows until the first frame and stays under Reduce Motion and Low Power Mode. Release excludes the view, the motion driver, `Mascot.usdz` and the JSON, and `scripts/verify-release-excludes.sh` checks them with the emblem's.
+
 ## 6. Do's and Don'ts
 
 ### Do:
