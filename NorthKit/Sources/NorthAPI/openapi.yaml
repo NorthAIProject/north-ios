@@ -11881,7 +11881,12 @@ components:
             $ref: '#/components/schemas/DaySummary'
         source:
           type: string
-          enum: [ai, edited]
+          description: >-
+            ai or edited today. Open string on purpose: a closed enum here made one
+            imported plan break the whole plan list ("Training did not load").
+        origin:
+          type: string
+          description: ai, edited or imported, and may grow. Treat an unknown value as edited.
         createdAt:
           type: string
           format: date-time
@@ -12018,7 +12023,12 @@ components:
             type: string
         source:
           type: string
-          enum: [ai, edited]
+          description: >-
+            ai or edited today. Open string on purpose: a closed enum here made one
+            imported plan break the whole plan list ("Training did not load").
+        origin:
+          type: string
+          description: ai, edited or imported, and may grow. Treat an unknown value as edited.
         createdAt:
           type: string
           format: date-time
