@@ -14,7 +14,7 @@ struct WorkoutReminderTests {
                                                     hasArt: true, primaryMuscles: [], secondaryMuscles: [])],
                             completedThisWeek: completed.contains(weekday), isNext: weekday == next)
             },
-            problems: [], source: .ai, createdAt: .now
+            problems: [], source: "ai", createdAt: .now
         )
     }
 
@@ -106,7 +106,7 @@ final class FakeTraining: TrainingServicing, @unchecked Sendable {
     }
 
     func plans() async throws -> [PlanSummary] {
-        hasPlan ? [PlanSummary(id: "v1", name: "Base", weeksTotal: 4, days: [], source: .ai, createdAt: .now)] : []
+        hasPlan ? [PlanSummary(id: "v1", name: "Base", weeksTotal: 4, days: [], source: "ai", createdAt: .now)] : []
     }
     func plan(_ id: String) async throws -> PlanDetail { Self.plan(id) }
     func latestIntake() async throws -> TrainingIntake? { nil }

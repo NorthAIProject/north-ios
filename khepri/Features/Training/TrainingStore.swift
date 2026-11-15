@@ -80,7 +80,7 @@ final class TrainingStore {
         let followed = PlanSummary(
             id: plan.id, name: plan.name, weeksTotal: plan.weeksTotal,
             days: plan.days.map { .init(weekday: $0.weekday, startTime: $0.startTime, focus: $0.focus, exerciseCount: $0.exercises.count) },
-            source: .init(rawValue: plan.source.rawValue) ?? .ai, createdAt: plan.createdAt, active: true
+            source: plan.source, origin: plan.origin, createdAt: plan.createdAt, active: true
         )
         return [followed] + otherPlans
     }
