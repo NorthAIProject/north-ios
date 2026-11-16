@@ -10,6 +10,11 @@ protocol DayServicing: Sendable {
     func bodyMap(days: Int) async throws -> BodyMap
     /// The figure's shape, from the latest progress check.
     func bodyShape() async throws -> BodyShape
+    /// Each soreness region's muscles on the figure; nil from a server that
+    /// does not say.
+    func sorenessFigure() async throws -> [String: [String]]?
+    /// The sore regions of the last `days` days.
+    func sorenessHistory(days: Int) async throws -> SorenessHistory
 }
 
 struct DayService: DayServicing {
@@ -30,6 +35,14 @@ struct DayService: DayServicing {
     func bodyShape() async throws -> BodyShape {
         try await NorthAPI.call { BodyShape(try await api.getBodyCurrent().ok.body.json.morph) }
     }
+
+    func sorenessFigure() async throws -> [String: [String]]? {
+        try await NorthAPI.call { try await api.getSoreness().ok.body.json.figure?.additionalProperties }
+    }
+
+    func sorenessHistory(days: Int) async throws -> SorenessHistory {
+        try await NorthAPI.call { try await api.getSorenessHistory(query: .init(days: days)).ok.body.json }
+    }
 }
 
 /// My Day's state: which date is on screen and what the server said about it.
@@ -45,6 +58,11 @@ final class DayStore {
     /// The figure's shape. A failure keeps the last one, or the figure as
     /// modelled.
     private(set) var bodyShape: BodyShape = .modelled
+    /// Each soreness region's muscles on the figure. Nil until the server
+    /// says, which leaves the figure showing training only.
+    private(set) var sorenessMuscles: [String: [String]]?
+    /// The last two weeks of reported soreness, for the strip under the figure.
+    private(set) var sorenessHistory: SorenessHistory?
     private(set) var error: String?
     /// nil means today, so a store left open past midnight follows the day.
     private(set) var date: Date?
@@ -85,6 +103,8 @@ final class DayStore {
         async let loadedTrends = try? service.trends()
         async let loadedBodyMap = try? service.bodyMap(days: 7)
         async let loadedShape = try? service.bodyShape()
+        async let loadedMuscles = try? service.sorenessFigure()
+        async let loadedHistory = try? service.sorenessHistory(days: 14)
         do {
             day = try await service.day(date.map(CalendarDay.string(from:)))
             error = nil
@@ -95,6 +115,15 @@ final class DayStore {
         if let fresh = await loadedTrends { trends = fresh }
         if let fresh = await loadedBodyMap { bodyMap = fresh }
         if let fresh = await loadedShape { bodyShape = fresh }
+        if let fresh = await loadedMuscles { sorenessMuscles = fresh }
+        if let fresh = await loadedHistory { sorenessHistory = fresh }
+    }
+
+    /// The day's soreness as the figure draws it; nil when the server has not
+    /// said which muscles a region covers.
+    var sorenessFigure: SorenessFigure? {
+        guard let day, let sorenessMuscles else { return nil }
+        return SorenessFigure(entries: day.body.soreness, figure: sorenessMuscles, history: sorenessHistory)
     }
 
     /// Moves a day back or forward. Stepping onto today goes back to "today"

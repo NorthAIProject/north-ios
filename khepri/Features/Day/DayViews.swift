@@ -9,6 +9,7 @@ struct DayDashboard: View {
     var store: DayStore?
     @State private var detail: DayCardKind?
     @State private var editingBody = false
+    @State private var soreRegion: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -20,7 +21,13 @@ struct DayDashboard: View {
                         .accessibilityIdentifier("day-card-\(kind.rawValue)")
                 }
             }
-            BodyCard(measurements: day.body, bodyMap: store?.bodyMap, shape: store?.bodyShape ?? .modelled) { editingBody = true }
+            BodyCard(
+                measurements: day.body, bodyMap: store?.bodyMap, shape: store?.bodyShape ?? .modelled,
+                soreness: store?.sorenessFigure
+            ) { region in
+                soreRegion = region
+                editingBody = true
+            }
             DayTimeline(day: day)
             if let trends = store?.trends, !trends.series.isEmpty || !trends.fasts.isEmpty {
                 TrendsSection(trends: trends)
@@ -36,7 +43,7 @@ struct DayDashboard: View {
             .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $editingBody) {
-            if let store { BodySheet(day: day, store: store) }
+            if let store { BodySheet(day: day, store: store, startingRegion: soreRegion) }
         }
     }
 }
@@ -431,76 +438,111 @@ private struct BodyCard: View {
     let measurements: Components.Schemas.DayBody
     let bodyMap: BodyMap?
     let shape: BodyShape
-    let edit: () -> Void
+    /// Nil when the server does not say which muscles a sore region covers;
+    /// the figure then shows training only.
+    let soreness: SorenessFigure?
+    /// Opens the body sheet, on a soreness region when a muscle was tapped.
+    let edit: (String?) -> Void
     @State private var selected: String?
+    @State private var mode = BodyRamp.training
     @Environment(AppRouter.self) private var router
 
+    private var showsSoreness: Bool { mode == .soreness && soreness != nil }
+
     var body: some View {
-        VStack(alignment: .trailing, spacing: 10) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 8) {
-                    if let weight = measurements.weightKg {
-                        Chip {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(weight, format: .number.precision(.fractionLength(1))) + Text(" kg").font(.caption).foregroundStyle(.secondary)
-                                if let toGoal = measurements.toGoalKg {
-                                    Text("\(toGoal.formatted(.number.precision(.fractionLength(1)))) kg to goal")
-                                        .font(.caption).foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    if let bmi = measurements.bmi {
-                        Chip {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text(bmi, format: .number.precision(.fractionLength(1)))
-                                if let category = measurements.bmiCategory {
-                                    Text(DayMath.bmiName(category)).font(.caption.weight(.medium)).foregroundStyle(DayMath.bmiColor(category))
-                                }
-                            }
-                        }
-                    } else if measurements.weightKg != nil, measurements.heightCm == nil {
-                        // A weight from Apple Health with no height: no BMI to show,
-                        // so say what would make one rather than guess.
-                        Button(action: edit) {
-                            Chip { Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text("Add height") }
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("body-add-height")
-                    }
-                    if let bp = measurements.bloodPressure {
-                        Chip { Text("\(bp.systolic)/\(bp.diastolic)") + Text(" mmHg").font(.caption).foregroundStyle(.secondary) }
-                    }
-                    if measurements.weightKg == nil {
-                        Text("No weight recorded yet.").font(.subheadline).foregroundStyle(.secondary)
-                    }
+        VStack(spacing: 10) {
+            if soreness != nil {
+                Picker("Figure shows", selection: $mode) {
+                    Text("Training").tag(BodyRamp.training)
+                    Text("Soreness").tag(BodyRamp.soreness)
                 }
-                Spacer()
-                VStack(spacing: 4) {
-                    BodyMapView(heat: bodyMap?.heat ?? [:], shape: shape) { selected = $0 }
-                        .frame(width: 170, height: 250)
-                        .popover(item: Binding(get: { selected.map(MuscleRoute.init(id:)) }, set: { selected = $0?.id })) { route in
-                            MuscleCallout(id: route.id, lastTrainedOn: bodyMap?.muscle(route.id)?.lastTrainedOn) {
-                                selected = nil
-                                router.open(.muscle(route.id))
-                            }
-                            .presentationCompactAdaptation(.popover)
-                        }
-                        .accessibilityIdentifier("body-map")
-                    if let caption {
-                        Text(caption).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("body-mode")
             }
+            figure
+            if let soreness, showsSoreness {
+                Text("Reported soreness. Tap a muscle to log it.").font(.caption).foregroundStyle(.secondary)
+                if !soreness.strip.isEmpty { SorenessStrip(figure: soreness) }
+            } else if let caption {
+                Text(caption).font(.caption).foregroundStyle(.secondary)
+            }
+            chips
             if !measurements.soreness.isEmpty {
                 FlowTags(tags: measurements.soreness.map { "\(DayMath.regionName($0.region)) · \(DayMath.severityName($0.severity))" })
             }
-            Button("Update body", action: edit)
+            Button("Update body") { edit(nil) }
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
         }
         .padding(16)
         .background(NorthColor.surface, in: .rect(cornerRadius: NorthRadius.large))
+    }
+
+    /// The figure across the card. In soreness mode a tap opens the sheet on
+    /// the muscle's region; in training mode it shows when it was last trained.
+    private var figure: some View {
+        BodyMapView(
+            heat: showsSoreness ? soreness?.heat ?? [:] : bodyMap?.heat ?? [:],
+            shape: shape,
+            ramp: showsSoreness ? .soreness : .training
+        ) { muscle in
+            if showsSoreness {
+                if let region = soreness?.regionOf[muscle] { edit(region) }
+            } else {
+                selected = muscle
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 380)
+        .popover(item: Binding(get: { selected.map(MuscleRoute.init(id:)) }, set: { selected = $0?.id })) { route in
+            MuscleCallout(id: route.id, lastTrainedOn: bodyMap?.muscle(route.id)?.lastTrainedOn) {
+                selected = nil
+                router.open(.muscle(route.id))
+            }
+            .presentationCompactAdaptation(.popover)
+        }
+        .accessibilityIdentifier("body-map")
+    }
+
+    private var chips: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if let weight = measurements.weightKg {
+                Chip {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(weight, format: .number.precision(.fractionLength(1))) + Text(" kg").font(.caption).foregroundStyle(.secondary)
+                        if let toGoal = measurements.toGoalKg {
+                            Text("\(toGoal.formatted(.number.precision(.fractionLength(1)))) kg to goal")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            if let bmi = measurements.bmi {
+                Chip {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text(bmi, format: .number.precision(.fractionLength(1)))
+                        if let category = measurements.bmiCategory {
+                            Text(DayMath.bmiName(category)).font(.caption.weight(.medium)).foregroundStyle(DayMath.bmiColor(category))
+                        }
+                    }
+                }
+            } else if measurements.weightKg != nil, measurements.heightCm == nil {
+                // A weight from Apple Health with no height: no BMI to show,
+                // so say what would make one rather than guess.
+                Button { edit(nil) } label: {
+                    Chip { Text("BMI ").font(.caption).foregroundStyle(.secondary) + Text("Add height") }
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("body-add-height")
+            }
+            if let bp = measurements.bloodPressure {
+                Chip { Text("\(bp.systolic)/\(bp.diastolic)") + Text(" mmHg").font(.caption).foregroundStyle(.secondary) }
+            }
+            if measurements.weightKg == nil {
+                Text("No weight recorded yet.").font(.subheadline).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
     }
 
     /// Why the figure is cold, when it is: never trained, or not lately.
@@ -509,6 +551,34 @@ private struct BodyCard: View {
         if bodyMap.lastSessionOn == nil { return String(localized: "No session yet") }
         if bodyMap.heat.values.allSatisfy({ $0 <= 0 }) { return String(localized: "Nothing in the last \(bodyMap.days) days") }
         return nil
+    }
+}
+
+/// The last two weeks of reported soreness, a cell a day, oldest first.
+private struct SorenessStrip: View {
+    let figure: SorenessFigure
+
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 2) {
+                ForEach(figure.strip) { day in
+                    RoundedRectangle(cornerRadius: 2).fill(color(day.severity)).frame(height: 8)
+                }
+            }
+            Text("Sore on \(figure.soreDays) of the last \(figure.strip.count) days")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("soreness-strip")
+    }
+
+    private func color(_ severity: Int) -> Color {
+        switch severity {
+        case 3...: NorthColor.Day.move
+        case 2: NorthColor.Day.move.opacity(0.55)
+        case 1: NorthColor.Day.move.opacity(0.25)
+        default: Color.secondary.opacity(0.15)
+        }
     }
 }
 

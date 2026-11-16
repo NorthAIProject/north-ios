@@ -31,6 +31,7 @@ public typealias CaffeineToday = Components.Schemas.CaffeineToday
 public typealias FastingState = Components.Schemas.FastingState
 public typealias SupplementsToday = Components.Schemas.SupplementsToday
 public typealias SorenessToday = Components.Schemas.SorenessToday
+public typealias SorenessHistory = Components.Schemas.SorenessHistory
 public typealias TrackerList = Components.Schemas.TrackerList
 public typealias DayTrends = Components.Schemas.DayTrends
 public typealias DayTrend = Components.Schemas.DayTrend
