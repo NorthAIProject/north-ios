@@ -2,7 +2,12 @@ import Foundation
 import NorthAPI
 import RealityKit
 
-/// The body figure's skin and its four shape keys, read from `BodyShell.bin`.
+/// The body figure's skin and its shape keys, read from `BodyShell.bin`.
+///
+/// Four keys shape the skin to a person (`BodyShape`). A fifth, `core`, sinks
+/// it to just under the muscles: drawn that way, opaque, it is the solid body
+/// the muscles sit on, so the head, hands, feet and every gap between muscles
+/// show a body instead of the background.
 ///
 /// The web repo's `scripts/bodymap` writes the file (its layout is in
 /// `shell_bin.go`) from the same mesh as the web's GLB, so the same weights
@@ -74,6 +79,30 @@ nonisolated struct BodyShell: Sendable {
             }
         }
         return out
+    }
+
+    /// The name of the shape key that sinks the skin under the muscles.
+    static let coreTarget = "core"
+
+    /// The skin sunk to just under the muscles; as modelled if the file has
+    /// no `core` key. The measurement keys do not move it: the muscles it
+    /// sits under do not move either.
+    var corePoints: [SIMD3<Float>] {
+        var out = points
+        guard let target = targets[Self.coreTarget] else { return out }
+        for (vertex, delta) in zip(target.vertices, target.deltas) {
+            out[vertex] += delta
+        }
+        return out
+    }
+
+    @MainActor func coreMesh() throws -> MeshResource? {
+        guard targets[Self.coreTarget] != nil else { return nil }
+        var descriptor = MeshDescriptor(name: BodyFigure.coreRegion)
+        descriptor.positions = MeshBuffer(corePoints)
+        descriptor.normals = MeshBuffer(normals)
+        descriptor.primitives = .triangles(indices)
+        return try MeshResource.generate(from: [descriptor])
     }
 
     @MainActor func mesh(_ shape: BodyShape) throws -> MeshResource {

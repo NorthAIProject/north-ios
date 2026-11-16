@@ -58,14 +58,19 @@ public enum NorthColor {
         public static let now = named("DayNow")
     }
 
-    /// The body figure: untrained muscle, the translucent skin and the dark
-    /// inside of the body, and the low end of the heat ramp that runs up to
-    /// `ember`. Identical to the web's `--north-body-*` and `--north-heat-low`.
+    /// The body figure: untrained muscle, the pale body under the muscles, the
+    /// skin's outline and the dark inside of the flat figure, and the low ends
+    /// and tops of the two ramps: training heat runs up to `ember`, reported
+    /// soreness from `soreLow` to `soreHigh`. The web's `--north-body-*`,
+    /// `--north-heat-low` and `--north-sore-*`.
     public enum Body {
         public static let idle = named("BodyIdle")
+        public static let base = named("BodyBase")
         public static let shell = named("BodyShell")
         public static let core = named("BodyCore")
         public static let heatLow = named("HeatLow")
+        public static let soreLow = named("SoreLow")
+        public static let soreHigh = named("SoreHigh")
     }
 
     private static func named(_ name: String) -> Color {

@@ -76,6 +76,9 @@ TOKENS = {
     "north-body-shell": "BodyShell",
     "north-body-core": "BodyCore",
     "north-heat-low": "HeatLow",
+    "north-body-base": "BodyBase",
+    "north-sore-low": "SoreLow",
+    "north-sore-high": "SoreHigh",
 }
 
 OKLCH = re.compile(r"oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:/\s*([\d.]+)%)?\s*\)")
