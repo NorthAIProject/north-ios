@@ -1,3 +1,4 @@
+import NorthAPI
 import RealityKit
 import SwiftUI
 import Testing
@@ -36,12 +37,13 @@ struct BodyMapTests {
 
     // MARK: - The skin and its shape keys
 
-    /// The bundled skin reads, with the four keys the server weights.
-    @Test func bundledShellHasTheFourShapeKeys() throws {
+    /// The bundled skin reads, with the four keys the server weights and the
+    /// one that sinks it under the muscles.
+    @Test func bundledShellHasItsShapeKeys() throws {
         let shell = try #require(BodyShell.bundled)
         #expect(shell.points.count == shell.normals.count)
         #expect(shell.indices.count % 3 == 0)
-        #expect(Set(shell.targets.keys) == ["waist", "hips", "chest", "overall"])
+        #expect(Set(shell.targets.keys) == ["waist", "hips", "chest", "overall", BodyShell.coreTarget])
         for (name, target) in shell.targets {
             #expect(!target.vertices.isEmpty, "\(name) moves nothing")
             #expect(target.vertices.count == target.deltas.count)
@@ -61,6 +63,52 @@ struct BodyMapTests {
 
         let both = shell.points(BodyShape(waist: 1, overall: 1))
         #expect(both[0] == SIMD3(0.01, 0, 0.002))
+    }
+
+    /// The solid body is the skin sunk by the `core` key; a file without the
+    /// key leaves it as modelled and builds no body.
+    @MainActor @Test func coreSinksTheSkinUnderTheMuscles() throws {
+        let plain = try BodyShell(data: Self.tinyShell)
+        #expect(plain.corePoints == plain.points)
+        #expect(try plain.coreMesh() == nil)
+
+        var data = Self.tinyShell
+        data.replaceSubrange(16..<20, with: withUnsafeBytes(of: UInt32(3).littleEndian) { Data($0) })
+        func put(_ value: UInt32) { withUnsafeBytes(of: value.littleEndian) { data.append(contentsOf: $0) } }
+        put(UInt32(4)); data.append(contentsOf: Array("core".utf8))
+        put(UInt32(1)); put(UInt32(1))
+        for value in [Float(0), 0, -0.004] { put(value.bitPattern) }
+        let sunk = try BodyShell(data: data)
+        #expect(sunk.corePoints[1] == SIMD3(1, 0, -0.004))
+        #expect(sunk.corePoints[0] == sunk.points[0])
+        #expect(sunk.points(BodyShape(waist: 1))[1] == sunk.points[1])
+        #expect(try sunk.coreMesh() != nil)
+
+        let bundled = try #require(BodyShell.bundled)
+        #expect(bundled.targets[BodyShell.coreTarget] != nil)
+    }
+
+    /// Soreness paints the muscles a region covers by its worst severity, and
+    /// a tapped muscle logs the region that lists it first.
+    @Test func sorenessOnTheFigure() {
+        let muscles = ["shoulders": ["delts", "traps"], "upper_back": ["traps", "lats"], "quads": ["quads"], "knees": []]
+        let history = SorenessHistory(days: 3, to: "2026-03-01", entries: [
+            .init(date: "2026-03-01", region: "quads", severity: 2),
+            .init(date: "2026-03-01", region: "knees", severity: 3),
+            .init(date: "2026-02-27", region: "quads", severity: 1),
+            .init(date: "2026-02-20", region: "quads", severity: 3),
+        ])
+        let figure = SorenessFigure(
+            entries: [.init(region: "shoulders", severity: 1), .init(region: "upper_back", severity: 3), .init(region: "knees", severity: 2)],
+            figure: muscles, history: history
+        )
+        #expect(figure.heat["traps"] == 1 && figure.heat["lats"] == 1)
+        #expect(figure.heat["delts"] == 0.05)
+        #expect(figure.heat.count == 3)
+        #expect(figure.regionOf == ["delts": "shoulders", "traps": "upper_back", "lats": "upper_back", "quads": "quads"])
+        #expect(figure.strip.map(\.date) == ["2026-02-27", "2026-02-28", "2026-03-01"])
+        #expect(figure.strip.map(\.severity) == [1, 0, 3])
+        #expect(figure.soreDays == 2)
     }
 
     /// Reshaping swaps the skin's mesh for a wider one, once per shape: the

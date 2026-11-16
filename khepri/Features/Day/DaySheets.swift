@@ -149,6 +149,8 @@ struct QuickAddSheet: View {
 struct BodySheet: View {
     let day: DayResponse
     let store: DayStore
+    /// The soreness region to start on: the muscle tapped on the figure.
+    var startingRegion: String?
     @Environment(\.dismiss) private var dismiss
     @State private var region = DayMath.regions[0].key
     @State private var target: Double?
@@ -220,7 +222,10 @@ struct BodySheet: View {
             .navigationTitle("Body")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .onAppear { target = day.body.targetWeightKg }
+            .onAppear {
+                target = day.body.targetWeightKg
+                if let startingRegion, DayMath.regions.contains(where: { $0.key == startingRegion }) { region = startingRegion }
+            }
         }
     }
 

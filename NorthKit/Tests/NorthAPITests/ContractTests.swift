@@ -101,7 +101,13 @@ struct ContractTests {
         #expect(try decode(Schemas.FastingState.self, "fasting").current?.phase == .fatBurning)
         #expect(try decode(Schemas.SupplementsToday.self, "supplements").entries.first?.count == 3)
         #expect(try decode(Schemas.ScreenTimeDay.self, "screen_time").minutes == 248)
-        #expect(try decode(Schemas.SorenessToday.self, "soreness").regions.contains("quads"))
+        let soreness = try decode(Schemas.SorenessToday.self, "soreness")
+        #expect(soreness.regions.contains("quads"))
+        #expect(soreness.figure?.additionalProperties["upper_back"] == ["traps", "lats"])
+        #expect(soreness.figure?.additionalProperties["knees"] == [])
+        let history = try decode(Schemas.SorenessHistory.self, "soreness_history")
+        #expect(history.days == 14 && history.to == "2026-11-15")
+        #expect(history.entries.first?.severity == 2 && history.entries.last?.region == "knees")
         #expect(try decode(Schemas.TrackerList.self, "trackers").trackers.first?.due == true)
     }
 
@@ -599,7 +605,7 @@ struct ContractTests {
 
     /// Every golden file the sync script copied has a test above.
     @Test func everyGoldenFileIsDecoded() throws {
-        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_cardio_kind", "insights-consistency", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "trackers", "passkey-ceremony", "parse", "commit", "foods",
+        let covered: Set = ["auth", "me", "onboarding", "today", "day", "day_rules", "day_trends", "caffeine", "lift_stats", "lift_last", "lift_recap", "body_map", "stats_sleep", "stats_cardio", "stats_cardio_kind", "insights-consistency", "stats_eating", "stats_patterns", "fasting", "supplements", "screen_time", "soreness", "soreness_history", "trackers", "passkey-ceremony", "parse", "commit", "foods",
                             "conversation", "conversations", "chat_attachment", "exercise",
                             "profile", "profile-appearance", "notifications", "ai-settings", "connections", "connection-created",
                             "activity", "telegram", "calendar",

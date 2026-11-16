@@ -54,6 +54,14 @@ actor FakeDayService: DayServicing {
     func bodyShape() async throws -> BodyShape {
         BodyShape(waist: 0.4)
     }
+
+    func sorenessFigure() async throws -> [String: [String]]? {
+        ["quads": ["quads"], "knees": []]
+    }
+
+    func sorenessHistory(days: Int) async throws -> SorenessHistory {
+        SorenessHistory(days: days, to: "2026-09-26", entries: [.init(date: "2026-09-25", region: "quads", severity: 2)])
+    }
 }
 
 @MainActor

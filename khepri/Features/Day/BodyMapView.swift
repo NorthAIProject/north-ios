@@ -4,16 +4,17 @@ import RealityKit
 import SwiftUI
 
 /// The body figure: the muscles of an anatomical atlas, one mesh per muscle
-/// key, inside the skin of a body, coloured by how much recent training heated
-/// each one. The same figure and the same payload (`GET /body/map`) as the
-/// web; this view only paints it.
+/// key, on a solid pale body, coloured by how much recent training heated
+/// each one, or by reported soreness. The same figure and the same payload
+/// (`GET /body/map`) as the web; this view only paints it.
 ///
-/// The web repo's `scripts/bodymap` writes `BodyMap.usdz`, one mesh per muscle
+/// The API repo's `scripts/bodymap` writes `BodyMap.usdz`, one mesh per muscle
 /// named by its key (`quads`, `delts`…), and `BodyShell.bin`, the skin with
-/// its shape keys. The skin is an outline only: clear facing the camera, firm
-/// at the silhouette, so the muscles read as the body. Recolouring sets one
-/// material per muscle, and a tap resolves to a key by the entity's name; the
-/// skin is not a tap target.
+/// its shape keys. The skin is drawn twice: sunk under the muscles and opaque,
+/// as the body they sit on, and as modelled, as an outline that is clear
+/// facing the camera and firm at the silhouette. Recolouring sets one material
+/// per muscle, and a tap resolves to a key by the entity's name; neither skin
+/// is a tap target.
 struct BodyMapView: View {
     /// Muscle key → 0…1. Missing means untrained.
     let heat: [String: Double]
@@ -23,6 +24,8 @@ struct BodyMapView: View {
     /// figure is shaped; one that shows what an exercise works stays as
     /// modelled.
     var shape: BodyShape = .modelled
+    /// Which colours `heat` is drawn in.
+    var ramp: BodyRamp = .training
     var onSelect: ((String) -> Void)?
 
     @State private var dragOffset: Float = 0
@@ -41,7 +44,7 @@ struct BodyMapView: View {
                 guard let figure = content.entities.first(where: { $0.name == BodyFigure.rootName }) else { return }
                 figure.orientation = simd_quatf(angle: yaw(at: context.date), axis: [0, 1, 0])
                 BodyFigure.reshape(figure, to: shape)
-                BodyFigure.paint(figure, heat: heat, palette: .init(colorScheme))
+                BodyFigure.paint(figure, heat: heat, ramp: ramp, palette: .init(colorScheme))
             }
         }
         .gesture(
@@ -60,11 +63,19 @@ struct BodyMapView: View {
         )
         .accessibilityElement()
         .accessibilityLabel("Body")
-        .accessibilityValue(BodyMapText.summary(heat))
+        .accessibilityValue(ramp == .soreness ? BodyMapText.soreSummary(heat) : BodyMapText.summary(heat))
+        .accessibilityActions {
+            // The figure is one element to VoiceOver, so each muscle a tap
+            // could reach is an action on it.
+            if let onSelect {
+                ForEach(BodyMapText.names.keys.sorted { BodyMapText.name($0) < BodyMapText.name($1) }, id: \.self) { key in
+                    Button(BodyMapText.name(key)) { onSelect(key) }
+                }
+            }
+        }
     }
 
-    /// Faces a front three-quarter (or the back, when back muscles are the
-    /// hottest) and sways slowly about it, except for reduced motion or for a
+    /// Faces the front (or the back, when back muscles are the hottest) and sways slowly about it, except for reduced motion or for a
     /// few seconds after a drag.
     private func yaw(at date: Date) -> Float {
         let facing = (side ?? BodySide.hottest(heat)) == .back ? Float.pi + BodyFigure.frontYaw : BodyFigure.frontYaw
@@ -72,6 +83,12 @@ struct BodyMapView: View {
         let phase = date.timeIntervalSinceReferenceDate / BodyFigure.swayPeriod * 2 * .pi
         return facing + dragOffset + Float(sin(phase)) * BodyFigure.sway
     }
+}
+
+/// What the figure's colours mean: recent training, from idle up to ember, or
+/// reported soreness, from a muted rose up to red.
+enum BodyRamp: Sendable {
+    case training, soreness
 }
 
 enum BodySide: String, CaseIterable, Identifiable {
@@ -93,11 +110,12 @@ enum BodySide: String, CaseIterable, Identifiable {
 enum BodyFigure {
     static let rootName = "body-map"
     static let shellRegion = "shell"
+    static let coreRegion = "core"
     /// The skin's edge, as on the web (viewer.js SHELL_EDGE_ALPHA and
     /// SHELL_EDGE_POWER): how opaque the silhouette gets, and how thin it is.
     static let shellEdgeAlpha: Float = 0.9
     static let shellEdgePower: Float = 4
-    static let frontYaw: Float = 0.45
+    static let frontYaw: Float = 0
     static let sway: Float = 0.35
     static let swayPeriod = 8.0
     /// The figure's height in metres, soles at y = 0 (see scripts/bodymap).
@@ -119,10 +137,17 @@ enum BodyFigure {
         let root = Entity()
         root.name = rootName
         root.addChild(loaded)
-        if let skin = BodyShell.bundled, let mesh = try? skin.mesh(.modelled) {
-            let shell = ModelEntity(mesh: mesh)
-            shell.name = shellRegion
-            root.addChild(shell)
+        if let skin = BodyShell.bundled {
+            if let mesh = try? skin.coreMesh() {
+                let core = ModelEntity(mesh: mesh)
+                core.name = coreRegion
+                root.addChild(core)
+            }
+            if let mesh = try? skin.mesh(.modelled) {
+                let shell = ModelEntity(mesh: mesh)
+                shell.name = shellRegion
+                root.addChild(shell)
+            }
         }
         for muscle in muscles(in: root) {
             muscle.components.set(InputTargetComponent())
@@ -194,7 +219,7 @@ enum BodyFigure {
         return disc
     }
 
-    /// Every mesh of the figure: the muscles and the skin.
+    /// Every mesh of the figure: the muscles, the body under them and the skin.
     static func models(in root: Entity) -> [ModelEntity] {
         var out: [ModelEntity] = []
         var stack = [root]
@@ -214,6 +239,7 @@ enum BodyFigure {
     /// sway runs it 30 times a second) does not rebuild every material.
     struct Painted: Component, Equatable {
         var heat: [String: Double]
+        var ramp: BodyRamp
         var dark: Bool
     }
 
@@ -237,16 +263,20 @@ enum BodyFigure {
 
     struct Palette {
         let idle: UIColor
+        let base: UIColor
         let shell: UIColor
         let rim: UIColor
         let rimStrength: Float
         let heatLow: UIColor
         let ember: UIColor
+        let soreLow: UIColor
+        let sore: UIColor
         let dark: Bool
 
         init(_ scheme: ColorScheme) {
             let traits = UITraitCollection(userInterfaceStyle: scheme == .dark ? .dark : .light)
             idle = UIColor(NorthColor.Body.idle).resolvedColor(with: traits)
+            base = UIColor(NorthColor.Body.base).resolvedColor(with: traits)
             shell = UIColor(NorthColor.Body.shell).resolvedColor(with: traits)
             // The web viewer's rim colours (viewer.js PALETTES).
             rim = scheme == .dark
@@ -255,14 +285,20 @@ enum BodyFigure {
             rimStrength = scheme == .dark ? 0.3 : 0.15
             heatLow = UIColor(NorthColor.Body.heatLow).resolvedColor(with: traits)
             ember = UIColor(NorthColor.ember).resolvedColor(with: traits)
+            soreLow = UIColor(NorthColor.Body.soreLow).resolvedColor(with: traits)
+            sore = UIColor(NorthColor.Body.soreHigh).resolvedColor(with: traits)
             dark = scheme == .dark
         }
 
         /// Untrained is idle; any heat starts a little way up the ramp, so a
-        /// light touch still reads as warm. Same ramp as the web.
-        func color(heat: Double) -> UIColor {
+        /// light touch still reads as warm. Same ramps as the web.
+        func color(heat: Double, ramp: BodyRamp = .training) -> UIColor {
             guard heat > 0 else { return idle }
-            return mix(heatLow, ember, CGFloat(0.15 + 0.85 * min(heat, 1)))
+            let fraction = CGFloat(0.15 + 0.85 * min(heat, 1))
+            switch ramp {
+            case .training: return mix(heatLow, ember, fraction)
+            case .soreness: return mix(soreLow, sore, fraction)
+            }
         }
 
         private func mix(_ from: UIColor, _ to: UIColor, _ fraction: CGFloat) -> UIColor {
@@ -278,20 +314,22 @@ enum BodyFigure {
         }
     }
 
-    static func paint(_ root: Entity, heat: [String: Double], palette: Palette) {
+    static func paint(_ root: Entity, heat: [String: Double], ramp: BodyRamp = .training, palette: Palette) {
         Painted.registerComponent()
-        let painted = Painted(heat: heat, dark: palette.dark)
+        let painted = Painted(heat: heat, ramp: ramp, dark: palette.dark)
         let before = root.components[Painted.self]
         if before == painted { return }
         root.components.set(painted)
         for muscle in muscles(in: root) {
-            muscle.model?.materials = [material(tint: palette.color(heat: heat[muscle.name] ?? 0), roughness: 0.55)]
+            muscle.model?.materials = [material(tint: palette.color(heat: heat[muscle.name] ?? 0, ramp: ramp), roughness: 0.55)]
         }
-        guard before?.dark != palette.dark,
-              let shell = root.findEntity(named: shellRegion) as? ModelEntity
-        else { return }
-        // Without the outline shader there is no skin at all: a flat
-        // translucent fill is the grey second body the outline replaced.
+        guard before?.dark != palette.dark else { return }
+        if let core = root.findEntity(named: coreRegion) as? ModelEntity {
+            core.model?.materials = [material(tint: palette.base, roughness: 0.7)]
+        }
+        guard let shell = root.findEntity(named: shellRegion) as? ModelEntity else { return }
+        // Without the outline shader the outline is left out: a flat
+        // translucent fill is a grey second body around the muscles.
         if let outline = outline(palette) {
             shell.model?.materials = [outline]
         } else {
@@ -344,6 +382,11 @@ enum BodyMapText {
     static func lastTrained(_ day: String?) -> String {
         guard let day, let date = CalendarDay.date(from: day) else { return String(localized: "Not trained yet") }
         return String(localized: "Last trained \(date.formatted(.dateTime.day().month(.wide)))")
+    }
+
+    static func soreSummary(_ heat: [String: Double]) -> String {
+        let sore = heat.filter { $0.value > 0 }.sorted { $0.value > $1.value }.map { name($0.key) }
+        return sore.isEmpty ? String(localized: "No soreness reported") : String(localized: "Reported soreness: \(sore.formatted(.list(type: .and)))")
     }
 
     static func summary(_ heat: [String: Double]) -> String {
