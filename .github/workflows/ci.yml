@@ -14,7 +14,7 @@ concurrency:
 jobs:
   test:
     name: Build and Test
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 45
     env:
       # One fixed DerivedData and SwiftPM checkout location for every step, so
@@ -38,7 +38,7 @@ jobs:
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "26.3"
+          xcode-version: "27.1"
 
       # Only the SwiftPM checkouts are cached. DerivedData is deliberately not:
       # checkout gives every source a fresh mtime, so Xcode recompiles all of it
