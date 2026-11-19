@@ -55,6 +55,61 @@ struct MultipartFileBodyTests {
     }
 }
 
+/// The stills a check is read from: when they are cut, and how they travel.
+struct FormCheckFramesTests {
+    @Test func spreadsTheTargetCountThroughAWorkingSet() {
+        let times = FormCheckFrames.times(durationSeconds: 16)
+        #expect(times.count == FormCheckFrames.targetFrames)
+        #expect(times.first == 0.5 && times.last == 15.5)
+    }
+
+    @Test(arguments: [0.3, 0.9, 1, 2.37, 7.5, 44.91, 600])
+    func timesAreStrictlyIncreasingAndInsideTheClip(duration: Double) {
+        let times = FormCheckFrames.times(durationSeconds: duration)
+        #expect(!times.isEmpty && times.count <= FormCheckFrames.maxFrames)
+        #expect(zip(times, times.dropFirst()).allSatisfy { $0 < $1 })
+        #expect(times.allSatisfy { $0 > 0 && $0 <= duration })
+    }
+
+    @Test func aShortClipGivesFewerStills() {
+        #expect(FormCheckFrames.times(durationSeconds: 2).count == 8)
+        #expect(FormCheckFrames.times(durationSeconds: 0.5).count == 4)
+    }
+
+    @Test func aClipWithNoLengthGivesNone() {
+        #expect(FormCheckFrames.times(durationSeconds: 0).isEmpty)
+        #expect(FormCheckFrames.times(durationSeconds: .nan).isEmpty)
+        #expect(FormCheckFrames.times(durationSeconds: .infinity).isEmpty)
+    }
+
+    @Test func numbersUseAPointWhateverTheRegion() {
+        #expect(FormCheckFrames.plain(4.5) == "4.5")
+        #expect(FormCheckFrames.plain(1234.25) == "1234.25")
+        #expect(FormCheckFrames.plain(2) == "2")
+    }
+
+    @Test func theBodyCarriesTheClipEachStillAndOneTimePerStill() throws {
+        let directory = try temporaryDirectory()
+        let clip = directory.appending(path: "clip.mov")
+        try Data([9, 9]).write(to: clip)
+        let destination = directory.appending(path: "body")
+        let stills = FormCheckStills(frames: [Data([1]), Data([2, 3])], times: [0.5, 1.5], durationSeconds: 2)
+
+        try MultipartFileBody(boundary: "B").write(FormCheckFrames.parts(video: clip, stills: stills), to: destination)
+
+        var expected = Data("--B\r\nContent-Disposition: form-data; filename=\"clip.mov\"; name=\"video\"\r\nContent-Type: text/plain\r\nContent-Length: 2\r\n\r\n".utf8)
+        expected.append(Data([9, 9]))
+        expected.append(Data("\r\n--B\r\nContent-Disposition: form-data; filename=\"frame-01.jpg\"; name=\"frames\"\r\nContent-Type: image/jpeg\r\nContent-Length: 1\r\n\r\n".utf8))
+        expected.append(Data([1]))
+        expected.append(Data("\r\n--B\r\nContent-Disposition: form-data; filename=\"frame-02.jpg\"; name=\"frames\"\r\nContent-Type: image/jpeg\r\nContent-Length: 2\r\n\r\n".utf8))
+        expected.append(Data([2, 3]))
+        expected.append(Data("\r\n--B\r\nContent-Disposition: form-data; name=\"frameTimes\"\r\n\r\n0.5,1.5".utf8))
+        expected.append(Data("\r\n--B\r\nContent-Disposition: form-data; name=\"durationSeconds\"\r\n\r\n2".utf8))
+        expected.append(Data("\r\n--B--\r\n".utf8))
+        #expect(try Data(contentsOf: destination) == expected)
+    }
+}
+
 @MainActor
 struct FormCheckUploaderTests {
     @Test func startsABackgroundUploadWithTheSessionToken() async throws {
@@ -208,9 +263,13 @@ struct FormCheckUploaderTests {
             self.onUnauthorized = onUnauthorized
             uploader = FormCheckUploader(
                 session: session, baseURL: URL(string: "https://khepri.test")!,
-                token: token, onUnauthorized: onUnauthorized, directory: directory, defaults: defaults
+                token: token, onUnauthorized: onUnauthorized, directory: directory, defaults: defaults,
+                cutStills: { _ in Self.stills }
             )
         }
+
+        /// The fixture clip is not a real video, so its stills are given.
+        static let stills = FormCheckStills(frames: [Data([0xFF, 0xD8]), Data([0xFF, 0xD9])], times: [0.5, 1.5], durationSeconds: 2)
 
         func relaunched() -> FormCheckUploader {
             FormCheckUploader(

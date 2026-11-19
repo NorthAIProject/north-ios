@@ -186,6 +186,8 @@ private struct FormCheckDetail: View {
     /// Made once from the first signed link. Every poll returns a fresh link,
     /// and swapping the player for each would restart the clip.
     @State private var player: AVPlayer?
+    /// The issue being looked at: its marker and its row are the gold ones.
+    @State private var selected: Int?
 
     var body: some View {
         List {
@@ -196,6 +198,13 @@ private struct FormCheckDetail: View {
                         .frame(maxHeight: 420)
                         .frame(maxWidth: .infinity)
                         .listRowInsets(EdgeInsets())
+                    if let issues = check?.result?.issues, !issues.isEmpty, let duration = check?.durationSeconds, duration > 0 {
+                        FormCheckTimeline(
+                            issues: issues.map { FormCheckMark(at: $0.at, severity: $0.severity) },
+                            durationSeconds: duration,
+                            selected: selected
+                        ) { select($0) }
+                    }
                 }
             }
             if let check {
@@ -210,28 +219,45 @@ private struct FormCheckDetail: View {
                             Text(result.summary)
                         }
                         .padding(.vertical, 4)
+                    } footer: {
+                        if check.method == "stills", let count = check.frames?.count, count > 0 {
+                            Text("Khepri looked at \(count) stills from your clip. It judges positions, not speed.")
+                        }
                     }
                     if !result.issues.isEmpty {
                         Section("What to Fix") {
-                            ForEach(Array(result.issues.enumerated()), id: \.offset) { _, issue in
+                            ForEach(Array(result.issues.enumerated()), id: \.offset) { index, issue in
                                 Button {
-                                    seek(to: issue.at)
+                                    select(index)
                                 } label: {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack {
-                                            Label(timestamp(issue.at), systemImage: player == nil ? "clock" : "play.fill")
-                                                .font(.subheadline.monospacedDigit().weight(.medium))
-                                                .foregroundStyle(NorthColor.signal)
-                                            Text(issue.severity.capitalized).font(.caption).foregroundStyle(.secondary)
+                                    HStack(alignment: .top, spacing: 12) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack {
+                                                Label(timestamp(issue.at), systemImage: player == nil ? "clock" : "pause.fill")
+                                                    .font(.subheadline.monospacedDigit().weight(.medium))
+                                                    .foregroundStyle(selected == index ? NorthColor.signal : .primary)
+                                                Text(issue.severity.capitalized).font(.caption).foregroundStyle(.secondary)
+                                            }
+                                            Text(issue.observation)
+                                            Text(issue.correction).font(.subheadline).foregroundStyle(.secondary)
                                         }
-                                        Text(issue.observation)
-                                        Text(issue.correction).font(.subheadline).foregroundStyle(.secondary)
+                                        Spacer(minLength: 0)
+                                        if let link = issue.frameUrl, let url = URL(string: link) {
+                                            AsyncImage(url: url) { image in
+                                                image.resizable().scaledToFit()
+                                            } placeholder: {
+                                                Color.clear
+                                            }
+                                            .frame(width: 64, height: 96)
+                                            .clipShape(.rect(cornerRadius: NorthRadius.small, style: .continuous))
+                                            .accessibilityHidden(true)
+                                        }
                                     }
                                     .padding(.vertical, 2)
                                 }
                                 .buttonStyle(.plain)
                                 .disabled(player == nil)
-                                .accessibilityHint(player == nil ? "" : String(localized: "Plays the clip from this moment"))
+                                .accessibilityHint(player == nil ? "" : String(localized: "Shows this moment in the clip"))
                             }
                         }
                     }
@@ -260,15 +286,102 @@ private struct FormCheckDetail: View {
         }
     }
 
-    /// Starts a little before the moment, so the rep is seen going wrong
-    /// rather than already wrong.
-    private func seek(to seconds: Double) {
-        guard let player else { return }
-        player.seek(to: CMTime(seconds: max(seconds - 1, 0), preferredTimescale: 600))
-        player.play()
+    /// Stops on the moment itself. The still the coach named is one frame,
+    /// so the seek is exact: the default tolerance lands on a keyframe that
+    /// can be seconds away.
+    private func select(_ index: Int) {
+        guard let player, let issue = check?.result?.issues[safe: index] else { return }
+        selected = index
+        player.pause()
+        player.seek(
+            to: CMTime(seconds: issue.at, preferredTimescale: 600),
+            toleranceBefore: .zero,
+            toleranceAfter: .zero
+        )
     }
 
     private func timestamp(_ seconds: Double) -> String {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
+    }
+}
+
+/// The clip as a line, with a marker where each issue is visible.
+///
+/// A marker's shape says how serious it is, so colour is never the only
+/// signal: a diamond to fix before adding load, a filled dot worth fixing, a
+/// ring for a minor one. VoiceOver reads the issue rows below instead.
+struct FormCheckTimeline: View {
+    let issues: [FormCheckMark]
+    let durationSeconds: Double
+    let selected: Int?
+    let select: (Int) -> Void
+
+    private static let hit: CGFloat = 44
+
+    var body: some View {
+        GeometryReader { proxy in
+            let track = max(proxy.size.width - Self.hit, 0)
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(NorthColor.hairline)
+                    .frame(height: 1)
+                    .padding(.horizontal, Self.hit / 2)
+                ForEach(Array(issues.enumerated()), id: \.offset) { index, issue in
+                    Button {
+                        select(index)
+                    } label: {
+                        FormCheckMarker(severity: issue.severity, isSelected: selected == index)
+                            .frame(width: Self.hit, height: Self.hit)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .offset(x: track * FormCheckTimeline.position(of: issue.at, in: durationSeconds))
+                }
+            }
+            .frame(maxHeight: .infinity)
+        }
+        .frame(height: Self.hit)
+        .sensoryFeedback(.selection, trigger: selected)
+        .accessibilityHidden(true)
+    }
+
+    /// Where a moment sits along the line, 0 to 1. Clamped, so a wrong
+    /// length cannot push a marker off it.
+    static func position(of seconds: Double, in durationSeconds: Double) -> Double {
+        guard durationSeconds > 0, seconds.isFinite else { return 0 }
+        return min(max(seconds / durationSeconds, 0), 1)
+    }
+}
+
+/// One issue as the timeline draws it.
+struct FormCheckMark: Equatable {
+    let at: Double
+    let severity: String
+}
+
+private struct FormCheckMarker: View {
+    let severity: String
+    let isSelected: Bool
+
+    var body: some View {
+        let color: Color = isSelected ? NorthColor.signal : .primary
+        Group {
+            switch severity {
+            case "critical":
+                Rectangle().fill(color).frame(width: 11, height: 11).rotationEffect(.degrees(45))
+            case "moderate":
+                Circle().fill(color).frame(width: 12, height: 12)
+            default:
+                Circle().strokeBorder(color, lineWidth: 2).frame(width: 11, height: 11)
+            }
+        }
+        .scaleEffect(isSelected ? 1.25 : 1)
+        .animation(.snappy, value: isSelected)
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

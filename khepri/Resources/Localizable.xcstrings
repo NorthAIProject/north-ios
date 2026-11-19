@@ -1214,6 +1214,50 @@
         }
       }
     },
+    "Khepri could not read that clip. Try filming it again." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri no pudo leer ese clip. Prueba a grabarlo de nuevo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri não conseguiu ler esse clipe. Tente filmar de novo."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri não conseguiu ler esse clip. Tenta filmá-lo outra vez."
+          }
+        }
+      }
+    },
+    "Khepri looked at %lld stills from your clip. It judges positions, not speed." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khepri miró %lld fotogramas de tu clip. Valora posiciones, no velocidad."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri olhou para %lld quadros do seu clipe. Ele avalia posições, não velocidade."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Khepri olhou para %lld fotogramas do teu clip. Avalia posições, não velocidade."
+          }
+        }
+      }
+    },
     "No soreness reported" : {
       "localizations" : {
         "es" : {
@@ -1276,6 +1320,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dores registadas: %@"
+          }
+        }
+      }
+    },
+    "Shows this moment in the clip" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra este momento del clip"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra este momento do clipe"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra este momento do clip"
           }
         }
       }
@@ -29581,28 +29647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Planos"
-          }
-        }
-      }
-    },
-    "Plays the clip from this moment" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reproduce el clip desde este momento"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reproduz o clipe a partir deste momento"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reproduz o clip a partir deste momento"
           }
         }
       }

@@ -355,6 +355,9 @@ struct ContractTests {
         #expect(try decode(Schemas.InsightsSpend.self, "insights-spend").surfaces.first?.pct == 75)
         let played = try decode(Schemas.FormCheck.self, "form-check-playback")
         #expect(played.playbackUrl?.hasPrefix("https://") == true)
+        let stills = try decode(Schemas.FormCheck.self, "form-check-stills")
+        #expect(stills.method == "stills" && stills.durationSeconds == 8 && stills.frames?.map(\.at) == [0.5, 4.5])
+        #expect(stills.result?.issues.first?.frameUrl == stills.frames?.last?.url)
         let diets = try decode(Schemas.DietSettings.self, "diets")
         #expect(diets.diets.filter(\.selected).map(\.code) == ["vegetarian"])
     }
@@ -618,7 +621,7 @@ struct ContractTests {
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
-                            "form-check-playback", "diets",
+                            "form-check-playback", "form-check-stills", "diets",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "profiles-profile", "profiles-profile-private", "profiles-profile-workouts", "profiles-profile-workouts-private", "sharing", "crews", "crew", "crew-board", "crew-space", "crew-messages", "summary", "board",
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",
