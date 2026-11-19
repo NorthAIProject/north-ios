@@ -115,12 +115,14 @@ struct HorizonLiftDetailTests {
 }
 
 struct HorizonShareCardTests {
-    /// Ranges only: a row needs a day ahead, so the waist (not ready) is left out.
-    @Test func sharesEveryReadyRangeAtItsFurthestDay() throws {
+    /// Lifts only, as ranges with their track record. Body weight is ready
+    /// in this forecast and still stays off the picture.
+    @Test func sharesLiftsOnlyAsRangesWithTheirRecord() throws {
         let rows = HorizonShareCard.rows(forecast(try response()))
-        #expect(rows.map(\.name) == ["Barbell Squat", "Body weight"])
-        #expect(rows.map(\.weeks) == [4, 1])
+        #expect(rows.map(\.name) == ["Barbell Squat"])
+        #expect(rows.map(\.weeks) == [4])
         #expect(rows.allSatisfy { $0.range.contains("–") })
+        #expect(rows.first?.record == "Would have landed in range 5 of 6 times")
     }
 
     /// A what-if is not a forecast, so it is never the picture that gets shared.

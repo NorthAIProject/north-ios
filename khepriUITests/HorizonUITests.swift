@@ -61,6 +61,15 @@ final class HorizonUITests: XCTestCase {
         XCTAssertEqual(app.sliders["Day to look at"].value as? String, ahead)
         sleep(1)
         attach(app, "04-four-weeks-off-figure")
+
+        // A lift's row opens its history and range.
+        tap(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Barbell Squat'")).firstMatch)
+        XCTAssertTrue(app.navigationBars["Barbell Squat"].waitForExistence(timeout: 20), "the lift did not open")
+        XCTAssertTrue(app.staticTexts["How earlier forecasts landed"].waitForExistence(timeout: 20),
+                      "no earlier forecasts on the lift's page")
+        // Nobody filmed this lift: no form check is shown for it.
+        XCTAssertFalse(app.staticTexts["Last form check"].exists)
+        attach(app, "05-lift-detail")
     }
 
     /// Two lifts twice a week for twelve weeks, creeping up; six weeks of

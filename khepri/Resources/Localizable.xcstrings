@@ -1434,6 +1434,28 @@
         }
       }
     },
+    "Est. 1RM in %lld weeks" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. en %lld semanas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. em %lld semanas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. em %lld semanas"
+          }
+        }
+      }
+    },
     "Figure shows" : {
       "localizations" : {
         "es" : {
@@ -1650,28 +1672,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daqui a %lld dias, %@"
-          }
-        }
-      }
-    },
-    "In %lld weeks" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En %lld semanas"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em %lld semanas"
-          }
-        },
-        "pt-PT" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em %lld semanas"
           }
         }
       }

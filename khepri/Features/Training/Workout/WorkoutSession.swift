@@ -190,9 +190,10 @@ final class WorkoutSession {
         if recorded == nil {
             connecting = Task { await rejoin() }
         }
-        if lastTime.isEmpty || nextSets.isEmpty {
-            loadingLastTime = Task { await loadLastTime() }
-        }
+        // Last time's sets came back with the snapshot and must stay as they
+        // were: asked for again mid-workout, "last time" could be today.
+        // Suggestions are not kept, so they are asked for again.
+        loadingLastTime = Task { await loadLastTime(keepingLastTime: !lastTime.isEmpty) }
         for set in logged where set.upload == .pending || set.upload == .failed {
             upload(set)
         }
@@ -472,12 +473,12 @@ extension WorkoutSession: Identifiable {}
 
 extension WorkoutSession {
     /// What each set starts from: last time's numbers and the suggested next sets.
-    fileprivate func loadLastTime() async {
+    fileprivate func loadLastTime(keepingLastTime: Bool = false) async {
         let keys = Array(Set(exercises.map(key(for:)))).sorted()
         // One request for the whole workout, beside last time's numbers. A
         // failure leaves the prefill as it always was.
         async let suggested = try? suggestions?.nextSets(keys)
-        if let lifts, let last = try? await lifts.last(keys) {
+        if !keepingLastTime, let lifts, let last = try? await lifts.last(keys) {
             lastTime = last
             persist()
         }
