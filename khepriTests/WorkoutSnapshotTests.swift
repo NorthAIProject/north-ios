@@ -33,6 +33,29 @@ struct WorkoutSnapshotTests {
         #expect(store.clears >= 1)
     }
 
+    /// A resumed workout keeps the "last time" it started with. Asked again
+    /// mid-workout the server would answer with today's sets, and today
+    /// would be compared with itself. Suggestions are not kept, so those
+    /// are asked for again.
+    @Test func resumingKeepsLastTimeAndAsksForSuggestionsAgain() async throws {
+        let clock = TestClock()
+        let memory = MemorySnapshots()
+        let before = FakeLifts(last: ["goblet squat": [.fixture(set: 1, kg: 20, reps: 8)]])
+        let session = workout(clock: clock, lifts: before, snapshots: memory)
+        session.start()
+        await session.loadingLastTime?.value
+        let snapshot = try #require(memory.saved)
+
+        let today = FakeLifts(last: ["goblet squat": [.fixture(set: 1, kg: 30, reps: 8)]])
+        let next = FakeNextSets(sets: ["goblet squat": NextSet(weightKg: 22.5, reps: 8, reason: "More weight")])
+        let resumed = restored(snapshot, lifts: today, suggestions: next, clock: clock)
+        resumed.start()
+        await resumed.loadingLastTime?.value
+
+        #expect(resumed.lastTime["goblet squat"]?.map(\.weightKg) == [20])
+        #expect(resumed.nextSets["goblet squat"]?.weightKg == 22.5)
+    }
+
     @Test func discardingClearsTheSnapshot() async {
         let store = MemorySnapshots()
         let session = workout(snapshots: store)

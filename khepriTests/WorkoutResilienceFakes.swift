@@ -17,10 +17,12 @@ func workout(clock: TestClock? = nil, lifts: LiftServicing? = nil, snapshots: Wo
 /// A workout restored from `snapshot`, timed by `clock`.
 @MainActor
 func restored(_ snapshot: WorkoutSnapshot, service: FakeActivity? = nil, live: FakeLiveActivity? = nil,
-              lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+              lifts: LiftServicing? = nil, suggestions: NextSetServicing? = nil,
+              snapshots: WorkoutSnapshotStoring? = nil,
               rest: RestNotificationScheduling? = nil, clock: TestClock) -> WorkoutSession {
     WorkoutSession(restoring: snapshot, service: service ?? FakeActivity(), live: live ?? FakeLiveActivity(),
-                   lifts: lifts, snapshots: snapshots, restNotifications: rest, now: { clock.now })
+                   lifts: lifts, suggestions: suggestions, snapshots: snapshots, restNotifications: rest,
+                   now: { clock.now })
 }
 
 // MARK: - Fakes

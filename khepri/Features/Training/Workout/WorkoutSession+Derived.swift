@@ -36,20 +36,34 @@ extension WorkoutSession {
 
     func key(for exercise: DayExercise) -> String { LiftMath.key(slug: exercise.catalogSlug, name: exercise.name) }
 
+    /// The server's suggestion for the set in hand: only for an exercise's
+    /// first set of the workout. After that the set just done is the better
+    /// guide, and a warm-up is never what a suggestion is for.
+    var nextSetForCurrent: NextSet? {
+        guard let current else { return nil }
+        let key = key(for: current)
+        guard !logged.contains(where: { $0.exerciseKey == key }) else { return nil }
+        return nextSets[key]
+    }
+
     /// What the set in hand starts from: this workout's previous set of the
-    /// exercise, else the same set last time, else last time's final set.
-    /// Nil when the exercise has never been done with a weight.
+    /// exercise, else the suggested next set, else the same set last time,
+    /// else last time's final set. Nil when the exercise has never been done
+    /// with a weight.
     var suggestedWeightKg: Double? {
         guard let current else { return nil }
         let key = key(for: current)
         if let previous = logged.last(where: { $0.exerciseKey == key }) { return previous.weightKg }
+        if let next = nextSetForCurrent { return next.weightKg }
         let last = lastWorkSets(key)
         return (last.first { $0.setNumber == setNumber } ?? last.last)?.weightKg
     }
 
-    /// Reps start from the plan's number, else last time's.
+    /// Reps start from the suggested next set, else the plan's number, else
+    /// last time's.
     var suggestedReps: Int {
         guard let current else { return 1 }
+        if let next = nextSetForCurrent { return next.reps }
         if let planned = LiftMath.reps(from: current.reps) { return planned }
         let last = lastWorkSets(key(for: current))
         return (last.first { $0.setNumber == setNumber } ?? last.last)?.reps ?? 10

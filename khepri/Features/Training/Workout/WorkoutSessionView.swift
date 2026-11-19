@@ -65,6 +65,7 @@ struct WorkoutSessionView: View {
                     SetEntrySheet(exerciseName: exercise.name, setNumber: session.setNumber,
                                   suggestedWeightKg: session.suggestedWeightKg, suggestedReps: session.suggestedReps,
                                   suggestedKind: session.suggestedKind, lastTime: session.lastTimeForCurrent,
+                                  suggestionNote: session.nextSetForCurrent?.reason,
                                   imperial: imperial) { entry in
                         Task {
                             await session.completeSet(weightKg: entry.weightKg, reps: entry.reps,

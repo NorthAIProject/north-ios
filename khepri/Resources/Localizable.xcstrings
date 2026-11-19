@@ -133,6 +133,28 @@
         }
       }
     },
+    "%@ %@ on %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ el %3$@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ em %3$@."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ a %3$@."
+          }
+        }
+      }
+    },
     "%@ on the period before" : {
       "localizations" : {
         "es" : {
@@ -1390,6 +1412,50 @@
         }
       }
     },
+    "Each is the forecast made that day for four weeks later, beside what you then lifted." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada una es la previsión hecha ese día para cuatro semanas después, junto a lo que levantaste entonces."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada uma é a previsão feita nesse dia para quatro semanas depois, ao lado do que você levantou então."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada uma é a previsão feita nesse dia para quatro semanas depois, ao lado do que levantaste então."
+          }
+        }
+      }
+    },
+    "Est. 1RM in %lld weeks" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. en %lld semanas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. em %lld semanas"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1RM est. em %lld semanas"
+          }
+        }
+      }
+    },
     "Figure shows" : {
       "localizations" : {
         "es" : {
@@ -1408,6 +1474,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A figura mostra"
+          }
+        }
+      }
+    },
+    "Forecast %@, lifted %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsto %1$@, levantado %2$@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsto %1$@, levantado %2$@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsto %1$@, levantado %2$@"
           }
         }
       }
@@ -1434,6 +1522,50 @@
         }
       }
     },
+    "Forecast, high" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsión, máximo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão, máximo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão, máximo"
+          }
+        }
+      }
+    },
+    "Forecast, low" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsión, mínimo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão, mínimo"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão, mínimo"
+          }
+        }
+      }
+    },
     "Horizon" : {
       "localizations" : {
         "es" : {
@@ -1452,6 +1584,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Horizonte"
+          }
+        }
+      }
+    },
+    "How earlier forecasts landed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo acabaron las previsiones anteriores"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como ficaram as previsões anteriores"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como ficaram as previsões anteriores"
           }
         }
       }
@@ -1544,6 +1698,28 @@
         }
       }
     },
+    "In %lld weeks: between %@ and %@ %@." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %1$lld semanas: entre %2$@ y %3$@ %4$@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em %1$lld semanas: entre %2$@ e %3$@ %4$@."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em %1$lld semanas: entre %2$@ e %3$@ %4$@."
+          }
+        }
+      }
+    },
     "Khepri could not read that clip. Try filming it again." : {
       "localizations" : {
         "es" : {
@@ -1588,6 +1764,50 @@
         }
       }
     },
+    "Last form check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última revisión de técnica"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última análise de execução"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última análise de técnica"
+          }
+        }
+      }
+    },
+    "Logged" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrado"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrado"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registado"
+          }
+        }
+      }
+    },
     "No soreness reported" : {
       "localizations" : {
         "es" : {
@@ -1628,6 +1848,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda não há histórico suficiente"
+          }
+        }
+      }
+    },
+    "Nothing logged for this lift yet." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay nada registrado de este ejercicio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há nada registrado deste exercício."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há nada registado deste exercício."
           }
         }
       }
@@ -1720,6 +1962,28 @@
         }
       }
     },
+    "See where this is heading" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mira hacia dónde va esto"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja para onde isto vai"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vê para onde isto vai"
+          }
+        }
+      }
+    },
     "Set it in your weekly review. Nothing changes unless you do." : {
       "localizations" : {
         "es" : {
@@ -1738,6 +2002,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Define-a na tua revisão semanal. Nada muda se não fores tu a mudar."
+          }
+        }
+      }
+    },
+    "Share" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partilhar"
+          }
+        }
+      }
+    },
+    "Shows this lift's history and forecast" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra el historial y la previsión de este ejercicio"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra o histórico e a previsão deste exercício"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra o histórico e a previsão deste exercício"
           }
         }
       }
@@ -4232,6 +4540,94 @@
         }
       }
     },
+    "Suggested: %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerido: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerido: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerido: %@"
+          }
+        }
+      }
+    },
+    "The clip did not show the lift clearly, so read this loosely." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El vídeo no mostraba bien el ejercicio; tómalo con cautela."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo não mostrava bem o exercício; leia com cautela."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo não mostrava bem o exercício; lê com cautela."
+          }
+        }
+      }
+    },
+    "The clip showed most of the lift." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El vídeo mostraba la mayor parte del ejercicio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo mostrava a maior parte do exercício."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo mostrava a maior parte do exercício."
+          }
+        }
+      }
+    },
+    "The clip showed the lift clearly." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El vídeo mostraba bien el ejercicio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo mostrava bem o exercício."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo mostrava bem o exercício."
+          }
+        }
+      }
+    },
     "These change how rested each muscle would be, and when your progress picks up again. Time off never raises a forecast." : {
       "localizations" : {
         "es" : {
@@ -4607,6 +5003,28 @@
         }
       }
     },
+    "Where this is heading" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacia dónde va esto"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para onde isto vai"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para onde isto vai"
+          }
+        }
+      }
+    },
     "Which Days?" : {
       "localizations" : {
         "es" : {
@@ -4625,6 +5043,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Que dias?"
+          }
+        }
+      }
+    },
+    "Work on: %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A trabajar: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A trabalhar: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A trabalhar: %@"
           }
         }
       }

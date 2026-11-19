@@ -117,6 +117,37 @@ struct WorkoutSessionTests {
         #expect(saved.allSatisfy { $0.activitySessionId == "s1" }, "sets attach to the timed workout")
     }
 
+    /// The server's next set fills the first set of an exercise, with its
+    /// reason; after that the set just done is the guide again.
+    @Test func theFirstSetStartsFromTheSuggestedNextSet() async {
+        let lifts = FakeLifts(last: ["goblet squat": [.fixture(set: 1, kg: 20, reps: 8)]])
+        let next = FakeNextSets(sets: ["goblet squat": NextSet(weightKg: 22.5, reps: 6, reason: "More weight, fewer reps")])
+        let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(),
+                                             lifts: lifts, suggestions: next)
+        session.start()
+        await session.loadingLastTime?.value
+
+        #expect(session.suggestedWeightKg == 22.5 && session.suggestedReps == 6)
+        #expect(session.nextSetForCurrent?.reason == "More weight, fewer reps")
+
+        await session.completeSet(weightKg: 20, reps: 8)
+        #expect(session.nextSetForCurrent == nil, "said once, for the first set")
+        #expect(session.suggestedWeightKg == 20, "set 2 starts from what was actually done")
+        #expect(session.suggestedReps == 8, "and the plan's reps")
+    }
+
+    /// No signal, or a lift without enough history: the prefill is last
+    /// time's, exactly as before.
+    @Test func withoutASuggestionThePrefillIsLastTimes() async {
+        let lifts = FakeLifts(last: ["goblet squat": [.fixture(set: 1, kg: 20, reps: 8)]])
+        let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(),
+                                             lifts: lifts, suggestions: FakeNextSets(offline: true))
+        session.start()
+        await session.loadingLastTime?.value
+        #expect(session.suggestedWeightKg == 20 && session.suggestedReps == 8)
+        #expect(session.nextSetForCurrent == nil)
+    }
+
     @Test func aSetDoneWithoutAWeightIsNotLogged() async {
         let lifts = FakeLifts()
         let session = WorkoutSession.fixture(service: FakeActivity(), live: FakeLiveActivity(), clock: TestClock(), lifts: lifts)
@@ -249,7 +280,8 @@ extension ActivitySession {
 extension WorkoutSession {
     /// Two sets of squats with 90s rest, then one set of push-ups.
     static func fixture(service: ActivityServicing, live: WorkoutLiveActivityControlling, clock: TestClock,
-                        lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+                        lifts: LiftServicing? = nil, suggestions: NextSetServicing? = nil,
+                        snapshots: WorkoutSnapshotStoring? = nil,
                         restNotifications: RestNotificationScheduling? = nil) -> WorkoutSession {
         let day = TrainingDay(weekday: "Monday", focus: "Full body", exercises: [
             DayExercise(name: "Goblet squat", sets: 2, reps: "8", restSeconds: 90, equipment: "dumbbell",
@@ -258,7 +290,18 @@ extension WorkoutSession {
                         hasArt: true, primaryMuscles: [], secondaryMuscles: []),
         ], completedThisWeek: false, isNext: true)
         return WorkoutSession(title: "Monday · Full body", day: day, service: service, live: live, lifts: lifts,
-                              snapshots: snapshots, restNotifications: restNotifications, now: { clock.now })
+                              suggestions: suggestions, snapshots: snapshots, restNotifications: restNotifications, now: { clock.now })
+    }
+}
+
+/// Suggests what it was given, or fails as a phone offline would.
+struct FakeNextSets: NextSetServicing {
+    var sets: [String: NextSet] = [:]
+    var offline = false
+
+    func nextSets(_ keys: [String]) async throws -> [String: NextSet] {
+        if offline { throw URLError(.notConnectedToInternet) }
+        return sets.filter { keys.contains($0.key) }
     }
 }
 

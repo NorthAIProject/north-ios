@@ -50,7 +50,7 @@ struct WeeklyReviewFlow: View {
             case .week: WeekStep(review: review)
             case .priorities: PrioritiesStep(draft: $draft)
             case .goals: GoalsOrderStep(review: review, draft: $draft)
-            case .training: TrainingStep(draft: $draft, saved: saved)
+            case .training: TrainingStep(draft: $draft, suggestion: WeeklySuggestion(review), saved: saved)
             }
         } else if let error {
             ContentUnavailableView("Could Not Load", systemImage: "exclamationmark.triangle", description: Text(error))
@@ -183,10 +183,26 @@ private struct GoalsOrderStep: View {
 
 private struct TrainingStep: View {
     @Binding var draft: WeeklyDraft
+    let suggestion: WeeklySuggestion?
     let saved: Bool
 
     var body: some View {
         Form {
+            if let suggestion {
+                // From the forecast. Shown, never chosen for them.
+                Section {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("A lighter week is worth considering")
+                            .font(.north(.subheadline).weight(.medium))
+                            .foregroundStyle(NorthColor.agent)
+                        Text(suggestion.reason)
+                            .font(.north(.footnote))
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("weekly-suggestion")
+                }
+            }
             Section {
                 Picker("Volume", selection: $draft.volume) {
                     ForEach([WeeklyVolume.hold, .build, .deload], id: \.self) { Text($0.title).tag($0) }

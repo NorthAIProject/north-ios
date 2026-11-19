@@ -51,6 +51,9 @@ final class WorkoutSession {
     private(set) var logged: [LoggedSet] = []
     /// The last workout's sets per exercise key, loaded at the start.
     private(set) var lastTime: [String: [LiftSet]] = [:]
+    /// A suggested first working set per exercise key, loaded at the start;
+    /// empty offline or when no lift has enough history.
+    private(set) var nextSets: [String: NextSet] = [:]
     /// Sets the server did not take. Kept on the phone for the summary.
     var unsavedSets: Int { logged.count(where: { $0.upload == .failed }) }
 
@@ -86,6 +89,9 @@ final class WorkoutSession {
     private let health: HealthWorkoutWriting?
     /// Where each set's weight and reps go; nil keeps them on the phone.
     private let lifts: LiftServicing?
+    /// Where a suggested next set for each lift comes from; nil suggests
+    /// nothing beyond last time's numbers.
+    private let suggestions: NextSetServicing?
     /// Where the workout is written down between launches; nil keeps it
     /// only in memory.
     private let snapshots: WorkoutSnapshotStoring?
@@ -97,7 +103,8 @@ final class WorkoutSession {
     /// `planWeekday` is the day the week trains this session on, which is the
     /// day finishing it completes; it defaults to the plan day's own weekday.
     init(title: String, day: TrainingDay, planWeekday: String? = nil, service: ActivityServicing, live: WorkoutLiveActivityControlling,
-         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, suggestions: NextSetServicing? = nil,
+         snapshots: WorkoutSnapshotStoring? = nil,
          restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init,
          sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }) {
         self.title = title
@@ -110,6 +117,7 @@ final class WorkoutSession {
         self.live = live
         self.health = health
         self.lifts = lifts
+        self.suggestions = suggestions
         self.snapshots = snapshots
         self.restNotifications = restNotifications
         self.now = now
@@ -117,7 +125,8 @@ final class WorkoutSession {
 
     /// The workout a killed run left behind, as it was. `start()` resumes it.
     init(restoring snapshot: WorkoutSnapshot, service: ActivityServicing, live: WorkoutLiveActivityControlling,
-         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, snapshots: WorkoutSnapshotStoring? = nil,
+         health: HealthWorkoutWriting? = nil, lifts: LiftServicing? = nil, suggestions: NextSetServicing? = nil,
+         snapshots: WorkoutSnapshotStoring? = nil,
          restNotifications: RestNotificationScheduling? = nil, now: @escaping () -> Date = Date.init,
          sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }) {
         title = snapshot.title
@@ -128,6 +137,7 @@ final class WorkoutSession {
         self.live = live
         self.health = health
         self.lifts = lifts
+        self.suggestions = suggestions
         self.snapshots = snapshots
         self.restNotifications = restNotifications
         self.now = now
@@ -180,20 +190,12 @@ final class WorkoutSession {
         if recorded == nil {
             connecting = Task { await rejoin() }
         }
-        if lastTime.isEmpty {
-            loadingLastTime = Task { await loadLastTime() }
-        }
+        // Last time's sets came back with the snapshot and must stay as they
+        // were: asked for again mid-workout, "last time" could be today.
+        // Suggestions are not kept, so they are asked for again.
+        loadingLastTime = Task { await loadLastTime(keepingLastTime: !lastTime.isEmpty) }
         for set in logged where set.upload == .pending || set.upload == .failed {
             upload(set)
-        }
-    }
-
-    private func loadLastTime() async {
-        guard let lifts else { return }
-        let keys = Array(Set(exercises.map(key(for:)))).sorted()
-        if let last = try? await lifts.last(keys) {
-            lastTime = last
-            persist()
         }
     }
 
@@ -468,3 +470,20 @@ final class WorkoutSession {
 
 /// Presented with `fullScreenCover(item:)`; identity is the instance.
 extension WorkoutSession: Identifiable {}
+
+extension WorkoutSession {
+    /// What each set starts from: last time's numbers and the suggested next sets.
+    fileprivate func loadLastTime(keepingLastTime: Bool = false) async {
+        let keys = Array(Set(exercises.map(key(for:)))).sorted()
+        // One request for the whole workout, beside last time's numbers. A
+        // failure leaves the prefill as it always was.
+        async let suggested = try? suggestions?.nextSets(keys)
+        if !keepingLastTime, let lifts, let last = try? await lifts.last(keys) {
+            lastTime = last
+            persist()
+        }
+        if let suggested = await suggested {
+            nextSets = suggested
+        }
+    }
+}
