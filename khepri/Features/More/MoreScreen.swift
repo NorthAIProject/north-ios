@@ -61,6 +61,12 @@ struct MoreScreen: View {
                         Label("Plan the Week", systemImage: "calendar.badge.checkmark")
                     }
                     .foregroundStyle(.primary)
+                    Button {
+                        router.open(.horizon)
+                    } label: {
+                        Label("Horizon", systemImage: "binoculars")
+                    }
+                    .foregroundStyle(.primary)
                 }
                 sectionRows("Growth", growth)
                 sectionRows("Life", life)

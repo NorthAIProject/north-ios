@@ -244,6 +244,28 @@
         }
       }
     },
+    "%lld wk off" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem sin entrenar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem de pausa"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem de pausa"
+          }
+        }
+      }
+    },
     "(edited)" : {
       "localizations" : {
         "es" : {
@@ -284,6 +306,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%lld mais"
+          }
+        }
+      }
+    },
+    "12 wk" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 sem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 sem"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 sem"
           }
         }
       }
@@ -374,6 +418,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um grupo é um punhado de pessoas que se motivam umas às outras."
+          }
+        }
+      }
+    },
+    "A forecast needs a few weeks of your own numbers. Here is what is missing." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una previsión necesita unas semanas de tus propios números. Esto es lo que falta."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma previsão precisa de algumas semanas dos seus próprios números. Veja o que falta."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma previsão precisa de algumas semanas dos teus próprios números. Eis o que falta."
+          }
+        }
+      }
+    },
+    "A lighter week is worth considering" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vale la pena considerar una semana más suave"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vale a pena considerar uma semana mais leve"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vale a pena considerar uma semana mais leve"
+          }
+        }
+      }
+    },
+    "A lighter week now" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una semana más suave ahora"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma semana mais leve agora"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma semana mais leve agora"
           }
         }
       }
@@ -506,6 +616,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todas as mensagens"
+          }
+        }
+      }
+    },
+    "An extra session changes how tired each muscle is, not the strength forecast: nothing in your logs can show that it would make you stronger." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sesión extra cambia lo cansado que está cada músculo, no la previsión de fuerza: nada en tus registros puede demostrar que te haría más fuerte."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma sessão extra muda quão cansado cada músculo fica, não a previsão de força: nada nos seus registros pode mostrar que deixaria você mais forte."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma sessão extra muda quão cansado está cada músculo, não a previsão de força: nada nos teus registos pode mostrar que te tornaria mais forte."
           }
         }
       }
@@ -708,6 +840,28 @@
         }
       }
     },
+    "Back to Today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a hoy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar para hoje"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar a hoje"
+          }
+        }
+      }
+    },
     "Block %@" : {
       "localizations" : {
         "es" : {
@@ -748,6 +902,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bloquear %@? Deixam de ver as mensagens um do outro."
+          }
+        }
+      }
+    },
+    "Body weight" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso corporal"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso corporal"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso corporal"
           }
         }
       }
@@ -1192,6 +1368,28 @@
         }
       }
     },
+    "Day to look at" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día que mirar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia para ver"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia a ver"
+          }
+        }
+      }
+    },
     "Figure shows" : {
       "localizations" : {
         "es" : {
@@ -1210,6 +1408,138 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A figura mostra"
+          }
+        }
+      }
+    },
+    "Forecast only %lld weeks out so far: it never reaches further ahead than your history is long." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsión solo a %lld semanas por ahora: nunca llega más lejos de lo que dura tu historial."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão só para %lld semanas por enquanto: nunca vai além do tamanho do seu histórico."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão só a %lld semanas por agora: nunca vai mais longe do que o teu histórico."
+          }
+        }
+      }
+    },
+    "Horizon" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horizonte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horizonte"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horizonte"
+          }
+        }
+      }
+    },
+    "How tired each muscle would be that morning, if you follow your plan." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo cansado que estaría cada músculo esa mañana, si sigues tu plan."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quão cansado cada músculo estaria nessa manhã, se você seguir o plano."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quão cansado estaria cada músculo nessa manhã, se seguires o teu plano."
+          }
+        }
+      }
+    },
+    "I take time off, starting today" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me tomo un descanso desde hoy"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faço uma pausa a partir de hoje"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faço uma pausa a partir de hoje"
+          }
+        }
+      }
+    },
+    "In %lld days, %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %lld días, %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daqui a %lld dias, %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daqui a %lld dias, %@"
+          }
+        }
+      }
+    },
+    "In %lld weeks, %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En %lld semanas, %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daqui a %lld semanas, %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daqui a %lld semanas, %@"
           }
         }
       }
@@ -1280,6 +1610,72 @@
         }
       }
     },
+    "Not enough history yet" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay suficiente historial"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há histórico suficiente"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há histórico suficiente"
+          }
+        }
+      }
+    },
+    "One more session a week" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sesión más por semana"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais uma sessão por semana"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais uma sessão por semana"
+          }
+        }
+      }
+    },
+    "Plain Forecast" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsión normal"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão normal"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsão normal"
+          }
+        }
+      }
+    },
     "Reported soreness. Tap a muscle to log it." : {
       "localizations" : {
         "es" : {
@@ -1320,6 +1716,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dores registadas: %@"
+          }
+        }
+      }
+    },
+    "Set it in your weekly review. Nothing changes unless you do." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponla en tu revisión semanal. Nada cambia si no lo haces tú."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defina na sua revisão semanal. Nada muda se você não mudar."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Define-a na tua revisão semanal. Nada muda se não fores tu a mudar."
           }
         }
       }
@@ -3814,6 +4232,28 @@
         }
       }
     },
+    "These change how rested each muscle would be, and when your progress picks up again. Time off never raises a forecast." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto cambia lo descansado que estaría cada músculo y cuándo se reanuda tu progreso. Un descanso nunca sube una previsión."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isso muda quão descansado cada músculo estaria e quando seu progresso retoma. Uma pausa nunca aumenta uma previsão."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isto muda quão descansado estaria cada músculo e quando o teu progresso retoma. Uma pausa nunca sobe uma previsão."
+          }
+        }
+      }
+    },
     "This Month" : {
       "localizations" : {
         "es" : {
@@ -4035,6 +4475,28 @@
         }
       }
     },
+    "Untrained for over two weeks by then: %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más de dos semanas sin entrenar para entonces: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais de duas semanas sem treinar até lá: %@"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais de duas semanas sem treinar até lá: %@"
+          }
+        }
+      }
+    },
     "Update Khepri to see this" : {
       "localizations" : {
         "es" : {
@@ -4123,6 +4585,28 @@
         }
       }
     },
+    "What if" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y si"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E se"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E se"
+          }
+        }
+      }
+    },
     "Which Days?" : {
       "localizations" : {
         "es" : {
@@ -4185,6 +4669,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escrito por IA e revisto automaticamente antes de ser publicado. As publicações são em inglês. Não é aconselhamento médico: para algo persistente, consulta um médico."
+          }
+        }
+      }
+    },
+    "You follow no plan, so this shows training stopping." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sigues ningún plan, así que esto muestra el entrenamiento parándose."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você não segue nenhum plano, então isto mostra o treino parando."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não segues nenhum plano, por isso isto mostra o treino a parar."
           }
         }
       }
@@ -4273,6 +4779,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os teus prémios"
+          }
+        }
+      }
+    },
+    "Your body on the chosen day" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuerpo en el día elegido"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu corpo no dia escolhido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O teu corpo no dia escolhido"
           }
         }
       }
