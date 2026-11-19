@@ -30,6 +30,28 @@ struct WeeklyTests {
         #expect(draft.volume == .deload)
     }
 
+    /// The forecast may suggest a lighter week. It is shown with its reason
+    /// and never chosen: the draft still starts on Hold.
+    @Test func aSuggestedLighterWeekIsShownNotChosen() {
+        var suggested = review()
+        suggested.suggestedVolume = "deload"
+        suggested.suggestedReason = "Two lifts have stalled."
+        #expect(WeeklySuggestion(suggested)?.reason == "Two lifts have stalled.")
+        #expect(WeeklyDraft(review: suggested).volume == .hold)
+    }
+
+    @Test func nothingIsSuggestedWithoutAReasonOrForAnotherVolume() {
+        #expect(WeeklySuggestion(review()) == nil)
+        var bare = review()
+        bare.suggestedVolume = "deload"
+        #expect(WeeklySuggestion(bare) == nil)
+        // A volume a later server might suggest is not this build's to show.
+        var other = review()
+        other.suggestedVolume = "build"
+        other.suggestedReason = "You are fresh."
+        #expect(WeeklySuggestion(other) == nil)
+    }
+
     @Test func blankPrioritiesDropOut() {
         var draft = WeeklyDraft()
         draft.priorities = ["  Sleep by 23:00 ", "", "Finish the deck"]

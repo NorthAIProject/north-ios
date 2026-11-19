@@ -14,6 +14,7 @@ extension WorkoutSession {
             live: WorkoutLiveActivityController(),
             health: HealthWorkoutWriter(),
             lifts: LiftService(),
+            suggestions: HorizonService(),
             snapshots: WorkoutSnapshotStore(),
             restNotifications: RestNotifications()
         )
@@ -30,6 +31,7 @@ extension WorkoutSession {
             live: WorkoutLiveActivityController(),
             health: HealthWorkoutWriter(),
             lifts: LiftService(),
+            suggestions: HorizonService(),
             snapshots: store,
             restNotifications: RestNotifications()
         )

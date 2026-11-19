@@ -473,6 +473,10 @@ private struct BodyCard: View {
             Button("Update body") { edit(nil) }
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
+            Button("See where this is heading") { router.open(.horizon) }
+                .font(.north(.footnote))
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("body-horizon")
         }
         .padding(16)
         .background(NorthColor.surface, in: .rect(cornerRadius: NorthRadius.large))

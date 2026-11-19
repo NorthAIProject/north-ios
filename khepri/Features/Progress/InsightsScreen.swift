@@ -78,6 +78,7 @@ struct MetricRoute: Hashable {
 }
 
 private struct SummaryList: View {
+    @Environment(AppRouter.self) private var router
     let summary: InsightsSummary
     let health: [InsightsHealthMetric]
     let recovery: InsightsRecovery?
@@ -162,6 +163,14 @@ private struct SummaryList: View {
             }
 
             Section("More") {
+                // Insights look back; Horizon is the same logs looking ahead.
+                Button {
+                    router.open(.horizon)
+                } label: {
+                    Label("Horizon", systemImage: "binoculars")
+                }
+                .tint(.primary)
+                .accessibilityIdentifier("insights-horizon")
                 NavigationLink(value: ConsistencyRoute()) {
                     Label("Consistency", systemImage: "calendar")
                 }

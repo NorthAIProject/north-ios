@@ -61,6 +61,17 @@ struct WeeklyDraft: Equatable {
     }
 }
 
+/// The forecast's word on the week being planned. Only a lighter week is
+/// ever suggested, and only with its reason; the choice stays the person's.
+struct WeeklySuggestion: Equatable {
+    let reason: String
+
+    init?(_ review: WeeklyReview) {
+        guard review.suggestedVolume == "deload", let reason = review.suggestedReason, !reason.isEmpty else { return nil }
+        self.reason = reason
+    }
+}
+
 extension WeeklyVolume {
     var title: String {
         switch self {

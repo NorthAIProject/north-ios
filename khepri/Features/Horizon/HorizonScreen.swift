@@ -8,6 +8,7 @@ import SwiftUI
 struct HorizonScreen: View {
     @State private var store = HorizonStore()
     @Environment(\.dismiss) private var dismiss
+    @State private var shareImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -18,8 +19,22 @@ struct HorizonScreen: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close") { dismiss() }
                     }
+                    if let picture = shareImage.map(Image.init(uiImage:)) {
+                        ToolbarItem(placement: .primaryAction) {
+                            ShareLink(item: picture, preview: SharePreview("Where this is heading", image: picture)) {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    }
+                }
+                .navigationDestination(for: HorizonLiftRoute.self) { route in
+                    HorizonLiftDetailScreen(key: route.key, name: route.name)
                 }
                 .task { await store.load() }
+                // Only the plain forecast is shared: a what-if is not a forecast.
+                .onChange(of: store.forecast, initial: true) { _, latest in
+                    shareImage = latest.flatMap(HorizonShareCard.render)
+                }
         }
     }
 
@@ -81,7 +96,21 @@ private struct HorizonForecastView: View {
 
                 VStack(spacing: 0) {
                     ForEach(forecast.series) { series in
-                        HorizonRangeBar(series: series, offsetDays: store.offsetDays)
+                        if let route = HorizonLiftRoute(series) {
+                            NavigationLink(value: route) {
+                                HStack(spacing: 8) {
+                                    HorizonRangeBar(series: series, offsetDays: store.offsetDays)
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.tertiary)
+                                        .accessibilityHidden(true)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint(Text("Shows this lift's history and forecast"))
+                        } else {
+                            HorizonRangeBar(series: series, offsetDays: store.offsetDays)
+                        }
                         if series.id != forecast.series.last?.id {
                             Divider().overlay(NorthColor.hairline)
                         }
@@ -135,6 +164,18 @@ private struct HorizonForecastView: View {
             return String(localized: "Untrained for over two weeks by then: \(names)")
         }
         return String(localized: "How tired each muscle would be that morning, if you follow your plan.")
+    }
+}
+
+/// A lift's row opens its detail; weight and waist have none.
+struct HorizonLiftRoute: Hashable {
+    let key: String
+    let name: String
+
+    init?(_ series: HorizonSeries) {
+        guard series.id.hasPrefix("lift:") else { return nil }
+        key = String(series.id.dropFirst("lift:".count))
+        name = series.name
     }
 }
 

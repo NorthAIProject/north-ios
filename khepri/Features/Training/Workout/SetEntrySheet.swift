@@ -19,6 +19,9 @@ struct SetEntrySheet: View {
     let exerciseName: String
     let setNumber: Int
     let lastTime: [LiftSet]
+    /// Why the weight and reps start where they do, when they came from a
+    /// suggestion rather than from last time; already worded.
+    let suggestionNote: String?
     let imperial: Bool
     let onLog: (SetEntry) -> Void
 
@@ -30,10 +33,12 @@ struct SetEntrySheet: View {
     @Environment(\.dismiss) private var dismiss
 
     init(exerciseName: String, setNumber: Int, suggestedWeightKg: Double?, suggestedReps: Int,
-         suggestedKind: SetKind = .work, lastTime: [LiftSet], imperial: Bool, onLog: @escaping (SetEntry) -> Void) {
+         suggestedKind: SetKind = .work, lastTime: [LiftSet], suggestionNote: String? = nil, imperial: Bool,
+         onLog: @escaping (SetEntry) -> Void) {
         self.exerciseName = exerciseName
         self.setNumber = setNumber
         self.lastTime = lastTime
+        self.suggestionNote = suggestionNote
         self.imperial = imperial
         self.onLog = onLog
         _weight = State(initialValue: LiftMath.display(suggestedWeightKg ?? 0, imperial: imperial))
@@ -82,6 +87,10 @@ struct SetEntrySheet: View {
                 } header: {
                     Text("Weight")
                 } footer: {
+                    if let suggestionNote, kind != .warmup {
+                        Text("Suggested: \(suggestionNote)")
+                            .accessibilityIdentifier("set-suggestion")
+                    }
                     if !lastTime.isEmpty {
                         let sets = lastTime.map { set in
                             let done = set.weightKg == 0 ? String(localized: "BW × \(set.reps)")

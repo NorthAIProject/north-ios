@@ -44,6 +44,92 @@ private func response(skipWeeks: Int = 0, squatHigh: Double = 146) throws -> Com
     return try decoder.decode(Components.Schemas.Horizon.self, from: Data(json.utf8))
 }
 
+/// One lift's detail as the API sends it: a long history, the forecast, two
+/// earlier forecasts and, when asked for, a form check.
+private func liftResponse(formNote: String = "") throws -> Components.Schemas.HorizonLiftDetail {
+    let json = """
+    {
+      "key": "barbell-squat", "name": "Barbell Squat", "slug": "barbell-squat", "status": "ready", "unit": "kg",
+      "needs": [], "now": 140,
+      "points": [{"offsetDays": 0, "low": 140, "mid": 140, "high": 140},
+                 {"offsetDays": 28, "low": 138, "mid": 142, "high": 146}],
+      "plateau": "progressing", "plateauText": "Progressing",
+      "history": [{"date": "2026-11-15", "value": 140}, {"date": "2025-12-01", "value": 100},
+                  {"date": "2026-10-01", "value": 132}],
+      "past": [{"madeOn": "2026-09-24", "predicted": 134.4, "actual": 138.8},
+               {"madeOn": "2026-10-22", "predicted": 145.2, "actual": 144.9}]\(formNote)
+    }
+    """
+    return try JSONDecoder().decode(Components.Schemas.HorizonLiftDetail.self, from: Data(json.utf8))
+}
+
+private let filmed = """
+,
+      "formNote": {"analysisId": "a1", "date": "2026-11-16", "summary": "Depth is good.", "confidence": "medium",
+                   "cue": "Knees out."}
+"""
+
+struct HorizonLiftDetailTests {
+    private let today = Date(timeIntervalSince1970: 1_795_089_600) // 2026-11-19 12:00 UTC
+
+    @Test func readsHistoryOldestFirstAndEarlierForecastsNewestFirst() throws {
+        let detail = HorizonLiftDetail(try liftResponse(), measure: "Est. 1RM")
+        #expect(detail.series.name == "Barbell Squat" && detail.series.measure == "Est. 1RM")
+        #expect(detail.history.map(\.value) == [100, 132, 140])
+        #expect(detail.past.map(\.predicted) == [145.2, 134.4])
+    }
+
+    /// Nobody has filmed the lift: the response has no form note at all, and
+    /// that is every person today.
+    @Test func aLiftNobodyFilmedHasNoFormNote() throws {
+        #expect(HorizonLiftDetail(try liftResponse(), measure: "").formNote == nil)
+    }
+
+    @Test func carriesTheLastFormCheck() throws {
+        let note = try #require(HorizonLiftDetail(try liftResponse(formNote: filmed), measure: "").formNote)
+        #expect(note.summary == "Depth is good." && note.cue == "Knees out." && note.analysisID == "a1")
+    }
+
+    /// A confidence this build has never heard of reads as the cautious one.
+    @Test func anUnknownConfidenceReadsAsLow() {
+        #expect(HorizonLiftDetailView.confidenceText("certain") == HorizonLiftDetailView.confidenceText("low"))
+        #expect(HorizonLiftDetailView.confidenceText("high") != HorizonLiftDetailView.confidenceText("low"))
+    }
+
+    /// A year-old set would squeeze a four-week range into the chart's corner.
+    @Test func theChartLeavesOutALongPast() throws {
+        let detail = HorizonLiftDetail(try liftResponse(), measure: "")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        #expect(detail.recent(from: today, calendar: calendar).map(\.value) == [132, 140])
+        let ahead = detail.ahead(from: today, calendar: calendar)
+        #expect(ahead.count == 2 && ahead.last?.point.high == 146)
+        #expect(ahead.last.map { calendar.dateComponents([.day], from: today, to: $0.date).day } == 28)
+    }
+
+    @Test func onlyLiftRowsOpenADetail() throws {
+        let model = forecast(try response())
+        let routes = model.series.map(HorizonLiftRoute.init)
+        #expect(routes.map { $0?.key } == ["barbell-squat", nil, nil])
+    }
+}
+
+struct HorizonShareCardTests {
+    /// Ranges only: a row needs a day ahead, so the waist (not ready) is left out.
+    @Test func sharesEveryReadyRangeAtItsFurthestDay() throws {
+        let rows = HorizonShareCard.rows(forecast(try response()))
+        #expect(rows.map(\.name) == ["Barbell Squat", "Body weight"])
+        #expect(rows.map(\.weeks) == [4, 1])
+        #expect(rows.allSatisfy { $0.range.contains("–") })
+    }
+
+    /// A what-if is not a forecast, so it is never the picture that gets shared.
+    @MainActor @Test func aWhatIfIsNotShared() throws {
+        #expect(HorizonShareCard.render(forecast(try response(skipWeeks: 2))) == nil)
+        #expect(HorizonShareCard.render(forecast(try response())) != nil)
+    }
+}
+
 private func forecast(_ response: Components.Schemas.Horizon) -> HorizonForecast {
     HorizonForecast(response, weightName: "Body weight", waistName: "Waist", liftMeasure: "Est. 1RM")
 }
@@ -124,6 +210,10 @@ private actor StagedForecasts: HorizonServicing {
         }
         if failing { throw URLError(.notConnectedToInternet) }
         return try response(skipWeeks: scenario.skipWeeks, squatHigh: 146 - Double(scenario.skipWeeks))
+    }
+
+    func lift(_ key: String) async throws -> Components.Schemas.HorizonLiftDetail {
+        try liftResponse()
     }
 
     func release(_ skipWeeks: Int) {
