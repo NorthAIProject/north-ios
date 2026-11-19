@@ -58,6 +58,8 @@ enum AppDestination: Equatable {
     /// The weekly review, as a sheet over whatever is open: where the Sunday
     /// nudge leads.
     case weeklyReview
+    /// The forecast, over whatever tab is showing.
+    case horizon
     /// The first week's day-7 review, as a sheet: where the day-7 coach
     /// message and the Today card lead. Opening it closes the week.
     case firstWeekReview
@@ -103,6 +105,7 @@ final class AppRouter {
     var showsCheckInFlow = false
     /// Set when a link asks for the weekly review; the tab view presents it.
     var showsWeeklyReview = false
+    var showsHorizon = false
     /// Set when a link asks for the first-week review; the tab view presents it.
     var showsFirstWeekReview = false
     /// Counts invite links opened while the app runs. Friends redeems on each
@@ -183,6 +186,8 @@ final class AppRouter {
             showsCheckInFlow = true
         case .weeklyReview:
             showsWeeklyReview = true
+        case .horizon:
+            showsHorizon = true
         case .firstWeekReview:
             showsFirstWeekReview = true
         case .crewJoin(let code):
@@ -302,6 +307,7 @@ final class AppRouter {
         case "insights", "fitness", "progress": .tab(.progress)
         case "settings": .settings
         case "weekly": .weeklyReview
+        case "horizon": .horizon
         case "more": .tab(.more)
         case let id? where sections.contains(id): .section(id)
         default: nil

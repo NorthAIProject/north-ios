@@ -358,6 +358,14 @@ struct ContractTests {
         let stills = try decode(Schemas.FormCheck.self, "form-check-stills")
         #expect(stills.method == "stills" && stills.durationSeconds == 8 && stills.frames?.map(\.at) == [0.5, 4.5])
         #expect(stills.result?.issues.first?.frameUrl == stills.frames?.last?.url)
+        let horizon = try decode(Schemas.Horizon.self, "horizon")
+        #expect(horizon.status == "ready" && horizon.frames.count == 2 && horizon.lifts.count == 2)
+        #expect(horizon.lifts.first?.value1.trackRecord?.kind == "backtest")
+        #expect(horizon.lifts.first?.value2.plateau == "progressing" && horizon.goalEta?.state == "open")
+        #expect(horizon.bodyWeight.points.first?.offsetDays == 0 && horizon.frames.last?.regions.isEmpty == false)
+        let early = try decode(Schemas.Horizon.self, "horizon-insufficient")
+        #expect(early.status == "insufficient" && early.needs.map(\.code) == ["lift_sessions", "weigh_ins", "waist_checks"])
+        #expect(early.bodyWeight.now == nil && early.bodyWeight.points.isEmpty)
         let diets = try decode(Schemas.DietSettings.self, "diets")
         #expect(diets.diets.filter(\.selected).map(\.code) == ["vegetarian"])
     }
@@ -621,7 +629,7 @@ struct ContractTests {
                             "decisions", "nudges", "calculator", "news",
                             "insights-timeline", "insights-body", "insights-mind", "insights-progress",
                             "insights-training", "insights-training-plan", "insights-nutrition", "insights-coach", "insights-spend",
-                            "form-check-playback", "form-check-stills", "diets",
+                            "form-check-playback", "form-check-stills", "diets", "horizon", "horizon-insufficient",
                             "social", "invite", "invite-preview", "public-profile", "connection", "redeem", "handle", "contacts-match", "phone", "phone-pending", "facebook-friends", "facebook-unconfigured", "facebook-connect", "feed", "profiles-profile", "profiles-profile-private", "profiles-profile-workouts", "profiles-profile-workouts-private", "sharing", "crews", "crew", "crew-board", "crew-space", "crew-messages", "summary", "board",
                             "weekly-review", "weekly-focus", "recap", "recap-shared", "daily-posts", "daily-posts-empty",
                             "decision-calibration", "inbox", "inbox-item", "insights-areas", "today-lighter",

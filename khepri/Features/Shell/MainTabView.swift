@@ -66,6 +66,9 @@ struct MainTabView: View {
         .sheet(isPresented: $router.showsWeeklyReview) {
             WeeklyReviewFlow()
         }
+        .sheet(isPresented: $router.showsHorizon) {
+            HorizonScreen()
+        }
         .sheet(isPresented: $router.showsFirstWeekReview) {
             FirstWeekReviewFlow()
         }
