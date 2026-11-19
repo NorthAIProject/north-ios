@@ -58,6 +58,7 @@ final class FormCheckUploader {
     @ObservationIgnored private let onUnauthorized: @Sendable () async -> Void
     @ObservationIgnored private let directory: URL
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let cutStills: @Sendable (URL) async throws -> FormCheckStills
 
     private static let storageKey = "formCheck.uploads"
     static let interrupted = String(localized: "The upload stopped before it finished.")
@@ -69,7 +70,8 @@ final class FormCheckUploader {
         token: @escaping @Sendable () async throws -> String?,
         onUnauthorized: @escaping @Sendable () async -> Void,
         directory: URL,
-        defaults: UserDefaults
+        defaults: UserDefaults,
+        cutStills: @escaping @Sendable (URL) async throws -> FormCheckStills = { try await FormCheckFrames.stills(from: $0) }
     ) {
         self.session = session
         self.baseURL = baseURL
@@ -77,11 +79,13 @@ final class FormCheckUploader {
         self.onUnauthorized = onUnauthorized
         self.directory = directory
         self.defaults = defaults
+        self.cutStills = cutStills
         uploads = defaults.data(forKey: Self.storageKey)
             .flatMap { try? JSONDecoder().decode([FormCheckUpload].self, from: $0) } ?? []
     }
 
-    /// Writes `video` into a multipart body and starts sending it. Returns
+    /// Cuts the stills the check is read from, writes them and `video` into
+    /// a multipart body, and starts sending it. Returns
     /// once the upload has started; the caller may delete `video` then.
     /// Throws `APIError.locked`, and starts nothing, when the session token
     /// cannot be read.
@@ -91,7 +95,8 @@ final class FormCheckUploader {
         let upload = FormCheckUpload(id: UUID(), bodyFile: "\(UUID().uuidString).multipart", boundary: body.boundary)
         let bodyURL = try bodyDirectory().appending(path: upload.bodyFile)
         do {
-            try await Self.write(body, video: video, to: bodyURL)
+            let stills = try await cutStills(video)
+            try await Self.write(body, video: video, stills: stills, to: bodyURL)
         } catch {
             try? FileManager.default.removeItem(at: bodyURL)
             throw error
@@ -209,14 +214,12 @@ final class FormCheckUploader {
 
     /// Off the main actor: copying 90 MB takes a moment.
     @concurrent
-    private nonisolated static func write(_ body: MultipartFileBody, video: URL, to destination: URL) async throws {
-        try body.write(
-            field: "video",
-            file: video,
-            filename: video.lastPathComponent,
-            // What the generated client labels every binary part.
-            contentType: "text/plain",
-            to: destination
-        )
+    private nonisolated static func write(
+        _ body: MultipartFileBody,
+        video: URL,
+        stills: FormCheckStills,
+        to destination: URL
+    ) async throws {
+        try body.write(FormCheckFrames.parts(video: video, stills: stills), to: destination)
     }
 }
