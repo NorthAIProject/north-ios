@@ -3,10 +3,14 @@
 What each App Store build of Khepri contains. TestFlight beta builds (the
 separate `.beta` app) ship every merge to `main` and are not listed here.
 
-## 1.0.1 — planned
+## 1.0.2 — submitted 2026-11-24
 
-Not yet submitted. Crew chat waits for 1.0.1 so that the crew rules,
-reporting and blocking reach review together (guideline 1.2).
+The first build submitted since 1.0 (16) was withdrawn: `main` at the time of
+submission, with everything listed under 1.0.1 and 1.0 below. Neither of those
+versions was submitted on its own. Crew chat ships here together with the crew
+rules, reporting and blocking (guideline 1.2).
+
+## 1.0.1 — never submitted (shipped in 1.0.2)
 
 - **Crew chat**: each crew has channels with live messages, replies,
   reactions, edits, pins and @mentions, unread badges on More, Crews and each
@@ -14,10 +18,10 @@ reporting and blocking reach review together (guideline 1.2).
   agreed before the first post; every message can be reported, and its author
   blocked from the message menu or the member list.
 
-## 1.0 — next build (October 2026)
+## 1.0 — never submitted (shipped in 1.0.2)
 
-Not yet submitted. Version 1.0 has not been released; it was withdrawn from
-review (Developer Rejected) with build 16 attached.
+Version 1.0 was withdrawn from review (Developer Rejected) with build 16
+attached; these changes came after it.
 
 - **Meal plans built with AI** (#72): Nutrition › Plans › Build with AI. Goal,
   number of days, meals per day, carb level, foods to leave out and notes; the
