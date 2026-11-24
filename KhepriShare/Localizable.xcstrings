@@ -1,6 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld days in a row" : {
+
+    },
+    "%lld rest days" : {
+
+    },
+    "%lld rest days in hand" : {
+
+    },
+    "1 day in a row" : {
+
+    },
+    "1 rest day" : {
+
+    },
+    "1 rest day in hand" : {
+
+    },
     "Adds water to today's total in Khepri." : {
       "localizations" : {
         "es" : {
@@ -89,6 +107,9 @@
         }
       }
     },
+    "Cancel Quick Check-in" : {
+
+    },
     "Done" : {
       "localizations" : {
         "es" : {
@@ -110,6 +131,21 @@
           }
         }
       }
+    },
+    "Drained" : {
+
+    },
+    "Energy" : {
+
+    },
+    "File Quick Check-in" : {
+
+    },
+    "Full" : {
+
+    },
+    "Good" : {
+
     },
     "Khepri" : {
       "localizations" : {
@@ -315,6 +351,15 @@
         }
       }
     },
+    "Low" : {
+
+    },
+    "Mood" : {
+
+    },
+    "New run starts today · best %lld" : {
+
+    },
     "Nothing in that could be logged." : {
       "localizations" : {
         "es" : {
@@ -359,6 +404,12 @@
         }
       }
     },
+    "OK" : {
+
+    },
+    "Okay" : {
+
+    },
     "Open Khepri and sign in first." : {
       "localizations" : {
         "es" : {
@@ -402,6 +453,9 @@
           }
         }
       }
+    },
+    "Pick Check-in Mood" : {
+
     },
     "Save to Inbox" : {
       "localizations" : {
