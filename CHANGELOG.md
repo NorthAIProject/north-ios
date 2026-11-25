@@ -3,6 +3,19 @@
 What each App Store build of Khepri contains. TestFlight beta builds (the
 separate `.beta` app) ship every merge to `main` and are not listed here.
 
+## 1.0.3 — fix for the launch crash on iOS 26
+
+- **Opens again on iOS 26.** 1.0.2 (22) closed at launch on every iPhone
+  running iOS 26: it was built with Xcode 27, and swift-collections, compiled
+  by that toolchain, needed `swift_initBorrow`, a Swift runtime function only
+  iOS 27 has. dyld refused to load the app before any of its code ran, so no
+  crash reporter could see it. The 1.0.1 (14) archive has the same import.
+  iOS 27 was unaffected, which is why it never showed on an iOS 27 phone.
+- Uploads are built with Xcode 26.3 again, the Xcode the tests use.
+- `scripts/min-ios-symbol-guard.sh` checks every Mach-O in the app against the
+  oldest supported iOS runtime; CI runs it after the test build and fastlane
+  runs it on every archive before upload.
+
 ## 1.0.2 — submitted 2026-11-24
 
 The first build submitted since 1.0 (16) was withdrawn: `main` at the time of

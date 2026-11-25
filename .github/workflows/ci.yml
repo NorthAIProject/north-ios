@@ -110,6 +110,13 @@ jobs:
             COMPILER_INDEX_STORE_ENABLE=NO \
             -quiet
 
+      # The Swift runtime symbols the app imports must exist on the oldest iOS
+      # it supports. 1.0.1 and 1.0.2 imported one only iOS 27 has and crashed
+      # at launch on every iOS 26 iPhone. fastlane runs the same check on each
+      # archive before upload.
+      - name: App launches on the minimum iOS
+        run: scripts/min-ios-symbol-guard.sh "$DERIVED_DATA/Build/Products/Debug-iphonesimulator/khepri.app"
+
       - name: Run Unit Tests
         run: |
           xcodebuild test-without-building \
