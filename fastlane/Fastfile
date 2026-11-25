@@ -55,6 +55,7 @@ platform :ios do
       # click Xcode's "Trust & Enable" prompt.
       xcargs: "-skipPackagePluginValidation"
     )
+    guard_minimum_ios
 
     upload_to_testflight(
       api_key: api_key,
@@ -95,6 +96,7 @@ platform :ios do
       # click Xcode's "Trust & Enable" prompt.
       xcargs: "-skipPackagePluginValidation"
     )
+    guard_minimum_ios
 
     upload_to_app_store(
       # metadata/testflight holds the TestFlight copy; deliver rejects it as
@@ -135,6 +137,7 @@ platform :ios do
       output_directory: "fastlane/build",
       xcargs: "-skipPackagePluginValidation"
     )
+    guard_minimum_ios
 
     # The build lands in App Store Connect, ready to attach to a version;
     # nothing is sent to testers or to review.
@@ -168,6 +171,7 @@ platform :ios do
       # click Xcode's "Trust & Enable" prompt.
       xcargs: "-skipPackagePluginValidation"
     )
+    guard_minimum_ios
 
     upload_to_app_store(
       # metadata/testflight holds the TestFlight copy; deliver rejects it as
@@ -204,6 +208,7 @@ platform :ios do
       output_directory: "fastlane/build",
       xcargs: "-skipPackagePluginValidation"
     )
+    guard_minimum_ios
 
     review = review_information
     upload_to_testflight(
@@ -247,6 +252,17 @@ platform :ios do
   end
 
   # ---- helpers ----
+
+  # Refuses an archive that would not launch on the oldest iOS it claims to
+  # support (1.0.1 and 1.0.2 crashed at launch on every iOS 26 iPhone because
+  # they were built with Xcode 27). Runs before anything is uploaded.
+  private_lane :guard_minimum_ios do
+    archive = lane_context[SharedValues::XCODEBUILD_ARCHIVE]
+    UI.user_error!("No archive to check") unless archive && File.directory?(archive)
+    app = Dir[File.join(archive, "Products/Applications/*.app")].first
+    UI.user_error!("No app in #{archive}") unless app
+    sh("../scripts/min-ios-symbol-guard.sh", app)
+  end
 
   # Contact details and the demo account come from the environment (GitHub
   # secrets REVIEW_*), never from files in the repo: the demo password signs
